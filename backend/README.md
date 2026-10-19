@@ -38,7 +38,7 @@ API mặc định bind `127.0.0.1:8080`; có thể đổi bằng API_HOST/API_PO
 | `GET /health/live` | 200 `{ "status": "ok" }`, độc lập với DB |
 | `GET /health/ready` | 200 `{ "status": "ready" }` khi DB/migration sẵn sàng; ngược lại 503 `CORE_NOT_READY` |
 
-Hợp đồng: [health OpenAPI](../../contracts/health.openapi.json). Đây là operational health, chưa đánh giá readiness của OIDC/scorer vì hai module đó chưa triển khai. Health public không trả host DB, credentials hay stacktrace. Các lỗi có `request_id` tương ứng header `X-Request-ID`. Business routes chưa triển khai trả 404.
+Hợp đồng: [health OpenAPI](contracts/health.openapi.json). Đây là operational health, chưa đánh giá readiness của OIDC/scorer vì hai module đó chưa triển khai. Health public không trả host DB, credentials hay stacktrace. Các lỗi có `request_id` tương ứng header `X-Request-ID`. Business routes chưa triển khai trả 404.
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8080/health/live
@@ -48,7 +48,7 @@ npm.cmd test
 
 ## Dữ liệu và migration
 
-SQL nằm tại `src/core/data/migrations/`, LF line endings được cố định bằng `.gitattributes`. Migration chạy trong transaction có advisory lock và lưu SHA256 vào `public.traceweaver_schema_migrations`. Chạy lại bỏ qua migration khớp checksum; thay file đã áp dụng hoặc thiếu lịch sử tương ứng sẽ fail. Thêm migration mới để thay schema, không sửa file đã chạy và không xóa bảng/volume để né lỗi. Chưa có down migration tự động.
+SQL nằm tại `backend/src/core/data/migrations/`, LF line endings được cố định bằng `.gitattributes`. Migration chạy trong transaction có advisory lock và lưu SHA256 vào `public.traceweaver_schema_migrations`. Chạy lại bỏ qua migration khớp checksum; thay file đã áp dụng hoặc thiếu lịch sử tương ứng sẽ fail. Thêm migration mới để thay schema, không sửa file đã chạy và không xóa bảng/volume để né lỗi. Chưa có down migration tự động.
 
 `withTransaction(pool, work)` dùng cùng client cho toàn transaction; khi callback lỗi sẽ rollback, release connection và giữ lỗi gốc. Repository/service nghiệp vụ sau này phải dùng transaction này cho cập nhật cùng audit.
 
@@ -58,10 +58,10 @@ SQL nằm tại `src/core/data/migrations/`, LF line endings được cố đị
 
 Integration tests tạo database riêng `traceweaver_test_<uuid>` trong container local, không sửa DB development và không tự drop database. Mỗi lần chạy tạo một DB nhỏ mới; chỉ chạy lại khi thay migration/DB behavior. Cần user có CREATEDB hoặc quyền bootstrap tương ứng. Không ghi credentials vào test output. Backend đang chạy đã trả `/health/live` = ok, `/health/ready` = ready.
 
-BE-03 đã bổ sung [OpenAPI và schema dùng chung](../../contracts/README.md) cho 21 operation, migration 002 cho memberships/roles/groups/sources/grants/knowledge/audit. Chạy `npm run test:contracts` để kiểm OpenAPI/49 schema/fixtures; `npm run test:db` còn kiểm ràng buộc cross-workspace, duplicate grants, knowledge version và audit append-only/rollback thật. Sau khi thêm migration phải migrate và restart BE vì server nạp danh sách migration lúc startup.
+BE-03 đã bổ sung [OpenAPI và schema dùng chung](contracts/README.md) cho 21 operation, migration 002 cho memberships/roles/groups/sources/grants/knowledge/audit. Chạy `npm run test:contracts` để kiểm OpenAPI/49 schema/fixtures; `npm run test:db` còn kiểm ràng buộc cross-workspace, duplicate grants, knowledge version và audit append-only/rollback thật. Sau khi thêm migration phải migrate và restart BE vì server nạp danh sách migration lúc startup.
 
 Tiếp theo: xác thực JWT/OIDC và enforcement membership/source grants theo contracts/schemas/domain.schema.json. Keycloak chưa được scaffold; API nghiệp vụ trong OpenAPI vẫn planned, không có chế độ bỏ qua auth.
 
 ## Phân tầng
 
-`routers/` → `controllers/` → `services/`; `middlewares/` xử lý HTTP chung. `models/`, `validations/`, `utils/` là khung cho API nghiệp vụ tiếp theo. Kết nối và migrations dùng chung tại `src/core/data/`.
+`routers/` → `controllers/` → `services/`; `middlewares/` xử lý HTTP chung. `models/`, `validations/`, `utils/` là khung cho API nghiệp vụ tiếp theo. Kết nối và migrations dùng chung tại `backend/src/core/data/`.

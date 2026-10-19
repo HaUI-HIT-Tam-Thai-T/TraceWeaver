@@ -1,6 +1,6 @@
 # Đóng góp
 
-Tạo thay đổi nhỏ, nêu mục tiêu và cách kiểm tra trong issue/PR. Dùng `contracts/` làm hợp đồng chung cho backend, frontend và AI.
+Tạo thay đổi nhỏ, nêu mục tiêu và cách kiểm tra trong issue/PR. Dùng `backend/contracts/` làm hợp đồng chung cho backend, frontend và AI.
 
 - Node.js ES modules; import nội bộ có đuôi `.js`.
 - Router khai báo endpoint; controller xử lý HTTP; service giữ nghiệp vụ; model/repository truy cập dữ liệu.

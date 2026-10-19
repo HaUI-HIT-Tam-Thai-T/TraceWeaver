@@ -5,15 +5,15 @@ Base dự án tái dựng hành trình yêu cầu cấp môi trường thực h�
 ## Cấu trúc
 
 ```text
-src/
-  backend/       # Node.js/Express: HTTP, routers, controllers, services, middleware
-  core/          # Headless: identity, data, workflow
-  frontend/      # Khung giao diện
-  ai/            # Khung scorer và training
-  simulator/     # Khung sinh dữ liệu giả
-contracts/       # OpenAPI, JSON Schema và fixtures
-scripts/         # Thiết lập môi trường local
-tests/           # Backend, contract và PostgreSQL integration
+backend/
+  src/           # Express, services và headless core
+  scripts/       # Thiết lập môi trường và migration
+  tests/         # Backend, contract và DB integration
+  contracts/     # OpenAPI, JSON Schema và fixtures
+  package.json
+frontend/        # Khung giao diện
+ai/              # Khung scorer và training
+simulator/       # Khung sinh dữ liệu giả
 .github/         # Issue/PR templates và CI
 ```
 
@@ -48,6 +48,6 @@ PowerShell có thể dùng `npm.cmd`. Makefile cung cấp lệnh tương đươn
 
 Core cung cấp Identity/Data/Workflow dùng chung, không phụ thuộc UI. Backend là lớp HTTP trung gian. Các module sau sẽ bổ sung workspace/tri thức, dữ liệu có provenance, review và workflow có audit, cùng scorer có bằng chứng và giới hạn rõ ràng. Base hiện tại chưa phải sản phẩm hoàn chỉnh hoặc bằng chứng đạt nghiệm thu bài thi.
 
-Xem [cài đặt](INSTALL.md), [đóng góp](CONTRIBUTING.md), [bảo mật](SECURITY.md) và [API contracts](contracts/README.md).
+Xem [cài đặt](INSTALL.md), [đóng góp](CONTRIBUTING.md), [bảo mật](SECURITY.md) và [API contracts](backend/contracts/README.md).
 
 License sản phẩm chưa được chủ sở hữu chốt; package hiện để `UNLICENSED`.

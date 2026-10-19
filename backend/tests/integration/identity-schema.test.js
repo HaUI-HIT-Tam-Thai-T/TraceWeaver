@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import test from 'node:test';
-import { readConfig } from '../../src/backend/config.js';
+import { readConfig } from '../../src/config.js';
 import { createDatabase, withTransaction } from '../../src/core/data/database.js';
 import { loadMigrations, migrate } from '../../src/core/data/migrations.js';
 

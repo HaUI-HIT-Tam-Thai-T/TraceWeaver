@@ -20,7 +20,9 @@ coverage/
 /templates/
 .DS_Store
 Thumbs.db
-src/frontend/.vite/
-src/frontend/build/
-src/ai/models/
-src/ai/.pytest_cache/
+frontend/.vite/
+frontend/build/
+ai/models/
+ai/.pytest_cache/
+
+/.local/

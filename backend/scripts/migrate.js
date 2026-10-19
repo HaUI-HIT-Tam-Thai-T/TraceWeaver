@@ -1,12 +1,12 @@
-import { readConfig } from '../config.js';
-import { createDatabase } from '../../core/data/database.js';
-import { loadMigrations, migrate } from '../../core/data/migrations.js';
+import { readConfig } from '../src/config.js';
+import { createDatabase } from '../src/core/data/database.js';
+import { loadMigrations, migrate } from '../src/core/data/migrations.js';
 
 let database;
 try {
   const config = readConfig();
   database = createDatabase(config, () => console.error('DATABASE_IDLE_ERROR'));
-  const migrations = await loadMigrations(new URL('../../core/data/migrations/', import.meta.url));
+  const migrations = await loadMigrations(new URL('../src/core/data/migrations/', import.meta.url));
   const applied = await migrate(database, migrations);
   console.log(applied.length ? `Applied: ${applied.join(', ')}` : 'Database migrations are up to date');
 } catch {

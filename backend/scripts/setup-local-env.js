@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseEnv } from 'node:util';
 
-const root = new URL('../', import.meta.url);
+const root = new URL('../../', import.meta.url);
 try {
   const template = await readFile(new URL('.env.example', root), 'utf8');
   const values = parseEnv(template);

@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { randomUUID, createHash } from 'node:crypto';
 import { once } from 'node:events';
 import test from 'node:test';
-import { readConfig } from '../../src/backend/config.js';
-import { createApp } from '../../src/backend/app.js';
+import { readConfig } from '../../src/config.js';
+import { createApp } from '../../src/app.js';
 import { createDatabase, withTransaction } from '../../src/core/data/database.js';
 import { loadMigrations, migrate, isDatabaseReady } from '../../src/core/data/migrations.js';
 

@@ -7,6 +7,6 @@ Khung dịch vụ chấm điểm cặp sự kiện; chưa có runtime, model ho�
 - `training/`: huấn luyện, chia tập và đánh giá.
 - `tests/`: kiểm schema và scoring khi triển khai.
 
-Input/output theo `contracts/openapi.json` và `contracts/schemas/domain.schema.json`.
+Input/output theo `../backend/contracts/openapi.json` và `../backend/contracts/schemas/domain.schema.json`.
 Không ghi trực tiếp DB/workflow. Oracle không được đưa vào runtime hoặc feature.
 Backend chịu trách nhiệm kiểm quyền nguồn và fallback khi scorer không khả dụng.

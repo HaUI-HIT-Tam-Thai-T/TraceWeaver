@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readConfig } from '../../src/backend/config.js';
+import { readConfig } from '../../src/config.js';
 
 const valid = { DATABASE_URL: 'postgresql://app:local-password@localhost:5432/traceweaver' };
 

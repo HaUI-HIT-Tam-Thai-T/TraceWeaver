@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { createApp } from '../../src/backend/app.js';
+import { createApp } from '../../src/app.js';
 
 async function serve(t, checkReadiness) {
   const server = createApp({ checkReadiness }).listen(0, '127.0.0.1');

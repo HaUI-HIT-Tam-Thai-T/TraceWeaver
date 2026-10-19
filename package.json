@@ -6,17 +6,17 @@
   "license": "UNLICENSED",
   "engines": { "node": ">=24.14.1 <25" },
   "packageManager": "npm@11.11.0",
-  "workspaces": ["src/backend"],
+  "workspaces": ["backend"],
   "scripts": {
     "dev:be": "npm run dev --workspace=@traceweaver/backend",
     "start:be": "npm run start --workspace=@traceweaver/backend",
     "db:migrate": "npm run db:migrate --workspace=@traceweaver/backend",
-    "db:setup": "node scripts/setup-local-env.js",
+    "db:setup": "node backend/scripts/setup-local-env.js",
     "db:up": "docker compose -f compose.dev.yaml up -d --wait --pull never postgres",
     "db:stop": "docker compose -f compose.dev.yaml stop postgres",
-    "test:db": "node --env-file-if-exists=.env --test tests/integration/*.test.js",
-    "test:contracts": "node --test tests/contracts/*.test.js",
-    "test": "node --test tests/backend/*.test.js tests/contracts/*.test.js"
+    "test:db": "node --env-file-if-exists=.env --test backend/tests/integration/*.test.js",
+    "test:contracts": "node --test backend/tests/contracts/*.test.js",
+    "test": "node --test backend/tests/backend/*.test.js backend/tests/contracts/*.test.js"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "13.1.0",

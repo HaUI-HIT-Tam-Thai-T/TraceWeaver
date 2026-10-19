@@ -1,12 +1,12 @@
 import { readConfig } from './config.js';
 import { createApp } from './app.js';
-import { createDatabase } from '../core/data/database.js';
-import { isDatabaseReady, loadMigrations } from '../core/data/migrations.js';
+import { createDatabase } from './core/data/database.js';
+import { isDatabaseReady, loadMigrations } from './core/data/migrations.js';
 
 let database;
 try {
   const config = readConfig();
-  const migrations = await loadMigrations(new URL('../core/data/migrations/', import.meta.url));
+  const migrations = await loadMigrations(new URL('./core/data/migrations/', import.meta.url));
   database = createDatabase(config, () => console.error('DATABASE_IDLE_ERROR'));
   const app = createApp({
     checkReadiness: () => isDatabaseReady(database, migrations),
