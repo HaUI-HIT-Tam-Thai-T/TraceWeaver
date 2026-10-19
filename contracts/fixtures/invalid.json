@@ -1,0 +1,1716 @@
+[
+  {
+    "name": "client cannot set server received_at",
+    "schema": "EventInput",
+    "data": {
+      "source_event_id": "example",
+      "occurred_at": "2026-10-19T03:00:00Z",
+      "service": "example",
+      "action": "example",
+      "outcome": "success",
+      "identifiers": [
+        {
+          "namespace": "example",
+          "value": "example"
+        }
+      ],
+      "message": "example",
+      "payload": {},
+      "received_at": "2026-10-19T03:00:00Z"
+    },
+    "keyword": "additionalProperties"
+  },
+  {
+    "name": "invalid timestamp",
+    "schema": "EventInput",
+    "data": {
+      "source_event_id": "example",
+      "occurred_at": "not-a-time",
+      "service": "example",
+      "action": "example",
+      "outcome": "success",
+      "identifiers": [
+        {
+          "namespace": "example",
+          "value": "example"
+        }
+      ],
+      "message": "example",
+      "payload": {}
+    },
+    "keyword": "format"
+  },
+  {
+    "name": "placeholder hash is not evidence",
+    "schema": "Event",
+    "data": {
+      "event_id": "11111111-1111-4111-8111-111111111111",
+      "source_id": "11111111-1111-4111-8111-111111111111",
+      "source_event_id": "example",
+      "occurred_at": "2026-10-19T03:00:00Z",
+      "received_at": "2026-10-19T03:00:00Z",
+      "service": "example",
+      "action": "example",
+      "outcome": "success",
+      "identifiers": [
+        {
+          "namespace": "example",
+          "value": "example"
+        }
+      ],
+      "message": "example",
+      "payload_redacted": {},
+      "parser_version": "example",
+      "provenance": {
+        "batch_id": "11111111-1111-4111-8111-111111111111",
+        "locator": "example",
+        "sha256_redacted": "EXAMPLE_HASH"
+      }
+    },
+    "keyword": "pattern"
+  },
+  {
+    "name": "review requires optimistic version",
+    "schema": "ReviewCreate",
+    "data": {
+      "decision": "accepted",
+      "reason": "example"
+    },
+    "keyword": "required"
+  },
+  {
+    "name": "blank review reason",
+    "schema": "ReviewCreate",
+    "data": {
+      "decision": "accepted",
+      "reason": "   ",
+      "expected_version": 1
+    },
+    "keyword": "pattern"
+  },
+  {
+    "name": "pending is not a review decision",
+    "schema": "ReviewCreate",
+    "data": {
+      "decision": "pending",
+      "reason": "example",
+      "expected_version": 1
+    },
+    "keyword": "enum"
+  },
+  {
+    "name": "assign requires owner",
+    "schema": "CaseTransition",
+    "data": {
+      "action": "assign",
+      "expected_version": 1,
+      "reason": "example"
+    },
+    "keyword": "required"
+  },
+  {
+    "name": "event evidence cannot be empty",
+    "schema": "EvidenceCreate",
+    "data": {
+      "kind": "events",
+      "event_ids": [],
+      "note": "example"
+    },
+    "keyword": "minItems"
+  },
+  {
+    "name": "out of range model score",
+    "schema": "ScoreResponse",
+    "data": {
+      "model_version": "example",
+      "feature_schema_version": "1",
+      "predictions": [
+        {
+          "pair_id": "example",
+          "score": 1.01
+        }
+      ]
+    },
+    "keyword": "maximum"
+  },
+  {
+    "name": "feature schema is complete",
+    "schema": "ScoreRequest",
+    "data": {
+      "schema_version": "1",
+      "pairs": [
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true
+          }
+        }
+      ]
+    },
+    "keyword": "required"
+  },
+  {
+    "name": "scorer max 100 pairs",
+    "schema": "ScoreRequest",
+    "data": {
+      "schema_version": "1",
+      "pairs": [
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        },
+        {
+          "pair_id": "example",
+          "features": {
+            "delta_seconds": 0,
+            "shared_id_count": 0,
+            "text_similarity": 0.63,
+            "transition_allowed": true,
+            "conflicting_id": false
+          }
+        }
+      ]
+    },
+    "keyword": "maxItems"
+  },
+  {
+    "name": "duplicate requested source",
+    "schema": "RunCreate",
+    "data": {
+      "root_event_id": "11111111-1111-4111-8111-111111111111",
+      "source_ids": [
+        "11111111-1111-4111-8111-111111111111",
+        "11111111-1111-4111-8111-111111111111"
+      ],
+      "window": {
+        "from": "2026-10-19T03:00:00Z",
+        "to": "2026-10-19T03:05:00Z"
+      },
+      "mode": "rule_only"
+    },
+    "keyword": "uniqueItems"
+  },
+  {
+    "name": "batch envelope empty",
+    "schema": "BatchRequest",
+    "data": {
+      "events": []
+    },
+    "keyword": "minItems"
+  },
+  {
+    "name": "batch envelope exceeds limit",
+    "schema": "BatchRequest",
+    "data": {
+      "events": [
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
+      ]
+    },
+    "keyword": "maxItems"
+  },
+  {
+    "name": "invalid workspace id",
+    "schema": "Id",
+    "data": "B01",
+    "keyword": "format"
+  }
+]

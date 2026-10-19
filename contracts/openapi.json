@@ -1,0 +1,1675 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "TraceWeaver planned API contract",
+    "version": "0.1.0",
+    "description": "Planned public/core/scorer interfaces from docs03-05. Business handlers and auth are NOT implemented yet; use health.openapi.json for currently running health routes. Schema validation does not establish runtime ACL, transactions, idempotency or business guards."
+  },
+  "paths": {
+    "/api/v1/me": {
+      "get": {
+        "operationId": "getMe",
+        "summary": "getMe",
+        "description": "Validated Identity subject and memberships. Roles are per workspace; admin does not imply source access.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/Me"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/sources": {
+      "get": {
+        "operationId": "listSources",
+        "summary": "listSources",
+        "description": "Viewer/operator/reviewer or admin with source read grants. Returns only granted sources; ingest credential does not imply read access.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/SourcesPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ]
+      }
+    },
+    "/api/v1/workspaces/{wid}/knowledge": {
+      "get": {
+        "operationId": "listKnowledge",
+        "summary": "listKnowledge",
+        "description": "",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/KnowledgePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/workspaces/{wid}/sources/{sid}/events:batch": {
+      "post": {
+        "operationId": "ingestEvents",
+        "summary": "ingestEvents",
+        "description": "Service token restricted to this source. Envelope 1-500 records, HTTP body <=1 MiB. Each record validates against EventInput independently; invalid record becomes rejected, valid records continue. Same source_event_id and canonical content = duplicate; changed content = per-item SOURCE_EVENT_CONFLICT. Server owns IDs/received_at/provenance/parser_version. Redact before persistence/logging. Unique key survives retries indefinitely; no Idempotency-Key needed.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "ingestBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/BatchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/sid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schemas/domain.schema.json#/$defs/BatchRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/events": {
+      "get": {
+        "operationId": "listEvents",
+        "summary": "listEvents",
+        "description": "Sort occurred_at,event_id; fixed snapshot across cursor pages. Apply source ACL before search/counts.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/EventsPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/UtcTime"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/UtcTime"
+            }
+          },
+          {
+            "name": "source_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Id"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/workspaces/{wid}/events/{eid}": {
+      "get": {
+        "operationId": "getEvent",
+        "summary": "getEvent",
+        "description": "",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/Event"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/eid"
+          }
+        ]
+      }
+    },
+    "/api/v1/workspaces/{wid}/runs": {
+      "post": {
+        "operationId": "createRun",
+        "summary": "createRun",
+        "description": "Operator/reviewer only. Root must belong to requested source scope and window. Max window 1h, max 1000 events before candidate filtering; 422 WINDOW_TOO_LARGE, never silently truncate. Freeze input IDs/watermark and source scope; late events need a new run. Poll Location; queued/running/completed/failed. Hybrid failure completes degraded=true, reason=ai_unavailable, effective_method=rule_only; requested mode remains hybrid.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/Run"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "URL to poll the created run",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schemas/domain.schema.json#/$defs/RunCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/runs/{rid}": {
+      "get": {
+        "operationId": "getRun",
+        "summary": "getRun",
+        "description": "Require current grants for all sources in the run; revoked grant blocks the whole artifact.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/Run"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/rid"
+          }
+        ]
+      }
+    },
+    "/api/v1/workspaces/{wid}/runs/{rid}/graph": {
+      "get": {
+        "operationId": "getGraph",
+        "summary": "getGraph",
+        "description": "Completed run only; otherwise 409 RUN_NOT_READY. Evidence is redacted, missing expected steps mean no evidence, not a fabricated outcome. Recheck grants for whole artifact.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/Graph"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/rid"
+          }
+        ]
+      }
+    },
+    "/api/v1/workspaces/{wid}/runs/{rid}/links/{lid}/reviews": {
+      "post": {
+        "operationId": "reviewLink",
+        "summary": "reviewLink",
+        "description": "Operator/reviewer. Append-only history, required reason/expected_version; stale ->409. Reject edits to evidence underlying a closed case until reopen. State update and audit share one transaction.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/Review"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/rid"
+          },
+          {
+            "$ref": "#/components/parameters/lid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schemas/domain.schema.json#/$defs/ReviewCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/runs/{rid}/links": {
+      "post": {
+        "operationId": "createManualLink",
+        "summary": "createManualLink",
+        "description": "Operator/reviewer; server sets manual and pending. Same workspace/run, no self-link/cycle; cannot silently replace prior links.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/Link"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/rid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schemas/domain.schema.json#/$defs/ManualLinkCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/cases": {
+      "post": {
+        "operationId": "createCase",
+        "summary": "createCase",
+        "description": "Operator/reviewer; case starts new. Workflow engine is the sole state source, no competing case state column.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/Case"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schemas/domain.schema.json#/$defs/CaseCreate"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listCases",
+        "summary": "listCases",
+        "description": "Only cases with full current source scope. New/assigned are waiting states.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/CasesPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/CaseState"
+            }
+          },
+          {
+            "name": "owner_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Subject"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/workspaces/{wid}/cases/{cid}": {
+      "get": {
+        "operationId": "getCase",
+        "summary": "getCase",
+        "description": "",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/CaseDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/cid"
+          }
+        ]
+      }
+    },
+    "/api/v1/workspaces/{wid}/cases/{cid}/evidence": {
+      "post": {
+        "operationId": "addEvidence",
+        "summary": "addEvidence",
+        "description": "Operator/reviewer; event references must be within case/source scope. Note or observed event evidence, no oracle/secret.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/Evidence"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/cid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schemas/domain.schema.json#/$defs/EvidenceCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/cases/{cid}/transitions": {
+      "post": {
+        "operationId": "transitionCase",
+        "summary": "transitionCase",
+        "description": "assign: operator/reviewer, valid owner with full scope; start/request_verification: owner or reviewer; verify_close/verification_failed/reopen: reviewer. Version required; stale 409, invalid action/guard 422, role 403. Verification needs note/evidence; close needs reviewed evidence and no pending link used in conclusion; reopen needs new evidence/reason and valid owner. Preserve state+history+audit atomically.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/Case"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/cid"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schemas/domain.schema.json#/$defs/CaseTransition"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/dashboard": {
+      "get": {
+        "operationId": "getDashboard",
+        "summary": "getDashboard",
+        "description": "Counts and filters for drill-down; only full-scope artifacts, including source grant revocation. No count leakage.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/Dashboard"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/UtcTime"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/UtcTime"
+            }
+          }
+        ]
+      }
+    },
+    "/core/v1/instances": {
+      "post": {
+        "operationId": "createWorkflowInstance",
+        "summary": "createWorkflowInstance",
+        "description": "Internal app credential only. Actor/creator derived from validated end-user context; never trust arbitrary client actor headers. Engine validates definition/version and workspace membership.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "appServiceBearer": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/WorkflowInstance"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schemas/domain.schema.json#/$defs/WorkflowCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/core/v1/instances/{id}/transitions": {
+      "post": {
+        "operationId": "transitionWorkflowInstance",
+        "summary": "transitionWorkflowInstance",
+        "description": "Internal app credential plus trusted user context; core enforces definition/role/guard/version and commits history+audit in the same transaction.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "appServiceBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/WorkflowInstance"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schemas/domain.schema.json#/$defs/WorkflowTransition"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/core/v1/instances/{id}": {
+      "get": {
+        "operationId": "getWorkflowInstance",
+        "summary": "getWorkflowInstance",
+        "description": "Internal app service only; enforce workspace and trusted actor scope.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "appServiceBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/WorkflowInstance"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ]
+      }
+    },
+    "/internal/v1/score-pairs": {
+      "post": {
+        "operationId": "scorePairs",
+        "summary": "scorePairs",
+        "description": "Internal only, timeout 5s, max100 pairs, no DB writes. Invalid schema ->422 whole batch; model unavailable ->503. Caller enforces exact pair_id set (no missing/extra/duplicate), finite [0,1] scores and feature_schema_version; mismatch/timeout ->degraded rule-only plus audit. Score is not claimed to be calibrated probability.",
+        "x-implementation-status": "planned",
+        "security": [
+          {
+            "scorerServiceSecret": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/ScoreResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schemas/domain.schema.json#/$defs/ScoreRequest"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "wid": {
+        "name": "wid",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "./schemas/domain.schema.json#/$defs/Id"
+        }
+      },
+      "sid": {
+        "name": "sid",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "./schemas/domain.schema.json#/$defs/Id"
+        }
+      },
+      "eid": {
+        "name": "eid",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "./schemas/domain.schema.json#/$defs/Id"
+        }
+      },
+      "rid": {
+        "name": "rid",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "./schemas/domain.schema.json#/$defs/Id"
+        }
+      },
+      "lid": {
+        "name": "lid",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "./schemas/domain.schema.json#/$defs/Id"
+        }
+      },
+      "cid": {
+        "name": "cid",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "./schemas/domain.schema.json#/$defs/Id"
+        }
+      },
+      "id": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "./schemas/domain.schema.json#/$defs/Id"
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 50
+        }
+      },
+      "Cursor": {
+        "name": "cursor",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "description": "Opaque; binds filters, grants/scope and sort. Event pages use a fixed input snapshot; mismatched filter/scope returns 400."
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "description": "Optional for initial creation, required to retry POST safely. Actor+workspace+route scoped for 24h; same key/body replays response; changed body returns 409."
+      }
+    },
+    "responses": {
+      "400": {
+        "description": "Malformed request or cursor/filter mismatch",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Error"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Invalid/expired token",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Error"
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "Action forbidden on visible resource",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Error"
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Not found or outside source/workspace scope",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Error"
+            }
+          }
+        }
+      },
+      "409": {
+        "description": "Version/content conflict or RUN_NOT_READY",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Error"
+            }
+          }
+        }
+      },
+      "413": {
+        "description": "Body exceeds 1 MiB; no records written",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Error"
+            }
+          }
+        }
+      },
+      "415": {
+        "description": "Unsupported content type/encoding",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Error"
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "Schema/guard/window/cycle failure",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Error"
+            }
+          }
+        }
+      },
+      "429": {
+        "description": "Rate limited",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Error"
+            }
+          }
+        },
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds to wait before retrying",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      },
+      "503": {
+        "description": "Core/scorer unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/Error"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "userBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "User access token; verify signature/issuer/audience/expiry, then current membership/roles/grants."
+      },
+      "ingestBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Ingest service access token with explicit source scope; not a user read token."
+      },
+      "appServiceBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Internal app service plus trusted validated end-user context."
+      },
+      "scorerServiceSecret": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Internal scorer service credential via Authorization; never delivered to frontend."
+      }
+    }
+  }
+}

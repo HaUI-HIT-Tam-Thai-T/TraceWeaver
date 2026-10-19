@@ -1,0 +1,26 @@
+# Local secrets and build previews; keep final submission artifacts trackable
+.env
+.env.*
+!.env.example
+demo-credentials.local.json
+.artifact-build/
+node_modules/
+__pycache__/
+.venv/
+evaluation/private/
+data/runtime/
+dist/
+coverage/
+*.log
+
+# Local project preparation
+/docs/
+/.planning/
+/data/
+/templates/
+.DS_Store
+Thumbs.db
+src/frontend/.vite/
+src/frontend/build/
+src/ai/models/
+src/ai/.pytest_cache/

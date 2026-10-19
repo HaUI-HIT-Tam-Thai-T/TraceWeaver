@@ -1,0 +1,26 @@
+# TraceWeaver API contracts
+
+`openapi.json` là OpenAPI 3.1 cho 21 operation dự kiến: public API `/api/v1`, workflow core `/core/v1` và scorer `/internal/v1`. Đây là hợp đồng mục tiêu; mọi business operation có `x-implementation-status: planned`, chưa có handler hoặc auth chạy thật. Endpoint đang hoạt động vẫn là health contract riêng `health.openapi.json`.
+
+`schemas/domain.schema.json` dùng JSON Schema 2020-12, là nơi định nghĩa duy nhất 49 kiểu dữ liệu. OpenAPI tham chiếu schema ngoài file, không chép DTO sang mỗi route. Dùng JSON thay YAML để tooling Node đọc trực tiếp; không cần YAML parser riêng.
+
+## Dùng và kiểm tra
+
+Từ root chạy `npm run test:contracts`; `npm test` cũng bao gồm contract tests. Swagger Parser kiểm OpenAPI/refs với remote resolution tắt; Ajv compile strict và kiểm UUID/date-time, positive/negative fixtures, finite score. Chưa có Postman workspace, mock được publish.
+
+`fixtures/valid.json` là map theo tên schema, mỗi entry là một payload ví dụ cho kiểu đó. `fixtures/invalid.json` ghi schema, payload và keyword lỗi mong đợi. Dữ liệu hoàn toàn synthetic, score là ví dụ cấu trúc, không phải kết quả model. Hash trong positive Event fixtures được tính từ canonical JSON của observable event, bỏ event_id/received_at/provenance; convention canonical/dedup runtime sẽ được khóa ở bước ingestion. Không lấy UUID/cursor/credential mẫu làm dữ liệu hoặc token dùng thật.
+
+## Semantics cần giữ khi implement
+
+- Input object đóng field ngoài schema; payload log là JSON object linh hoạt. Server tự tạo event_id, received_at, provenance và parser_version; client không được gán chúng.
+- BatchRequest chỉ kiểm envelope/count. Mỗi phần tử được kiểm riêng bằng EventInput, kể cả record không phải object; record sai trả rejected, record đúng vẫn xử lý. Body >1 MiB bị chặn tại HTTP; counters/index coverage/hash/dedup là runtime invariants.
+- User JWT, ingest JWT, app service credential và scorer credential khác nhau. User context của core phải đến từ phía đã validate token, không từ header actor do client tự gán. Contract không tự chứng minh auth/source ACL.
+- Me có subject và memberships; roles/group_ids nằm trong mỗi workspace membership. Role wire value cho ingest là `ingest_service`. Admin không tự có read/ingest grants.
+- Pagination `{items,next_cursor}`; default limit 50/max100; cursor gắn filter/scope/sort và snapshot. Events sort occurred_at,event_id. Cursor sai filter/scope trả 400.
+- Idempotency-Key trên POST run/case/transition là tùy chọn khi tạo lần đầu, bắt buộc nếu muốn retry an toàn; actor+workspace+route trong 24h, đổi body cùng key trả 409. Ingest dùng persistent source_event_id dedup.
+- Review/transition bắt buộc expected_version và reason không trắng. Assign bắt buộc owner_id. Các guard membership/owner/evidence/role/case closed cần kiểm runtime, không chỉ schema.
+- Case detail trả `{case,history,evidence}`; WorkflowInstance chứa state/version/history. Evidence kind `events` cần event_ids không rỗng; kind `note` cần note không trắng. KnowledgeArticle có source_ref URI bắt buộc cùng version/author.
+- Scorer pairs ≤100, feature schema `1`, finite score [0,1]. Caller phải kiểm exact pair_id set, model/schema compatibility, timeout/degraded; JSON Schema không so request IDs với response IDs.
+- Schema không chứng minh from≤to/window≤1h, event count≤1000, graph references/cycle, source grant revocation hoặc atomic audit. Các mục đó vẫn cần business/integration tests ở các bước tiếp theo.
+
+Thay contract phải cập nhật schema, fixtures/tests, docs và consumer trong cùng thay đổi. Không tạo CRUD quản trị sources/knowledge ngoài MVP chỉ vì DB đã có bảng.

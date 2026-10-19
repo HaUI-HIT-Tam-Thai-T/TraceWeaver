@@ -1,0 +1,24 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "TraceWeaver backend health", "version": "0.1.0", "description": "Foundation health routes only. Business operations are planned in openapi.json." },
+  "paths": {
+    "/health/live": {
+      "get": { "operationId": "getLiveness", "security": [], "responses": {
+        "200": { "description": "HTTP process responds independently of database readiness", "content": { "application/json": { "schema": { "type": "object", "required": ["status"], "additionalProperties": false, "properties": { "status": { "const": "ok" } } } } } }
+      } }
+    },
+    "/health/ready": {
+      "get": { "operationId": "getReadiness", "security": [], "responses": {
+        "200": { "description": "Database is reachable and source migrations match", "content": { "application/json": { "schema": { "type": "object", "required": ["status"], "additionalProperties": false, "properties": { "status": { "const": "ready" } } } } } },
+        "503": { "description": "Database unavailable, schema missing, pending or changed migrations", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NotReady" } } } }
+      } }
+    }
+  },
+  "components": { "schemas": { "NotReady": {
+    "type": "object", "required": ["error", "request_id"], "additionalProperties": false,
+    "properties": {
+      "error": { "type": "object", "required": ["code", "message"], "additionalProperties": false, "properties": { "code": { "const": "CORE_NOT_READY" }, "message": { "type": "string" } } },
+      "request_id": { "type": "string", "format": "uuid" }
+    }
+  } } }
+}
