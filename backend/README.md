@@ -1,6 +1,6 @@
 # TraceWeaver backend
 
-Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Foundation hiện có healthcheck, config fail-fast, pg pool, transaction helper và migration đầu tiên cho `core.workspaces`. PostgreSQL đã được người dùng xác nhận ngày 19/10/2026. Chưa có OIDC hay API nghiệp vụ; không sử dụng các routes mục tiêu trong OpenAPI như endpoint đã có.
+Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Đã có foundation và JWT/JWKS enforcement cho GET /me, sources, knowledge. Các endpoint còn lại vẫn planned. Xem [Identity BE](IDENTITY.md) về cấu hình provider và quyền.
 
 ## Chạy trên Windows PowerShell
 
@@ -22,7 +22,7 @@ Nếu dùng PostgreSQL có sẵn thay vì Compose, điền DATABASE_URL trỏ đ
 DATABASE_URL=postgresql://USER:URL_ENCODED_PASSWORD@localhost:5432/traceweaver
 ```
 
-Password có ký tự đặc biệt phải URL-encode. Không commit `.env`. Config hiện chỉ bắt buộc DATABASE_URL và kiểm các biến BE đang dùng; OIDC/ingest/scorer secrets dành cho module sau, chưa được sử dụng hoặc xác thực bởi foundation.
+Password có ký tự đặc biệt phải URL-encode. Không commit `.env`. DATABASE_URL và CURSOR_SECRET là bắt buộc; db:setup sinh mới khi chưa có env. Với env cũ cần bổ sung cursor key. OIDC cấu hình theo provider; scorer/ingest module vẫn thuộc bước sau.
 
 ```powershell
 npm.cmd run db:migrate
@@ -38,7 +38,7 @@ API mặc định bind `127.0.0.1:8080`; có thể đổi bằng API_HOST/API_PO
 | `GET /health/live` | 200 `{ "status": "ok" }`, độc lập với DB |
 | `GET /health/ready` | 200 `{ "status": "ready" }` khi DB/migration sẵn sàng; ngược lại 503 `CORE_NOT_READY` |
 
-Hợp đồng: [health OpenAPI](contracts/health.openapi.json). Đây là operational health, chưa đánh giá readiness của OIDC/scorer vì hai module đó chưa triển khai. Health public không trả host DB, credentials hay stacktrace. Các lỗi có `request_id` tương ứng header `X-Request-ID`. Business routes chưa triển khai trả 404.
+Hợp đồng: [health OpenAPI](contracts/health.openapi.json). Đây là operational health, chưa đánh giá readiness của Identity provider/scorer; JWT verification được thực hiện riêng tại API auth. Health public không trả host DB, credentials hay stacktrace. Các lỗi có `request_id` tương ứng header `X-Request-ID`. Business routes chưa triển khai trả 404.
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8080/health/live
@@ -60,7 +60,7 @@ Integration tests tạo database riêng `traceweaver_test_<uuid>` trong containe
 
 BE-03 đã bổ sung [OpenAPI và schema dùng chung](contracts/README.md) cho 21 operation, migration 002 cho memberships/roles/groups/sources/grants/knowledge/audit. Chạy `npm run test:contracts` để kiểm OpenAPI/49 schema/fixtures; `npm run test:db` còn kiểm ràng buộc cross-workspace, duplicate grants, knowledge version và audit append-only/rollback thật. Sau khi thêm migration phải migrate và restart BE vì server nạp danh sách migration lúc startup.
 
-Tiếp theo: xác thực JWT/OIDC và enforcement membership/source grants theo contracts/schemas/domain.schema.json. Keycloak chưa được scaffold; API nghiệp vụ trong OpenAPI vẫn planned, không có chế độ bỏ qua auth.
+Ba API đọc đã implemented với JWT/JWKS và DB permissions; Keycloak chưa được cài, kiểm chứng bằng Postman JWKS simulation và PostgreSQL thật, không có auth bypass. `npm run test:identity` kiểm token/quyền/revocation/cursor; xem [IDENTITY.md](IDENTITY.md). Tiếp theo phía BE là ingestion/parser/provenance; không làm frontend/AI trong phạm vi này.
 
 ## Phân tầng
 

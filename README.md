@@ -17,7 +17,7 @@ simulator/       # Khung sinh dữ liệu giả
 .github/         # Issue/PR templates và CI
 ```
 
-Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có cấu hình môi trường, healthcheck, xử lý lỗi, transaction và migrations. Các phần còn lại mới là khung; API nghiệp vụ, OIDC và AI chưa triển khai. OpenAPI đánh dấu rõ các operation dự kiến.
+Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, JWT/JWKS verification và GET /me, sources, knowledge với quyền từ DB. Identity provider/login, workflow/ingestion và AI vẫn thuộc bước sau; OpenAPI phân biệt implemented/planned. Lần triển khai này chỉ làm BE, không làm frontend/AI.
 
 ## Chạy backend
 
@@ -33,12 +33,13 @@ npm run db:migrate
 npm run dev:be
 ```
 
-Nếu đã có `.env`, bỏ qua `db:setup`. Script giữ nguyên cấu hình hiện có. Có thể dùng PostgreSQL riêng bằng `DATABASE_URL`.
+Nếu đã có `.env`, bỏ qua `db:setup`; bổ sung CURSOR_SECRET ngẫu nhiên ≥32 ký tự nếu thiếu và giữ DB credentials. Xem [cấu hình Identity phía BE](backend/IDENTITY.md). Có thể dùng PostgreSQL riêng bằng DATABASE_URL.
 
 - `GET http://127.0.0.1:8080/health/live`: tiến trình hoạt động.
 - `GET http://127.0.0.1:8080/health/ready`: DB và migrations sẵn sàng.
 - `npm test`: unit, HTTP và contract tests, không cần DB.
 - `npm run test:db`: integration, cần PostgreSQL và quyền tạo DB test.
+- `npm run test:identity`: JWT/quyền nguồn qua PostgreSQL và Postman CLI >=1.74.0, không chạy FE/AI.
 - `npm run start:be`: chạy backend không watch.
 - `npm run db:stop`: dừng DB và giữ dữ liệu.
 
@@ -82,7 +83,7 @@ Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi tri�
 |---|---|---|
 | API trung gian | Express, health, giới hạn body, lỗi/request ID | Endpoint nghiệp vụ có xác thực |
 | Data | PostgreSQL, transaction, migrations nền | Repository và service nghiệp vụ |
-| Identity | Khung module và schema membership/role/grant | OIDC/SSO và enforcement quyền |
+| Identity | JWT/JWKS verification, membership/role/group/source grants cho ba API đọc | IdP thật, login/SSO và quyền cho các API còn lại |
 | Workflow | Khung module và API contract | Engine dùng chung, guard và audit |
 | H-P-D-I / ứng dụng | Khung frontend và contract | Workspace/tri thức, hồ sơ, tìm kiếm/dashboard |
 | Intelligence | Khung scorer/training và contract | Luật/scorer, giải thích, đánh giá và fallback |
@@ -90,7 +91,7 @@ Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi tri�
 
 ## API và tài khoản demo
 
-Health API đang chạy được mô tả tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) là hợp đồng nghiệp vụ dự kiến, có cờ `planned`; không phải danh sách endpoint đã triển khai.
+Health API tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) đánh dấu implemented cho GET /me, sources, knowledge và planned cho 18 operation còn lại. Các API đọc đã kiểm với PostgreSQL thật và Postman JWKS stand-in; chưa kiểm login với Keycloak thật.
 
 Base chưa có đăng nhập nên chưa có tài khoản demo. Khi triển khai Identity, tài khoản và mật khẩu demo phải được tạo tại máy qua seed, không lưu mật khẩu/token thật trong repository.
 
