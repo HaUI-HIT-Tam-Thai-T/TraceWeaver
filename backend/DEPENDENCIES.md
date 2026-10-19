@@ -15,7 +15,7 @@ Project code: Apache-2.0. Third-party packages retain their original licenses. T
 
 React, Identity provider, AI runtime and model are not installed in this scaffold. Add their pinned versions, licenses and notices when implemented.
 
-## npm packages (95)
+## npm packages (96)
 
 | Package | Version | Scope | License | Source |
 |---|---|---|---|---|
@@ -65,6 +65,7 @@ React, Identity provider, AI runtime and model are not installed in this scaffol
 | inherits | 2.0.4 | runtime / transitive | ISC | [npm](https://www.npmjs.com/package/inherits/v/2.0.4) |
 | ipaddr.js | 1.9.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/ipaddr.js/v/1.9.1) |
 | is-promise | 4.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/is-promise/v/4.0.0) |
+| jose | 6.2.12 | runtime / direct | MIT | [npm](https://www.npmjs.com/package/jose/v/6.2.12) |
 | js-yaml | 5.5.0 | development / transitive | MIT | [npm](https://www.npmjs.com/package/js-yaml/v/5.5.0) |
 | json-schema-traverse | 1.0.0 | development / transitive | MIT | [npm](https://www.npmjs.com/package/json-schema-traverse/v/1.0.0) |
 | math-intrinsics | 1.1.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/math-intrinsics/v/1.1.0) |

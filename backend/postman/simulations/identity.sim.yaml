@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: 2026 TraceWeaver contributors
+# SPDX-License-Identifier: Apache-2.0
+simulation: traceweaver-identity
+routing: path
+mocks:
+  - routeKey: oidc
+    path: ../mocks/oidc/config.yaml

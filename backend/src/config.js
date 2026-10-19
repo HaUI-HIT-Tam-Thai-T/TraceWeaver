@@ -9,6 +9,16 @@ function positiveInteger(value, name, fallback, max) {
   return Number(text);
 }
 
+function identityUrl(value, name, appEnv) {
+  try {
+    const url = new URL(value);
+    const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname);
+    if (url.username || url.password || url.search || url.hash ||
+        (url.protocol !== 'https:' && !(appEnv !== 'production' && loopback && url.protocol === 'http:'))) throw new Error();
+    return url.href.replace(/\/$/, '');
+  } catch { throw new Error(`${name} must be a trusted HTTPS URL (loopback HTTP allowed outside production)`); }
+}
+
 export function readConfig(env = process.env) {
   const appEnv = env.APP_ENV ?? 'development';
   if (!['development', 'test', 'production'].includes(appEnv)) {
@@ -24,6 +34,11 @@ export function readConfig(env = process.env) {
       !url.username || !url.password || url.pathname.length < 2 || url.hash) {
     throw new Error('DATABASE_URL must be a PostgreSQL URL with credentials and database');
   }
+  const oidcIssuer = identityUrl(env.OIDC_ISSUER ?? 'http://localhost:8081/realms/traceweaver', 'OIDC_ISSUER', appEnv);
+  const oidcAudience = env.OIDC_API_AUDIENCE ?? 'traceweaver-api';
+  const oidcUserClientId = env.OIDC_CLIENT_ID ?? 'traceweaver-web';
+  if (![oidcAudience, oidcUserClientId].every((value) => value.trim().length > 0 && value.length <= 255)) throw new Error('OIDC client/audience configuration is invalid');
+  if (typeof env.CURSOR_SECRET !== 'string' || env.CURSOR_SECRET.length < 32) throw new Error('CURSOR_SECRET must contain at least 32 characters');
   return Object.freeze({
     appEnv,
     host: env.API_HOST ?? '127.0.0.1',
@@ -31,5 +46,9 @@ export function readConfig(env = process.env) {
     databaseUrl: env.DATABASE_URL,
     poolMax: positiveInteger(env.DB_POOL_MAX, 'DB_POOL_MAX', 5, 50),
     shutdownTimeoutMs: positiveInteger(env.SHUTDOWN_TIMEOUT_MS, 'SHUTDOWN_TIMEOUT_MS', 10000, 60000),
+    oidcIssuer, oidcAudience, oidcUserClientId,
+    oidcJwksUri: identityUrl(env.OIDC_JWKS_URI ?? `${oidcIssuer}/protocol/openid-connect/certs`, 'OIDC_JWKS_URI', appEnv),
+    oidcTimeoutMs: positiveInteger(env.OIDC_TIMEOUT_MS, 'OIDC_TIMEOUT_MS', 2000, 10000),
+    cursorSecret: env.CURSOR_SECRET,
   });
 }
