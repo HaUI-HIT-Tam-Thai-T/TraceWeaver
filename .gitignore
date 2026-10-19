@@ -14,7 +14,9 @@ coverage/
 *.log
 
 # Local project preparation
-/docs/
+# Shared team documentation is tracked explicitly; preparation stays local.
+/docs/*
+!/docs/HUONG-DAN-LICENSE-CHO-TEAM.md
 /.planning/
 /data/
 /templates/

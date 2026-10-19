@@ -53,6 +53,8 @@ Xem [cài đặt](INSTALL.md), [đóng góp](CONTRIBUTING.md), [bảo mật](SEC
 
 Mã nguồn dự án dùng [Apache-2.0](LICENSE). Dependency giữ giấy phép riêng; xem [bảng dependency/license](backend/DEPENDENCIES.md) và [thông báo bên thứ ba](backend/THIRD_PARTY_NOTICES.txt).
 
+Thành viên BE/FE/AI: đọc [hướng dẫn chạy kiểm license cho team](docs/HUONG-DAN-LICENSE-CHO-TEAM.md) để biết lệnh cần chạy, file cần commit và phạm vi kiểm của từng module.
+
 ## Kiến trúc DX-OS ba tầng
 
 ```mermaid
