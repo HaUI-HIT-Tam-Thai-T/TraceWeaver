@@ -15,7 +15,6 @@ frontend/        # Khung giao diện
 ai/              # Khung scorer và training
 simulator/       # Khung sinh dữ liệu giả
 .github/         # Issue/PR templates và CI
-docs/            # Đối chiếu đề thi, hướng dẫn tích hợp và hồ sơ cho team
 ```
 
 Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, JWT/JWKS verification và GET /me, sources, knowledge với quyền từ DB. Identity provider/login, workflow/ingestion và AI vẫn thuộc bước sau; OpenAPI phân biệt implemented/planned. Lần triển khai này chỉ làm BE, không làm frontend/AI.
@@ -53,10 +52,6 @@ Core cung cấp Identity/Data/Workflow dùng chung, không phụ thuộc UI. Bac
 Xem [cài đặt](INSTALL.md), [đóng góp](CONTRIBUTING.md), [bảo mật](SECURITY.md) và [API contracts](backend/contracts/README.md).
 
 Mã nguồn dự án dùng [Apache-2.0](LICENSE). Dependency giữ giấy phép riêng; xem [bảng dependency/license](backend/DEPENDENCIES.md) và [thông báo bên thứ ba](backend/THIRD_PARTY_NOTICES.txt).
-
-Thành viên BE/FE/AI: đọc [hướng dẫn chạy kiểm license cho team](docs/HUONG-DAN-LICENSE-CHO-TEAM.md) để biết lệnh cần chạy, file cần commit và phạm vi kiểm của từng module.
-
-Các yêu cầu khác của đề nằm trong [docs dùng chung cho team](docs/README.md): checklist Open-Core/H-P-D-I, việc BE/FE/AI, dữ liệu/kiểm thử và demo/hồ sơ. Từng mục ghi rõ hiện trạng, minh chứng còn thiếu và nguồn yêu cầu; không coi skeleton/tag nền là sản phẩm đã nghiệm thu.
 
 ## Kiến trúc DX-OS ba tầng
 

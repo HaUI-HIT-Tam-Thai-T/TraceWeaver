@@ -13,7 +13,3 @@ Tạo thay đổi nhỏ, nêu mục tiêu và cách kiểm tra trong issue/PR. D
 Commit theo Conventional Commits. PR ghi hành vi thay đổi, lệnh kiểm thử và giới hạn còn lại.
 
 Mã mới dùng Apache-2.0 và SPDX header. Thay dependency cần chạy `npm run licenses`, `npm run licenses:check` và `npm run check:base`. Giữ nguyên attribution/license của mã bên thứ ba. Không thêm SPDX trực tiếp vào SQL đã migrate; dùng file `.sql.license` đi kèm để giữ checksum.
-
-Các bước cho thành viên mới, xử lý lỗi và trách nhiệm BE/FE/AI nằm trong [hướng dẫn license cho team](docs/HUONG-DAN-LICENSE-CHO-TEAM.md).
-
-Trước khi làm tính năng hoặc chốt bản nộp, đọc [docs team](docs/README.md) và đối chiếu [checklist đề thi](docs/01-DOI-CHIEU-DE-THI.md). Cập nhật trạng thái/test evidence đúng phần đã chạy; không đánh dấu complete chỉ vì có contract, tài liệu hoặc mock.

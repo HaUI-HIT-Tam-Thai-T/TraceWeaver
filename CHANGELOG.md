@@ -2,10 +2,6 @@
 
 ## Unreleased — BE identity/read APIs
 
-- Docs team mở rộng từ license sang đối chiếu đề HaUI/thể lệ: Open-Core/H-P-D-I, bàn giao BE/FE/AI, dữ liệu/kiểm thử/minh chứng và demo/hồ sơ; tách bắt buộc/khuyến nghị, trạng thái đã có/còn thiếu.
-
-- Tài liệu dùng chung docs/HUONG-DAN-LICENSE-CHO-TEAM.md: lệnh kiểm/cập nhật, file cần commit, lỗi thường gặp và giới hạn BE/FE/AI; README/CONTRIBUTING liên kết tới hướng dẫn.
-
 - JWT/JWKS verification bằng JOSE: RS256, issuer/audience/expiry/client checks; không tin quyền trong token, không có auth bypass.
 - GET /api/v1/me và sources/knowledge theo workspace với role/grants PostgreSQL, group access, revocation và signed keyset cursor.
 - Cấu hình OIDC/CURSOR_SECRET, cập nhật OpenAPI implemented/planned và dependency notices.
