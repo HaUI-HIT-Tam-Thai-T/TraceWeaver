@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Chưa có sản phẩm phát hành hoặc phiên bản được hỗ trợ. Đội chưa công bố đầu mối báo cáo bảo mật. Trước public release phải điền maintainer và bật kênh báo riêng; không invent email.
+Phiên bản 0.1.0-base.1 là bộ khung phát triển; chưa có API nghiệp vụ hoặc đăng nhập. Chưa có cam kết hỗ trợ production. Chỉ báo lỗi bảo mật qua kênh riêng với maintainer; không đăng credential hoặc dữ liệu nhạy cảm lên issue công khai.
 
 ## Quy tắc thực hiện
 

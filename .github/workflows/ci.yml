@@ -1,4 +1,7 @@
-name: Backend CI
+# SPDX-FileCopyrightText: 2026 TraceWeaver contributors
+# SPDX-License-Identifier: Apache-2.0
+
+name: Project base CI
 
 on:
   push:
@@ -9,7 +12,10 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -18,4 +24,25 @@ jobs:
           node-version: '24.14.1'
           cache: npm
       - run: npm ci --ignore-scripts
+      - run: npm run check:base
+      - run: npm run licenses:check
       - run: npm test
+
+  postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.1'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run db:setup
+      - run: docker compose -f compose.dev.yaml pull postgres
+      - run: npm run db:up
+      - run: npm run db:migrate
+      - run: npm run smoke
+      - run: npm run test:db
+      - if: always()
+        run: npm run db:stop

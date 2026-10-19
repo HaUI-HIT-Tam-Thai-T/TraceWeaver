@@ -20,3 +20,20 @@ Biến bắt buộc: `DATABASE_URL`. Các biến tùy chọn: `APP_ENV`, `API_HO
 API mặc định bind loopback 8080; PostgreSQL Compose bind loopback 55432. `npm run db:stop` dừng DB và giữ volume. Không sửa migration đã áp dụng; thêm migration mới.
 
 Base chưa bao gồm OIDC, giao diện, scorer hoặc simulator chạy được. Không có tài khoản hay mật khẩu demo cố định.
+
+## Kiểm tra bộ khung sau khi clone
+
+```sh
+npm ci --ignore-scripts
+npm run check:base
+npm run licenses:check
+npm test
+```
+
+Chạy `npm run smoke` sau bước migrate để khởi động backend tạm trên loopback 18080, kiểm liveness/readiness rồi tự dừng tiến trình test. Có thể chọn cổng khác bằng `SMOKE_PORT`.
+
+CI lặp lại cài từ lockfile trên Linux và Windows; job PostgreSQL tạo môi trường DB mới, chạy migration và integration. Đó là bằng chứng tái lập phần backend foundation; các module đang là khung chưa có lệnh build/run riêng.
+
+## Offline
+
+Sau khi đã cache npm packages và PostgreSQL image, có thể dùng `npm ci --offline --ignore-scripts`, `npm run db:up` (không pull), migrate và start như trên. Máy chưa có cache cần Internet ở lần chuẩn bị đầu. Base không gọi API bên ngoài; dataset demo và fallback nghiệp vụ chưa triển khai.

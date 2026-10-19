@@ -50,4 +50,61 @@ Core cung cấp Identity/Data/Workflow dùng chung, không phụ thuộc UI. Bac
 
 Xem [cài đặt](INSTALL.md), [đóng góp](CONTRIBUTING.md), [bảo mật](SECURITY.md) và [API contracts](backend/contracts/README.md).
 
-License sản phẩm chưa được chủ sở hữu chốt; package hiện để `UNLICENSED`.
+Mã nguồn dự án dùng [Apache-2.0](LICENSE). Dependency giữ giấy phép riêng; xem [bảng dependency/license](backend/DEPENDENCIES.md) và [thông báo bên thứ ba](backend/THIRD_PARTY_NOTICES.txt).
+
+## Kiến trúc DX-OS ba tầng
+
+```mermaid
+flowchart BT
+  subgraph L1["Tầng 1 — Open-Core headless"]
+    ID["Identity / SSO / RBAC"]
+    API["API trung gian — Express"]
+    DATA["Data — PostgreSQL / transaction"]
+    WF["Workflow — definition / guard / audit"]
+  end
+  subgraph L2["Tầng 2 — H-P-D-I"]
+    H["H: nhóm / workspace / tri thức"]
+    P["P: quy trình xử lý và hàng chờ"]
+    D["D: provenance / tìm kiếm / dashboard"]
+    I["I: luật / scorer / bằng chứng"]
+  end
+  APP["Tầng 3 — TraceWeaver: điều tra yêu cầu dịch vụ CNTT"]
+  ID --> H
+  API --> H & P & D & I
+  DATA --> API
+  WF --> API
+  H & P & D & I --> APP
+```
+
+Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi triển khai: giao diện → API → Identity kiểm quyền → service nghiệp vụ → core Data/Workflow; scorer chỉ nhận dữ liệu đã được lọc quyền. Core không import Express hoặc giao diện và phải có thể tái sử dụng cho nghiệp vụ khác.
+
+| Thành phần | Hiện trạng bộ khung | Phần cần triển khai tiếp |
+|---|---|---|
+| API trung gian | Express, health, giới hạn body, lỗi/request ID | Endpoint nghiệp vụ có xác thực |
+| Data | PostgreSQL, transaction, migrations nền | Repository và service nghiệp vụ |
+| Identity | Khung module và schema membership/role/grant | OIDC/SSO và enforcement quyền |
+| Workflow | Khung module và API contract | Engine dùng chung, guard và audit |
+| H-P-D-I / ứng dụng | Khung frontend và contract | Workspace/tri thức, hồ sơ, tìm kiếm/dashboard |
+| Intelligence | Khung scorer/training và contract | Luật/scorer, giải thích, đánh giá và fallback |
+| Dữ liệu demo | Fixtures kiểm schema synthetic | Dataset có provenance/manifest và kịch bản đầu-cuối |
+
+## API và tài khoản demo
+
+Health API đang chạy được mô tả tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) là hợp đồng nghiệp vụ dự kiến, có cờ `planned`; không phải danh sách endpoint đã triển khai.
+
+Base chưa có đăng nhập nên chưa có tài khoản demo. Khi triển khai Identity, tài khoản và mật khẩu demo phải được tạo tại máy qua seed, không lưu mật khẩu/token thật trong repository.
+
+## Kiểm chứng và phát triển
+
+```sh
+npm run check:base
+npm run licenses:check
+npm test
+# Sau khi DB đã khởi động và migrate:
+npm run smoke
+npm run test:db
+```
+
+CI kiểm bộ khung và tests trên Linux/Windows; job PostgreSQL kiểm migration, integration và health readiness thật. `npm run licenses` cập nhật bảng dependency và nguyên văn license từ các package đã cài; `licenses:check` phát hiện dữ liệu bị lệch lockfile.
+
+[Issue tracker](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues) tiếp nhận bug/feature. Bản `v0.1.0-base.1` đánh dấu bộ khung, không phải bản nghiệm thu sản phẩm. Yêu cầu chức năng của bài thi cần tiếp tục có code chạy, dữ liệu demo và bằng chứng kiểm thử thực tế.
