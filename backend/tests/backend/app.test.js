@@ -58,7 +58,7 @@ test('malformed/oversized bodies get JSON errors without reflecting payload or c
 
 test('unimplemented business endpoint returns 404 instead of fabricated data', async (t) => {
   const url = await serve(t, async () => false);
-  const response = await fetch(`${url}/api/v1/me`);
+  const response = await fetch(`${url}/api/v1/runs`);
   assert.equal(response.status, 404);
   assert.equal((await response.json()).error.code, 'NOT_FOUND');
 });

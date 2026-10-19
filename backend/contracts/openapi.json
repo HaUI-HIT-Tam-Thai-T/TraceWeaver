@@ -4,7 +4,7 @@
   "info": {
     "title": "TraceWeaver planned API contract",
     "version": "0.1.0",
-    "description": "Planned public/core/scorer interfaces from docs03-05. Business handlers and auth are NOT implemented yet; use health.openapi.json for currently running health routes. Schema validation does not establish runtime ACL, transactions, idempotency or business guards."
+    "description": "Public/core/scorer interfaces. getMe, listSources and listKnowledge are implemented with OIDC access JWT validation and PostgreSQL authorization. Other business operations remain planned. Health routes are in health.openapi.json."
   },
   "paths": {
     "/api/v1/me": {
@@ -12,7 +12,7 @@
         "operationId": "getMe",
         "summary": "getMe",
         "description": "Validated Identity subject and memberships. Roles are per workspace; admin does not imply source access.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -61,7 +61,7 @@
         "operationId": "listSources",
         "summary": "listSources",
         "description": "Viewer/operator/reviewer or admin with source read grants. Returns only granted sources; ingest credential does not imply read access.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -121,7 +121,7 @@
         "operationId": "listKnowledge",
         "summary": "listKnowledge",
         "description": "",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []

@@ -23,8 +23,9 @@ test('OpenAPI validates with all local refs and no remote resolution', async () 
   const operations = Object.entries(api.paths).flatMap(([path, methods]) => Object.entries(methods).map(([method, op]) => ({ path, method, ...op })));
   assert.equal(operations.length, 21);
   assert.equal(new Set(operations.map((op) => op.operationId)).size, operations.length);
+  const implemented = new Set(['getMe', 'listSources', 'listKnowledge']);
   for (const op of operations) {
-    assert.equal(op['x-implementation-status'], 'planned');
+    assert.equal(op['x-implementation-status'], implemented.has(op.operationId) ? 'implemented' : 'planned');
     assert.equal(op.security.length, 1);
     for (const param of op.path.matchAll(/\{(\w+)\}/g)) {
       assert.ok(op.parameters.some((p) => p.in === 'path' && p.name === param[1] && p.required));
