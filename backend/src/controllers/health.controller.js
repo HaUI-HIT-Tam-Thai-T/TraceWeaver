@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 TraceWeaver contributors
+// SPDX-License-Identifier: Apache-2.0
+
 export function createHealthController(service) {
   return {
     live(req, res) { res.json({ status: 'ok' }); },

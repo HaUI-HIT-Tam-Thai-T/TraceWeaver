@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 TraceWeaver contributors
+// SPDX-License-Identifier: Apache-2.0
+
 function positiveInteger(value, name, fallback, max) {
   const text = value ?? String(fallback);
   if (!/^\d+$/.test(text) || Number(text) < 1 || Number(text) > max) {

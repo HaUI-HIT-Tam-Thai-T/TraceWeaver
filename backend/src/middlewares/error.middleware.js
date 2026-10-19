@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 TraceWeaver contributors
+// SPDX-License-Identifier: Apache-2.0
+
 const bodyErrors = {
       'entity.too.large': [413, 'PAYLOAD_TOO_LARGE', 'Request body exceeds the limit'],
       'entity.parse.failed': [400, 'INVALID_JSON', 'Request body is not valid JSON'],

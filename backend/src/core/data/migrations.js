@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 TraceWeaver contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { createHash } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import { withTransaction } from './database.js';

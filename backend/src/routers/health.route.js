@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 TraceWeaver contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { Router } from 'express';
 import { createHealthController } from '../controllers/health.controller.js';
 import { createHealthService } from '../services/health.service.js';

@@ -1,12 +1,16 @@
 {
   "name": "traceweaver",
-  "version": "0.1.0",
+  "version": "0.1.0-base.1",
   "private": true,
   "type": "module",
-  "license": "UNLICENSED",
-  "engines": { "node": ">=24.14.1 <25" },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=24.14.1 <25"
+  },
   "packageManager": "npm@11.11.0",
-  "workspaces": ["backend"],
+  "workspaces": [
+    "backend"
+  ],
   "scripts": {
     "dev:be": "npm run dev --workspace=@traceweaver/backend",
     "start:be": "npm run start --workspace=@traceweaver/backend",
@@ -16,11 +20,22 @@
     "db:stop": "docker compose -f compose.dev.yaml stop postgres",
     "test:db": "node --env-file-if-exists=.env --test backend/tests/integration/*.test.js",
     "test:contracts": "node --test backend/tests/contracts/*.test.js",
-    "test": "node --test backend/tests/backend/*.test.js backend/tests/contracts/*.test.js"
+    "test": "node --test backend/tests/backend/*.test.js backend/tests/contracts/*.test.js",
+    "check:base": "node backend/scripts/check-base.js",
+    "licenses": "node backend/scripts/dependency-inventory.js",
+    "licenses:check": "node backend/scripts/dependency-inventory.js --check",
+    "smoke": "node backend/scripts/smoke.js"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "13.1.0",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues"
   }
 }

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 TraceWeaver contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { readConfig } from './config.js';
 import { createApp } from './app.js';
 import { createDatabase } from './core/data/database.js';
