@@ -28,7 +28,7 @@ export function createDocsRouter({ issuer = 'http://localhost:8081/realms/tracew
   router.get('/openapi.json', (req, res) => res.json(publicContract));
   router.get('/health.openapi.json', (req, res) => res.sendFile(join(contracts, 'health.openapi.json')));
   router.get('/schemas/domain.schema.json', (req, res) => res.sendFile(join(contracts, 'schemas/domain.schema.json')));
-  for (const file of ['swagger-ui.css', 'swagger-ui-bundle.js', 'swagger-ui-standalone-preset.js', 'oauth2-redirect.html']) {
+  for (const file of ['swagger-ui.css', 'swagger-ui-bundle.js', 'swagger-ui-standalone-preset.js', 'oauth2-redirect.html', 'oauth2-redirect.js']) {
     router.get(`/${file}`, (req, res) => res.sendFile(join(assets, file)));
   }
   return router;

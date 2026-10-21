@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { readFile } from 'node:fs/promises';
+import { runInNewContext } from 'node:vm';
 import test from 'node:test';
 import { createApp } from '../../src/app.js';
 
@@ -84,4 +85,25 @@ test('Swagger serves local assets/specs/schema refs without auth or external val
   assert.match(init, /usePkceWithAuthorizationCodeGrant.*true/);
   assert.equal((await fetch(`${url}/api/v1/me`)).status, 401);
   assert.equal((await fetch(`${url}/docs/package.json`)).status, 404);
+});
+
+test('Swagger OAuth callback loads its script and hands the authorization code back to its opener', async (t) => {
+  const base = await serve(t, async () => false);
+  const callback = new URL('/docs/oauth2-redirect.html', base);
+  const html = await (await fetch(callback)).text();
+  const scripts = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map((match) => new URL(match[1], callback));
+  assert.ok(scripts.length, 'callback script dependency');
+  const returned = [], errors = []; let closed = false;
+  const location = { hash: '', search: '?state=demo-state&code=demo-authorization-code' };
+  const window = { location, close: () => { closed = true; }, opener: { swaggerUIRedirectOauth2: {
+    state: 'demo-state', redirectUrl: callback.href, auth: { name: 'keycloakLogin', schema: { get: () => 'authorizationCode' } },
+    callback: (result) => returned.push(result), errCb: (error) => errors.push(error),
+  } } };
+  for (const url of scripts) {
+    const script = await fetch(url); assert.equal(script.status, 200, `callback dependency ${url.pathname}`);
+    assert.match(script.headers.get('content-type'), /javascript/);
+    runInNewContext(await script.text(), { window, location, document: { readyState: 'complete' } });
+  }
+  assert.equal(returned.length, 1); assert.equal(returned[0].auth.code, 'demo-authorization-code');
+  assert.equal(errors.length, 0); assert.equal(closed, true);
 });

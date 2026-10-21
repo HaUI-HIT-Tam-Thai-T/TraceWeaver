@@ -11,6 +11,14 @@ try {
   const issuer = process.env.OIDC_ISSUER ?? `http://localhost:${process.env.IDENTITY_PORT ?? 8081}/realms/traceweaver`;
   const api = `http://localhost:${process.env.API_PORT ?? 8080}`, redirect = `${api}/docs/oauth2-redirect.html`;
   const clientId = process.env.OIDC_CLIENT_ID ?? 'traceweaver-web';
+  step = 'Swagger callback assets';
+  const callbackPage = await fetch(redirect); assert.equal(callbackPage.status, 200);
+  const callbackHtml = await callbackPage.text(), callbackScripts = [...callbackHtml.matchAll(/<script[^>]+src="([^"]+)"/g)];
+  assert.ok(callbackScripts.length);
+  for (const match of callbackScripts) {
+    const assetUrl = new URL(match[1], redirect); assert.equal(assetUrl.origin, api);
+    const asset = await fetch(assetUrl); assert.equal(asset.status, 200); assert.match(asset.headers.get('content-type'), /javascript/); await asset.arrayBuffer();
+  }
   const discovery = await (await fetch(`${issuer}/.well-known/openid-configuration`)).json();
   assert.equal(discovery.issuer, issuer);
   for (const endpoint of [discovery.authorization_endpoint, discovery.token_endpoint]) assert.equal(new URL(endpoint).origin, new URL(issuer).origin);
