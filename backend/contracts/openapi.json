@@ -191,7 +191,7 @@
         "operationId": "ingestEvents",
         "summary": "ingestEvents",
         "description": "Service token restricted to this source. Envelope 1-500 records, HTTP body <=1 MiB. Each record validates against EventInput independently; invalid record becomes rejected, valid records continue. Same source_event_id and canonical content = duplicate; changed content = per-item SOURCE_EVENT_CONFLICT. Server owns IDs/received_at/provenance/parser_version. Redact before persistence/logging. Unique key survives retries indefinitely; no Idempotency-Key needed.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "ingestBearer": []

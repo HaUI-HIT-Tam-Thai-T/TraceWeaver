@@ -5,10 +5,12 @@ import { readConfig } from './config.js';
 import { createApp } from './app.js';
 import { createDatabase } from './core/data/database.js';
 import { isDatabaseReady, loadMigrations } from './core/data/migrations.js';
-import { createTokenVerifier } from './core/identity/token-verifier.js';
+import { createTokenVerifier, createIngestTokenVerifier } from './core/identity/token-verifier.js';
 import { createCursorCodec } from './core/identity/cursor.js';
 import { createAccessRepository } from './core/identity/access-repository.js';
 import { createAccessService } from './services/access.service.js';
+import { createIngestionRepository } from './core/data/ingestion-repository.js';
+import { createIngestionService } from './services/ingestion.service.js';
 
 let database;
 try {
@@ -18,7 +20,9 @@ try {
   const app = createApp({
     checkReadiness: () => isDatabaseReady(database, migrations),
     verifyToken: createTokenVerifier(config),
+    verifyIngestToken: createIngestTokenVerifier(config),
     access: createAccessService(createAccessRepository(database), createCursorCodec(config.cursorSecret)),
+    ingestion: createIngestionService(createIngestionRepository(database)),
     logError: (event) => console.error(JSON.stringify(event)),
   });
   const server = app.listen(config.port, config.host, () => {

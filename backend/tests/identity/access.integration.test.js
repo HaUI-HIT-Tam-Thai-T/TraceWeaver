@@ -12,7 +12,9 @@ import { createApp } from '../../src/app.js';
 import { readConfig } from '../../src/config.js';
 import { createDatabase } from '../../src/core/data/database.js';
 import { migrate, loadMigrations } from '../../src/core/data/migrations.js';
-import { createTokenVerifier } from '../../src/core/identity/token-verifier.js';
+import { createTokenVerifier, createIngestTokenVerifier } from '../../src/core/identity/token-verifier.js';
+import { createIngestionRepository } from '../../src/core/data/ingestion-repository.js';
+import { createIngestionService } from '../../src/services/ingestion.service.js';
 import { createAccessRepository } from '../../src/core/identity/access-repository.js';
 import { createCursorCodec } from '../../src/core/identity/cursor.js';
 import { createAccessService } from '../../src/services/access.service.js';
@@ -51,6 +53,8 @@ test('authenticated read APIs enforce current PostgreSQL membership and source s
   const sim = await identitySimulation(t);
   const server = createApp({
     checkReadiness: async () => true, verifyToken: createTokenVerifier(sim.config),
+    verifyIngestToken: createIngestTokenVerifier({ ...sim.config, oidcIngestClientId: 'traceweaver-ingest' }),
+    ingestion: createIngestionService(createIngestionRepository(pool)),
     access: createAccessService(createAccessRepository(pool), createCursorCodec(config.cursorSecret)),
   }).listen(0, '127.0.0.1');
   t.after(() => new Promise((resolve) => server.close(resolve)));
@@ -105,6 +109,24 @@ test('authenticated read APIs enforce current PostgreSQL membership and source s
     assert.equal((await api(`/workspaces/${a}/knowledge?q=guide&cursor=${encodeURIComponent(first.body.next_cursor)}`)).res.status, 400);
     assert.equal((await api(`/workspaces/${a}/sources?limit=101`)).res.status, 400);
     assert.equal((await api(`/workspaces/${a}/knowledge?limit=1&limit=2`)).res.status, 400);
+  });
+  await t.test('real JWT/JWKS and PostgreSQL batch route isolate clients and enforce grant revocation', async () => {
+    const grant = randomUUID();
+    await pool.query(`INSERT INTO core.source_grants(id,workspace_id,source_id,grantee_subject,permission,granted_by) VALUES ($1,$2,$3,'service','ingest','test')`, [grant, a, ids[0]]);
+    const token = await sim.token({ sub: 'service', azp: 'traceweaver-ingest' });
+    const event = { source_event_id: 'http-one', occurred_at: '2026-10-19T03:00:00Z', service: 'intake', action: 'request.accepted', outcome: 'success', identifiers: [], message: 'token=hidden', payload: { password: 'hidden' } };
+    const send = (bearer) => fetch(`${base}/workspaces/${a}/sources/${ids[0]}/events:batch`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${bearer}`, 'X-Actor-Subject': 'admin' }, body: JSON.stringify({ events: [event, null] }) });
+    assert.equal((await send(alice)).status, 401);
+    const response = await send(token), body = await response.json();
+    assert.equal(response.status, 200); conforms('BatchResult', body);
+    assert.deepEqual([body.accepted, body.rejected], [1, 1]);
+    assert.equal((await (await send(token)).json()).duplicate, 1);
+    assert.equal((await api('/me', token)).res.status, 401);
+    const { rows: [stored] } = await pool.query(`SELECT e.document,a.actor_subject FROM core.events e JOIN core.audit_events a ON a.entity_id=e.batch_id::text WHERE e.event_id=$1`, [body.results[0].event_id]);
+    assert.equal(stored.actor_subject, 'service');
+    assert.doesNotMatch(JSON.stringify(stored), /hidden/);
+    await pool.query('UPDATE core.source_grants SET revoked_at=clock_timestamp() WHERE id=$1', [grant]);
+    assert.equal((await send(token)).status, 404);
   });
   await t.test('revocation changes scope immediately and invalidates old cursors without changing token', async () => {
     const first = await api(`/workspaces/${a}/sources?limit=1`);

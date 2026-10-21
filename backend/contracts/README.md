@@ -1,6 +1,6 @@
 # TraceWeaver API contracts
 
-`openapi.json` có 21 operation public/core/scorer. GET /me, /workspaces/{wid}/sources và /knowledge đã có handler/JWT verification/DB scope enforcement, được đánh dấu implemented; 18 operation khác vẫn planned. Health có contract riêng `health.openapi.json`. Xem [Identity BE](../IDENTITY.md) về cấu hình provider và giới hạn kiểm chứng.
+`openapi.json` có 21 operation public/core/scorer. GET /me, /workspaces/{wid}/sources, /knowledge và POST /workspaces/{wid}/sources/{sid}/events:batch đã có handler/JWT verification/DB scope enforcement, được đánh dấu implemented; 17 operation khác vẫn planned. Health có contract riêng `health.openapi.json`. Xem [Identity BE](../IDENTITY.md) và [Batch ingestion](../INGESTION.md) về cấu hình provider và giới hạn kiểm chứng.
 
 `schemas/domain.schema.json` dùng JSON Schema 2020-12, là nơi định nghĩa duy nhất 49 kiểu dữ liệu. OpenAPI tham chiếu schema ngoài file, không chép DTO sang mỗi route. Dùng JSON thay YAML để tooling Node đọc trực tiếp; không cần YAML parser riêng.
 
