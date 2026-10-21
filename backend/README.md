@@ -4,6 +4,8 @@ Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện
 
 ## Chạy trên Windows PowerShell
 
+Chạy API + PostgreSQL bằng Docker: `docker compose up -d --build --wait api` từ root, dùng `.env` hiện có. Xem [Docker API](DOCKER.md) về migration, build và cấu hình IdP trong container.
+
 Từ root repo, dùng Node 24.14.1/npm 11.11.0 đã kiểm:
 
 ```powershell
@@ -29,7 +31,7 @@ npm.cmd run db:migrate
 npm.cmd run dev:be
 ```
 
-API mặc định bind `127.0.0.1:8080`; có thể đổi bằng API_HOST/API_PORT. Dùng `npm.cmd run start:be` để chạy không watch. Không tự migration lúc khởi động server; thiếu schema thì readiness chưa đạt. `npm.cmd run db:stop` dừng DB, giữ nguyên volume. Compose hiện chỉ có PostgreSQL development, chưa phải toàn bộ hệ thống.
+API chạy trên host mặc định bind `127.0.0.1:8080`; có thể đổi bằng API_HOST/API_PORT. Dùng `npm.cmd run start:be` để chạy không watch. Không tự migration lúc khởi động server; thiếu schema thì readiness chưa đạt. `npm.cmd run db:stop` dừng DB, giữ nguyên volume. `compose.dev.yaml` chỉ chạy PostgreSQL; `compose.yaml` bổ sung migration/API, chưa có FE/IdP/AI.
 
 ## Endpoint hiện có
 

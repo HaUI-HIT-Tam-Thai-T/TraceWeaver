@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Docker API
+
+- Pinned Node24 multi-stage image with runtime dependencies, non-root/read-only API and allowlisted build context excluding local secrets/data.
+- Default Compose reuses development PostgreSQL/volume, runs one-shot migrations before API readiness; container-only DB URL setup preserves host .env and correctly escapes credentials.
+- Verified image build, migration exit0, container live/ready200 and anonymous /me401;29 tests/base/license pass. API progress remains6/21; live IdP in container not verified.
+
 ## Unreleased — BE event reads
 
 - GET events và event detail theo current source read ACL; public provenance/hash, time/source/action/literal text/identifier filters.

@@ -19,6 +19,8 @@ simulator/       # Khung sinh dữ liệu giả
 
 Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, JWT/JWKS, batch ingestion và GET /me, sources, knowledge, events, event detail với quyền từ DB. Identity provider/login thật, workflow và AI vẫn thuộc bước sau; OpenAPI phân biệt 6 implemented/15 planned. Phạm vi triển khai hiện tại là BE.
 
+Chạy API bằng Docker với `.env` hiện có: `docker compose up -d --build --wait api`. Mặc định API tại `http://localhost:8080`; Compose chờ PostgreSQL và migration xong trước khi bật API. Chi tiết tại [Docker API](backend/DOCKER.md).
+
 ## Chạy backend
 
 Yêu cầu Node.js 24.14.1, npm 11.11.0 và PostgreSQL 17 hoặc Docker Compose.
