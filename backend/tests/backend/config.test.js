@@ -21,6 +21,11 @@ test('identity configuration rejects insecure production URLs and missing cursor
   assert.throws(() => readConfig({ ...valid, INGEST_CLIENT_ID: '' }), /OIDC/);
   assert.throws(() => readConfig({ ...valid, INGEST_CLIENT_ID: 'traceweaver-web' }), /OIDC/);
   assert.equal(readConfig(valid).oidcJwksUri, 'http://localhost:8081/realms/traceweaver/protocol/openid-connect/certs');
+  const internal = { ...valid, OIDC_JWKS_URI: 'http://keycloak:8080/realms/traceweaver/protocol/openid-connect/certs', OIDC_LOCAL_KEYCLOAK: 'true' };
+  assert.equal(readConfig(internal).oidcJwksUri, internal.OIDC_JWKS_URI);
+  assert.throws(() => readConfig({ ...internal, OIDC_LOCAL_KEYCLOAK: 'false' }), /OIDC_JWKS_URI/);
+  assert.throws(() => readConfig({ ...internal, OIDC_JWKS_URI: 'http://other:8080/realms/traceweaver/protocol/openid-connect/certs' }), /OIDC_JWKS_URI/);
+  assert.throws(() => readConfig({ ...internal, APP_ENV: 'production', OIDC_ISSUER: 'https://id.example.test/realm' }), /OIDC_JWKS_URI/);
 });
 
 test('configuration rejects empty credentials and malformed values without exposing secrets', () => {

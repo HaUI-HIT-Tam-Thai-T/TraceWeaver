@@ -9,12 +9,13 @@ function positiveInteger(value, name, fallback, max) {
   return Number(text);
 }
 
-function identityUrl(value, name, appEnv) {
+function identityUrl(value, name, appEnv, allowLocalKeycloak = false) {
   try {
     const url = new URL(value);
     const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname);
+    const localKeycloak = allowLocalKeycloak && name === 'OIDC_JWKS_URI' && url.hostname === 'keycloak' && url.port === '8080' && url.pathname === '/realms/traceweaver/protocol/openid-connect/certs';
     if (url.username || url.password || url.search || url.hash ||
-        (url.protocol !== 'https:' && !(appEnv !== 'production' && loopback && url.protocol === 'http:'))) throw new Error();
+        (url.protocol !== 'https:' && !(appEnv !== 'production' && (loopback || localKeycloak) && url.protocol === 'http:'))) throw new Error();
     return url.href.replace(/\/$/, '');
   } catch { throw new Error(`${name} must be a trusted HTTPS URL (loopback HTTP allowed outside production)`); }
 }
@@ -48,7 +49,7 @@ export function readConfig(env = process.env) {
     poolMax: positiveInteger(env.DB_POOL_MAX, 'DB_POOL_MAX', 5, 50),
     shutdownTimeoutMs: positiveInteger(env.SHUTDOWN_TIMEOUT_MS, 'SHUTDOWN_TIMEOUT_MS', 10000, 60000),
     oidcIssuer, oidcAudience, oidcUserClientId, oidcIngestClientId,
-    oidcJwksUri: identityUrl(env.OIDC_JWKS_URI ?? `${oidcIssuer}/protocol/openid-connect/certs`, 'OIDC_JWKS_URI', appEnv),
+    oidcJwksUri: identityUrl(env.OIDC_JWKS_URI ?? `${oidcIssuer}/protocol/openid-connect/certs`, 'OIDC_JWKS_URI', appEnv, env.OIDC_LOCAL_KEYCLOAK === 'true'),
     oidcTimeoutMs: positiveInteger(env.OIDC_TIMEOUT_MS, 'OIDC_TIMEOUT_MS', 2000, 10000),
     cursorSecret: env.CURSOR_SECRET,
   });
