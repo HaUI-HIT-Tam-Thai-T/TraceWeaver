@@ -16,6 +16,7 @@ COPY package.json LICENSE NOTICE ./
 COPY backend/package.json backend/THIRD_PARTY_NOTICES.txt ./backend/
 COPY backend/src ./backend/src
 COPY backend/contracts/schemas ./backend/contracts/schemas
+COPY backend/contracts/openapi.json backend/contracts/health.openapi.json ./backend/contracts/
 COPY backend/scripts/migrate.js backend/scripts/container-env.js ./backend/scripts/
 WORKDIR /app/backend
 USER node

@@ -2,9 +2,9 @@
   "openapi": "3.1.0",
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
-    "title": "TraceWeaver planned API contract",
+    "title": "TraceWeaver API",
     "version": "0.1.0",
-    "description": "Public/core/scorer interfaces. getMe, listSources and listKnowledge are implemented with OIDC access JWT validation and PostgreSQL authorization. Other business operations remain planned. Health routes are in health.openapi.json."
+    "description": "Public/core/scorer interfaces. Six operations are implemented: getMe, listSources, listKnowledge, ingestEvents, listEvents and getEvent, with JWT verification and PostgreSQL authorization. The other 15 operations remain planned. Health routes are in health.openapi.json."
   },
   "paths": {
     "/api/v1/me": {

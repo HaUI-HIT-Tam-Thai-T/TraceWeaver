@@ -62,3 +62,22 @@ test('unimplemented business endpoint returns 404 instead of fabricated data', a
   assert.equal(response.status, 404);
   assert.equal((await response.json()).error.code, 'NOT_FOUND');
 });
+
+test('Swagger serves local assets/specs/schema refs without auth or external validation', async (t) => {
+  const url = await serve(t, async () => false);
+  const response = await fetch(`${url}/docs`);
+  assert.equal(response.status, 200); assert.match(await response.text(), /TraceWeaver Swagger UI/);
+  for (const file of ['swagger-ui.css', 'swagger-ui-bundle.js', 'swagger-ui-standalone-preset.js', 'initializer.js', 'openapi.json', 'health.openapi.json', 'schemas/domain.schema.json']) {
+    const asset = await fetch(`${url}/docs/${file}`);
+    assert.equal(asset.status, 200, file); await asset.arrayBuffer();
+  }
+  const spec = await (await fetch(`${url}/docs/openapi.json`)).json();
+  assert.deepEqual(spec.servers, [{ url: '/' }]);
+  assert.equal(spec.jsonSchemaDialect, undefined);
+  assert.match(spec.paths['/api/v1/me'].get.summary, /implemented/);
+  assert.match(spec.paths['/api/v1/workspaces/{wid}/runs'].post.summary, /planned/);
+  const init = await (await fetch(`${url}/docs/initializer.js`)).text();
+  assert.match(init, /validatorUrl:null/); assert.match(init, /persistAuthorization:false/);
+  assert.equal((await fetch(`${url}/api/v1/me`)).status, 401);
+  assert.equal((await fetch(`${url}/docs/package.json`)).status, 404);
+});

@@ -14,5 +14,7 @@
 !backend/scripts/migrate.js
 !backend/scripts/container-env.js
 !backend/contracts/
+!backend/contracts/openapi.json
+!backend/contracts/health.openapi.json
 !backend/contracts/schemas/
 !backend/contracts/schemas/**

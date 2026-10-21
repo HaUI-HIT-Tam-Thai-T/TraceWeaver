@@ -15,7 +15,7 @@ Project code: Apache-2.0. Third-party packages retain their original licenses. T
 
 React, Identity provider, AI runtime and model are not installed in this scaffold. Add their pinned versions, licenses and notices when implemented.
 
-## npm packages (96)
+## npm packages (98)
 
 | Package | Version | Scope | License | Source |
 |---|---|---|---|---|
@@ -23,6 +23,7 @@ React, Identity provider, AI runtime and model are not installed in this scaffol
 | @apidevtools/openapi-schemas | 2.1.0 | development / transitive | MIT | [npm](https://www.npmjs.com/package/@apidevtools/openapi-schemas/v/2.1.0) |
 | @apidevtools/swagger-methods | 3.0.2 | development / transitive | MIT | [npm](https://www.npmjs.com/package/@apidevtools/swagger-methods/v/3.0.2) |
 | @apidevtools/swagger-parser | 13.1.0 | development / direct | MIT | [npm](https://www.npmjs.com/package/@apidevtools/swagger-parser/v/13.1.0) |
+| @scarf/scarf | 1.4.0 | runtime / transitive | Apache-2.0 | [npm](https://www.npmjs.com/package/@scarf/scarf/v/1.4.0) |
 | @types/json-schema | 7.0.15 | development / transitive | MIT | [npm](https://www.npmjs.com/package/@types/json-schema/v/7.0.15) |
 | accepts | 2.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/accepts/v/2.0.0) |
 | ajv | 8.20.0 | runtime / direct | MIT | [npm](https://www.npmjs.com/package/ajv/v/8.20.0) |
@@ -109,6 +110,7 @@ React, Identity provider, AI runtime and model are not installed in this scaffol
 | side-channel-weakmap | 1.0.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/side-channel-weakmap/v/1.0.2) |
 | split2 | 4.2.0 | runtime / transitive | ISC | [npm](https://www.npmjs.com/package/split2/v/4.2.0) |
 | statuses | 2.0.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/statuses/v/2.0.2) |
+| swagger-ui-dist | 5.34.0 | runtime / direct | Apache-2.0 | [npm](https://www.npmjs.com/package/swagger-ui-dist/v/5.34.0) |
 | toidentifier | 1.0.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/toidentifier/v/1.0.1) |
 | type-is | 2.1.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/type-is/v/2.1.0) |
 | unpipe | 1.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/unpipe/v/1.0.0) |
