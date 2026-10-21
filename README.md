@@ -17,7 +17,7 @@ simulator/       # Khung sinh dữ liệu giả
 .github/         # Issue/PR templates và CI
 ```
 
-Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, JWT/JWKS verification và GET /me, sources, knowledge với quyền từ DB. Identity provider/login, workflow/ingestion và AI vẫn thuộc bước sau; OpenAPI phân biệt implemented/planned. Lần triển khai này chỉ làm BE, không làm frontend/AI.
+Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, JWT/JWKS, batch ingestion và GET /me, sources, knowledge, events, event detail với quyền từ DB. Identity provider/login thật, workflow và AI vẫn thuộc bước sau; OpenAPI phân biệt 6 implemented/15 planned. Phạm vi triển khai hiện tại là BE.
 
 ## Chạy backend
 
@@ -83,7 +83,7 @@ Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi tri�
 |---|---|---|
 | API trung gian | Express, health, giới hạn body, lỗi/request ID | Endpoint nghiệp vụ có xác thực |
 | Data | PostgreSQL, transaction, migrations nền | Repository và service nghiệp vụ |
-| Identity | JWT/JWKS verification, membership/role/group/source grants cho ba API đọc | IdP thật, login/SSO và quyền cho các API còn lại |
+| Identity | JWT/JWKS user/ingest client, membership/role/group/source grants cho sáu API | IdP thật, login/SSO và quyền cho các API còn lại |
 | Workflow | Khung module và API contract | Engine dùng chung, guard và audit |
 | H-P-D-I / ứng dụng | Khung frontend và contract | Workspace/tri thức, hồ sơ, tìm kiếm/dashboard |
 | Intelligence | Khung scorer/training và contract | Luật/scorer, giải thích, đánh giá và fallback |
@@ -91,7 +91,7 @@ Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi tri�
 
 ## API và tài khoản demo
 
-Health API tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) đánh dấu implemented cho GET /me, sources, knowledge và planned cho 18 operation còn lại. Các API đọc đã kiểm với PostgreSQL thật và Postman JWKS stand-in; chưa kiểm login với Keycloak thật.
+Health API tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) đánh dấu 6 operation implemented: GET /me, sources, knowledge, events, event detail và POST batch ingestion; còn 15 planned. Đã kiểm với PostgreSQL thật và Postman JWKS stand-in; chưa kiểm login với Keycloak thật.
 
 Base chưa có đăng nhập nên chưa có tài khoản demo. Khi triển khai Identity, tài khoản và mật khẩu demo phải được tạo tại máy qua seed, không lưu mật khẩu/token thật trong repository.
 

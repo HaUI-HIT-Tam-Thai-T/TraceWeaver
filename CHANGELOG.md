@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — BE event reads
+
+- GET events và event detail theo current source read ACL; public provenance/hash, time/source/action/literal text/identifier filters.
+- Fixed PostgreSQL visibility snapshot và signed occurred_at/event_id keyset cursor; late commits không chen vào các trang cũ. Migration 004 preserves event IDs/content/hash and stamps top-level xid8.
+- API progress 6/21 implemented, 15 planned; user/ingest token isolation và immediate permission revocation giữ nguyên. Reject PostgreSQL-invalid year0000 trước query/ingest.
+- Local verification: 27 unit/HTTP/contract, 20 PostgreSQL, 23 identity/HTTP/DB tests pass; base/license/process smoke pass. Real backend/JOSE/DB against local Postman JWKS; live Keycloak/SSO/CI chưa nghiệm thu.
+
 ## Unreleased — BE batch ingestion
 
 - POST events:batch: per-record validation/redaction, canonical dedup/conflict, immutable events/provenance and transactional audit; migration 003.
