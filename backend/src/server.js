@@ -11,6 +11,9 @@ import { createAccessRepository } from './core/identity/access-repository.js';
 import { createAccessService } from './services/access.service.js';
 import { createIngestionRepository } from './core/data/ingestion-repository.js';
 import { createIngestionService } from './services/ingestion.service.js';
+import { createEventRepository } from './core/data/event-repository.js';
+import { createEventService } from './services/event.service.js';
+import { createEventCursorCodec } from './core/identity/event-cursor.js';
 
 let database;
 try {
@@ -23,6 +26,7 @@ try {
     verifyIngestToken: createIngestTokenVerifier(config),
     access: createAccessService(createAccessRepository(database), createCursorCodec(config.cursorSecret)),
     ingestion: createIngestionService(createIngestionRepository(database)),
+    events: createEventService(createEventRepository(database), createAccessRepository(database), createEventCursorCodec(config.cursorSecret)),
     logError: (event) => console.error(JSON.stringify(event)),
   });
   const server = app.listen(config.port, config.host, () => {

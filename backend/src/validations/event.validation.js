@@ -24,7 +24,7 @@ export function eventQuery(query) {
   const limit = query.limit ?? '50';
   if (!/^\d+$/.test(limit) || Number(limit) < 1 || Number(limit) > 100 || (query.cursor?.length ?? 0) > 4096 ||
       (query.q?.length ?? 0) > 500 || (query.action?.length ?? 0) > 200) throw invalid();
-  for (const key of ['from', 'to']) if (query[key] && (!validUtcTime(query[key]) || !Number.isFinite(Date.parse(query[key])))) throw invalid();
+  for (const key of ['from', 'to']) if (query[key] && (!validUtcTime(query[key]) || query[key].startsWith('0000-') || !Number.isFinite(Date.parse(query[key])))) throw invalid();
   if (query.from && query.to && laterThan(query.from, query.to)) throw invalid();
   return { limit: Number(limit), cursor: query.cursor, source_id: query.source_id ? workspaceId(query.source_id) : '',
     from: query.from ?? '', to: query.to ?? '', q: query.q ?? '', action: query.action ?? '' };

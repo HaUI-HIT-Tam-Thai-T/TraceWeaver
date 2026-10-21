@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const readRoles = "('viewer','operator','reviewer','admin')";
-const reader = `EXISTS (SELECT 1 FROM core.memberships m JOIN core.membership_roles r
+export const reader = `EXISTS (SELECT 1 FROM core.memberships m JOIN core.membership_roles r
   ON r.workspace_id=m.workspace_id AND r.subject=m.subject
   WHERE m.workspace_id=$2 AND m.subject=$1 AND m.revoked_at IS NULL AND r.role_key IN ${readRoles})`;
-const visibleSource = `EXISTS (SELECT 1 FROM core.source_grants g
+export const visibleSource = `EXISTS (SELECT 1 FROM core.source_grants g
   WHERE g.workspace_id=s.workspace_id AND g.source_id=s.id AND g.permission='read' AND g.revoked_at IS NULL
   AND (g.grantee_subject=$1 OR EXISTS (SELECT 1 FROM core.group_members gm
     WHERE gm.workspace_id=g.workspace_id AND gm.group_id=g.group_id AND gm.subject=$1)))`;

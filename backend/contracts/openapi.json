@@ -264,7 +264,7 @@
         "operationId": "listEvents",
         "summary": "listEvents",
         "description": "Sort occurred_at,event_id; fixed snapshot across cursor pages. Apply source ACL before search/counts.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -368,7 +368,7 @@
         "operationId": "getEvent",
         "summary": "getEvent",
         "description": "",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
