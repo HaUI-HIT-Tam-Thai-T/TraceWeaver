@@ -17,7 +17,7 @@ test('batch envelope accepts invalid records independently; bounds and unknown f
   for (const body of [{ events: [] }, { events: Array(501).fill(record) }, { events: [record], actor: 'admin' }, null]) assert.equal(validBatch(body), false);
 });
 test('record validation rejects server fields, bad date, missing ID and mismatched source', () => {
-  for (const patch of [{ received_at: '2026-10-19T03:00:00Z' }, { occurred_at: 'invalid' }, { source_event_id: '' }, { outcome: 'other' }]) assert.equal(normalizeEvent({ ...record, ...patch }, source).code, 'INVALID_EVENT');
+  for (const patch of [{ received_at: '2026-10-19T03:00:00Z' }, { occurred_at: 'invalid' }, { occurred_at: '0000-01-01T00:00:00Z' }, { source_event_id: '' }, { outcome: 'other' }]) assert.equal(normalizeEvent({ ...record, ...patch }, source).code, 'INVALID_EVENT');
   assert.equal(normalizeEvent({ ...record, service: 'account' }, source).code, 'SOURCE_SERVICE_MISMATCH');
   assert.equal(normalizeEvent(record, { ...source, parser_version: 'future' }).code, 'UNSUPPORTED_PARSER');
 });

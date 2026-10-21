@@ -31,6 +31,7 @@ export const digest = (value) => createHash('sha256').update(canonical(value)).d
 
 export function normalizeEvent(input, source) {
   if (!validEvent(input)) return { code: 'INVALID_EVENT' };
+  if (input.occurred_at.startsWith('0000-')) return { code: 'INVALID_EVENT' };
   if (input.service !== source.service) return { code: 'SOURCE_SERVICE_MISMATCH' };
   if (!['intake', 'account', 'provision'].includes(source.service) || source.parser_version !== `${source.service}-v1`) return { code: 'UNSUPPORTED_PARSER' };
   try {
