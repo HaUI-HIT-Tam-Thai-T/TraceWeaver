@@ -10,11 +10,11 @@ import { createIngestionRouter } from './routers/ingestion.route.js';
 import { createEventRouter } from './routers/event.route.js';
 import { createDocsRouter } from './routers/docs.route.js';
 
-export function createApp({ checkReadiness, verifyToken, verifyIngestToken, access, ingestion, events, logError = () => {} }) {
+export function createApp({ checkReadiness, verifyToken, verifyIngestToken, access, ingestion, events, oidc, logError = () => {} }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(requestContext);
-  app.use('/docs', createDocsRouter());
+  app.use('/docs', createDocsRouter(oidc));
   app.use('/health', createHealthRouter(checkReadiness));
   app.use('/api/v1', express.json({ limit: 1048576, strict: true }));
   app.use('/api/v1', createAccessRouter({ verifyToken, access }));

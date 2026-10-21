@@ -24,6 +24,7 @@ try {
     checkReadiness: () => isDatabaseReady(database, migrations),
     verifyToken: createTokenVerifier(config),
     verifyIngestToken: createIngestTokenVerifier(config),
+    oidc: { issuer: config.oidcIssuer, clientId: config.oidcUserClientId },
     access: createAccessService(createAccessRepository(database), createCursorCodec(config.cursorSecret)),
     ingestion: createIngestionService(createIngestionRepository(database)),
     events: createEventService(createEventRepository(database), createAccessRepository(database), createEventCursorCodec(config.cursorSecret)),

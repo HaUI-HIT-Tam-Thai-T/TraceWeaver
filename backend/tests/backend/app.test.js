@@ -67,17 +67,21 @@ test('Swagger serves local assets/specs/schema refs without auth or external val
   const url = await serve(t, async () => false);
   const response = await fetch(`${url}/docs`);
   assert.equal(response.status, 200); assert.match(await response.text(), /TraceWeaver Swagger UI/);
-  for (const file of ['swagger-ui.css', 'swagger-ui-bundle.js', 'swagger-ui-standalone-preset.js', 'initializer.js', 'openapi.json', 'health.openapi.json', 'schemas/domain.schema.json']) {
+  for (const file of ['swagger-ui.css', 'swagger-ui-bundle.js', 'swagger-ui-standalone-preset.js', 'oauth2-redirect.html', 'initializer.js', 'openapi.json', 'health.openapi.json', 'schemas/domain.schema.json']) {
     const asset = await fetch(`${url}/docs/${file}`);
     assert.equal(asset.status, 200, file); await asset.arrayBuffer();
   }
   const spec = await (await fetch(`${url}/docs/openapi.json`)).json();
   assert.deepEqual(spec.servers, [{ url: '/' }]);
   assert.equal(spec.jsonSchemaDialect, undefined);
+  assert.match(spec.components.securitySchemes.keycloakLogin.flows.authorizationCode.authorizationUrl, /localhost:8081\/realms\/traceweaver/);
+  assert.ok(spec.paths['/api/v1/me'].get.security.some((rule) => Object.hasOwn(rule, 'keycloakLogin')));
+  assert.equal(spec.paths['/api/v1/workspaces/{wid}/sources/{sid}/events:batch'].post.security.some((rule) => Object.hasOwn(rule, 'keycloakLogin')), false);
   assert.match(spec.paths['/api/v1/me'].get.summary, /implemented/);
   assert.match(spec.paths['/api/v1/workspaces/{wid}/runs'].post.summary, /planned/);
   const init = await (await fetch(`${url}/docs/initializer.js`)).text();
   assert.match(init, /validatorUrl:null/); assert.match(init, /persistAuthorization:false/);
+  assert.match(init, /usePkceWithAuthorizationCodeGrant.*true/);
   assert.equal((await fetch(`${url}/api/v1/me`)).status, 401);
   assert.equal((await fetch(`${url}/docs/package.json`)).status, 404);
 });
