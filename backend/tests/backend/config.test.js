@@ -18,6 +18,8 @@ test('identity configuration rejects insecure production URLs and missing cursor
   assert.throws(() => readConfig({ ...valid, APP_ENV: 'production' }), /OIDC_ISSUER/);
   assert.throws(() => readConfig({ ...valid, OIDC_JWKS_URI: 'http://localhost:8081/certs?secret=no' }), /OIDC_JWKS_URI/);
   assert.throws(() => readConfig({ ...valid, OIDC_API_AUDIENCE: '' }), /OIDC/);
+  assert.throws(() => readConfig({ ...valid, INGEST_CLIENT_ID: '' }), /OIDC/);
+  assert.throws(() => readConfig({ ...valid, INGEST_CLIENT_ID: 'traceweaver-web' }), /OIDC/);
   assert.equal(readConfig(valid).oidcJwksUri, 'http://localhost:8081/realms/traceweaver/protocol/openid-connect/certs');
 });
 

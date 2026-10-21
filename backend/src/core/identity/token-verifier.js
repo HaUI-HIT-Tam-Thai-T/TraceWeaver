@@ -4,6 +4,11 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { ApiError } from './api-error.js';
 
+export function createIngestTokenVerifier(config) {
+  if (!config.oidcIngestClientId || config.oidcIngestClientId === config.oidcUserClientId) throw new Error('OIDC ingest client must be distinct');
+  return createTokenVerifier({ ...config, oidcUserClientId: config.oidcIngestClientId });
+}
+
 export function createTokenVerifier(config) {
   const keys = createRemoteJWKSet(new URL(config.oidcJwksUri), {
     timeoutDuration: config.oidcTimeoutMs,

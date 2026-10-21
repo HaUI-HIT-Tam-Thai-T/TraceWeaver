@@ -6,7 +6,7 @@ import test from 'node:test';
 import { generateKeyPair, SignJWT } from 'jose';
 import { createServer } from 'node:net';
 import { once } from 'node:events';
-import { createTokenVerifier } from '../../src/core/identity/token-verifier.js';
+import { createTokenVerifier, createIngestTokenVerifier } from '../../src/core/identity/token-verifier.js';
 import { createCursorCodec } from '../../src/core/identity/cursor.js';
 import { identitySimulation } from '../support/oidc-simulation.js';
 
@@ -14,6 +14,10 @@ test('JWT verification uses the Postman JWKS HTTP dependency and ignores token r
   const sim = await identitySimulation(t);
   const verify = createTokenVerifier(sim.config);
   assert.deepEqual(await verify(await sim.token({ roles: ['admin'] })), { subject: 'alice' });
+  const ingest = createIngestTokenVerifier({ ...sim.config, oidcIngestClientId: 'traceweaver-ingest' });
+  assert.deepEqual(await ingest(await sim.token({ azp: 'traceweaver-ingest' })), { subject: 'alice' });
+  await assert.rejects(ingest(await sim.token()), { status: 401 });
+  await assert.rejects(ingest(await sim.token({ azp: 'traceweaver-ingest', typ: 'ID' })), { status: 401 });
   const other = await generateKeyPair('RS256');
   for (const token of [
     await sim.token({ exp: 1 }), await sim.token({ aud: 'wrong-api' }), await sim.token({ iss: 'https://wrong.example.test' }),
