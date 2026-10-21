@@ -13,6 +13,8 @@ API and Keycloak are running. Open `http://localhost:8080/docs/`, refresh the pa
 
 Use workspace `10000000-0000-4000-8000-000000000015` for sources/knowledge/events. There are three sources (intake/account/provision), with source UUIDs ending000000000015/16/17. Demo event `keycloak-demo-smoke-v1` is available in intake. Both demo users have read grants; operator has the operator role, viewer has only viewer. Neither user token is an ingest-service token.
 
+If an older build left you on a blank `/docs/oauth2-redirect.html?...` page: BE-16 fixes the missing local oauth2-redirect.js asset. Close that stale callback, reload the main `/docs/` page and start **keycloakLogin → Authorize** again. Do not keep reusing an old authorization code; it is short-lived and single-use. Swagger should show Authorized/Logout after a successful callback; `/me` must then include Authorization and return200. The earlier blank-page failure was an API asset-delivery bug, not evidence that the user failed to sign in.
+
 ## Fresh checkout/bootstrap
 
 Use Node24 and installed root dependencies. First create the existing application `.env` with `npm run db:setup` if absent, then:

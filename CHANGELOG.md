@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — Swagger OAuth callback fix
+
+- Serve oauth2-redirect.js required by Swagger UI5.34 callback HTML. Its missing404 left login on a blank page and Swagger without a token.
+- Regression follows the actual callback HTML's script references, checks JavaScript content type and executes the code/state handoff to its opener. Live Keycloak verifier now checks callback assets too.
+
 ## Unreleased — Live Keycloak/Swagger login
 
 - Pinned local Keycloak26.8.1, isolated persistent IdP volume, random ignored demo/admin/service credentials and idempotent demo workspace/source grants.
