@@ -2,6 +2,8 @@
 
 Run from the repository root with Docker Desktop/Compose v2.20+ and the existing `.env`. To create `.env` on a fresh checkout, run `npm run db:setup` once; an existing file is preserved. Do not replace credentials for an existing PostgreSQL volume.
 
+Local Keycloak is now included. Before the first full Compose start, prepare its ignored import/credential files and demo DB grants using the bootstrap commands in [KEYCLOAK.md](KEYCLOAK.md). This machine is already prepared.
+
 ```powershell
 docker compose up -d --build --wait api
 docker compose ps -a
@@ -33,7 +35,9 @@ docker compose stop api
 
 ## Identity networking
 
-OIDC_ISSUER remains the exact issuer present in JWTs. OIDC_JWKS_URI must be a trusted URL reachable **inside** the container. `localhost:8081` inside the API container refers to that container, so the default host-only IdP setup is not a working container IdP integration. Set a reachable HTTPS JWKS URI for the provider; the existing verifier continues to reject arbitrary non-loopback HTTP. Do not change the issuer or disable verification to work around networking. This Compose does not start Keycloak/FE/AI.
+BE-15 update: [local Keycloak](KEYCLOAK.md) is running; Swagger supports real Authorization Code+PKCE. Compose uses the exact dev-only internal Keycloak JWKS route with explicit opt-in, while issuer remains browser-visible localhost. The following paragraph describes the previous host-only/external-provider arrangement.
+
+OIDC_ISSUER remains the exact issuer present in JWTs. OIDC_JWKS_URI must be trusted and reachable **inside** the container. Compose now uses the explicit local Keycloak route documented above; external providers require a reachable HTTPS JWKS URI. `localhost:8081` inside the API container refers to that container. Do not change the issuer or disable verification to work around networking. Compose starts local Keycloak but no FE/AI.
 
 APP_ENV defaults to the existing development setting; NODE_ENV=production controls runtime dependency behavior. A production APP_ENV requires HTTPS OIDC URLs. PostgreSQL credentials still use the development bootstrap account from the existing Compose; separate least-privilege runtime/migration roles and live IdP verification remain deployment work.
 

@@ -4,6 +4,8 @@ Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện
 
 Swagger UI tại `http://localhost:8080/docs/`; OpenAPI JSON tại `/docs/openapi.json`. Chọn API/Health, dùng **Authorize** để nhập Bearer token; operation có nhãn implemented/planned.
 
+Đăng nhập thật: **Authorize → keycloakLogin → Authorize**, dùng `demo.operator` hoặc `demo.viewer`; mật khẩu trong `demo-credentials.local.json` ở root. Không nhập client_secret. [Hướng dẫn Keycloak và bootstrap](KEYCLOAK.md).
+
 ## Chạy trên Windows PowerShell
 
 Chạy API + PostgreSQL bằng Docker: `docker compose up -d --build --wait api` từ root, dùng `.env` hiện có. Xem [Docker API](DOCKER.md) về migration, build và cấu hình IdP trong container.

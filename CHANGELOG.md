@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Live Keycloak/Swagger login
+
+- Pinned local Keycloak26.8.1, isolated persistent IdP volume, random ignored demo/admin/service credentials and idempotent demo workspace/source grants.
+- Swagger Authorization Code+S256 PKCE login, exact callback origins, separate confidential ingest client; no password-grant/auth bypass. Explicit exact-host dev-only internal JWKS path; production HTTP remains rejected.
+- Verified real operator/viewer login, PKCE negatives/CORS, refresh and scoped API/ingest/read with Keycloak-issued JWTs. New registration does not auto-grant app permissions. API count remains6/21.
+
 ## Unreleased — Swagger UI
 
 - Local Swagger UI at /docs/ with API/Health definitions, schema refs, Bearer Authorize and implemented/planned labels. No CDN/online validator or persistent token storage.

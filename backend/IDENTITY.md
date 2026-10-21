@@ -2,6 +2,8 @@
 
 BE xác minh access token, không nhận mật khẩu hoặc tự cấp token. Đăng nhập/SSO/PKCE nằm ở Identity provider/client. Bước này không triển khai FE, AI hoặc Keycloak server.
 
+Cập nhật BE-15: Keycloak local thật đã được thêm vào Docker và Swagger đã có đăng nhập Authorization Code+PKCE; operator/viewer/service tokens, refresh và API quyền đã kiểm thật. Xem [KEYCLOAK.md](KEYCLOAK.md) để đăng nhập và lấy mật khẩu demo trong file ignored. Những đoạn dưới ghi chi tiết foundation trước khi dựng IdP.
+
 ## Cấu hình
 
 DATABASE_URL và CURSOR_SECRET ngẫu nhiên ≥32 ký tự là bắt buộc. `db:setup` sinh cả hai khi tạo env mới; với env cũ cần bổ sung cursor key riêng, giữ nguyên DB credentials. Giữ key qua restart; xoay key làm cursor cũ invalid. Không commit/log key hoặc token.

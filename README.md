@@ -17,9 +17,9 @@ simulator/       # Khung sinh dữ liệu giả
 .github/         # Issue/PR templates và CI
 ```
 
-Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, JWT/JWKS, batch ingestion và GET /me, sources, knowledge, events, event detail với quyền từ DB. Identity provider/login thật, workflow và AI vẫn thuộc bước sau; OpenAPI phân biệt 6 implemented/15 planned. Phạm vi triển khai hiện tại là BE.
+Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, Keycloak local/Swagger PKCE login, JWT/JWKS, batch ingestion và GET /me, sources, knowledge, events, event detail với quyền từ DB. Workflow và AI vẫn thuộc bước sau; OpenAPI phân biệt 6 implemented/15 planned. Phạm vi triển khai hiện tại là BE.
 
-Chạy API bằng Docker với `.env` hiện có: `docker compose up -d --build --wait api`. Mặc định API tại `http://localhost:8080`; Compose chờ PostgreSQL và migration xong trước khi bật API. Chi tiết tại [Docker API](backend/DOCKER.md).
+Chạy API bằng Docker sau bước [chuẩn bị Keycloak/demo](backend/KEYCLOAK.md): `docker compose up -d --build --wait api`. Mặc định API tại `http://localhost:8080`; đăng nhập Swagger bằng **Authorize → keycloakLogin**. Máy hiện tại đã chuẩn bị xong; mật khẩu nằm trong `demo-credentials.local.json` bị Git ignore. Chi tiết tại [Docker API](backend/DOCKER.md).
 
 ## Chạy backend
 
@@ -93,7 +93,7 @@ Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi tri�
 
 ## API và tài khoản demo
 
-Health API tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) đánh dấu 6 operation implemented: GET /me, sources, knowledge, events, event detail và POST batch ingestion; còn 15 planned. Đã kiểm với PostgreSQL thật và Postman JWKS stand-in; chưa kiểm login với Keycloak thật.
+Health API tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) đánh dấu 6 operation implemented: GET /me, sources, knowledge, events, event detail và POST batch ingestion; còn 15 planned. Đã kiểm Authorization Code/PKCE, refresh, token user/service và quyền API với Keycloak local/PostgreSQL thật; Postman JWKS vẫn dùng cho hồi quy lỗi IdP. Chưa nghiệm thu triển khai production.
 
 Base chưa có đăng nhập nên chưa có tài khoản demo. Khi triển khai Identity, tài khoản và mật khẩu demo phải được tạo tại máy qua seed, không lưu mật khẩu/token thật trong repository.
 
