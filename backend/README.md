@@ -2,6 +2,8 @@
 
 Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện có 6/21 API: GET /me, sources, knowledge, events, event detail và POST batch ingestion. Xem [Identity BE](IDENTITY.md), [ingestion](INGESTION.md) và [events](EVENTS.md) về cấu hình/quyền và giới hạn kiểm chứng.
 
+Swagger UI tại `http://localhost:8080/docs/`; OpenAPI JSON tại `/docs/openapi.json`. Chọn API/Health, dùng **Authorize** để nhập Bearer token; operation có nhãn implemented/planned.
+
 ## Chạy trên Windows PowerShell
 
 Chạy API + PostgreSQL bằng Docker: `docker compose up -d --build --wait api` từ root, dùng `.env` hiện có. Xem [Docker API](DOCKER.md) về migration, build và cấu hình IdP trong container.

@@ -9,6 +9,8 @@ docker compose ps -a
 
 Default URL: http://localhost:8080. Host port follows API_PORT from `.env`; the container always listens on 0.0.0.0:8080 and publishes only on host loopback.
 
+Swagger UI: http://localhost:8080/docs/ (API and Health definitions). Use **Authorize** with the appropriate user/ingest Bearer token, then **Try it out** for implemented operations. Planned operations are labeled and remain unimplemented. Assets/schema refs are served locally; tokens are not persisted and no external Swagger validator is used. OpenAPI JSON is available at `/docs/openapi.json`.
+
 Build separately or start without rebuilding:
 
 ```powershell

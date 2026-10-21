@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — Swagger UI
+
+- Local Swagger UI at /docs/ with API/Health definitions, schema refs, Bearer Authorize and implemented/planned labels. No CDN/online validator or persistent token storage.
+- Swagger UI5.34.0 Apache-2.0 pinned; Docker bundles assets/specs. API progress remains6/21.
+
 ## Unreleased — Docker API
 
 - Pinned Node24 multi-stage image with runtime dependencies, non-root/read-only API and allowlisted build context excluding local secrets/data.
