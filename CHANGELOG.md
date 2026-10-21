@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — BE batch ingestion
+
+- POST events:batch: per-record validation/redaction, canonical dedup/conflict, immutable events/provenance and transactional audit; migration 003.
+- Separate ingest JWT authorized client plus current DB membership/role/source grants. User tokens cannot ingest; ingest tokens cannot use user read routes.
+- API progress: 4/21 implemented, 17 planned. Input is normalized EventInput; raw simulator parsers and event read routes remain pending.
+- Local verification: 25 unit/HTTP/contract, 20 PostgreSQL, 7 identity auth and 9 identity HTTP/DB tests pass; base/license/process smoke pass. JWKS simulated locally with Postman; live IdP/CI not verified.
+
 ## Unreleased — BE identity/read APIs
 
 - JWT/JWKS verification bằng JOSE: RS256, issuer/audience/expiry/client checks; không tin quyền trong token, không có auth bypass.
