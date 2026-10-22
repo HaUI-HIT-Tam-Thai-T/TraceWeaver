@@ -424,8 +424,8 @@
       "post": {
         "operationId": "createRun",
         "summary": "createRun",
-        "description": "Operator/reviewer only. Root must belong to requested source scope and window. Max window 1h, max 1000 events before candidate filtering; 422 WINDOW_TOO_LARGE, never silently truncate. Freeze input IDs/watermark and source scope; late events need a new run. Poll Location; queued/running/completed/failed. Hybrid failure completes degraded=true, reason=ai_unavailable, effective_method=rule_only; requested mode remains hybrid.",
-        "x-implementation-status": "planned",
+        "description": "Operator/reviewer only, with current read grants for every requested source. Root must belong to scope/window. Max window 1h and 1000 events before candidate filtering; 422 WINDOW_TOO_LARGE, never truncate. Freeze event IDs, full requested source scope and rule policy atomically with audit. Initial bounded execution completes in the request transaction; 202 returns completed Run and Location to poll. Same actor/workspace/route Idempotency-Key replays the committed response for 24h after rechecking current authorization; different canonical normalized input returns 409. No key creates a new run. Hybrid currently completes degraded=true, reason=ai_unavailable, effective_method=rule_only because scorer is not configured; requested mode stays hybrid. See backend/RECONSTRUCTION.md for the pinned sandbox action policy and limits.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -507,7 +507,7 @@
         "operationId": "getRun",
         "summary": "getRun",
         "description": "Require current grants for all sources in the run; revoked grant blocks the whole artifact.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -564,7 +564,7 @@
         "operationId": "getGraph",
         "summary": "getGraph",
         "description": "Completed run only; otherwise 409 RUN_NOT_READY. Evidence is redacted, missing expected steps mean no evidence, not a fabricated outcome. Recheck grants for whole artifact.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []

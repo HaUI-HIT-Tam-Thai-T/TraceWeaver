@@ -9,8 +9,9 @@ import { createAccessRouter } from './routers/access.route.js';
 import { createIngestionRouter } from './routers/ingestion.route.js';
 import { createEventRouter } from './routers/event.route.js';
 import { createDocsRouter } from './routers/docs.route.js';
+import { createRunRouter } from './routers/run.route.js';
 
-export function createApp({ checkReadiness, verifyToken, verifyIngestToken, access, ingestion, events, oidc, logError = () => {} }) {
+export function createApp({ checkReadiness, verifyToken, verifyIngestToken, access, ingestion, events, runs, oidc, logError = () => {} }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(requestContext);
@@ -20,6 +21,7 @@ export function createApp({ checkReadiness, verifyToken, verifyIngestToken, acce
   app.use('/api/v1', createAccessRouter({ verifyToken, access }));
   app.use('/api/v1', createIngestionRouter({ verifyToken: verifyIngestToken, access, ingestion }));
   app.use('/api/v1', createEventRouter({ verifyToken, access, events }));
+  app.use('/api/v1', createRunRouter({ verifyToken, access, runs }));
   app.use(notFound);
   app.use(errorHandler(logError));
   return app;
