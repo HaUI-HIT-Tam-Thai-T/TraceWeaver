@@ -15,11 +15,11 @@
 
 ## Môi trường
 
-Biến bắt buộc: `DATABASE_URL`. Các biến tùy chọn: `APP_ENV`, `API_HOST`, `API_PORT`, `DB_POOL_MAX`, `SHUTDOWN_TIMEOUT_MS`. Mẫu tại `.env.example`; các biến OIDC/scorer dành cho module tương lai.
+Biến bắt buộc cho backend: `DATABASE_URL`. Các biến tùy chọn: `APP_ENV`, `API_HOST`, `API_PORT`, `DB_POOL_MAX`, `SHUTDOWN_TIMEOUT_MS`. Mẫu tại `.env.example`; OIDC và cấu hình model đã train dành cho module tương lai. API AI baseline có hướng dẫn riêng tại [ai/RUN.md](ai/RUN.md), dùng môi trường Python độc lập.
 
 API mặc định bind loopback 8080; PostgreSQL Compose bind loopback 55432. `npm run db:stop` dừng DB và giữ volume. Không sửa migration đã áp dụng; thêm migration mới.
 
-Base chưa bao gồm OIDC, giao diện, scorer hoặc simulator chạy được. Không có tài khoản hay mật khẩu demo cố định.
+Base chưa bao gồm OIDC, giao diện, scorer model đã train hoặc simulator đầy đủ. AI baseline demo chạy riêng và không yêu cầu DB. Không có tài khoản hay mật khẩu demo cố định.
 
 ## Kiểm tra bộ khung sau khi clone
 

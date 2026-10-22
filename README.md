@@ -17,7 +17,7 @@ simulator/       # Khung sinh dữ liệu giả
 .github/         # Issue/PR templates và CI
 ```
 
-Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có cấu hình môi trường, healthcheck, xử lý lỗi, transaction và migrations. Các phần còn lại mới là khung; API nghiệp vụ, OIDC và AI chưa triển khai. OpenAPI đánh dấu rõ các operation dự kiến.
+Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có cấu hình môi trường, healthcheck, xử lý lỗi, transaction và migrations. AI có [baseline/API demo độc lập](ai/RUN.md); chưa có model đã train hoặc tích hợp reconstruction. API nghiệp vụ backend và OIDC chưa triển khai. OpenAPI vẫn đánh dấu các operation dự kiến; baseline demo chưa chứng minh scorer model đã hoàn thành.
 
 ## Chạy backend
 
@@ -85,7 +85,7 @@ Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi tri�
 | Identity | Khung module và schema membership/role/grant | OIDC/SSO và enforcement quyền |
 | Workflow | Khung module và API contract | Engine dùng chung, guard và audit |
 | H-P-D-I / ứng dụng | Khung frontend và contract | Workspace/tri thức, hồ sơ, tìm kiếm/dashboard |
-| Intelligence | Khung scorer/training và contract | Luật/scorer, giải thích, đánh giá và fallback |
+| Intelligence | Baseline/API nội bộ chạy độc lập, kiểm nhãn và schema | Model đã train, đánh giá và tích hợp fallback/audit với backend |
 | Dữ liệu demo | Fixtures kiểm schema synthetic | Dataset có provenance/manifest và kịch bản đầu-cuối |
 
 ## API và tài khoản demo
