@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Headless reconstruction rules
+
+- Add scoped candidate generation and a deterministic rule baseline with versioned server policy, explicit service/action transitions, namespace-aware strong-ID matching and conflict rejection.
+- Enforce inclusive scope/window/root bounds and 1,000-event limit before candidate filtering; preserve timestamp precision, abstain on ambiguous matches, support declared branches and reject cyclic proposals.
+- Keep rule evidence pending for review; ignore message/payload/oracle-shaped metadata. Run persistence/snapshot/API and model evaluation remain pending; API progress stays 6/21.
+
 ## Unreleased — Swagger OAuth callback fix
 
 - Serve oauth2-redirect.js required by Swagger UI5.34 callback HTML. Its missing404 left login on a blank page and Swagger without a token.

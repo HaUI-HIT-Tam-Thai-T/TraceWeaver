@@ -2,6 +2,8 @@
 
 Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện có 6/21 API: GET /me, sources, knowledge, events, event detail và POST batch ingestion. Xem [Identity BE](IDENTITY.md), [ingestion](INGESTION.md) và [events](EVENTS.md) về cấu hình/quyền và giới hạn kiểm chứng.
 
+BE-17: đã có [candidate/rule baseline headless](RECONSTRUCTION.md) với policy có version, ID evidence, ambiguity và cycle protection. Run snapshot/persistence và HTTP run/graph còn ở bước tiếp theo; API vẫn 6/21.
+
 Swagger UI tại `http://localhost:8080/docs/`; OpenAPI JSON tại `/docs/openapi.json`. Chọn API/Health, dùng **Authorize** để nhập Bearer token; operation có nhãn implemented/planned.
 
 Đăng nhập thật: **Authorize → keycloakLogin → Authorize**, dùng `demo.operator` hoặc `demo.viewer`; mật khẩu trong `demo-credentials.local.json` ở root. Không nhập client_secret. [Hướng dẫn Keycloak và bootstrap](KEYCLOAK.md).
