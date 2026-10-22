@@ -52,7 +52,7 @@ function order(a, b) {
 }
 function shift(point, milliseconds) {
   const width = Math.max(point.fraction.length, 3), scale = 10n ** BigInt(width);
-  let ticks = point.seconds * scale + BigInt(point.fraction.padEnd(width, '0'))
+  const ticks = point.seconds * scale + BigInt(point.fraction.padEnd(width, '0'))
     + BigInt(milliseconds) * (scale / 1000n);
   let seconds = ticks / scale, remainder = ticks % scale;
   if (remainder < 0n) { seconds -= 1n; remainder += scale; }
@@ -89,7 +89,7 @@ export function createCandidateGenerator(configuration) {
       const id = event.event_id.toLowerCase();
       if (seen.has(id)) throw badInput();
       seen.add(id);
-      scoped.push({ id, at, stage: stage(event), ids: identifiers(event, namespaces) });
+      scoped.push({ id, at, occurred_at: event.occurred_at, stage: stage(event), ids: identifiers(event, namespaces) });
       if (scoped.length > 1000) throw tooLarge();
     }
     const root = root_event_id.toLowerCase();
@@ -122,8 +122,9 @@ export function createCandidateGenerator(configuration) {
           }
           candidates.push({ transition_id: rule.id, from_event_id: from.id, to_event_id: to.id,
             has_strong_id: shared.length > 0,
-            evidence: [evidence('TRANSITION_MATCH', from.id, to.id, 'service/action', [rule.id]),
-              evidence('TIME_WINDOW', from.id, to.id, 'occurred_at', [rule.max_gap_ms, policy.clock_skew_ms]),
+            evidence: [evidence('TRANSITION_MATCH', from.id, to.id, 'service/action',
+              [rule.from.service, rule.from.action, rule.to.service, rule.to.action]),
+              evidence('TIME_WINDOW', from.id, to.id, 'occurred_at', [from.occurred_at, to.occurred_at]),
               ...shared.map(([namespace, value]) => evidence('SHARED_STRONG_ID', from.id, to.id, `identifiers.${namespace}`, [value]))] });
         }
       }
