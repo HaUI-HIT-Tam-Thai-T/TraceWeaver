@@ -77,5 +77,5 @@ và validate schema trước khi dùng dữ liệu thật.
 
 Code mới dùng Apache-2.0 và có SPDX header theo CONTRIBUTING. Samples là synthetic
 do code của dự án tạo; chưa thêm dependency, pretrained model hoặc dữ liệu bên ngoài.
-Không commit output local hoặc đáp án review. Xem [LICENSE](../LICENSE),
-[AI contract](../backend/contracts/README.md) và [kế hoạch](PLAN.md).
+Không commit output local hoặc đáp án review. Xem [LICENSE](../LICENSE) và
+[AI contract](../backend/contracts/README.md).
