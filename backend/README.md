@@ -1,8 +1,8 @@
 # TraceWeaver backend
 
-Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện có 6/21 API: GET /me, sources, knowledge, events, event detail và POST batch ingestion. Xem [Identity BE](IDENTITY.md), [ingestion](INGESTION.md) và [events](EVENTS.md) về cấu hình/quyền và giới hạn kiểm chứng.
+Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện có 9/21 API: GET /me, sources, knowledge, events, event detail; POST batch ingestion; POST run, GET run và graph. Xem [Identity BE](IDENTITY.md), [ingestion](INGESTION.md), [events](EVENTS.md) và [reconstruction](RECONSTRUCTION.md) về cấu hình/quyền và giới hạn kiểm chứng.
 
-BE-17: đã có [candidate/rule baseline headless](RECONSTRUCTION.md) với policy có version, ID evidence, ambiguity và cycle protection. Run snapshot/persistence và HTTP run/graph còn ở bước tiếp theo; API vẫn 6/21.
+BE-18: run snapshot/persistence, policy có version, current ACL cho toàn artifact, idempotency 24h và atomic audit đã có. Rule baseline giữ ambiguity/cycle protection; hybrid hiện degraded về rule_only vì chưa có scorer. Review/case/workflow còn planned. API mới được kiểm trong process test; Docker image cần build lại trước sử dụng.
 
 Swagger UI tại `http://localhost:8080/docs/`; OpenAPI JSON tại `/docs/openapi.json`. Chọn API/Health, dùng **Authorize** để nhập Bearer token; operation có nhãn implemented/planned.
 
@@ -23,6 +23,8 @@ npm.cmd run db:up
 `db:setup` chỉ tạo `.env` khi chưa tồn tại, sinh password ngẫu nhiên và DATABASE_URL tương ứng; không in credentials. `db:up` chạy PostgreSQL riêng bằng `compose.dev.yaml`, chỉ bind `127.0.0.1:55432`, giữ dữ liệu trong volume `traceweaver_postgres_data`. Container hiện đã khởi tạo; nếu `.env` có sẵn thì giữ nguyên, không cần chạy lại setup.
 
 Image PostgreSQL 17.11 đã pin digest. `db:up` không tự pull; trên máy mới chưa có image, chạy `docker compose -f compose.dev.yaml pull postgres` trước. Đây là môi trường development: POSTGRES_USER là tài khoản bootstrap/migration của image, không phải cấu hình quyền tối thiểu cho production. Không đổi password trong `.env` để đặt lại password của volume đã khởi tạo.
+
+Nếu Windows báo port 55432 bị chặn, kiểm dải port reserved và chọn port local khác chưa dùng (ví dụ 15432). Cập nhật cả POSTGRES_PORT và port trong DATABASE_URL ở `.env`, rồi chạy lại db:up; giữ volume hiện có. Port PostgreSQL trong mạng Docker vẫn là 5432.
 
 Nếu dùng PostgreSQL có sẵn thay vì Compose, điền DATABASE_URL trỏ đến database đã tạo và user có quyền tạo bảng/schema. Ví dụ cấu trúc, không phải credential có sẵn:
 
@@ -51,6 +53,9 @@ API chạy trên host mặc định bind `127.0.0.1:8080`; có thể đổi bằ
 | `POST /api/v1/workspaces/{wid}/sources/{sid}/events:batch` | Ingest client + ingest role/grant; counters từng record |
 | `GET /api/v1/workspaces/{wid}/events` | Search/filter và cursor snapshot theo read grants |
 | `GET /api/v1/workspaces/{wid}/events/{eid}` | Event đã redacted và provenance; 404 ngoài scope |
+| `POST /api/v1/workspaces/{wid}/runs` | Operator/reviewer; snapshot, idempotency và audit; 202 + Location |
+| `GET /api/v1/workspaces/{wid}/runs/{rid}` | Run theo current grants cho mọi nguồn snapshot |
+| `GET /api/v1/workspaces/{wid}/runs/{rid}/graph` | Graph cố định; thu hồi một nguồn chặn toàn artifact |
 
 Hợp đồng: [health OpenAPI](contracts/health.openapi.json). Đây là operational health, chưa đánh giá readiness của Identity provider/scorer; JWT verification được thực hiện riêng tại API auth. Health public không trả host DB, credentials hay stacktrace. Các lỗi có `request_id` tương ứng header `X-Request-ID`. Business routes chưa triển khai trả 404.
 
@@ -68,6 +73,8 @@ SQL nằm tại `backend/src/core/data/migrations/`, LF line endings được c�
 
 ## Kiểm chứng hiện tại và bước tiếp theo
 
+BE-18: 47 unit/HTTP/contract, 29 PostgreSQL và 29 identity/HTTP/DB tests pass; base/license/process smoke pass. Migration 005 applied development; PostgreSQL local dùng port 15432 sau khi Windows reserved dải chứa 55432. JWT/JOSE/HTTP/DB chạy thật, chỉ JWKS mô phỏng qua Postman. Keycloak login từng được kiểm ở BE-15; BE-18 không chạy lại live IdP/Docker API. Các counts BE-12 trở xuống là lịch sử.
+
 Cập nhật BE-12: 27 unit/HTTP/contract, 20 PostgreSQL và 23 identity/HTTP/DB tests pass; base/license checks pass. Snapshot loại cả transaction đang mở rồi commit sau trang đầu. Chỉ JWKS được mô phỏng bằng Postman; backend/JOSE/PostgreSQL chạy thật. Các đoạn BE-01–03 dưới đây ghi lịch sử foundation.
 
 11 unit/HTTP test pass với Node 24.14.1. Ngày 19/10/2026 sau khi người dùng bật Docker, đã chạy migration hai lần trên PostgreSQL 17.11 thật; lần hai không áp dụng lại. `npm.cmd run test:db` pass 5 tình huống (runner báo 6 tests tính cả test cha): concurrent migration, rollback business write, rollback DDL/history khi SQL lỗi, checksum drift và HTTP readiness 200/503 với DB connection thật.
@@ -76,7 +83,7 @@ Integration tests tạo database riêng `traceweaver_test_<uuid>` trong containe
 
 BE-03 đã bổ sung [OpenAPI và schema dùng chung](contracts/README.md) cho 21 operation, migration 002 cho memberships/roles/groups/sources/grants/knowledge/audit. Chạy `npm run test:contracts` để kiểm OpenAPI/49 schema/fixtures; `npm run test:db` còn kiểm ràng buộc cross-workspace, duplicate grants, knowledge version và audit append-only/rollback thật. Sau khi thêm migration phải migrate và restart BE vì server nạp danh sách migration lúc startup.
 
-Sáu API đã implemented với JWT/JWKS và DB permissions; Keycloak thật chưa nghiệm thu. `npm run test:identity` kiểm token/quyền/revocation/cursor/snapshot; xem [EVENTS.md](EVENTS.md). Tiếp theo phía BE là reconstruction run/rule baseline và snapshot theo source scope; raw simulator parsers là việc riêng.
+Chín API đã implemented với JWT/JWKS và DB permissions. `npm run test:identity` kiểm token/quyền/revocation/cursor/run snapshot; xem [EVENTS.md](EVENTS.md) và [RECONSTRUCTION.md](RECONSTRUCTION.md). Tiếp theo phía BE là review/manual links; raw simulator parsers và scorer là việc riêng.
 
 ## Phân tầng
 

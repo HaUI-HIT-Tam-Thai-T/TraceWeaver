@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Reconstruction runs and graph APIs
+
+- Implement createRun/getRun/getGraph, taking the contract to 9/21 implemented operations. Bounded rule execution persists a completed run, input event/source/policy snapshot, pending links, idempotency response and audit in one transaction; POST returns 202 with Location.
+- Current role/membership/direct/group read grants protect every requested source, including empty sources, and block the whole old artifact after revocation. Concurrent Idempotency-Key retries replay one committed response for 24h; changed input returns 409.
+- Pin sandbox action rules, preserve missing-evidence labels and event provenance; absent scorer makes hybrid explicitly degraded to rule_only. Migration 005 adds immutable snapshot tables and endpoint/workspace/source constraints.
+- Verify 47 unit/HTTP/contract, 29 PostgreSQL and 29 identity/HTTP/DB tests; base/license/process smoke pass. Apply migration on development. Resolve Windows reserved host port by changing ignored local PostgreSQL configuration from 55432 to 15432, retaining data volume. Docker API image has not been rebuilt in this step.
+
 ## Unreleased — Headless reconstruction rules
 
 - Add scoped candidate generation and a deterministic rule baseline with versioned server policy, explicit service/action transitions, namespace-aware strong-ID matching and conflict rejection.

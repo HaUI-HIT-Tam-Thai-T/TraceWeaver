@@ -1,6 +1,39 @@
-# Headless reconstruction rules
+# Reconstruction runs and headless rules
 
-BE-17 bổ sung candidate generation và rule baseline trong `src/core/reconstruction/`. Đây là lõi gọi trực tiếp bằng JavaScript; API vẫn **6/21 implemented**. `POST runs`, polling/graph, snapshot PostgreSQL, idempotency và audit của run chưa triển khai.
+BE-17 bổ sung candidate generation và rule baseline trong `src/core/reconstruction/`. BE-18 bổ sung run persistence/snapshot, idempotency/audit và ba API hiện có trong contract. Backend hiện **9/21 implemented**, còn 12 planned.
+
+## API run và graph
+
+| Method/path dưới `/api/v1/workspaces/{wid}` | Quyền và hành vi |
+|---|---|
+| `POST /runs` | Operator/reviewer và read grants cho mọi nguồn yêu cầu; trả 202 Run và Location |
+| `GET /runs/{rid}` | Reader role và current read grants cho toàn bộ scope run; trả Run |
+| `GET /runs/{rid}/graph` | Cùng quyền đọc run; completed mới trả Graph, trạng thái khác trả 409 RUN_NOT_READY |
+
+Bearer JWT từ user client như [Identity](IDENTITY.md); ingest client không dùng được. Viewer không tạo run; admin cần thêm role operator/reviewer để tạo và vẫn cần grants. ID ngoài workspace/scope, root ngoài cửa sổ hoặc không tồn tại trả 404. Thu hồi membership, direct grant hoặc group membership chặn toàn run/graph cũ, kể cả nguồn được chọn nhưng không có event.
+
+Ví dụ body cho Swagger (thay UUID bằng event/nguồn thực đã được cấp quyền):
+
+```json
+{
+  "root_event_id": "11111111-1111-4111-8111-111111111111",
+  "source_ids": ["22222222-2222-4222-8222-222222222222"],
+  "window": { "from": "2026-10-22T00:00:00Z", "to": "2026-10-22T00:10:00Z" },
+  "mode": "rule_only"
+}
+```
+
+Body dùng RunCreate schema đóng. Cửa sổ tối đa 1 giờ, tối đa 1.000 events trước lọc action/candidate; vượt trả 422 WINDOW_TOO_LARGE và yêu cầu thu hẹp scope/window. Source UUIDs được lowercase/sort như một tập; timestamp string giữ nguyên. Không nhận actor/policy/score từ client. Chỉ nhận Content-Type application/json, body tối đa 1 MiB; query bổ sung bị từ chối.
+
+Thêm `Idempotency-Key` khi cần retry an toàn: 1–200 ký tự ASCII hiển thị, không có khoảng trắng. Cùng actor/workspace/route/key và input đã chuẩn hóa trong 24 giờ trả đúng response đã commit, không tạo run/audit mới. Đổi input cùng key trả 409; đảo thứ tự sources hoặc thứ tự JSON object keys không đổi request hash. Không key hoặc key hết hạn tạo run mới. Chỉ hash của key được lưu. Retry vẫn kiểm quyền hiện tại, không dùng cached response để vượt qua revocation.
+
+Bản đầu thực thi rule có giới hạn trong cùng transaction tạo run, trả `status=completed` cùng 202 và URL poll. Không có worker/in-memory job; lỗi hạ tầng trả 503 đã sanitize và rollback, không để lại run dở hoặc key đã chiếm. `queued/running/failed` vẫn là trạng thái hợp lệ của contract để mở rộng sau này. Chưa có scorer: mode `hybrid` luôn hoàn tất với `degraded=true`, `degraded_reason=ai_unavailable`, `effective_method=rule_only`, `model_version=null`; mode yêu cầu giữ nguyên. Đây không phải kết quả ML.
+
+Policy API được pin tại `src/core/reconstruction/policy.js`: `sandbox-rules-1`, strong namespaces request/account/job, clock skew 5s, max gap 1h, chuyển `intake/request.accepted` → `account/account.created` → `provision/provision.completed` hoặc `provision/provision.failed`. Fan-in/out mặc định false theo từng transition. Action chưa hỗ trợ giữ unresolved; chưa có parser raw hoặc tự đọc attempt từ payload. Kịch bản và producer cần dùng action map này, hoặc đổi policy/version có kiểm thử khi bổ sung action mới.
+
+Graph nodes là **toàn bộ snapshot**, gồm cả event chưa nối được; links là đề xuất trong thành phần nối với root, có UUID riêng, pending và score null. `unresolved_event_ids` luôn trỏ đến node trong snapshot. Bước kỳ vọng intake/account/provision được so với bằng chứng trong thành phần root, version `sandbox-process-1`; bước thiếu mang nhãn “chưa có bằng chứng”. Provision failed vẫn là event đã quan sát được, không bị diễn giải thành hoàn tất cấp phát thành công.
+
+Migration 005 lưu run, requested source IDs (kể cả nguồn rỗng), snapshot event IDs, policy JSON và kết quả graph/links. Events vốn append-only nên snapshot dùng refs, không sao chép payload. Tập event lấy bằng một SQL statement; transaction đang mở rồi commit hoặc event mới đến sau không vào run cũ. Bounds phần lẻ được ceil ở đầu và floor ở cuối đến độ chính xác PostgreSQL để tránh lọt event ngoài cửa sổ. FK giữ workspace/source/root/link endpoints nhất quán; run/scope/snapshot/links có trigger immutable. Tạo run, snapshot, links, idempotency và audit cùng commit/rollback. Review/manual links chưa triển khai; không sửa snapshot trực tiếp.
 
 ## Gọi lõi
 
@@ -44,7 +77,7 @@ Retry không bị dedup theo request ID; mỗi event giữ event_id riêng. Hai 
 
 `createRuleEngine(policy)` ở `rules.js` trả root, `rule_version`, `event_ids` thuộc thành phần root, `links`, `unresolved_event_ids`, `abstentions` và số cặp xung đột. `unresolved_event_ids` là mọi input event trong scope/window chưa nối được vào root, gồm cả thành phần độc lập; không khẳng định chúng cùng hành trình với root. `abstentions` ghi các cặp chưa tự đề xuất được, kể cả ngoài thành phần root.
 
-Link proposal có `method=rule`, `score=null`, `review_state=pending`, `version=1`. Đây chưa phải Link public hoàn chỉnh: adapter persistence sẽ cấp `id` và liên kết run; không dùng event ID hoặc policy ID làm link UUID. Evidence theo LinkEvidence schema, gồm event refs, service/action quan sát được, timestamp gốc và ID chung đã redacted. Thiếu bước không suy diễn thành kết quả nghiệp vụ; `missing_expected_steps` cần definition/pipeline ở bước sau.
+Link proposal có `method=rule`, `score=null`, `review_state=pending`, `version=1`. Khi gọi lõi trực tiếp chưa có `id`; repository run cấp UUID riêng và liên kết run để trả Link public hoàn chỉnh. Evidence theo LinkEvidence schema, gồm event refs, service/action quan sát được, timestamp gốc và ID chung đã redacted. Adapter API tính `missing_expected_steps` theo template đã pin; lõi tổng quát không tự suy diễn template.
 
 Lõi không đọc file, gọi mạng, ghi DB hoặc gọi model. Tests dùng observable synthetic nhỏ với expected edges khai báo trong test; chưa phải dataset/evaluator hoặc benchmark feasibility AI. Chưa đo p95/precision/recall trên dữ liệu đại diện và chưa chứng minh oracle mount isolation của deployment. Không đánh dấu gate toàn dự án đạt từ các unit tests này.
 
@@ -53,8 +86,10 @@ Lõi không đọc file, gọi mạng, ghi DB hoặc gọi model. Tests dùng ob
 ```powershell
 node --test backend/tests/backend/reconstruction.test.js
 npm.cmd test
+npm.cmd run test:db
+npm.cmd run test:identity
 ```
 
-Tests kiểm namespace/conflict, partial IDs, actor/time hard negatives, redaction sentinel, scope/window/root/limit, exact fractional time/skew, ambiguity, retry/branch, root ở giữa hành trình, evidence theo Link schema và loại cycle độc lập thứ tự input. Không cần database, Keycloak, Docker hoặc dependency mới.
+Unit tests kiểm namespace/conflict, partial IDs, actor/time hard negatives, redaction sentinel, scope/window/root/limit, exact fractional time/skew, ambiguity, retry/branch, root ở giữa hành trình, evidence theo Link schema và loại cycle độc lập thứ tự input. Unit/contract không cần DB. DB/identity tests cần PostgreSQL; identity dùng Postman JWKS simulation hiện có, backend/JOSE/HTTP/DB chạy thật. Kiểm snapshot late commit, concurrency/expiry/idempotency, revoke toàn artifact, FK/immutability và rollback audit. Không cần dependency mới.
 
-Bước kế tiếp: policy nghiệp vụ cụ thể, migration/repository snapshot cho run, quyền operator/reviewer và thu hồi grants trên toàn artifact, atomic audit/idempotency, sau đó createRun/getRun/getGraph. Giữ scorer/model và raw simulator parsers là phần việc riêng.
+Bước kế tiếp: append-only link reviews, optimistic concurrency, manual links và guard cycle/closed case. Giữ scorer/model, raw simulator parsers và feasibility benchmark là phần việc riêng. Migration 005 đã áp dụng DB development; API mới đã kiểm trong process test/smoke, Docker API image chưa rebuild trong BE-18. Trước chạy bản mới bằng Docker, build lại image theo [hướng dẫn Docker](DOCKER.md).
