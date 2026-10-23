@@ -5,6 +5,9 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import test from 'node:test';
 import { caseFixture } from '../support/case-fixture.js';
+import { withTransaction } from '../../src/core/data/database.js';
+import { createWorkflow } from '../../src/core/data/workflow-store.js';
+import { documentReviewDefinition } from '../../src/core/workflow/definitions.js';
 
 test('case workflow persistence, scope, closure lock and audit on PostgreSQL', async (t) => {
   const f = await caseFixture(t), { pool, workspace, cases, runs, reviews } = f;
@@ -41,6 +44,14 @@ test('case workflow persistence, scope, closure lock and audit on PostgreSQL', a
     const closed = await step(main.id, 'verify_close', 4); assert.equal(closed.state, 'closed');
     const detail = await cases.get('viewer', workspace, main.id);
     assert.equal(detail.history.length, 5); assert.deepEqual(detail.history.at(-1).evidence_refs, [evidence.id]);
+    await assert.rejects(pool.query(`INSERT INTO core.case_evidence_events(workspace_id,case_id,evidence_id,run_id,event_id)
+      VALUES($1,$2,$3,$4,$5)`, [workspace, randomUUID(), evidence.id, f.run.id, f.events[1]]), { code: '23503' });
+    const spare = randomUUID();
+    await withTransaction(pool, (client) => createWorkflow(client, { id: spare, workspace, creator: 'operator',
+      entity: { type: 'document', id: randomUUID() }, definition: documentReviewDefinition }));
+    assert.equal((await pool.query('SELECT to_state FROM core.workflow_history WHERE instance_id=$1', [spare])).rows[0].to_state, 'draft');
+    await assert.rejects(pool.query(`INSERT INTO core.cases(id,workspace_id,run_id,workflow_instance_id,title,creator_subject)
+      VALUES($1,$2,$3,$4,'Cross-workspace','operator')`, [randomUUID(), f.otherWorkspace, f.run.id, spare]), { code: '23503' });
     const snapshot = (await pool.query(`SELECT evidence_snapshot FROM core.workflow_history WHERE instance_id=$1 AND version=5`, [main.workflow_instance_id])).rows[0].evidence_snapshot;
     assert.deepEqual(snapshot.links, [{ id: link.id, version: 2, review_state: 'accepted' }]);
     await assert.rejects(reviews.review('reviewer', workspace, f.run.id, link.id, { decision: 'rejected', reason: 'change', expected_version: 2 }), { code: 'CASE_CLOSED' });

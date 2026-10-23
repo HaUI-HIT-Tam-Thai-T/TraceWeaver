@@ -620,7 +620,7 @@
       "post": {
         "operationId": "reviewLink",
         "summary": "reviewLink",
-        "description": "Operator/reviewer with current read grants for every run source. Append-only history, required reason/expected_version; stale ->409, cycle ->422. Latest review overlays immutable link evidence; review and audit share one transaction. Case runtime is planned: closed-case evidence guards must be integrated before enabling case endpoints.",
+        "description": "Operator/reviewer with current read grants for every run source. Append-only history, required reason/expected_version; stale ->409, cycle ->422. Latest review overlays immutable link evidence; review and audit share one transaction. Any closed case for the run blocks graph edits with409 CASE_CLOSED until reopened.",
         "x-implementation-status": "implemented",
         "security": [
           {
@@ -696,7 +696,7 @@
       "post": {
         "operationId": "createManualLink",
         "summary": "createManualLink",
-        "description": "Operator/reviewer with current read grants for every run source; server sets manual/pending, null score and reason evidence. Endpoints must belong to the immutable run snapshot. Self-link/cycle ->422, duplicate pair ->409 even if rejected; cannot replace prior links. Mutations serialize per run and commit with audit.",
+        "description": "Operator/reviewer with current read grants for every run source; server sets manual/pending, null score and reason evidence. Endpoints must belong to the immutable run snapshot. Self-link/cycle ->422, duplicate pair ->409 even if rejected; cannot replace prior links. Mutations serialize per run and commit with audit. Any closed case for the run blocks graph edits with409 CASE_CLOSED until reopened.",
         "x-implementation-status": "implemented",
         "security": [
           {
@@ -770,7 +770,7 @@
         "operationId": "createCase",
         "summary": "createCase",
         "description": "Operator/reviewer; case starts new. Workflow engine is the sole state source, no competing case state column.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -840,8 +840,8 @@
       "get": {
         "operationId": "listCases",
         "summary": "listCases",
-        "description": "Only cases with full current source scope. New/assigned are waiting states.",
-        "x-implementation-status": "planned",
+        "description": "Current full run-source scope, including empty sources. New/assigned are waiting states. Live state/owner filters, UUID ascending cursor binds actor/workspace/filters/limit/current scope; no immutable case-list snapshot.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -917,7 +917,7 @@
         "operationId": "getCase",
         "summary": "getCase",
         "description": "",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -973,8 +973,8 @@
       "post": {
         "operationId": "addEvidence",
         "summary": "addEvidence",
-        "description": "Operator/reviewer; event references must be within case/source scope. Note or observed event evidence, no oracle/secret.",
-        "x-implementation-status": "planned",
+        "description": "Operator/reviewer with full current run-source grants; event references must belong to exact run snapshot. Notes are redacted. Closed case returns409 until reopen. Evidence append and audit are atomic; workflow version is unchanged.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -1046,8 +1046,8 @@
       "post": {
         "operationId": "transitionCase",
         "summary": "transitionCase",
-        "description": "assign: operator/reviewer, valid owner with full scope; start/request_verification: owner or reviewer; verify_close/verification_failed/reopen: reviewer. Version required; stale 409, invalid action/guard 422, role 403. Verification needs note/evidence; close needs reviewed evidence and no pending link used in conclusion; reopen needs new evidence/reason and valid owner. Preserve state+history+audit atomically.",
-        "x-implementation-status": "planned",
+        "description": "assign: operator/reviewer, valid owner with full scope; start/request_verification: owner or reviewer; verify_close/verification_failed/reopen: reviewer. Version required; stale 409, invalid action/guard 422, role 403. Verification needs note/evidence; close conservatively requires no pending link anywhere in run, then freezes all run graph edits. Reopen needs a reason different from last close and valid owner. Case state/owner derive only from workflow history. Preserve state+history+audit atomically.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []

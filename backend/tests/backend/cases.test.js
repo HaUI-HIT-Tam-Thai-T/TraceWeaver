@@ -4,7 +4,18 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { caseInput, caseQuery } from '../../src/validations/case.validation.js';
+import { createCaseService } from '../../src/services/case.service.js';
 const id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+test('case service rejects invalid inputs before writes and sanitizes DB failures', async () => {
+  let calls = 0;
+  const fail = async () => { calls++; throw new Error('private-db-credentials'); };
+  const service = createCaseService({ create: fail, evidence: fail, transition: fail, get: fail });
+  await assert.rejects(service.create('u', id, { run_id: id, title: ' ' }), { status: 422 });
+  await assert.rejects(service.transition('u', id, id, { action: 'assign', reason: 'assign', expected_version: 1 }), { status: 422 });
+  assert.equal(calls, 0);
+  await assert.rejects(service.create('u', id, { run_id: id, title: 'Valid' }), (e) => e.status === 503 && !e.message.includes('private'));
+  await assert.rejects(service.get('u', id, id), { status: 503 });
+});
 test('case inputs use closed schemas, preserve opaque owner IDs, redact text and reject invalid text/expanded bounds', () => {
   assert.deepEqual(caseInput('CaseCreate', { run_id: id.toUpperCase(), title: 'token=private' }), { run_id: id, title: 'token=[REDACTED]' });
   assert.equal(caseInput('CaseTransition', { action: 'assign', reason: 'checked', expected_version: 1, owner_id: 'Owner X' }).owner_id, 'Owner X');

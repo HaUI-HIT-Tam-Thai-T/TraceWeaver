@@ -18,6 +18,8 @@ import { createRunRepository } from './core/data/run-repository.js';
 import { createRunService } from './services/run.service.js';
 import { createReviewRepository } from './core/data/review-repository.js';
 import { createReviewService } from './services/review.service.js';
+import { createCaseRepository } from './core/data/case-repository.js';
+import { createCaseService } from './services/case.service.js';
 
 let database;
 try {
@@ -34,6 +36,7 @@ try {
     events: createEventService(createEventRepository(database), createAccessRepository(database), createEventCursorCodec(config.cursorSecret)),
     runs: createRunService(createRunRepository(database)),
     reviews: createReviewService(createReviewRepository(database)),
+    cases: createCaseService(createCaseRepository(database), createAccessRepository(database), createCursorCodec(config.cursorSecret)),
     logError: (event) => console.error(JSON.stringify(event)),
   });
   const server = app.listen(config.port, config.host, () => {
