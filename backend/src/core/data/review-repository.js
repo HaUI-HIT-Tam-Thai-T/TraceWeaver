@@ -7,6 +7,7 @@ import { authorize } from './run-repository.js';
 import { projectedLinks } from './link-projection.js';
 import { assertAcyclicLink } from '../reconstruction/reviews.js';
 import { ApiError } from '../identity/api-error.js';
+import { assertRunEditable } from './case-guards.js';
 
 const notFound = () => new ApiError(404, 'NOT_FOUND', 'Resource not found');
 export function createReviewRepository(pool) {
@@ -19,6 +20,7 @@ export function createReviewRepository(pool) {
       if (!row) throw notFound();
       await authorize(client, subject, workspace, row.sources, true);
       if (row.document.status !== 'completed') throw new ApiError(409, 'RUN_NOT_READY', 'Run graph is not ready');
+      await assertRunEditable(client, workspace, run);
       const result = await work(client);
       await authorize(client, subject, workspace, row.sources, true);
       return result;

@@ -30,8 +30,9 @@ export async function authorize(client, subject, workspace, sources, write = fal
     throw new ApiError(403, 'FORBIDDEN', 'Action is not permitted');
   }
   if (membership.sources.length !== sources.length) throw notFound();
+  return membership;
 }
-const artifactScope = `${reader} AND NOT EXISTS (
+export const artifactScope = `${reader} AND NOT EXISTS (
   SELECT 1 FROM core.run_sources rs WHERE rs.workspace_id=r.workspace_id AND rs.run_id=r.id
   AND NOT EXISTS (SELECT 1 FROM core.sources s WHERE s.workspace_id=rs.workspace_id AND s.id=rs.source_id AND ${visibleSource}))`;
 
