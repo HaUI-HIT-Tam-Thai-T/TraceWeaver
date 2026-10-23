@@ -620,8 +620,8 @@
       "post": {
         "operationId": "reviewLink",
         "summary": "reviewLink",
-        "description": "Operator/reviewer. Append-only history, required reason/expected_version; stale ->409. Reject edits to evidence underlying a closed case until reopen. State update and audit share one transaction.",
-        "x-implementation-status": "planned",
+        "description": "Operator/reviewer with current read grants for every run source. Append-only history, required reason/expected_version; stale ->409, cycle ->422. Latest review overlays immutable link evidence; review and audit share one transaction. Case runtime is planned: closed-case evidence guards must be integrated before enabling case endpoints.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -696,8 +696,8 @@
       "post": {
         "operationId": "createManualLink",
         "summary": "createManualLink",
-        "description": "Operator/reviewer; server sets manual and pending. Same workspace/run, no self-link/cycle; cannot silently replace prior links.",
-        "x-implementation-status": "planned",
+        "description": "Operator/reviewer with current read grants for every run source; server sets manual/pending, null score and reason evidence. Endpoints must belong to the immutable run snapshot. Self-link/cycle ->422, duplicate pair ->409 even if rejected; cannot replace prior links. Mutations serialize per run and commit with audit.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []

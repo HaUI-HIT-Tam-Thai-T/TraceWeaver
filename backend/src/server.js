@@ -16,6 +16,8 @@ import { createEventService } from './services/event.service.js';
 import { createEventCursorCodec } from './core/identity/event-cursor.js';
 import { createRunRepository } from './core/data/run-repository.js';
 import { createRunService } from './services/run.service.js';
+import { createReviewRepository } from './core/data/review-repository.js';
+import { createReviewService } from './services/review.service.js';
 
 let database;
 try {
@@ -31,6 +33,7 @@ try {
     ingestion: createIngestionService(createIngestionRepository(database)),
     events: createEventService(createEventRepository(database), createAccessRepository(database), createEventCursorCodec(config.cursorSecret)),
     runs: createRunService(createRunRepository(database)),
+    reviews: createReviewService(createReviewRepository(database)),
     logError: (event) => console.error(JSON.stringify(event)),
   });
   const server = app.listen(config.port, config.host, () => {

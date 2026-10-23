@@ -14,6 +14,8 @@ import { createDatabase } from '../../src/core/data/database.js';
 import { loadMigrations, migrate } from '../../src/core/data/migrations.js';
 import { createRunRepository } from '../../src/core/data/run-repository.js';
 import { createRunService } from '../../src/services/run.service.js';
+import { createReviewRepository } from '../../src/core/data/review-repository.js';
+import { createReviewService } from '../../src/services/review.service.js';
 import { createTokenVerifier } from '../../src/core/identity/token-verifier.js';
 import { createIngestionRepository } from '../../src/core/data/ingestion-repository.js';
 import { createIngestionService } from '../../src/services/ingestion.service.js';
@@ -48,7 +50,8 @@ test('run APIs: real JWT/Postman JWKS, PostgreSQL snapshots, schemas and permiss
   }] }));
   const sim = await identitySimulation(t), verifyToken = createTokenVerifier(sim.config);
   const runs = createRunService(createRunRepository(pool));
-  const server = createApp({ checkReadiness: async () => true, access: {}, verifyToken, runs }).listen(0, '127.0.0.1');
+  const reviews = createReviewService(createReviewRepository(pool));
+  const server = createApp({ checkReadiness: async () => true, access: {}, verifyToken, runs, reviews }).listen(0, '127.0.0.1');
   await once(server, 'listening'); t.after(() => new Promise((resolve) => server.close(resolve)));
   const base = `http://127.0.0.1:${server.address().port}/api/v1/workspaces/${workspace}/runs`;
   const token = await sim.token(), viewer = await sim.token({ sub: 'viewer' });
@@ -110,13 +113,75 @@ test('run APIs: real JWT/Postman JWKS, PostgreSQL snapshots, schemas and permiss
     await pool.query('DROP TRIGGER fail_http_run_audit ON core.audit_events');
     assert.equal((await request('', { method: 'POST', body: input, key: 'recover' })).status, 202);
   });
+  await t.test('review and manual HTTP contracts return201, project history/version, preserve evidence and report stale/cycle/duplicate', async () => {
+    const fresh = (await request('', { method: 'POST', body: input })).body;
+    const graph = (await request(`/${fresh.id}/graph`)).body, link = graph.links[0];
+    const path = `/${fresh.id}/links/${link.id}/reviews`;
+    const decision = { decision: 'accepted', reason: 'token=private-review', expected_version: 1 };
+    const response = await request(path, { method: 'POST', body: decision });
+    assert.equal(response.status, 201); conforms('Review', response.body);
+    assert.equal(response.body.actor_subject, 'alice'); assert.equal(response.body.link_version, 2);
+    assert.equal(response.body.reason, 'token=[REDACTED]');
+    assert.equal((await request(path, { method: 'POST', body: decision })).status, 409);
+    const manualPath = `/${fresh.id}/links`, a = input.root_event_id, c = records[2].results[0].event_id;
+    const manual = { from_event_id: a, to_event_id: c, reason: 'Observed shortcut password=private-manual' };
+    const created = await request(manualPath, { method: 'POST', body: manual });
+    assert.equal(created.status, 201); conforms('Link', created.body);
+    assert.equal(created.body.review_state, 'pending'); assert.equal(created.body.method, 'manual'); assert.equal(created.body.score, null);
+    assert.doesNotMatch(JSON.stringify(created.body), /private-manual/);
+    assert.equal((await request(manualPath, { method: 'POST', body: manual })).status, 409);
+    const cycle = await request(manualPath, { method: 'POST', body: { ...manual, from_event_id: c, to_event_id: a } });
+    assert.equal(cycle.status, 422); assert.equal(cycle.body.error.code, 'LINK_CYCLE');
+    const updated = (await request(`/${fresh.id}/graph`, { bearer: viewer })).body;
+    conforms('Graph', updated); assert.equal(updated.version, 3); assert.equal(updated.links.length, graph.links.length + 1);
+    const reviewed = updated.links.find((entry) => entry.id === link.id);
+    assert.equal(reviewed.version, 2); assert.equal(reviewed.review_state, 'accepted'); assert.deepEqual(reviewed.evidence, link.evidence);
+  });
+  await t.test('link routes enforce JWT, DB roles, closed inputs/IDs/media/size and sanitized audit rollback', async () => {
+    const graph = (await request(`/${run.id}/graph`)).body, link = graph.links[0];
+    const path = `/${run.id}/links/${link.id}/reviews`, manualPath = `/${run.id}/links`;
+    const body = { decision: 'rejected', reason: 'observed', expected_version: 1 };
+    for (const bearer of [null, 'bad', await sim.token({ azp: 'traceweaver-ingest' })]) {
+      assert.equal((await request(path, { method: 'POST', body, bearer })).status, 401);
+    }
+    for (const bearer of [viewer, await sim.token({ sub: 'admin' })]) {
+      assert.equal((await request(path, { method: 'POST', body, bearer })).status, 403);
+      assert.equal((await request(manualPath, { method: 'POST', body: {
+        from_event_id: input.root_event_id, to_event_id: records[2].results[0].event_id, reason: 'forbidden' }, bearer })).status, 403);
+    }
+    for (const [route, options, status] of [
+      [path + '?actor=admin', { body }, 400], [`/${run.id}/links/bad/reviews`, { body }, 400],
+      [path, { body, type: 'text/plain' }, 415], [path, { body: '{' }, 400],
+      [path, { body: { ...body, reason: ' ' } }, 422], [path, { body: { ...body, reason: '\u0000' } }, 422],
+      [path, { body: { ...body, actor_subject: 'admin' } }, 422], [path, { body: { ...body, expected_version: 0 } }, 422],
+      [path, { body: { ...body, reason: 'x'.repeat(1048576) } }, 413],
+      [`/${run.id}/links/${randomUUID()}/reviews`, { body }, 404],
+      [manualPath, { body: { from_event_id: input.root_event_id, to_event_id: input.root_event_id, reason: 'self' } }, 422],
+      [manualPath, { body: { from_event_id: input.root_event_id, to_event_id: randomUUID(), reason: 'unknown' } }, 404],
+    ]) {
+      const response = await request(route, { method: 'POST', ...options });
+      assert.equal(response.status, status, JSON.stringify(response.body)); conforms('Error', response.body);
+    }
+    await pool.query(`CREATE FUNCTION core.fail_http_link_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'private-link-audit-password'; END; $$`);
+    await pool.query(`CREATE TRIGGER fail_http_link_audit BEFORE INSERT ON core.audit_events FOR EACH ROW WHEN(NEW.action='link.reviewed') EXECUTE FUNCTION core.fail_http_link_audit()`);
+    const failed = await request(path, { method: 'POST', body });
+    assert.equal(failed.status, 503); assert.doesNotMatch(JSON.stringify(failed.body), /private-link-audit-password/);
+    assert.deepEqual((await request(`/${run.id}/graph`)).body, graph);
+    await pool.query('DROP TRIGGER fail_http_link_audit ON core.audit_events');
+    assert.equal((await request(path, { method: 'POST', body })).status, 201);
+  });
   await t.test('source, role and membership revocation block cached responses and whole graphs immediately', async () => {
     await pool.query(`UPDATE core.source_grants SET revoked_at=clock_timestamp() WHERE grantee_subject='alice' AND source_id=$1`, [sources[2]]);
     for (const path of [`/${run.id}`, `/${run.id}/graph`]) assert.equal((await request(path)).status, 404);
     assert.equal((await request('', { method: 'POST', body: input, key: 'http-once' })).status, 404);
+    const graph = (await request(`/${run.id}/graph`, { bearer: viewer })).body;
+    const reviewPath = `/${run.id}/links/${graph.links[0].id}/reviews`;
+    const decision = { decision: 'accepted', reason: 'revoked', expected_version: 2 };
+    assert.equal((await request(reviewPath, { method: 'POST', body: decision })).status, 404);
     await pool.query(`UPDATE core.source_grants SET revoked_at=NULL WHERE grantee_subject='alice'`);
     await pool.query(`DELETE FROM core.membership_roles WHERE subject='alice' AND role_key='operator'`);
     assert.equal((await request('', { method: 'POST', body: input, key: 'http-once' })).status, 403);
+    assert.equal((await request(reviewPath, { method: 'POST', body: decision })).status, 403);
     await pool.query(`UPDATE core.memberships SET revoked_at=clock_timestamp() WHERE subject='viewer'`);
     assert.equal((await request(`/${run.id}/graph`, { bearer: viewer })).status, 404);
   });

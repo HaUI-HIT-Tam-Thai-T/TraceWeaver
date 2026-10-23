@@ -10,7 +10,11 @@ const ajv = new Ajv2020({ strict: true }); addFormats(ajv); ajv.addSchema(schema
 const validators = Object.fromEntries(['ReviewCreate', 'ManualLinkCreate'].map((name) => [name, ajv.getSchema(`${schema.$id}#/$defs/${name}`)]));
 function input(name, body) {
   if (!validators[name](body)) throw new ApiError(422, 'INVALID_LINK_INPUT', 'Link input does not match the contract');
-  try { return { ...body, reason: redactText(body.reason) }; }
+  try {
+    const value = { ...body, reason: redactText(body.reason) };
+    if (!validators[name](value)) throw new Error('redacted reason exceeds contract bounds');
+    return value;
+  }
   catch { throw new ApiError(422, 'INVALID_LINK_INPUT', 'Reason contains unsupported text'); }
 }
 export const reviewInput = (body) => input('ReviewCreate', body);
