@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — Case workflow APIs
+
+- Implement create/list/detail/evidence/transition case APIs:16/21 implemented. Current full run-source scope applies to every case artifact, signed live-list cursor and idempotent response.
+- Persist immutable workflow instances and append-only history as sole state/owner/version source. Versioned definition engine runs case_handling and document_review headlessly; generic core HTTP remains planned pending app credential/trusted-user delegation.
+- Enforce owner/reviewer/version/evidence/verification/reopen guards. Closure conservatively requires no pending run link and freezes all graph edits while any run case is closed. Shared run lock prevents concurrent manual proposal/closure from both committing; closure captures link/evidence versions.
+- Add migration007 and scoped evidence FKs, hashed24h create/transition idempotency and atomic audit/rollback. Apply to development. Verify58unit/HTTP/contract+39PostgreSQL+38identity/HTTP/DB tests, targetedFK/replay follow-ups, base/license98packages and source process smoke.
+- No dependencies/image rebuild/liveKeycloak changes. Remaining operations: dashboard, three core workflow endpoints and scorer. Headless reuse is not a claim of completed core HTTP authorization.
+
 ## Unreleased — Link review and manual APIs
 
 - Implement reviewLink/createManualLink: 11/21 operations implemented. Append-only reviews project current state/version without changing snapshot or original evidence; manual proposals remain pending with null score and redacted reason evidence.

@@ -1,6 +1,6 @@
 # Reconstruction runs and headless rules
 
-BE-17 bổ sung candidate generation và rule baseline trong `src/core/reconstruction/`. BE-18 bổ sung run persistence/snapshot, idempotency/audit; BE-19 bổ sung review/manual links. Backend hiện **11/21 implemented**, còn 10 planned.
+BE-17 bổ sung candidate generation và rule baseline trong `src/core/reconstruction/`. BE-18 bổ sung run persistence/snapshot, idempotency/audit; BE-19 bổ sung review/manual links. BE-20 bổ sung [case/workflow](CASES.md) và guard cho hồ sơ đóng. Backend hiện **16/21 implemented**, còn 5 planned.
 
 ## API run và graph
 
@@ -50,7 +50,7 @@ Migration006 thêm `core.link_reviews`, composite FK tới đúng link/run/works
 
 GET graph chiếu review mới nhất từ lịch sử, giữ nguyên evidence/score/method/ID. Một SQL statement chụp nodes, links và graph version, tránh trộn hai revision. `Graph.version = 1 + số manual proposals + số reviews`; `Link.version = 1 + số reviews của link`. Các link rejected vẫn hiển thị cùng trạng thái. Unresolved IDs và missing steps được tính lại từ thành phần root qua pending/accepted; đây là connectivity của graph đang xem, không sửa baseline/snapshot.
 
-Case/workflow hiện chưa có persistence/API runtime. **Closed-case evidence guard chưa được nghiệm thu và phải tích hợp trước khi bật case endpoints**: closure/reopen và review/manual phải dùng cùng khóa run, guard đọc trạng thái workflow có thẩm quyền, không tạo cột case state cạnh tranh. Reviews không tự trở thành nhãn training; chưa có API lịch sử review riêng.
+Case/workflow đã có runtime ở BE-20. Khi bất kỳ case của run đang closed, review/manual trả409 CASE_CLOSED cho đến khi mọi case đóng được reopen. Guard khóa toàn graph của run để bảo toàn căn cứ; closure yêu cầu không còn pending link trong run. Closure/reopen dùng cùng khóa run với review/manual và lấy state từ lịch sử workflow, không có cột case state cạnh tranh. Xem [Case workflow](CASES.md). Reviews không tự trở thành nhãn training; chưa có API lịch sử review riêng.
 
 ## Gọi lõi
 
@@ -109,4 +109,4 @@ npm.cmd run test:identity
 
 Unit tests kiểm namespace/conflict, partial IDs, actor/time hard negatives, redaction sentinel, scope/window/root/limit, exact fractional time/skew, ambiguity, retry/branch, root ở giữa hành trình, evidence theo Link schema và loại cycle độc lập thứ tự input. Unit/contract không cần DB. DB/identity tests cần PostgreSQL; identity dùng Postman JWKS simulation hiện có, backend/JOSE/HTTP/DB chạy thật. Kiểm snapshot late commit, concurrency/expiry/idempotency, revoke toàn artifact, FK/immutability và rollback audit. Không cần dependency mới.
 
-Bước kế tiếp: case/workflow và closed-case evidence guard. Giữ scorer/model, raw simulator parsers và feasibility benchmark là phần việc riêng. API mới kiểm trong process test/smoke; Docker API image chưa rebuild trong BE-19. Trước chạy bản mới bằng Docker, build lại image theo [hướng dẫn Docker](DOCKER.md).
+Bước kế tiếp: dashboard và trusted user context cho core HTTP nội bộ. Giữ scorer/model, raw simulator parsers và feasibility benchmark là phần việc riêng. API mới kiểm trong process test/smoke; Docker API image chưa rebuild trong BE-19. Trước chạy bản mới bằng Docker, build lại image theo [hướng dẫn Docker](DOCKER.md).

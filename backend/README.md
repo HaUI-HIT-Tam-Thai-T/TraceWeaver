@@ -1,8 +1,8 @@
 # TraceWeaver backend
 
-Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện có 11/21 API: GET /me, sources, knowledge, events, event detail; POST batch ingestion; POST run, GET run và graph; POST review và manual link. Xem [Identity BE](IDENTITY.md), [ingestion](INGESTION.md), [events](EVENTS.md) và [reconstruction](RECONSTRUCTION.md) về cấu hình/quyền và giới hạn kiểm chứng.
+Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện có 16/21 API: GET /me, sources, knowledge, events, event detail; POST batch ingestion; POST run, GET run và graph; POST review và manual link; tạo/list/detail/evidence/transition case. Xem [Identity BE](IDENTITY.md), [ingestion](INGESTION.md), [events](EVENTS.md), [reconstruction](RECONSTRUCTION.md) và [case/workflow](CASES.md) về cấu hình/quyền và giới hạn kiểm chứng.
 
-BE-19 bổ sung review append-only, expected_version, manual links, graph projection và cycle/concurrency guards trên nền run snapshot BE-18. Case/workflow và guard hồ sơ đóng còn planned; phải tích hợp guard trước khi bật case endpoints. Hybrid hiện degraded về rule_only vì chưa có scorer. API mới được kiểm trong process test; Docker image cần build lại trước sử dụng.
+BE-20 bổ sung case/workflow, owner/role/evidence/version guards, idempotency, lịch sử/audit và closed-case graph protection. Engine dùng chung đã kiểm headless với case_handling/document_review; core HTTP nội bộ còn planned. Hybrid hiện degraded về rule_only vì chưa có scorer. API mới được kiểm trong process test; Docker image cần build lại trước sử dụng.
 
 Swagger UI tại `http://localhost:8080/docs/`; OpenAPI JSON tại `/docs/openapi.json`. Chọn API/Health, dùng **Authorize** để nhập Bearer token; operation có nhãn implemented/planned.
 
@@ -58,6 +58,11 @@ API chạy trên host mặc định bind `127.0.0.1:8080`; có thể đổi bằ
 | `GET /api/v1/workspaces/{wid}/runs/{rid}/graph` | Snapshot cố định, review mới nhất/version; thu hồi một nguồn chặn toàn artifact |
 | `POST /api/v1/workspaces/{wid}/runs/{rid}/links/{lid}/reviews` | Append-only accepted/rejected; expected_version, reason; 201 Review |
 | `POST /api/v1/workspaces/{wid}/runs/{rid}/links` | Manual pending; snapshot endpoints/cycle/duplicate guard; 201 Link |
+| `POST /api/v1/workspaces/{wid}/cases` | Tạo case new, idempotency24h; 201 + Location |
+| `GET /api/v1/workspaces/{wid}/cases` | Live state/owner filters và signed cursor theo current scope |
+| `GET /api/v1/workspaces/{wid}/cases/{cid}` | Case/history/evidence theo current full-source grants |
+| `POST /api/v1/workspaces/{wid}/cases/{cid}/evidence` | Append-only note/event refs trong snapshot; closed409 |
+| `POST /api/v1/workspaces/{wid}/cases/{cid}/transitions` | Owner/reviewer, version/guard, idempotency và audit |
 
 Hợp đồng: [health OpenAPI](contracts/health.openapi.json). Đây là operational health, chưa đánh giá readiness của Identity provider/scorer; JWT verification được thực hiện riêng tại API auth. Health public không trả host DB, credentials hay stacktrace. Các lỗi có `request_id` tương ứng header `X-Request-ID`. Business routes chưa triển khai trả 404.
 
@@ -85,7 +90,7 @@ Integration tests tạo database riêng `traceweaver_test_<uuid>` trong containe
 
 BE-03 đã bổ sung [OpenAPI và schema dùng chung](contracts/README.md) cho 21 operation, migration 002 cho memberships/roles/groups/sources/grants/knowledge/audit. Chạy `npm run test:contracts` để kiểm OpenAPI/49 schema/fixtures; `npm run test:db` còn kiểm ràng buộc cross-workspace, duplicate grants, knowledge version và audit append-only/rollback thật. Sau khi thêm migration phải migrate và restart BE vì server nạp danh sách migration lúc startup.
 
-Mười một API đã implemented với JWT/JWKS và DB permissions. `npm run test:identity` kiểm token/quyền/revocation/cursor/run snapshot/review/manual; xem [EVENTS.md](EVENTS.md) và [RECONSTRUCTION.md](RECONSTRUCTION.md). Tiếp theo phía BE là case/workflow và closed-case evidence guard; raw simulator parsers và scorer là việc riêng.
+Mười sáu API đã implemented với JWT/JWKS và DB permissions. `npm run test:identity` kiểm token/quyền/revocation/cursor/run snapshot/review/manual/case workflow; xem [EVENTS.md](EVENTS.md) và [RECONSTRUCTION.md](RECONSTRUCTION.md). Tiếp theo phía BE là dashboard cùng scope/filter và cơ chế trusted context cho core HTTP; raw simulator parsers và scorer là việc riêng.
 
 ## Phân tầng
 
