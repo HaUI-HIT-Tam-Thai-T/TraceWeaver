@@ -1,6 +1,6 @@
 # Reconstruction runs and headless rules
 
-BE-17 bổ sung candidate generation và rule baseline trong `src/core/reconstruction/`. BE-18 bổ sung run persistence/snapshot, idempotency/audit và ba API hiện có trong contract. Backend hiện **9/21 implemented**, còn 12 planned.
+BE-17 bổ sung candidate generation và rule baseline trong `src/core/reconstruction/`. BE-18 bổ sung run persistence/snapshot, idempotency/audit; BE-19 bổ sung review/manual links. Backend hiện **11/21 implemented**, còn 10 planned.
 
 ## API run và graph
 
@@ -33,7 +33,24 @@ Policy API được pin tại `src/core/reconstruction/policy.js`: `sandbox-rule
 
 Graph nodes là **toàn bộ snapshot**, gồm cả event chưa nối được; links là đề xuất trong thành phần nối với root, có UUID riêng, pending và score null. `unresolved_event_ids` luôn trỏ đến node trong snapshot. Bước kỳ vọng intake/account/provision được so với bằng chứng trong thành phần root, version `sandbox-process-1`; bước thiếu mang nhãn “chưa có bằng chứng”. Provision failed vẫn là event đã quan sát được, không bị diễn giải thành hoàn tất cấp phát thành công.
 
-Migration 005 lưu run, requested source IDs (kể cả nguồn rỗng), snapshot event IDs, policy JSON và kết quả graph/links. Events vốn append-only nên snapshot dùng refs, không sao chép payload. Tập event lấy bằng một SQL statement; transaction đang mở rồi commit hoặc event mới đến sau không vào run cũ. Bounds phần lẻ được ceil ở đầu và floor ở cuối đến độ chính xác PostgreSQL để tránh lọt event ngoài cửa sổ. FK giữ workspace/source/root/link endpoints nhất quán; run/scope/snapshot/links có trigger immutable. Tạo run, snapshot, links, idempotency và audit cùng commit/rollback. Review/manual links chưa triển khai; không sửa snapshot trực tiếp.
+Migration 005 lưu run, requested source IDs (kể cả nguồn rỗng), snapshot event IDs, policy JSON và kết quả graph/links. Events vốn append-only nên snapshot dùng refs, không sao chép payload. Tập event lấy bằng một SQL statement; transaction đang mở rồi commit hoặc event mới đến sau không vào run cũ. Bounds phần lẻ được ceil ở đầu và floor ở cuối đến độ chính xác PostgreSQL để tránh lọt event ngoài cửa sổ. FK giữ workspace/source/root/link endpoints nhất quán; run/scope/snapshot/links có trigger immutable. Tạo run, snapshot, links, idempotency và audit cùng commit/rollback. Review ghi bảng lịch sử riêng, không sửa snapshot hoặc bằng chứng link.
+
+## Review và liên kết thủ công
+
+Hai API dùng JWT user client, active membership, role operator/reviewer và current read grant cho **mọi nguồn run**, kể cả nguồn rỗng. Viewer/admin cần role bổ sung để sửa; subject lấy từ JWT, không nhận qua body/header tùy ý. Chỉ run completed được sửa (khác trả409).
+
+- `POST /api/v1/workspaces/{wid}/runs/{rid}/links/{lid}/reviews`: body `{ "decision": "accepted", "reason": "Đã đối chiếu bằng chứng", "expected_version": 1 }`, trả201 Review với `link_version=2`. Decision chỉ accepted/rejected. Version stale trả409 `VERSION_CONFLICT`; dùng graph mới nhất để quyết định lại. Mọi review, kể cả quyết định giống trước, thêm lịch sử và tăng version.
+- `POST /api/v1/workspaces/{wid}/runs/{rid}/links`: body `{ "from_event_id": "<UUID>", "to_event_id": "<UUID>", "reason": "Đã quan sát liên hệ" }`, trả201 Link `method=manual`, `score=null`, `review_state=pending`, `version=1`. Lý do trở thành evidence `MANUAL_REASON`; đây là giải thích của người dùng, không phải bằng chứng rule/model tự sinh.
+
+Schema đóng, reason không trắng 1–1000 ký tự; UUID canonical lowercase. Text có NUL/lone surrogate bị từ chối; các mẫu token/password/Bearer được redacted trước khi lưu hoặc trả. Content-Type application/json, tối đa1MiB, query lạ bị từ chối. Không có idempotency cho hai thao tác này: retry review version cũ nhận409, retry manual pair nhận409 `LINK_EXISTS`.
+
+Hai đầu manual phải thuộc snapshot của đúng run/workspace; thiếu hoặc ngoài scope trả404 để không lộ dữ liệu. Self-link/cycle trả422; chu trình tính cả pending và accepted, bỏ rejected. Khi chấp nhận lại link rejected, kiểm chu trình lại. Pair đã tồn tại luôn409, kể cả rejected; muốn đổi quyết định dùng review version hiện tại, muốn sửa cặp thì bác bỏ cặp cũ rồi thêm cặp khác. Không có heuristic thời gian/action áp cho manual và không tự coi manual là accepted.
+
+Migration006 thêm `core.link_reviews`, composite FK tới đúng link/run/workspace, unique link/version và trigger chặn UPDATE/DELETE/TRUNCATE. Manual proposals append vào `run_links` bất biến. Mỗi writer khóa row run trước khi đọc version/graph và ghi, nên review đồng thời không lost update, manual cạnh ngược không cùng commit được. Quyền được kiểm lại trước commit; link/review/audit cùng transaction, audit lỗi rollback và HTTP trả503 đã sanitize.
+
+GET graph chiếu review mới nhất từ lịch sử, giữ nguyên evidence/score/method/ID. Một SQL statement chụp nodes, links và graph version, tránh trộn hai revision. `Graph.version = 1 + số manual proposals + số reviews`; `Link.version = 1 + số reviews của link`. Các link rejected vẫn hiển thị cùng trạng thái. Unresolved IDs và missing steps được tính lại từ thành phần root qua pending/accepted; đây là connectivity của graph đang xem, không sửa baseline/snapshot.
+
+Case/workflow hiện chưa có persistence/API runtime. **Closed-case evidence guard chưa được nghiệm thu và phải tích hợp trước khi bật case endpoints**: closure/reopen và review/manual phải dùng cùng khóa run, guard đọc trạng thái workflow có thẩm quyền, không tạo cột case state cạnh tranh. Reviews không tự trở thành nhãn training; chưa có API lịch sử review riêng.
 
 ## Gọi lõi
 
@@ -92,4 +109,4 @@ npm.cmd run test:identity
 
 Unit tests kiểm namespace/conflict, partial IDs, actor/time hard negatives, redaction sentinel, scope/window/root/limit, exact fractional time/skew, ambiguity, retry/branch, root ở giữa hành trình, evidence theo Link schema và loại cycle độc lập thứ tự input. Unit/contract không cần DB. DB/identity tests cần PostgreSQL; identity dùng Postman JWKS simulation hiện có, backend/JOSE/HTTP/DB chạy thật. Kiểm snapshot late commit, concurrency/expiry/idempotency, revoke toàn artifact, FK/immutability và rollback audit. Không cần dependency mới.
 
-Bước kế tiếp: append-only link reviews, optimistic concurrency, manual links và guard cycle/closed case. Giữ scorer/model, raw simulator parsers và feasibility benchmark là phần việc riêng. Migration 005 đã áp dụng DB development; API mới đã kiểm trong process test/smoke, Docker API image chưa rebuild trong BE-18. Trước chạy bản mới bằng Docker, build lại image theo [hướng dẫn Docker](DOCKER.md).
+Bước kế tiếp: case/workflow và closed-case evidence guard. Giữ scorer/model, raw simulator parsers và feasibility benchmark là phần việc riêng. API mới kiểm trong process test/smoke; Docker API image chưa rebuild trong BE-19. Trước chạy bản mới bằng Docker, build lại image theo [hướng dẫn Docker](DOCKER.md).

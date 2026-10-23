@@ -17,7 +17,7 @@ simulator/       # Khung sinh dữ liệu giả
 .github/         # Issue/PR templates và CI
 ```
 
-Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, Keycloak local/Swagger PKCE login, JWT/JWKS, batch ingestion, GET /me, sources, knowledge, events, event detail và [run/graph reconstruction](backend/RECONSTRUCTION.md) với quyền từ DB, snapshot và idempotency/audit. Workflow và AI vẫn thuộc bước sau; OpenAPI phân biệt 9 implemented/12 planned. Hybrid hiện degraded về rule_only vì chưa có scorer. Phạm vi triển khai hiện tại là BE.
+Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, Keycloak local/Swagger PKCE login, JWT/JWKS, batch ingestion, GET /me, sources, knowledge, events, event detail và [run/graph, review/manual links](backend/RECONSTRUCTION.md) với quyền từ DB, snapshot, version và audit. Workflow và AI vẫn thuộc bước sau; OpenAPI phân biệt 11 implemented/10 planned. Hybrid hiện degraded về rule_only vì chưa có scorer. Phạm vi triển khai hiện tại là BE.
 
 Chạy API bằng Docker sau bước [chuẩn bị Keycloak/demo](backend/KEYCLOAK.md): `docker compose up -d --build --wait api`. Mặc định API tại `http://localhost:8080`; đăng nhập Swagger bằng **Authorize → keycloakLogin**. Máy hiện tại đã chuẩn bị xong; mật khẩu nằm trong `demo-credentials.local.json` bị Git ignore. Chi tiết tại [Docker API](backend/DOCKER.md).
 
@@ -49,7 +49,7 @@ PowerShell có thể dùng `npm.cmd`. Makefile cung cấp lệnh tương đươn
 
 ## Ranh giới kiến trúc
 
-Core cung cấp Identity/Data/Workflow dùng chung, không phụ thuộc UI. Backend là lớp HTTP trung gian. Các module sau sẽ bổ sung workspace/tri thức, dữ liệu có provenance, review và workflow có audit, cùng scorer có bằng chứng và giới hạn rõ ràng. Base hiện tại chưa phải sản phẩm hoàn chỉnh hoặc bằng chứng đạt nghiệm thu bài thi.
+Core cung cấp Identity/Data/Workflow dùng chung, không phụ thuộc UI. Backend là lớp HTTP trung gian. Identity/Data, dữ liệu có provenance và review có audit đã có phần runtime; case/workflow và scorer sẽ bổ sung ở bước sau. Base hiện tại chưa phải sản phẩm hoàn chỉnh hoặc bằng chứng đạt nghiệm thu bài thi.
 
 Xem [cài đặt](INSTALL.md), [đóng góp](CONTRIBUTING.md), [bảo mật](SECURITY.md) và [API contracts](backend/contracts/README.md).
 
@@ -93,7 +93,7 @@ Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi tri�
 
 ## API và tài khoản demo
 
-Health API tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) đánh dấu 9 operation implemented: GET /me, sources, knowledge, events, event detail; POST batch ingestion; POST run, GET run và graph; còn 12 planned. Run APIs đã kiểm HTTP/JWT/PostgreSQL với Postman JWKS simulation; Docker API image cần build lại để có endpoint mới. Authorization Code/PKCE, refresh và token user/service từng được kiểm với Keycloak local ở BE-15. Chưa nghiệm thu triển khai production.
+Health API tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) đánh dấu 11 operation implemented: GET /me, sources, knowledge, events, event detail; POST batch ingestion; POST run, GET run và graph; POST review và manual link; còn 10 planned. Run/link APIs đã kiểm HTTP/JWT/PostgreSQL với Postman JWKS simulation; Docker API image cần build lại để có endpoint mới. Authorization Code/PKCE, refresh và token user/service từng được kiểm với Keycloak local ở BE-15. Chưa nghiệm thu triển khai production.
 
 Tài khoản local `demo.operator`/`demo.viewer` được seed theo [hướng dẫn Keycloak](backend/KEYCLOAK.md); mật khẩu sinh ngẫu nhiên nằm trong `demo-credentials.local.json` bị ignore. Không lưu mật khẩu/token thật trong repository.
 

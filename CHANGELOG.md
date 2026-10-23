@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Link review and manual APIs
+
+- Implement reviewLink/createManualLink: 11/21 operations implemented. Append-only reviews project current state/version without changing snapshot or original evidence; manual proposals remain pending with null score and redacted reason evidence.
+- Serialize graph writers per run; reject stale versions, duplicate pairs, self-links and cycles, including reacceptance. Current operator/reviewer membership and all-source grants apply. Audit failure rolls back edits; graph reads capture revisions in one statement.
+- Add migration006 with scoped review FK, unique link/version and immutable history. Apply to development; verify 51 unit/HTTP/contract, 32 PostgreSQL and 31 identity/HTTP/DB tests plus base, license and process smoke checks.
+- Case/workflow and closed-case evidence guards remain pending before case APIs can be enabled. Docker API image has not been rebuilt; new routes verified using source processes. No dependency changes.
+
 ## Unreleased — Reconstruction runs and graph APIs
 
 - Implement createRun/getRun/getGraph, taking the contract to 9/21 implemented operations. Bounded rule execution persists a completed run, input event/source/policy snapshot, pending links, idempotency response and audit in one transaction; POST returns 202 with Location.
