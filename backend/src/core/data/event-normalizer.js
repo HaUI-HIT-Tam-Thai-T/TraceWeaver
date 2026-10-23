@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { validEvent } from '../../validations/ingestion.validation.js';
 
 const secretKey = /password|passwd|secret|token|authorization|cookie|api[_-]?key|credential/i;
-function text(value) {
+export function redactText(value) {
   if (value.includes('\u0000') || !value.isWellFormed()) throw new Error('unsupported text');
   return value.replace(/\bBearer\s+[A-Za-z0-9._~+\/-]+=*/gi, 'Bearer [REDACTED]')
     .replace(/\b(password|passwd|secret|token|api[_-]?key|authorization|cookie)\s*[:=]\s*(?:"[^"\r\n]*"|'[^'\r\n]*'|[^\s,;]+)/gi, '$1=[REDACTED]');
@@ -13,7 +13,7 @@ function text(value) {
 function redact(value, depth = 0) {
   if (depth > 32) throw new Error('depth');
   if (typeof value === 'number' && !Number.isFinite(value)) throw new Error('non-finite number');
-  if (typeof value === 'string') return text(value);
+  if (typeof value === 'string') return redactText(value);
   if (Array.isArray(value)) return value.map((entry) => redact(entry, depth + 1));
   if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value)
     .map(([key, entry]) => {

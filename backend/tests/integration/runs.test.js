@@ -13,6 +13,8 @@ import { createRunRepository } from '../../src/core/data/run-repository.js';
 import { runInput } from '../../src/validations/run.validation.js';
 import { digest } from '../../src/core/data/event-normalizer.js';
 import { withTransaction } from '../../src/core/data/database.js';
+import { createReviewRepository } from '../../src/core/data/review-repository.js';
+import { manualLinkInput, reviewInput } from '../../src/validations/review.validation.js';
 
 test('durable reconstruction: snapshot, idempotency, whole-artifact ACL and atomic audit on PostgreSQL', async (t) => {
   const config = readConfig(), admin = createDatabase(config); t.after(() => admin.end());
@@ -150,6 +152,78 @@ test('durable reconstruction: snapshot, idempotency, whole-artifact ACL and atom
     assert.deepEqual(await Promise.all(tables.map(count)), before);
     await pool.query('DROP TRIGGER fail_run_audit ON core.audit_events');
     assert.equal((await repository.create('operator', workspace, input, 'rollback')).status, 'completed');
+  });
+  await t.test('append-only reviews preserve baseline, increment graph/link versions and serialize stale concurrent decisions', async () => {
+    const fresh = await repository.create('operator', workspace, input), reviews = createReviewRepository(pool);
+    const graph = await repository.get('operator', workspace, fresh.id, true), link = graph.links[0];
+    const decisions = await Promise.allSettled(['accepted', 'rejected'].map((decision) => reviews.review('operator', workspace, fresh.id, link.id,
+      reviewInput({ decision, reason: 'token=private-reason', expected_version: 1 }))));
+    assert.equal(decisions.filter((item) => item.status === 'fulfilled').length, 1);
+    assert.equal(decisions.find((item) => item.status === 'rejected').reason.code, 'VERSION_CONFLICT');
+    const review = decisions.find((item) => item.status === 'fulfilled').value;
+    assert.equal(review.link_version, 2); assert.equal(review.actor_subject, 'operator'); assert.equal(review.reason, 'token=[REDACTED]');
+    const updated = await repository.get('viewer', workspace, fresh.id, true);
+    assert.equal(updated.version, 2); assert.equal(updated.links.find((item) => item.id === link.id).version, 2);
+    assert.deepEqual((await pool.query('SELECT document FROM core.run_links WHERE id=$1', [link.id])).rows[0].document, link);
+    await reviews.review('reviewer', workspace, fresh.id, link.id, { decision: 'rejected', reason: 'disconnect', expected_version: 2 });
+    const disconnected = await repository.get('viewer', workspace, fresh.id, true);
+    assert.equal(disconnected.version, 3); assert.ok(disconnected.unresolved_event_ids.length > graph.unresolved_event_ids.length);
+    for (const verb of ['UPDATE core.link_reviews SET reason=reason', 'DELETE FROM core.link_reviews', 'TRUNCATE core.link_reviews']) {
+      await assert.rejects(pool.query(verb), { code: '55000' });
+    }
+    await assert.rejects(pool.query(`INSERT INTO core.link_reviews(id,workspace_id,run_id,link_id,link_version,decision,reason,actor_subject)
+      VALUES($1,$2,$3,$4,9,'accepted','bad scope','operator')`, [randomUUID(), workspace, run.id, link.id]), { code: '23503' });
+  });
+  await t.test('manual proposals enforce snapshot membership, duplicates and cycles, including reaccepting a rejected edge', async () => {
+    const fresh = await repository.create('operator', workspace, input), reviews = createReviewRepository(pool);
+    const graph = await repository.get('operator', workspace, fresh.id, true);
+    const a = initial[0].results[0].event_id, b = initial[1].results[0].event_id, c = initial[2].results[0].event_id;
+    const first = graph.links.find((link) => link.from_event_id === a && link.to_event_id === b);
+    const create = (from, to) => reviews.manual('operator', workspace, fresh.id, manualLinkInput({ from_event_id: from, to_event_id: to, reason: 'observed manually' }));
+    await assert.rejects(create(c, a), { status: 422, code: 'LINK_CYCLE' });
+    await assert.rejects(create(a, b), { status: 409, code: 'LINK_EXISTS' });
+    await assert.rejects(create(a, randomUUID()), { status: 404 });
+    await reviews.review('operator', workspace, fresh.id, first.id, { decision: 'rejected', reason: 'wrong pair', expected_version: 1 });
+    const reverse = await create(c, a);
+    assert.equal(reverse.method, 'manual'); assert.equal(reverse.score, null); assert.equal(reverse.review_state, 'pending');
+    await assert.rejects(reviews.review('operator', workspace, fresh.id, first.id,
+      { decision: 'accepted', reason: 'retry', expected_version: 2 }), { status: 422, code: 'LINK_CYCLE' });
+    await assert.rejects(create(c, a), { status: 409 });
+    const updated = await repository.get('viewer', workspace, fresh.id, true);
+    assert.equal(updated.version, 3); assert.equal(updated.links.length, graph.links.length + 1);
+    const isolated = await repository.create('operator', workspace, { ...input,
+      window: { from: input.window.from, to: '2026-10-22T00:00:00Z' } });
+    await assert.rejects(reviews.manual('operator', workspace, isolated.id, { from_event_id: a, to_event_id: c, reason: 'outside snapshot' }), { status: 404 });
+    await assert.rejects(reviews.review('operator', workspace, isolated.id, first.id, { decision: 'accepted', reason: 'other run', expected_version: 2 }), { status: 404 });
+  });
+  await t.test('concurrent opposing manual edges cannot both commit; whole-source ACL and atomic audit cover graph mutations', async () => {
+    const fresh = await repository.create('operator', workspace, input), reviews = createReviewRepository(pool);
+    const graph = await repository.get('operator', workspace, fresh.id, true), a = initial[0].results[0].event_id;
+    const isolated = graph.nodes.find((event) => event.identifiers.length === 0).event_id;
+    const race = await Promise.allSettled([[a, isolated], [isolated, a]].map(([from_event_id, to_event_id]) =>
+      reviews.manual('operator', workspace, fresh.id, { from_event_id, to_event_id, reason: 'race' })));
+    assert.equal(race.filter((item) => item.status === 'fulfilled').length, 1);
+    assert.equal(race.find((item) => item.status === 'rejected').reason.code, 'LINK_CYCLE');
+    const link = graph.links[0];
+    for (const subject of ['viewer', 'admin', 'writer']) await assert.rejects(reviews.review(subject, workspace, fresh.id, link.id,
+      { decision: 'accepted', reason: 'forbidden', expected_version: 1 }), { status: 403 });
+    await pool.query('UPDATE core.source_grants SET revoked_at=clock_timestamp() WHERE group_id=$1 AND source_id=$2', [group, sources[3]]);
+    await assert.rejects(reviews.review('operator', workspace, fresh.id, link.id,
+      { decision: 'accepted', reason: 'revoked empty source', expected_version: 1 }), { status: 404 });
+    await pool.query('UPDATE core.source_grants SET revoked_at=NULL WHERE group_id=$1', [group]);
+    const before = await repository.get('operator', workspace, fresh.id, true);
+    await pool.query(`CREATE FUNCTION core.fail_link_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'private-review-error'; END; $$`);
+    await pool.query(`CREATE TRIGGER fail_link_audit BEFORE INSERT ON core.audit_events FOR EACH ROW WHEN(NEW.action IN ('link.reviewed','link.manual_created')) EXECUTE FUNCTION core.fail_link_audit()`);
+    await assert.rejects(reviews.review('operator', workspace, fresh.id, link.id,
+      { decision: 'accepted', reason: 'rollback', expected_version: 1 }));
+    await assert.rejects(reviews.manual('operator', workspace, fresh.id,
+      { from_event_id: a, to_event_id: initial[2].results[0].event_id, reason: 'rollback manual' }));
+    assert.deepEqual(await repository.get('operator', workspace, fresh.id, true), before);
+    await pool.query('DROP TRIGGER fail_link_audit ON core.audit_events');
+    const recovered = await reviews.review('reviewer', workspace, fresh.id, link.id,
+      { decision: 'accepted', reason: 'recovered', expected_version: 1 });
+    assert.equal(recovered.link_version, 2);
+    assert.equal((await pool.query(`SELECT count(*)::int AS n FROM core.audit_events WHERE action='link.reviewed' AND entity_id=$1`, [link.id])).rows[0].n, 1);
   });
   await t.test('1001 events are rejected before filtering unrelated actions and do not leave a run', async () => {
     const { rows: [base] } = await pool.query('SELECT * FROM core.events WHERE event_id=$1', [root]);

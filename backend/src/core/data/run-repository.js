@@ -10,6 +10,8 @@ import { ApiError } from '../identity/api-error.js';
 import { createRuleEngine } from '../reconstruction/rules.js';
 import { compileRulePolicy } from '../reconstruction/candidates.js';
 import { sandboxRulePolicy, missingSteps } from '../reconstruction/policy.js';
+import { graphProjection } from '../reconstruction/reviews.js';
+import { projectedLinks } from './link-projection.js';
 
 const notFound = () => new ApiError(404, 'NOT_FOUND', 'Resource not found');
 const writerRoles = new Set(['operator', 'reviewer']), readerRoles = new Set(['viewer', 'operator', 'reviewer', 'admin']);
@@ -18,7 +20,7 @@ function sqlBound(value, lower) {
   return [`${value.slice(0, 19)}Z`, Number(fraction.padEnd(6, '0').slice(0, 6))
     + (lower && /[1-9]/.test(fraction.slice(6)) ? 1 : 0)];
 }
-async function authorize(client, subject, workspace, sources, write = false) {
+export async function authorize(client, subject, workspace, sources, write = false) {
   const { rows: [membership] } = await client.query(`SELECT ARRAY(SELECT role_key FROM core.membership_roles r
     WHERE r.workspace_id=m.workspace_id AND r.subject=m.subject) AS roles,
     ARRAY(SELECT s.id::text FROM core.sources s WHERE s.workspace_id=$2 AND s.id=ANY($3::uuid[]) AND ${visibleSource}) AS sources
@@ -40,13 +42,17 @@ export function createRunRepository(pool, configuration = sandboxRulePolicy()) {
       ARRAY(SELECT to_jsonb(e) FROM core.events e JOIN core.run_events re
         ON re.workspace_id=e.workspace_id AND re.event_id=e.event_id
         WHERE re.workspace_id=r.workspace_id AND re.run_id=r.id ORDER BY e.occurred_at,e.event_id) AS event_rows,
-      ARRAY(SELECT l.document FROM core.run_links l WHERE l.workspace_id=r.workspace_id AND l.run_id=r.id
-        ORDER BY l.from_event_id,l.to_event_id) AS links
+      ARRAY(${projectedLinks}) AS links,
+      1 + (SELECT count(*)::int FROM core.link_reviews v WHERE v.workspace_id=r.workspace_id AND v.run_id=r.id)
+        + (SELECT count(*)::int FROM core.run_links l WHERE l.workspace_id=r.workspace_id AND l.run_id=r.id
+          AND l.document->>'method'='manual') AS graph_version
       FROM core.reconstruction_runs r WHERE r.workspace_id=$2 AND r.id=$3 AND ${artifactScope}`, [subject, workspace, id]);
     if (!row) throw notFound();
     if (!graph) return row.document;
     if (row.document.status !== 'completed') throw new ApiError(409, 'RUN_NOT_READY', 'Run graph is not ready');
-    return { run_id: id, nodes: row.event_rows.map(eventDto), links: row.links, ...row.graph_metadata };
+    const nodes = row.event_rows.map(eventDto);
+    return { run_id: id, nodes, links: row.links, ...row.graph_metadata,
+      ...graphProjection(row.document.root_event_id, nodes, row.links), version: row.graph_version };
   }
   return {
     create(subject, workspace, input, key = null) {
