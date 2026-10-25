@@ -16,16 +16,11 @@ coverage/
 # Local project preparation
 # Shared team documentation is tracked explicitly; preparation stays local.
 /docs/*
-!/docs/HUONG-DAN-LICENSE-CHO-TEAM.md
 !/docs/README.md
-!/docs/01-DOI-CHIEU-DE-THI.md
-!/docs/02-TICH-HOP-BE-FE-AI.md
-!/docs/03-DU-LIEU-KIEM-THU-MINH-CHUNG.md
-!/docs/04-DEMO-VA-HO-SO-NOP.md
+!/docs/INTEGRATION.md
 !/docs/CURRENT_STATUS.md
 !/docs/BACKEND_HANDOFF.md
 !/docs/BACKEND_HANDOFF_RESPONSE.md
-!/docs/COUNCIL_READINESS.md
 /.planning/
 /data/
 /templates/

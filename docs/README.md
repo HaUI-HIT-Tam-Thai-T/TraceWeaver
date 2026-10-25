@@ -1,21 +1,19 @@
-# Tài liệu dùng chung của team TraceWeaver
+# Tài liệu TraceWeaver
 
-Cập nhật hiện trạng: 25/10/2026. Đọc [bảng capability hiện tại](CURRENT_STATUS.md) trước khi tích hợp. `.local/` và `.planning/` là tài liệu chuẩn bị local, không tự nhận được khi clone.
+Tài liệu được chia theo tổng quan, vận hành và thành phần kỹ thuật. Chỉ các chức năng trong [hiện trạng](CURRENT_STATUS.md) được xem là đã triển khai.
 
-| Đọc theo thứ tự | Dùng để làm gì |
+| Chủ đề | Tài liệu |
 |---|---|
-| [01 — Đối chiếu đề thi](01-DOI-CHIEU-DE-THI.md) | Yêu cầu bắt buộc/khuyến nghị, hiện trạng và phần còn thiếu; nguồn đề, trang/mục và rubric |
-| [02 — Tích hợp BE/FE/AI](02-TICH-HOP-BE-FE-AI.md) | Phần mỗi người cần làm, API đã có/planned, hợp đồng bàn giao và thứ tự tích hợp |
-| [03 — Dữ liệu, kiểm thử, minh chứng](03-DU-LIEU-KIEM-THU-MINH-CHUNG.md) | Dữ liệu demo/evaluation, test matrix và cách lưu bằng chứng thật |
-| [04 — Demo và hồ sơ nộp](04-DEMO-VA-HO-SO-NOP.md) | Checklist source/release/install/report/slide, kịch bản 10 phút và cổng nghiệm thu |
-| [Hướng dẫn license](HUONG-DAN-LICENSE-CHO-TEAM.md) | Các lệnh kiểm/cập nhật license và giới hạn npm/FE/AI/container |
-| [AI handoff](BACKEND_HANDOFF.md) / [Backend response](BACKEND_HANDOFF_RESPONSE.md) | Yêu cầu gốc, policy hiện tại và quyết định AI còn cần chốt |
-| [Phiếu hội đồng 2026](COUNCIL_READINESS.md) | Đối chiếu đủ 8 điều kiện/11 tiêu chí, bằng chứng backend và cổng FE/AI/release còn mở |
+| Tổng quan, kiến trúc ba tầng, công nghệ | [README](../README.md) |
+| Cài từ source, cấu hình và kiểm thử | [INSTALL](../INSTALL.md) |
+| Docker, local Identity và demo login | [Docker](../backend/DOCKER.md), [Keycloak](../backend/KEYCLOAK.md) |
+| Backend/API | [Backend](../backend/README.md), [OpenAPI và schemas](../backend/contracts/README.md) |
+| Xác thực và quyền dữ liệu | [Identity](../backend/IDENTITY.md) |
+| Dữ liệu đầu vào và truy vấn | [Ingestion](../backend/INGESTION.md), [Events](../backend/EVENTS.md) |
+| Tái dựng và duyệt liên kết | [Reconstruction](../backend/RECONSTRUCTION.md) |
+| Quy trình và thống kê | [Cases](../backend/CASES.md), [Core workflow](../backend/WORKFLOW.md), [Dashboard](../backend/DASHBOARD.md) |
+| Tích hợp FE/AI/simulator | [Integration](INTEGRATION.md), [AI handoff](BACKEND_HANDOFF.md), [Backend response](BACKEND_HANDOFF_RESPONSE.md) |
+| Đóng góp, license, bảo mật | [Contributing](../CONTRIBUTING.md), [Dependency inventory](../backend/DEPENDENCIES.md), [Notices](../backend/THIRD_PARTY_NOTICES.txt), [Security](../SECURITY.md) |
+| Thay đổi và báo lỗi | [Changelog](../CHANGELOG.md), [Issues](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues) |
 
-Lệnh chạy hiện có ở [INSTALL](../INSTALL.md), [backend README](../backend/README.md) và [Identity BE](../backend/IDENTITY.md). Contract authoritative ở [backend/contracts](../backend/contracts/README.md); không định nghĩa DTO riêng khác schema khi làm FE/AI.
-
-## Hiện trạng để tránh hiểu nhầm
-
-BE có20/21 operations và local Keycloak thật; xem [CURRENT_STATUS](CURRENT_STATUS.md) để biết tests và giới hạn deployment. Frontend/AI/simulator còn là khung; chưa có sản phẩm end-to-end. Tag v0.1.0-base.1 là bộ khung trước các thay đổi BE mới, không phải release nghiệm thu toàn sản phẩm.
-
-Các bảng trong docs là checklist làm việc, không phải điểm số hoặc xác nhận BTC đã nghiệm thu. Yêu cầu vòng HaUI và thể lệ Quốc gia được ghi tách riêng; deadline lịch thực tế cần đội xác nhận.
+OpenAPI/JSON Schema là hợp đồng chung; không tạo DTO riêng khác schema. Checklist chuẩn bị thi và báo cáo kiểm chứng local không thuộc tài liệu sử dụng công khai. FE/AI runtime chưa được tích hợp vào checkout này; tag v0.1.0-base.1 là bản scaffold.

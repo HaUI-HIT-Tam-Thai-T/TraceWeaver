@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — Documentation cleanup
+
+- Consolidate integration/data handoff guidance into docs/INTEGRATION.md and license maintenance into CONTRIBUTING.md. Keep runtime/API/install/security/license documentation; remove duplicate preparation/progress checklists from public docs. Council evidence remains local.
+
 ## Unreleased — Council backend evidence
 
 - Map all8 eligibility conditions and11 scored criteria from the HaUI2026 council form to backend evidence and remaining FE/AI/release gates; record public repository/release/CI observations without claiming a judge score.
