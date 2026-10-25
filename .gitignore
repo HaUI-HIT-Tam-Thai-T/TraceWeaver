@@ -25,6 +25,7 @@ coverage/
 !/docs/CURRENT_STATUS.md
 !/docs/BACKEND_HANDOFF.md
 !/docs/BACKEND_HANDOFF_RESPONSE.md
+!/docs/COUNCIL_READINESS.md
 /.planning/
 /data/
 /templates/

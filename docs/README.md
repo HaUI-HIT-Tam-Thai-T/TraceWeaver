@@ -10,6 +10,7 @@ Cập nhật hiện trạng: 25/10/2026. Đọc [bảng capability hiện tại]
 | [04 — Demo và hồ sơ nộp](04-DEMO-VA-HO-SO-NOP.md) | Checklist source/release/install/report/slide, kịch bản 10 phút và cổng nghiệm thu |
 | [Hướng dẫn license](HUONG-DAN-LICENSE-CHO-TEAM.md) | Các lệnh kiểm/cập nhật license và giới hạn npm/FE/AI/container |
 | [AI handoff](BACKEND_HANDOFF.md) / [Backend response](BACKEND_HANDOFF_RESPONSE.md) | Yêu cầu gốc, policy hiện tại và quyết định AI còn cần chốt |
+| [Phiếu hội đồng 2026](COUNCIL_READINESS.md) | Đối chiếu đủ 8 điều kiện/11 tiêu chí, bằng chứng backend và cổng FE/AI/release còn mở |
 
 Lệnh chạy hiện có ở [INSTALL](../INSTALL.md), [backend README](../backend/README.md) và [Identity BE](../backend/IDENTITY.md). Contract authoritative ở [backend/contracts](../backend/contracts/README.md); không định nghĩa DTO riêng khác schema khi làm FE/AI.
 
