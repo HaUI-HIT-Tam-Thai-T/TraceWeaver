@@ -31,6 +31,7 @@ try {
   const migrations = await loadMigrations(new URL('./core/data/migrations/', import.meta.url));
   database = createDatabase(config, () => console.error('DATABASE_IDLE_ERROR'));
   const app = createApp({
+    frontendOrigins: config.frontendOrigins,
     checkReadiness: () => isDatabaseReady(database, migrations),
     verifyToken: createTokenVerifier(config),
     verifyIngestToken: createIngestTokenVerifier(config),
@@ -75,7 +76,7 @@ try {
   console.error(error.message.startsWith('DATABASE_URL') || error.message.startsWith('API_') ||
     error.message.startsWith('APP_ENV') || error.message.startsWith('DB_POOL_MAX') ||
     error.message.startsWith('SHUTDOWN_TIMEOUT_MS') || error.message.startsWith('OIDC') ||
-    error.message.startsWith('CURSOR_SECRET') ? error.message : 'BACKEND_STARTUP_FAILED');
+    error.message.startsWith('CURSOR_SECRET') || error.message.startsWith('FRONTEND_') ? error.message : 'BACKEND_STARTUP_FAILED');
   process.exitCode = 1;
   if (database) await database.end();
 }

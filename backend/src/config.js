@@ -25,6 +25,16 @@ export function readConfig(env = process.env) {
   if (!['development', 'test', 'production'].includes(appEnv)) {
     throw new Error('APP_ENV must be development, test or production');
   }
+  const frontendPort = positiveInteger(env.FRONTEND_PORT, 'FRONTEND_PORT', 3000, 65535);
+  const frontendOrigins = (env.FRONTEND_ORIGINS ?? (appEnv === 'production' ? '' : `http://localhost:${frontendPort},http://127.0.0.1:${frontendPort}`))
+    .split(',').map((value) => value.trim()).filter(Boolean);
+  for (const value of frontendOrigins) {
+    try {
+      const origin = new URL(value), local = ['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname);
+      if (origin.origin !== value || origin.username || origin.password || origin.hostname.includes('*') ||
+          (origin.protocol !== 'https:' && !(appEnv !== 'production' && local && origin.protocol === 'http:'))) throw new Error();
+    } catch { throw new Error('FRONTEND_ORIGINS must contain exact HTTPS origins (loopback HTTP allowed outside production)'); }
+  }
   let url;
   try {
     url = new URL(env.DATABASE_URL);
@@ -49,6 +59,7 @@ export function readConfig(env = process.env) {
   if (typeof env.CURSOR_SECRET !== 'string' || env.CURSOR_SECRET.length < 32) throw new Error('CURSOR_SECRET must contain at least 32 characters');
   return Object.freeze({
     appEnv,
+    frontendOrigins: Object.freeze([...new Set(frontendOrigins)]),
     host: env.API_HOST ?? '127.0.0.1',
     port: positiveInteger(env.API_PORT, 'API_PORT', 8080, 65535),
     databaseUrl: env.DATABASE_URL,

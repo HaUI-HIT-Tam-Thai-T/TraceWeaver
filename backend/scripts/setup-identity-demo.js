@@ -12,6 +12,7 @@ const secret = () => randomBytes(24).toString('base64url');
 let database;
 try {
   if ((process.env.APP_ENV ?? 'development') !== 'development') throw new Error('Demo setup is development-only');
+  const config = readConfig();
   const credentialsPath = new URL('demo-credentials.local.json', root);
   let credentials;
   try { credentials = JSON.parse(await readFile(credentialsPath, 'utf8')); }
@@ -33,8 +34,8 @@ try {
     accessTokenLifespan: 300, clients: [
       { clientId: 'traceweaver-web', enabled: true, protocol: 'openid-connect', publicClient: true, standardFlowEnabled: true,
         directAccessGrantsEnabled: false, implicitFlowEnabled: false,
-        redirectUris: [`http://localhost:${apiPort}/docs/oauth2-redirect.html`, `http://127.0.0.1:${apiPort}/docs/oauth2-redirect.html`],
-        webOrigins: [`http://localhost:${apiPort}`, `http://127.0.0.1:${apiPort}`], attributes: { 'pkce.code.challenge.method': 'S256' }, protocolMappers: [audience] },
+        redirectUris: [`http://localhost:${apiPort}/docs/oauth2-redirect.html`, `http://127.0.0.1:${apiPort}/docs/oauth2-redirect.html`, ...config.frontendOrigins.map((origin) => `${origin}/auth/callback`)],
+        webOrigins: [`http://localhost:${apiPort}`, `http://127.0.0.1:${apiPort}`, ...config.frontendOrigins], attributes: { 'pkce.code.challenge.method': 'S256' }, protocolMappers: [audience] },
       { clientId: 'traceweaver-ingest', enabled: true, protocol: 'openid-connect', publicClient: false, clientAuthenticatorType: 'client-secret',
         secret: credentials.ingest.clientSecret, standardFlowEnabled: false, directAccessGrantsEnabled: false, serviceAccountsEnabled: true, protocolMappers: [audience] },
     ], users: [user('operator'), user('viewer'), { id: service, username: 'service-account-traceweaver-ingest', enabled: true, serviceAccountClientId: 'traceweaver-ingest' }] };
@@ -50,7 +51,7 @@ try {
     if (error.code !== 'ENOENT') throw error;
     await writeFile(new URL('.env.keycloak.local', root), `KC_BOOTSTRAP_ADMIN_USERNAME=${credentials.admin.username}\nKC_BOOTSTRAP_ADMIN_PASSWORD=${credentials.admin.password}\n`, { flag: 'wx', mode: 0o600 });
   }
-  database = createDatabase(readConfig());
+  database = createDatabase(config);
   await withTransaction(database, async (client) => {
     await client.query('INSERT INTO core.workspaces(id,name) VALUES ($1,$2) ON CONFLICT DO NOTHING', [workspace, 'TraceWeaver Demo']);
     for (const [subject, roles] of [[operator, ['operator']], [viewer, ['viewer']], [service, ['ingest_service']]]) {

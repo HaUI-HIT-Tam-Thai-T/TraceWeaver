@@ -24,6 +24,8 @@ x-api: &api
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     CURSOR_SECRET: ${CURSOR_SECRET:?Set CURSOR_SECRET in .env}
     DB_POOL_MAX: ${DB_POOL_MAX:-5}
+    FRONTEND_PORT: ${FRONTEND_PORT:-3000}
+    FRONTEND_ORIGINS: ${FRONTEND_ORIGINS-http://localhost:${FRONTEND_PORT:-3000},http://127.0.0.1:${FRONTEND_PORT:-3000}}
     OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:8081/realms/traceweaver}
     OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-traceweaver-web}
     INGEST_CLIENT_ID: ${INGEST_CLIENT_ID:-traceweaver-ingest}

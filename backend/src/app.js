@@ -3,6 +3,7 @@
 
 import express from 'express';
 import { requestContext } from './middlewares/request.middleware.js';
+import { browserCors } from './middlewares/cors.middleware.js';
 import { errorHandler, notFound } from './middlewares/error.middleware.js';
 import { createHealthRouter } from './routers/health.route.js';
 import { createAccessRouter } from './routers/access.route.js';
@@ -15,10 +16,11 @@ import { createCaseRouter } from './routers/case.route.js';
 import { createDashboardRouter } from './routers/dashboard.route.js';
 import { createWorkflowRouter } from './routers/workflow.route.js';
 
-export function createApp({ checkReadiness, verifyToken, verifyIngestToken, verifyAppToken, access, ingestion, events, runs, reviews, cases, dashboard, workflows, oidc, logError = () => {} }) {
+export function createApp({ checkReadiness, verifyToken, verifyIngestToken, verifyAppToken, access, ingestion, events, runs, reviews, cases, dashboard, workflows, oidc, frontendOrigins = [], logError = () => {} }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(requestContext);
+  app.use(['/api/v1', '/health'], browserCors(frontendOrigins));
   app.use('/docs', createDocsRouter(oidc));
   app.use('/health', createHealthRouter(checkReadiness));
   app.use('/api/v1', express.json({ limit: 1048576, strict: true, inflate: false }));
