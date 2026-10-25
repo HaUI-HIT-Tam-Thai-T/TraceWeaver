@@ -10,6 +10,7 @@ import { createWorkflow, appendHistory, latestWorkflow, historyDto } from './wor
 import { createWorkflowEngine } from '../workflow/engine.js';
 import { caseDefinition } from '../workflow/definitions.js';
 import { ApiError } from '../identity/api-error.js';
+import { artifactTimeScope, artifactTimeValues } from './artifact-time.js';
 
 const notFound = () => new ApiError(404, 'NOT_FOUND', 'Resource not found');
 const projection = `SELECT c.*,h.to_state,h.owner_subject,h.version,h.occurred_at AS updated_at
@@ -102,10 +103,11 @@ export function createCaseRepository(pool) {
       if (!row) throw notFound();
       return { case: caseDto(row), history: row.history.map(historyDto), evidence: row.evidence };
     },
-    async list(subject, workspace, last, limit, state, owner) {
+    async list(subject, workspace, last, limit, state, owner, filters = {}) {
       const { rows } = await pool.query(`${projection} WHERE c.workspace_id=$2 AND ${artifactScope}
         AND ($3::uuid IS NULL OR c.id>$3) AND ($5='' OR h.to_state=$5) AND ($6='' OR h.owner_subject=$6)
-        ORDER BY c.id LIMIT $4`, [subject, workspace, last, limit, state, owner]);
+        AND ${artifactTimeScope(7)}
+        ORDER BY c.id LIMIT $4`, [subject, workspace, last, limit, state, owner, ...artifactTimeValues(filters)]);
       return rows.map(caseDto);
     },
     evidence(subject, workspace, id, input) {
