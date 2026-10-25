@@ -22,7 +22,6 @@
     "test:contracts": "node --test backend/tests/contracts/*.test.js",
     "test:identity": "node --env-file-if-exists=.env --test backend/tests/identity/*.test.js",
     "test:identity:native": "node --env-file-if-exists=.env --import ./backend/tests/support/oidc-native-loader.js --test --test-concurrency=1 backend/tests/identity/*.test.js",
-    "test:identity:native": "node --env-file-if-exists=.env --import ./backend/tests/support/oidc-native-loader.js --test --test-concurrency=1 backend/tests/identity/*.test.js",
     "test": "node --test backend/tests/backend/*.test.js backend/tests/contracts/*.test.js",
     "check:base": "node backend/scripts/check-base.js",
     "licenses": "node backend/scripts/dependency-inventory.js",
