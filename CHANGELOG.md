@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Audit runtime corrections
+
+- Reject compressed public/core bodies415 before decompression; pin body-parser2.4.0 and fast-uri3.1.9, refresh notices. Child-process regression verifies process survival. Full npm audit reports0 advisories at verification time.
+- Reject records that exceed schema bounds after redaction. Preserve canonical microseconds/dedup distinctions and legacy millisecond hashes; explicitly reject nonrepresentable finer precision. Apply ceil/floor SQL event filter bounds, reuse core transaction client and reject malformed knowledge query text400.
+- Verification:73 unit/HTTP/contract,49 DB,45 native identity tests pass; base/license98 pass. Existing local Keycloak frontend origin/callback provisioning verified. Old Docker image not rebuilt in this session; source restart/rebuild required. Scorer/model/FE/simulator/E2E/performance and production readiness remain separate.
+
 ## Unreleased — Live local core identity
 
 - Add development/loopback-only bootstrap for confidential core Keycloak client through Admin REST, signed service JWT/subject verification, service workspace membership only and CORE_APP configuration. Preserve existing user/ingest/admin credentials, realm and other environment values; reruns preserve file hashes and revoked membership remains revoked. Save core credential only in ignored local JSON/import.
