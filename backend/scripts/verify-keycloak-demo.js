@@ -2,14 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import assert from 'node:assert/strict';
-import { randomBytes, createHash } from 'node:crypto';
+import { randomBytes, createHash, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { decodeJwt } from 'jose';
+import { coreDemoTarget } from './lib/core-demo.js';
+const fetch = (url, options = {}) => globalThis.fetch(url, { redirect: 'error', ...options, signal: AbortSignal.timeout(10000) });
 let step = 'configuration';
 try {
   const credentials = JSON.parse(await readFile(new URL('../../demo-credentials.local.json', import.meta.url), 'utf8'));
-  const issuer = process.env.OIDC_ISSUER ?? `http://localhost:${process.env.IDENTITY_PORT ?? 8081}/realms/traceweaver`;
-  const api = `http://localhost:${process.env.API_PORT ?? 8080}`, redirect = `${api}/docs/oauth2-redirect.html`;
+  const { issuer } = coreDemoTarget();
+  const apiPort = process.env.API_PORT ?? '8080';
+  assert.ok(/^\d+$/.test(apiPort) && Number(apiPort) > 0 && Number(apiPort) <= 65535);
+  const api = `http://localhost:${apiPort}`, redirect = `${api}/docs/oauth2-redirect.html`;
   const clientId = process.env.OIDC_CLIENT_ID ?? 'traceweaver-web';
   step = 'Swagger callback assets';
   const callbackPage = await fetch(redirect); assert.equal(callbackPage.status, 200);
@@ -55,7 +59,8 @@ try {
     return response.json();
   }
   const request = async (path, token, options = {}) => {
-    const response = await fetch(api + path, { ...options, headers: { Authorization: `Bearer ${token}`, ...(options.body ? { 'Content-Type': 'application/json' } : {}) } });
+    const response = await fetch(api + path, { ...options, redirect: 'error', headers: { Authorization: `Bearer ${token}`,
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers } });
     return { status: response.status, body: await response.json() };
   };
   step = 'PKCE negative';
@@ -98,5 +103,62 @@ try {
   step = 'refresh';
   const refresh = await fetch(discovery.token_endpoint, { method: 'POST', body: new URLSearchParams({ grant_type: 'refresh_token', client_id: clientId, refresh_token: operator.refresh_token }) });
   assert.equal(refresh.status, 200); const refreshed = await refresh.json(); assert.equal((await request('/api/v1/me', refreshed.access_token)).status, 200);
-  console.log('Live Keycloak checks passed: discovery, PKCE S256/negative/CORS, operator+viewer login, refresh, /me/sources/knowledge, client separation, scoped batch ingestion/events and redaction. Tokens were not printed or saved.');
+  step = 'core service credential';
+  assert.equal(credentials.core?.clientId, 'traceweaver-core');
+  assert.equal(process.env.CORE_APP_CLIENT_ID, credentials.core.clientId);
+  assert.equal(process.env.CORE_APP_SUBJECT, credentials.core.subject);
+  const coreGrant = (clientSecret) => fetch(discovery.token_endpoint, { method: 'POST', redirect: 'error', body: new URLSearchParams({
+    grant_type: 'client_credentials', client_id: credentials.core.clientId, client_secret: clientSecret }) });
+  assert.equal((await coreGrant('invalid-test-secret')).status, 401);
+  const coreResponse = await coreGrant(credentials.core.clientSecret); assert.equal(coreResponse.status, 200);
+  const core = await coreResponse.json(), coreClaims = decodeJwt(core.access_token);
+  assert.equal(coreClaims.sub, credentials.core.subject); assert.equal(coreClaims.azp, credentials.core.clientId); assert.equal(coreClaims.iss, issuer);
+  const corePath = '/core/v1/instances';
+  const coreRequest = (path, userToken, options = {}, appToken = core.access_token) => request(corePath + path, appToken, {
+    ...options, headers: { 'X-Workspace-Id': credentials.workspace_id, 'X-End-User-Authorization': `Bearer ${userToken}`,
+      'X-Actor-Subject': credentials.operator.subject, ...options.headers } });
+  const post = (body) => ({ method: 'POST', body: JSON.stringify(body) });
+  const transition = (action, expected_version, extra = {}) => ({ action, expected_version, reason: `Live delegated ${action}`, evidence_refs: [], ...extra });
+  step = 'core client isolation';
+  assert.equal((await request('/api/v1/me', core.access_token)).status, 401);
+  assert.equal((await request(batchPath, core.access_token, post({ events: [input] }))).status, 401);
+  const documentInput = { definition_key: 'document_review', definition_version: 1, entity_ref: { type: 'document', id: randomUUID() },
+    workspace_id: credentials.workspace_id, creator_subject: credentials.operator.subject };
+  assert.equal((await request(corePath, core.access_token, { ...post(documentInput), headers: { 'X-Workspace-Id': credentials.workspace_id } })).status, 401);
+  for (const wrongApp of [operator.access_token, service.access_token]) assert.equal((await coreRequest('', operator.access_token, post(documentInput), wrongApp)).status, 401);
+  assert.equal((await coreRequest('', core.access_token, post(documentInput))).status, 401);
+  assert.equal((await coreRequest('', operator.access_token, post({ ...documentInput, creator_subject: credentials.viewer.subject }))).status, 422);
+  assert.equal((await coreRequest('', viewer.access_token, post({ ...documentInput, creator_subject: credentials.viewer.subject }))).status, 403);
+  step = 'core document workflow';
+  const createdDocument = await coreRequest('', operator.access_token, post(documentInput)); assert.equal(createdDocument.status, 201);
+  const document = createdDocument.body; assert.equal(document.state, 'draft'); assert.equal(document.history[0].actor_subject, credentials.operator.subject);
+  assert.equal((await coreRequest('', operator.access_token, post(documentInput))).status, 409);
+  assert.equal((await coreRequest(`/${document.id}`, viewer.access_token)).status, 200);
+  assert.equal((await coreRequest(`/${document.id}`, operator.access_token, { headers: { 'X-Workspace-Id': '99999999-9999-4999-8999-999999999999' } })).status, 404);
+  const submitted = await coreRequest(`/${document.id}/transitions`, operator.access_token, post(transition('submit', 1)));
+  assert.equal(submitted.status, 200); assert.equal(submitted.body.state, 'in_review'); assert.equal(submitted.body.history.length, 2);
+  assert.equal((await coreRequest(`/${document.id}/transitions`, operator.access_token, post(transition('submit', 1)))).status, 409);
+  assert.equal((await coreRequest(`/${document.id}/transitions`, operator.access_token, post(transition('approve', 2)))).status, 403);
+  assert.equal((await coreRequest(`/${document.id}/transitions`, viewer.access_token, post(transition('approve', 2)))).status, 403);
+  step = 'core case workflow and evidence guard';
+  const runResponse = await request(`${base}/runs`, operator.access_token, { ...post({ root_event_id: event.body.event_id,
+    source_ids: ['30000000-0000-4000-8000-000000000015', '30000000-0000-4000-8000-000000000016', '30000000-0000-4000-8000-000000000017'],
+    mode: 'rule_only', window: { from: '2026-10-21T00:00:00Z', to: '2026-10-21T00:01:00Z' } }), headers: { 'Idempotency-Key': 'live-core-run-v1' } });
+  assert.equal(runResponse.status, 202);
+  const createdCase = await request(`${base}/cases`, operator.access_token, post({ run_id: runResponse.body.id, title: 'Live core delegation check' }));
+  assert.equal(createdCase.status, 201); const caseId = createdCase.body.id, caseInstance = createdCase.body.workflow_instance_id;
+  const caseWorkflow = await coreRequest(`/${caseInstance}`, viewer.access_token);
+  assert.equal(caseWorkflow.status, 200); assert.equal(caseWorkflow.body.definition_key, 'case_handling');
+  assert.equal((await coreRequest(`/${caseInstance}/transitions`, operator.access_token,
+    post(transition('assign', 1, { owner_subject: credentials.operator.subject })))).status, 200);
+  assert.equal((await coreRequest(`/${caseInstance}/transitions`, operator.access_token, post(transition('start', 2)))).status, 200);
+  assert.equal((await coreRequest(`/${caseInstance}/transitions`, operator.access_token, post(transition('request_verification', 3)))).status, 422);
+  const addedEvidence = await request(`${base}/cases/${caseId}/evidence`, operator.access_token, post({ kind: 'note', event_ids: [], note: 'Verified live delegated case workflow' }));
+  assert.equal(addedEvidence.status, 201);
+  const awaiting = await coreRequest(`/${caseInstance}/transitions`, operator.access_token,
+    post(transition('request_verification', 3, { evidence_refs: [addedEvidence.body.id] })));
+  assert.equal(awaiting.status, 200); assert.equal(awaiting.body.state, 'awaiting_verification');
+  assert.equal(awaiting.body.history.at(-1).actor_subject, credentials.operator.subject);
+  assert.equal((await request(`${base}/cases/${caseId}`, viewer.access_token)).body.case.state, 'awaiting_verification');
+  console.log('Live Keycloak checks passed: discovery, PKCE S256/negative/CORS, operator+viewer login, refresh, scoped ingestion/events/redaction; core app/user/ingest isolation, document+case workflows, role/version/evidence guards and shared case history. Tokens were not printed or saved; workflow smoke artifacts retained.');
 } catch { console.error(`LIVE_KEYCLOAK_VERIFY_FAILED at ${step}; credentials and tokens withheld`); process.exitCode = 1; }
