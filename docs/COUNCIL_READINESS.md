@@ -44,7 +44,7 @@ npm.cmd run evidence:backend
 npm.cmd run package:source
 ```
 
-Collector chạy base/license, unit/HTTP/contract, PostgreSQL, identity-native HTTP, source process readiness và npm audit tuần tự. Fail/skip/timeout đều không được coi pass. Nó chỉ lưu summary, hash source, môi trường và Git history vào `.local/council-evidence`; không lưu stdout con, token hoặc env. Native JWKS fixture không phải Keycloak thật. DB test tạo và giữ DB riêng. `npm audit` cần registry; kết quả phụ thuộc thời điểm. Trước khi chia sẻ vẫn đọc lại bằng chứng và loại thông tin cá nhân không cần thiết trong Git metadata.
+Collector chạy base/license, unit/HTTP/contract, PostgreSQL, identity-native HTTP, source process readiness và npm audit tuần tự. PostgreSQL/identity chạy từng file để giới hạn pool/tài nguyên local; assertions concurrency trong file giữ nguyên. Fail/skip/todo/cancel/timeout đều không được coi pass. Nó chỉ lưu summary, hash source, môi trường và Git history vào `.local/council-evidence`; không lưu stdout con, token hoặc env. Native JWKS fixture không phải Keycloak thật. DB test tạo và giữ DB riêng. `npm audit` cần registry; kết quả phụ thuộc thời điểm. Trước khi chia sẻ vẫn đọc lại bằng chứng và loại thông tin cá nhân không cần thiết trong Git metadata.
 
 Package script chỉ archive đúng HEAD sạch, chặn env/credentials/private paths và kèm manifest + SHA256SUMS. **Không copy `.env`, credentials hay DB dump vào gói source.** Archive không tạo tag/release hoặc push. Kiểm checksum và danh sách archive trước nộp.
 

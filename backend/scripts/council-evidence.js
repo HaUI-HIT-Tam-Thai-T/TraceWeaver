@@ -26,9 +26,14 @@ const run = (id, args, kind = 'check') => {
     status: result.status === 0 && !result.error ? 'pass' : 'fail' };
   // Persist structured summaries only: child output can contain paths or fixtures.
   if (kind === 'test') {
-    check.counts = Object.fromEntries(['tests', 'pass', 'fail', 'skipped'].map((key) =>
+    check.counts = Object.fromEntries(['tests', 'pass', 'fail', 'skipped', 'cancelled', 'todo'].map((key) =>
       [key, Number(output.match(new RegExp(`^# ${key} (\\d+)$`, 'm'))?.[1] ?? -1)]));
-    if (check.counts.tests < 1 || check.counts.fail !== 0 || check.counts.skipped !== 0) check.status = 'fail';
+    if (check.counts.tests < 1 || check.counts.pass !== check.counts.tests ||
+        ['fail', 'skipped', 'cancelled', 'todo'].some((key) => check.counts[key] !== 0)) check.status = 'fail';
+    if (check.status === 'fail') {
+      check.error_codes = [...new Set([...output.matchAll(/^\s+code: '?([A-Z][A-Z0-9_]{1,63})'?\s*$/gm)].map((x) => x[1]))];
+      check.failure_types = [...new Set([...output.matchAll(/^\s+failureType: '([a-zA-Z]+)'\s*$/gm)].map((x) => x[1]))];
+    }
   }
   if (kind === 'audit') {
     try { check.vulnerabilities = JSON.parse(result.stdout).metadata.vulnerabilities;
@@ -55,7 +60,9 @@ try {
   run('base_license_headers', ['backend/scripts/check-base.js']);
   run('dependency_notices', ['backend/scripts/dependency-inventory.js', '--check']);
   run('unit_http_contract', ['--test', '--test-reporter=tap', 'backend/tests/backend/*.test.js', 'backend/tests/contracts/*.test.js'], 'test');
-  run('postgresql', ['--env-file-if-exists=.env', '--test', '--test-reporter=tap', 'backend/tests/integration/*.test.js'], 'test');
+  // Bound simultaneous fixture pools on small development machines. Assertions
+  // for concurrent transactions inside each file still execute unchanged.
+  run('postgresql', ['--env-file-if-exists=.env', '--test', '--test-concurrency=1', '--test-reporter=tap', 'backend/tests/integration/*.test.js'], 'test');
   run('identity_native_http', ['--env-file-if-exists=.env', '--import', './backend/tests/support/oidc-native-loader.js',
     '--test', '--test-concurrency=1', '--test-reporter=tap', 'backend/tests/identity/*.test.js'], 'test');
   run('source_process_readiness', ['backend/scripts/smoke.js']);
