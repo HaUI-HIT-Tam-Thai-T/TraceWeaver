@@ -21,7 +21,7 @@ export function createApp({ checkReadiness, verifyToken, verifyIngestToken, veri
   app.use(requestContext);
   app.use('/docs', createDocsRouter(oidc));
   app.use('/health', createHealthRouter(checkReadiness));
-  app.use('/api/v1', express.json({ limit: 1048576, strict: true }));
+  app.use('/api/v1', express.json({ limit: 1048576, strict: true, inflate: false }));
   app.use('/api/v1', createAccessRouter({ verifyToken, access }));
   app.use('/api/v1', createIngestionRouter({ verifyToken: verifyIngestToken, access, ingestion }));
   app.use('/api/v1', createEventRouter({ verifyToken, access, events }));
@@ -29,7 +29,7 @@ export function createApp({ checkReadiness, verifyToken, verifyIngestToken, veri
   app.use('/api/v1', createReviewRouter({ verifyToken, access, reviews }));
   app.use('/api/v1', createCaseRouter({ verifyToken, access, cases }));
   app.use('/api/v1', createDashboardRouter({ verifyToken, access, dashboard }));
-  app.use('/core/v1', express.json({ limit: 1048576, strict: true }), createWorkflowRouter({ verifyAppToken, verifyToken, workflows }));
+  app.use('/core/v1', express.json({ limit: 1048576, strict: true, inflate: false }), createWorkflowRouter({ verifyAppToken, verifyToken, workflows }));
   app.use(notFound);
   app.use(errorHandler(logError));
   return app;

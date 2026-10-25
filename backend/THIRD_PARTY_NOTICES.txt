@@ -531,9 +531,9 @@ Agreement.
 
 
 ========================================================================
-body-parser@2.3.0 (MIT)
-https://registry.npmjs.org/body-parser/-/body-parser-2.3.0.tgz
-sha512-2cGmJupaNgg+QUwVLAucDuWuoMZ6EX9iHDRswZ5lsNYEmwPaRknMPCLZz07yTzVq/83p4o/wzbDZbBrTvGGTIw==
+body-parser@2.4.0 (MIT)
+https://registry.npmjs.org/body-parser/-/body-parser-2.4.0.tgz
+sha512-Ifk1KcLrxaGt1occQagQNFNNOqRt1LFuehEnHHzB8Z6cRgIxRU1TBaiIsUiCdA+gy5PL7Y1IX31DNKkRmxtXjQ==
 
 LICENSE
 (The MIT License)
@@ -1160,9 +1160,9 @@ SOFTWARE.
 
 
 ========================================================================
-fast-uri@3.1.8 (BSD-3-Clause)
-https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.8.tgz
-sha512-GZMtZUTNRpOVIECoXwLNZS5xUGE+mVNbTB8h/7Rwh2TFWcBQiPzTgyZi05BF9UMZKkLJv8XBRJTlU7zg8+ZfMg==
+fast-uri@3.1.9 (BSD-3-Clause)
+https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.9.tgz
+sha512-hS/0Wt3Ya043oKXs0sIxrMpKQITXhMLIrVAKKXi4gozGC9v7YRWVnXIZzjNPTO02M9BdxLCWqK1yRXgNziVyJQ==
 
 LICENSE
 Copyright (c) 2011-2021, Gary Court until https://github.com/garycourt/uri-js/commit/a1acf730b4bba3f1097c9f52e7d9d3aba8cdcaae

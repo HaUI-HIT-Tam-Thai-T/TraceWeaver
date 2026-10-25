@@ -31,7 +31,7 @@ React, AI runtime and model are not installed in this scaffold. Add their pinned
 | ajv-draft-04 | 1.0.0 | development / transitive | MIT | [npm](https://www.npmjs.com/package/ajv-draft-04/v/1.0.0) |
 | ajv-formats | 3.0.1 | runtime / direct | MIT | [npm](https://www.npmjs.com/package/ajv-formats/v/3.0.1) |
 | argparse | 3.0.3 | development / transitive | PSF-2.0 | [npm](https://www.npmjs.com/package/argparse/v/3.0.3) |
-| body-parser | 2.3.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/body-parser/v/2.3.0) |
+| body-parser | 2.4.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/body-parser/v/2.4.0) |
 | bytes | 3.1.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/bytes/v/3.1.2) |
 | call-bind-apply-helpers | 1.0.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/call-bind-apply-helpers/v/1.0.2) |
 | call-bound | 1.0.4 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/call-bound/v/1.0.4) |
@@ -52,7 +52,7 @@ React, AI runtime and model are not installed in this scaffold. Add their pinned
 | etag | 1.8.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/etag/v/1.8.1) |
 | express | 5.3.0 | runtime / direct | MIT | [npm](https://www.npmjs.com/package/express/v/5.3.0) |
 | fast-deep-equal | 3.1.3 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/fast-deep-equal/v/3.1.3) |
-| fast-uri | 3.1.8 | runtime / transitive | BSD-3-Clause | [npm](https://www.npmjs.com/package/fast-uri/v/3.1.8) |
+| fast-uri | 3.1.9 | runtime / transitive | BSD-3-Clause | [npm](https://www.npmjs.com/package/fast-uri/v/3.1.9) |
 | finalhandler | 2.1.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/finalhandler/v/2.1.1) |
 | forwarded | 0.2.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/forwarded/v/0.2.0) |
 | fresh | 2.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/fresh/v/2.0.0) |
