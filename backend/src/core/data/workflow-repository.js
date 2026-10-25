@@ -50,7 +50,7 @@ export function createWorkflowRepository(pool) {
         await serviceMember(client, app, workspace); await authorize(client, subject, workspace, [], true);
         if (input.definition_key === 'case_handling' && input.definition_version === 1 && input.entity_ref.type === 'case') {
           // Case creation owns the run/evidence relationship. Core never creates an unbound case workflow.
-          const detail = await cases.get(subject, workspace, input.entity_ref.id);
+          const detail = await cases.get(subject, workspace, input.entity_ref.id, client);
           if (detail) throw new ApiError(409, 'WORKFLOW_EXISTS', 'Case workflow already exists; use its workflow_instance_id');
         }
         if (input.definition_key !== 'document_review' || input.definition_version !== 1 || input.entity_ref.type !== 'document') {

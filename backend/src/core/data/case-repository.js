@@ -90,12 +90,12 @@ export function createCaseRepository(pool) {
         return result;
       });
     },
-    async get(subject, workspace, id) {
-      const initial = await lookup(pool, workspace, id);
-      const { rows: scope } = await pool.query('SELECT source_id::text FROM core.run_sources WHERE workspace_id=$1 AND run_id=$2', [workspace, initial.run_id]);
-      await authorize(pool, subject, workspace, scope.map((row) => row.source_id));
+    async get(subject, workspace, id, client = pool) {
+      const initial = await lookup(client, workspace, id);
+      const { rows: scope } = await client.query('SELECT source_id::text FROM core.run_sources WHERE workspace_id=$1 AND run_id=$2', [workspace, initial.run_id]);
+      await authorize(client, subject, workspace, scope.map((row) => row.source_id));
       // Everything returned to the client is captured in one SQL statement with current artifact scope.
-      const { rows: [row] } = await pool.query(`SELECT summary.*,
+      const { rows: [row] } = await client.query(`SELECT summary.*,
         ARRAY(SELECT to_jsonb(wh) FROM core.workflow_history wh WHERE wh.workspace_id=summary.workspace_id
           AND wh.instance_id=summary.workflow_instance_id ORDER BY wh.version) AS history,
         ARRAY(SELECT e.document FROM core.case_evidence e WHERE e.workspace_id=summary.workspace_id AND e.case_id=summary.id ORDER BY e.id) AS evidence

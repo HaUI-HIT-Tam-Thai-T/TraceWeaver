@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import test from 'node:test';
 import { caseFixture } from '../support/case-fixture.js';
 import { createWorkflowRepository } from '../../src/core/data/workflow-repository.js';
+import { createDatabase } from '../../src/core/data/database.js';
 test('core repository persists documents, delegates cases and rolls back audit failures', async (t) => {
   const f = await caseFixture(t), { pool, workspace } = f, repo = createWorkflowRepository(pool), app = 'core-app';
   await pool.query('INSERT INTO core.memberships(workspace_id,subject) VALUES($1,$2)', [workspace, app]);
@@ -29,6 +30,18 @@ test('core repository persists documents, delegates cases and rolls back audit f
     const approved = await step(doc.id, 'approve', 2, 'reviewer'); assert.equal(approved.state, 'approved');
     assert.equal(approved.history.length, 3); assert.equal(approved.history.at(-1).actor_subject, 'reviewer');
     await assert.rejects(repo.get(app, 'operator', f.otherWorkspace, doc.id), { status: 404 });
+  });
+  await t.test('existing case lookup uses the transaction connection even with a one-connection pool', async () => {
+    const c = await f.cases.create('operator', workspace, { run_id: f.run.id, title: 'Pool scope' });
+    const { rows: [db] } = await pool.query('SELECT current_database() AS name');
+    const url = new URL(f.config.databaseUrl); url.pathname = `/${db.name}`;
+    const single = createDatabase({ ...f.config, databaseUrl: url.href, poolMax: 1 });
+    try {
+      const constrained = createWorkflowRepository(single);
+      await assert.rejects(constrained.create(app, 'operator', workspace,
+        { ...create(), definition_key: 'case_handling', entity_ref: { type: 'case', id: c.id } }),
+      { status: 409, code: 'WORKFLOW_EXISTS' });
+    } finally { await single.end(); }
   });
   await t.test('case core transitions share authoritative state, evidence guards and run freeze', async () => {
     const c = await f.cases.create('operator', workspace, { run_id: f.run.id, title: 'Core test' });
