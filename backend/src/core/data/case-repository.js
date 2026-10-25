@@ -127,8 +127,9 @@ export function createCaseRepository(pool) {
         return evidence;
       });
     },
-    transition(subject, workspace, id, input, key) {
+    transition(subject, workspace, id, input, key, context = {}) {
       return withTransaction(pool, async (client) => {
+        if (context.authorize) await context.authorize(client);
         const retry = await idempotency(client, subject, workspace, `cases/${id}/transitions`, input, key);
         const { row, run, engine } = await lockedCase(client, subject, workspace, id);
         const current = { state: row.to_state, owner_subject: row.owner_subject, version: row.version };
@@ -139,6 +140,7 @@ export function createCaseRepository(pool) {
           (SELECT reason FROM core.workflow_history h WHERE h.workspace_id=r.workspace_id AND h.instance_id=$4
             AND h.to_state='closed' ORDER BY version DESC LIMIT 1) AS close_reason
           FROM core.reconstruction_runs r WHERE r.workspace_id=$1 AND r.id=$2`, [workspace, row.run_id, id, row.workflow_instance_id]);
+        if (context.evidenceRefs?.some((ref) => !data.evidence.some((e) => e.id === ref))) throw notFound();
         const owner = input.action === 'assign' ? input.owner_id : current.owner_subject;
         const next = engine.transition(current, { ...input, owner_subject: owner }, run.actor, {
           valid_owner: await ownerValid(client, owner, workspace, run.sources), has_note: data.evidence.some((e) => e.note.trim()),
@@ -150,10 +152,11 @@ export function createCaseRepository(pool) {
           current.state, data.evidence.map((e) => e.id), snapshot);
         const result = caseDto({ ...row, to_state: next.state, owner_subject: next.owner_subject, version: next.version, updated_at: history.occurred_at });
         await audit(client, workspace, subject, 'case.transitioned', id, { version: current.version, state: current.state },
-          { version: next.version, state: next.state, action: input.action });
+          { version: next.version, state: next.state, action: input.action, ...(context.appSubject ? { app_subject: context.appSubject } : {}) });
         await retry.save(id, result); await authorize(client, subject, workspace, run.sources, true);
         if (!await ownerValid(client, owner, workspace, run.sources)) throw new ApiError(422, 'GUARD_FAILED', 'Owner no longer has the required scope');
-        return result;
+        if (context.authorize) await context.authorize(client);
+        return context.respond ? context.respond(client) : result;
       });
     },
   };
