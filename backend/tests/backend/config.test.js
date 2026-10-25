@@ -10,6 +10,12 @@ const valid = { DATABASE_URL: 'postgresql://app:local-password@localhost:5432/tr
 test('configuration validates defaults and explicit ports', () => {
   assert.equal(readConfig(valid).port, 8080);
   assert.equal(readConfig({ ...valid, API_PORT: '8090' }).port, 8090);
+  assert.equal(readConfig(valid).oidcAppClientId, 'traceweaver-core');
+  assert.equal(readConfig(valid).oidcAppSubject, '');
+  for (const config of [{ CORE_APP_CLIENT_ID: 'traceweaver-web' }, { CORE_APP_CLIENT_ID: 'traceweaver-ingest' },
+    { CORE_APP_CLIENT_ID: '' }, { CORE_APP_SUBJECT: ' ' }, { CORE_APP_SUBJECT: '\u0000' }]) {
+    assert.throws(() => readConfig({ ...valid, ...config }), /OIDC/);
+  }
 });
 
 test('identity configuration rejects insecure production URLs and missing cursor key', () => {

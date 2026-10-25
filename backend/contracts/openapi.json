@@ -1204,11 +1204,15 @@
       "post": {
         "operationId": "createWorkflowInstance",
         "summary": "createWorkflowInstance",
-        "description": "Internal app credential only. Actor/creator derived from validated end-user context; never trust arbitrary client actor headers. Engine validates definition/version and workspace membership.",
-        "x-implementation-status": "planned",
+        "description": "Internal app JWT (distinct client and configured service subject) plus independently verified end-user JWT; both require active workspace membership. X-Workspace-Id must match body workspace_id and creator_subject must match verified user. Creates standalone workspace-scoped document_review v1/document entities; no document content is stored. Case workflows are created by createCase; duplicate core case creation returns409 after current source ACL. Server definitions only. Entity uniqueness409; no Idempotency-Key support.",
+        "x-implementation-status": "implemented",
+        "parameters": [
+          { "$ref": "#/components/parameters/coreWorkspace" }
+        ],
         "security": [
           {
-            "appServiceBearer": []
+            "appServiceBearer": [],
+            "delegatedUserBearer": []
           }
         ],
         "responses": {
@@ -1269,11 +1273,12 @@
       "post": {
         "operationId": "transitionWorkflowInstance",
         "summary": "transitionWorkflowInstance",
-        "description": "Internal app credential plus trusted user context; core enforces definition/role/guard/version and commits history+audit in the same transaction.",
-        "x-implementation-status": "planned",
+        "description": "Verified app plus end-user JWT and current DB permissions. Definition/role/owner/guard/expected_version enforced; history and audit commit atomically. Case transitions share case repository and run lock, evidence/close/reopen guards; supplied evidence_refs must belong to that case, server records full current evidence. document_review v1 rejects owner/evidence refs. Stale version409; no Idempotency-Key support.",
+        "x-implementation-status": "implemented",
         "security": [
           {
-            "appServiceBearer": []
+            "appServiceBearer": [],
+            "delegatedUserBearer": []
           }
         ],
         "responses": {
@@ -1319,6 +1324,7 @@
           }
         },
         "parameters": [
+          { "$ref": "#/components/parameters/coreWorkspace" },
           {
             "$ref": "#/components/parameters/id"
           }
@@ -1339,11 +1345,12 @@
       "get": {
         "operationId": "getWorkflowInstance",
         "summary": "getWorkflowInstance",
-        "description": "Internal app service only; enforce workspace and trusted actor scope.",
-        "x-implementation-status": "planned",
+        "description": "Verified app JWT plus independently verified user JWT, X-Workspace-Id and current memberships/reader role. Case instances also require current read grants for every requested run source including empty sources. Returns persisted definition identity, latest state/version and sanitized history; no internal facts or definition payload.",
+        "x-implementation-status": "implemented",
         "security": [
           {
-            "appServiceBearer": []
+            "appServiceBearer": [],
+            "delegatedUserBearer": []
           }
         ],
         "responses": {
@@ -1383,6 +1390,7 @@
           }
         },
         "parameters": [
+          { "$ref": "#/components/parameters/coreWorkspace" },
           {
             "$ref": "#/components/parameters/id"
           }
@@ -1457,6 +1465,13 @@
   },
   "components": {
     "parameters": {
+      "coreWorkspace": {
+        "name": "X-Workspace-Id",
+        "in": "header",
+        "required": true,
+        "description": "Explicit workspace scope; must equal WorkflowCreate.workspace_id. Both service and user need active membership.",
+        "schema": { "$ref": "./schemas/domain.schema.json#/$defs/Id" }
+      },
       "wid": {
         "name": "wid",
         "in": "path",
@@ -1675,7 +1690,13 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "Internal app service plus trusted validated end-user context."
+        "description": "App access JWT with distinct CORE_APP_CLIENT_ID azp and exact CORE_APP_SUBJECT sub. Requires active workspace membership; empty CORE_APP_SUBJECT disables core503. Pair with delegatedUserBearer; never send app credentials to browser."
+      },
+      "delegatedUserBearer": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-End-User-Authorization",
+        "description": "Bearer <original user access JWT>. Core independently verifies signature/issuer/audience/expiry/user client. Current user roles and grants come from DB, never arbitrary actor headers. Send only through a trusted server over HTTPS."
       },
       "scorerServiceSecret": {
         "type": "http",

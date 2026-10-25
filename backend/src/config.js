@@ -39,6 +39,12 @@ export function readConfig(env = process.env) {
   const oidcAudience = env.OIDC_API_AUDIENCE ?? 'traceweaver-api';
   const oidcUserClientId = env.OIDC_CLIENT_ID ?? 'traceweaver-web';
   const oidcIngestClientId = env.INGEST_CLIENT_ID ?? 'traceweaver-ingest';
+  const oidcAppClientId = env.CORE_APP_CLIENT_ID ?? 'traceweaver-core';
+  const oidcAppSubject = env.CORE_APP_SUBJECT ?? '';
+  if (typeof oidcAppClientId !== 'string' || !oidcAppClientId.trim() || oidcAppClientId.length > 255 ||
+      [oidcUserClientId, oidcIngestClientId].includes(oidcAppClientId) || typeof oidcAppSubject !== 'string' ||
+      oidcAppSubject.length > 255 || oidcAppSubject.includes('\u0000') || !oidcAppSubject.isWellFormed() ||
+      (oidcAppSubject && !oidcAppSubject.trim())) throw new Error('OIDC core app configuration is invalid');
   if (![oidcAudience, oidcUserClientId, oidcIngestClientId].every((value) => value.trim().length > 0 && value.length <= 255) || oidcUserClientId === oidcIngestClientId) throw new Error('OIDC client/audience configuration is invalid');
   if (typeof env.CURSOR_SECRET !== 'string' || env.CURSOR_SECRET.length < 32) throw new Error('CURSOR_SECRET must contain at least 32 characters');
   return Object.freeze({
@@ -48,7 +54,7 @@ export function readConfig(env = process.env) {
     databaseUrl: env.DATABASE_URL,
     poolMax: positiveInteger(env.DB_POOL_MAX, 'DB_POOL_MAX', 5, 50),
     shutdownTimeoutMs: positiveInteger(env.SHUTDOWN_TIMEOUT_MS, 'SHUTDOWN_TIMEOUT_MS', 10000, 60000),
-    oidcIssuer, oidcAudience, oidcUserClientId, oidcIngestClientId,
+    oidcIssuer, oidcAudience, oidcUserClientId, oidcIngestClientId, oidcAppClientId, oidcAppSubject,
     oidcJwksUri: identityUrl(env.OIDC_JWKS_URI ?? `${oidcIssuer}/protocol/openid-connect/certs`, 'OIDC_JWKS_URI', appEnv, env.OIDC_LOCAL_KEYCLOAK === 'true'),
     oidcTimeoutMs: positiveInteger(env.OIDC_TIMEOUT_MS, 'OIDC_TIMEOUT_MS', 2000, 10000),
     cursorSecret: env.CURSOR_SECRET,

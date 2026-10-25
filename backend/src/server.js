@@ -5,7 +5,7 @@ import { readConfig } from './config.js';
 import { createApp } from './app.js';
 import { createDatabase } from './core/data/database.js';
 import { isDatabaseReady, loadMigrations } from './core/data/migrations.js';
-import { createTokenVerifier, createIngestTokenVerifier } from './core/identity/token-verifier.js';
+import { createTokenVerifier, createIngestTokenVerifier, createAppTokenVerifier } from './core/identity/token-verifier.js';
 import { createCursorCodec } from './core/identity/cursor.js';
 import { createAccessRepository } from './core/identity/access-repository.js';
 import { createAccessService } from './services/access.service.js';
@@ -22,6 +22,8 @@ import { createCaseRepository } from './core/data/case-repository.js';
 import { createCaseService } from './services/case.service.js';
 import { createDashboardRepository } from './core/data/dashboard-repository.js';
 import { createDashboardService } from './services/dashboard.service.js';
+import { createWorkflowRepository } from './core/data/workflow-repository.js';
+import { createWorkflowService } from './services/workflow.service.js';
 
 let database;
 try {
@@ -32,6 +34,8 @@ try {
     checkReadiness: () => isDatabaseReady(database, migrations),
     verifyToken: createTokenVerifier(config),
     verifyIngestToken: createIngestTokenVerifier(config),
+    verifyAppToken: createAppTokenVerifier(config),
+    workflows: createWorkflowService(createWorkflowRepository(database)),
     oidc: { issuer: config.oidcIssuer, clientId: config.oidcUserClientId },
     access: createAccessService(createAccessRepository(database), createCursorCodec(config.cursorSecret)),
     ingestion: createIngestionService(createIngestionRepository(database)),

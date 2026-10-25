@@ -27,6 +27,8 @@ x-api: &api
     OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:8081/realms/traceweaver}
     OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-traceweaver-web}
     INGEST_CLIENT_ID: ${INGEST_CLIENT_ID:-traceweaver-ingest}
+    CORE_APP_CLIENT_ID: ${CORE_APP_CLIENT_ID:-traceweaver-core}
+    CORE_APP_SUBJECT: ${CORE_APP_SUBJECT:-}
     OIDC_API_AUDIENCE: ${OIDC_API_AUDIENCE:-traceweaver-api}
     OIDC_JWKS_URI: ${OIDC_JWKS_URI:-http://keycloak:8080/realms/traceweaver/protocol/openid-connect/certs}
     OIDC_LOCAL_KEYCLOAK: "true"

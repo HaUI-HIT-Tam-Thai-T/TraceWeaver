@@ -82,7 +82,7 @@ test('Swagger serves local assets/specs/schema refs without auth or external val
   assert.match(spec.paths['/api/v1/workspaces/{wid}/runs'].post.summary, /implemented/);
   assert.match(spec.paths['/api/v1/workspaces/{wid}/cases'].post.summary, /implemented/);
   assert.match(spec.paths['/api/v1/workspaces/{wid}/dashboard'].get.summary, /implemented/);
-  assert.match(spec.paths['/core/v1/instances'].post.summary, /planned/);
+  assert.match(spec.paths['/core/v1/instances'].post.summary, /implemented/);
   const init = await (await fetch(`${url}/docs/initializer.js`)).text();
   assert.match(init, /validatorUrl:null/); assert.match(init, /persistAuthorization:false/);
   assert.match(init, /usePkceWithAuthorizationCodeGrant.*true/);

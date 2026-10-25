@@ -13,8 +13,9 @@ import { createRunRouter } from './routers/run.route.js';
 import { createReviewRouter } from './routers/review.route.js';
 import { createCaseRouter } from './routers/case.route.js';
 import { createDashboardRouter } from './routers/dashboard.route.js';
+import { createWorkflowRouter } from './routers/workflow.route.js';
 
-export function createApp({ checkReadiness, verifyToken, verifyIngestToken, access, ingestion, events, runs, reviews, cases, dashboard, oidc, logError = () => {} }) {
+export function createApp({ checkReadiness, verifyToken, verifyIngestToken, verifyAppToken, access, ingestion, events, runs, reviews, cases, dashboard, workflows, oidc, logError = () => {} }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(requestContext);
@@ -28,6 +29,7 @@ export function createApp({ checkReadiness, verifyToken, verifyIngestToken, acce
   app.use('/api/v1', createReviewRouter({ verifyToken, access, reviews }));
   app.use('/api/v1', createCaseRouter({ verifyToken, access, cases }));
   app.use('/api/v1', createDashboardRouter({ verifyToken, access, dashboard }));
+  app.use('/core/v1', express.json({ limit: 1048576, strict: true }), createWorkflowRouter({ verifyAppToken, verifyToken, workflows }));
   app.use(notFound);
   app.use(errorHandler(logError));
   return app;
