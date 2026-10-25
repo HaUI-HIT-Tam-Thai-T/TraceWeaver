@@ -1,6 +1,6 @@
 # Case workflow
 
-BE-20 implements five case APIs; BE-21 adds dashboard and case time filters. Backend contract progress is **17/21 implemented**, four planned; this is not overall product completion. Apply migration007 and restart the source server, or rebuild the API Docker image before using new routes there.
+Five case APIs, dashboard/time filters and three core workflow APIs are implemented: **20/21 operations**, scorer planned. See [current status](../docs/CURRENT_STATUS.md). Apply migration007 and restart source/rebuild the image before using new behavior; this is not overall product completion.
 
 ## API
 

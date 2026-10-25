@@ -190,7 +190,7 @@
       "post": {
         "operationId": "ingestEvents",
         "summary": "ingestEvents",
-        "description": "Service token restricted to this source. Envelope 1-500 records, HTTP body <=1 MiB. Each record validates against EventInput independently; invalid record becomes rejected, valid records continue. Same source_event_id and canonical content = duplicate; changed content = per-item SOURCE_EVENT_CONFLICT. Server owns IDs/received_at/provenance/parser_version. Redact before persistence/logging. Unique key survives retries indefinitely; no Idempotency-Key needed.",
+        "description": "Service token restricted to this source. Envelope 1-500 records, HTTP body <=1 MiB. Each record validates against EventInput independently; invalid record becomes rejected, valid records continue. Same source_event_id and canonical content = duplicate; changed content = per-item SOURCE_EVENT_CONFLICT. Server owns IDs/received_at/provenance/parser_version. Redact before persistence/logging. Unique key survives retries indefinitely; no Idempotency-Key needed. Compressed request bodies return 415. Records are revalidated after redaction. Timestamps support exact microseconds; nonzero fractional digits beyond 6 reject per record as UNSUPPORTED_TIMESTAMP_PRECISION.",
         "x-implementation-status": "implemented",
         "security": [
           {

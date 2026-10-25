@@ -23,8 +23,11 @@ Use Node24 and installed root dependencies. First create the existing applicatio
 npm run db:up
 npm run db:migrate
 node --env-file-if-exists=.env backend/scripts/setup-identity-demo.js
+# Fresh machine only: download the pinned image before --pull never.
+docker compose pull keycloak
 docker compose up -d --wait --pull never keycloak
 node --env-file-if-exists=.env backend/scripts/setup-core-identity-demo.js
+node --env-file-if-exists=.env backend/scripts/setup-frontend-origin.js
 docker compose up -d --build --wait --pull never api
 node --env-file-if-exists=.env backend/scripts/verify-keycloak-demo.js
 ```
@@ -36,6 +39,8 @@ Base setup generates `demo-credentials.local.json`, `.env.keycloak.local` and `.
 The core secret and subject are saved under `core` in the ignored credentials JSON; only CORE_APP_CLIENT_ID/CORE_APP_SUBJECT are added to `.env`, preserving other values and line endings. Reruns do not rotate credentials or rewrite unchanged files (hash checked). Existing unmanaged/misconfigured core client, conflicting nonempty environment values, mismatched saved subject/secret or revoked membership make setup stop; it does not reset/repair those permissions silently. The tool is restricted to development and a loopback HTTP `/realms/traceweaver` issuer, uses bounded requests and rejects redirects. Production configuration is separate.
 
 ## Accounts and service tokens
+
+Browser integration uses exact FRONTEND_ORIGINS, defaulting to localhost/127.0.0.1 at FRONTEND_PORT3000 in development, with `/auth/callback` redirects. Fresh imports include them. For an existing realm, run `setup-frontend-origin.js`: it appends these values to the local public S256 PKCE client through Admin REST and updates the ignored import, preserving Swagger callbacks, accounts, passwords, membership and service clients. It rejects unexpected client profiles and is development/loopback-only. API/health use the same CORS allowlist; core HTTP has no browser CORS. A source change needs an API restart/container rebuild to take effect. Production origins must be explicitly configured HTTPS.
 
 - `demo.operator`: database role operator, read grants for three demo sources.
 - `demo.viewer`: database role viewer, read grants for the same sources.

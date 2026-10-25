@@ -16,26 +16,26 @@ Snapshot offline phải có nguồn/hash/cách tái tạo và nhãn replay; star
 
 | ID | Tình huống | Expected | Hiện trạng |
 |---|---|---|---|
-| T01 | Token sai/hết hạn/signature/audience/issuer/client | 401, không payload nhạy cảm | Đã kiểm BE bằng JWKS HTTP simulation; IdP thật còn thiếu |
-| T02 | Workspace/event/run/case nguồn khác | 404, không leak graph/count/model | Workspace/sources đã kiểm; artifact nghiệp vụ chưa có |
-| T03 | Thu hồi grant/group/membership, mở lại dữ liệu | Chặn dữ liệu, cursor invalid; FE bỏ cache | BE đọc sources/KB đã kiểm; FE/artifact khác chưa có |
-| T04 | Batch lặp / cùng ID khác nội dung | Duplicate/conflict đúng, không ghi đè | Chưa có ingest |
-| T05 | Record lỗi so với envelope/body lỗi | Reject từng record; envelope sai không ghi, body lớn413 | Contract và HTTP body limit có; ingest semantics chưa có |
-| T06 | Run vượt window/event limit | 422, không cắt ngầm | Chưa có |
-| T07 | Log đến muộn | Run cũ giữ snapshot, run mới bổ sung | Chưa có |
-| T08 | Namespace khác nhưng ID value giống | Không nối sai | Chưa có candidate/rules |
-| T09 | Ambiguous không phân biệt | Unresolved, không bịa edge | Chưa có |
-| T10 | Scorer timeout/missing/extra/duplicate pair_id/NaN | Degraded rule-only, ghi version/lý do | Score schema reject NaN/Infinity; runtime scorer fallback chưa có |
-| T11 | Hai reviewer cùng version | Một thành công, một409 | Chưa có |
-| T12 | Cycle/cross-workspace link | 422/404 theo scope, không đổi graph | Chưa có |
-| T13 | Workflow action/role sai | 422/403, giữ state | Chưa có engine |
-| T14 | Ghi audit lỗi | Rollback business write/state/history | DB transaction + audit constraints đã kiểm; case/review chưa có |
-| T15 | Close thiếu evidence/reason | Guard chặn | Chưa có |
-| T16 | Sửa căn cứ case closed | Chặn đến khi reopen | Chưa có |
-| T17 | Core chạy ≥2 workflow definitions | Headless, dùng cùng engine | Chưa có; là cách chứng minh reuse dự án chọn |
+| T01 | Token sai/hết hạn/signature/audience/issuer/client | 401, không payload nhạy cảm | JWT/JWKS HTTP tests; local Keycloak PKCE cũng đã kiểm |
+| T02 | Workspace/event/run/case nguồn khác | 404, không leak graph/count/model | BE HTTP/DB cho artifacts; scorer chưa có |
+| T03 | Thu hồi grant/group/membership, mở lại dữ liệu | Chặn dữ liệu, cursor invalid; FE bỏ cache | BE HTTP/DB tests; FE cache chưa có |
+| T04 | Batch lặp / cùng ID khác nội dung | Duplicate/conflict đúng, không ghi đè | DB/HTTP tests, thêm microsecond conflict/equivalent timestamp |
+| T05 | Record lỗi so với envelope/body lỗi | Reject từng record; envelope sai không ghi, body lớn413 | Đã kiểm; revalidate sau redaction; request nén415/process survival |
+| T06 | Run vượt window/event limit | 422, không cắt ngầm | Unit/DB/HTTP tests |
+| T07 | Log đến muộn | Run cũ giữ snapshot, run mới bổ sung | DB/HTTP tests, kể cả transaction commit trễ |
+| T08 | Namespace khác nhưng ID value giống | Không nối sai | Candidate/rule unit tests |
+| T09 | Ambiguous không phân biệt | Unresolved, không bịa edge | Rule unit tests; chưa evaluation dataset |
+| T10 | Scorer timeout/missing/extra/duplicate pair_id/NaN | Degraded rule-only, ghi version/lý do | Score schema finite checks và absent-AI degraded có; HTTP scorer adapter/failure tests chưa có |
+| T11 | Hai reviewer cùng version | Một thành công, một409 | DB/HTTP concurrency tests |
+| T12 | Cycle/cross-workspace link | 422/404 theo scope, không đổi graph | DB/HTTP tests |
+| T13 | Workflow action/role sai | 422/403, giữ state | Engine/DB/HTTP tests |
+| T14 | Ghi audit lỗi | Rollback business write/state/history | Ingest/run/review/case/core DB/HTTP tests |
+| T15 | Close thiếu evidence/reason | Guard chặn | Case/core DB/HTTP tests |
+| T16 | Sửa căn cứ case closed | Chặn đến khi reopen | DB/HTTP tests với run lock và concurrent graph writes |
+| T17 | Core chạy ≥2 workflow definitions | Headless, dùng cùng engine | Hai definitions qua engine/DB/HTTP; regression poolMax1 |
 | T18 | Runtime/feature thấy oracle | Test isolation phải phát hiện và fail | Chưa có pipeline/runtime nghiệp vụ để kiểm |
 | T19 | Build/source máy mới + offline demo/backup-restore | Chạy toàn luồng, ghi môi trường/lệnh/hash | Có nền BE smoke/clone check theo nhật ký; full hệ thống chưa có |
-| T20 | KB/search/dashboard drill-down | Quyền/filter nhất quán | BE latest KB/literal search đã kiểm; dashboard/FE chưa có |
+| T20 | KB/search/dashboard drill-down | Quyền/filter nhất quán | BE HTTP/DB và exact time bounds; FE chưa có |
 
 Test phải bổ sung cùng module, không chờ cuối kỳ. Thất bại quyền/correctness không được đổi expected để tạo CI xanh. Nếu có deviation cần ghi phạm vi/lý do và quyết định đội; không giấu chức năng chưa triển khai bằng skip.
 
@@ -49,11 +49,13 @@ npm.cmd test
 npm.cmd run test:db
 # Cần thêm Postman CLI >=1.74.0:
 npm.cmd run test:identity
+# Cùng assertions, native JWKS HTTP + PostgreSQL, không cần Postman; CI dùng lệnh này:
+npm.cmd run test:identity:native
 # Sau migrate, khởi động backend tạm và tự dừng:
 npm.cmd run smoke
 ```
 
-Lượt BE mới nhất ghi 17 tests thường và 15 tests identity pass local, cùng base/license/smoke. Identity suite dùng BE thật, Postman JWKS HTTP và PostgreSQL test DB, không chứng minh Keycloak/SSO thật. CI scaffold chưa tự cài Postman; không ghi CI identity pass nếu chỉ chạy local. test:db/test:identity giữ DB fixture riêng sau chạy, không tự drop; tránh chạy lặp vô cớ.
+Lượt sửa audit:73 tests thường,49 DB,45 identity-native pass; base/license98packages và npm audit0. Native fixture dùng HTTP thật, JOSE/Express/PostgreSQL thật và assertions gốc; không kiểm Postman lifecycle. CI PostgreSQL đã có native identity và npm audit gate; chưa xác nhận remote run. Local Keycloak có verifier riêng. Tests giữ DB riêng sau chạy. Xem [hiện trạng](CURRENT_STATUS.md); không lấy kết quả BE thay full app E2E/AI/performance.
 
 ## Mẫu ghi một lần kiểm
 

@@ -18,15 +18,15 @@ SHA256 bản thể lệ Quốc gia đã đọc: `7a9625672075eab29e77033a1b4c11c
 | ID | Yêu cầu / nguồn | Phần cần làm và minh chứng | Hiện trạng |
 |---|---|---|---|
 | A01 | Kiến trúc ba tầng, Open-Core trước ứng dụng; tr.1–3 | Sơ đồ core → H-P-D-I → ứng dụng, luồng gọi dịch vụ thật | Có sơ đồ/ranh giới; cần chứng minh toàn luồng |
-| A02 | Identity/Auth/Authz, có thể dùng Keycloak/tương đương; 4.1 | Login/roles/groups, token thật và test sai quyền | BE verifier + DB permissions đã có; IdP/SSO thật và FE login chưa kiểm |
-| A03 | API Gateway hoặc lớp API trung gian; 4.1 | Endpoint có kiểm soát, app gọi core qua API | Express và 3 API đọc có auth; còn nhiều operation planned |
-| A04 | Dữ liệu cấu trúc và/hoặc phi cấu trúc; 4.1 | Schema, storage, metadata và migration tái lập | PostgreSQL và schema nền có; dữ liệu nghiệp vụ chưa có |
-| A05 | Workflow engine trạng thái/luồng/lịch sử; 4.1 | Engine/definition, guard/owner/history/audit gọi headless | Chưa có engine chạy; schema/contract không thay engine |
-| A06 | Core tách UI, dịch vụ dùng chung; 4.1 | Gọi API không cần UI, chứng minh tái sử dụng | Data/identity không import Express; workflow reuse còn thiếu |
-| A07 | H: login, người dùng/nhóm/quyền, workspace/knowledge; 4.2 | Màn hình + dữ liệu/role + tài liệu có nội dung | Có BE đọc me/sources/knowledge; UI/IdP/knowledge seed còn thiếu |
-| A08 | P: ≥1 quy trình có state/creator/handler/time/history và hàng chờ; 4.2 | Case lifecycle và hàng chờ xử lý, audit thật | Chưa có |
-| A09 | D: nguồn thống nhất, provenance, tìm/lọc/thống kê/dashboard, REST hoặc GraphQL; 4.2 | Ingest/events + provenance + explorer/dashboard | Có nền storage/contracts; nghiệp vụ chưa có |
-| A10 | I: ≥1 chức năng thông minh, có thể rule-based; 4.2/7 | Luật/scorer có input, version/license, giới hạn và căn cứ | Chưa có luật/model/scorer chạy |
+| A02 | Identity/Auth/Authz, có thể dùng Keycloak/tương đương; 4.1 | Login/roles/groups, token thật và test sai quyền | Local Keycloak PKCE/refresh + DB permissions đã kiểm; FE login UI/production chưa có |
+| A03 | API Gateway hoặc lớp API trung gian; 4.1 | Endpoint có kiểm soát, app gọi core qua API | 20/21 operations implemented; core HTTP dùng app/user JWT riêng |
+| A04 | Dữ liệu cấu trúc và/hoặc phi cấu trúc; 4.1 | Schema, storage, metadata và migration tái lập | PostgreSQL7 migrations và dữ liệu ingest/provenance có; dataset đại diện chưa có |
+| A05 | Workflow engine trạng thái/luồng/lịch sử; 4.1 | Engine/definition, guard/owner/history/audit gọi headless | Engine/version/guards/audit có, hai definitions chạy headless và HTTP |
+| A06 | Core tách UI, dịch vụ dùng chung; 4.1 | Gọi API không cần UI, chứng minh tái sử dụng | Core không import Express; document_review/case_handling dùng chung engine/API |
+| A07 | H: login, người dùng/nhóm/quyền, workspace/knowledge; 4.2 | Màn hình + dữ liệu/role + tài liệu có nội dung | BE me/sources/knowledge và local IdP có; UI/knowledge demo đại diện còn thiếu |
+| A08 | P: ≥1 quy trình có state/creator/handler/time/history và hàng chờ; 4.2 | Case lifecycle và hàng chờ xử lý, audit thật | Case lifecycle/history/owner/guards và dashboard waiting counts có; UI chưa có |
+| A09 | D: nguồn thống nhất, provenance, tìm/lọc/thống kê/dashboard, REST hoặc GraphQL; 4.2 | Ingest/events + provenance + explorer/dashboard | Normalized ingest/events/search/provenance/dashboard APIs có; raw parsers/dataset/UI còn thiếu |
+| A10 | I: ≥1 chức năng thông minh, có thể rule-based; 4.2/7 | Luật/scorer có input, version/license, giới hạn và căn cứ | Rule engine có version/evidence/unresolved; model/scorer/evaluation chưa có |
 | A11 | ≥1 ứng dụng cho khoa/phòng/trung tâm/đơn vị đào tạo; 4.3 | Demo ứng dụng sử dụng cả core và H-P-D-I | TraceWeaver đã xác định bài toán; chưa end-to-end |
 | A12 | UI rõ ràng, ưu tiên Việt/song ngữ; dashboard/landing trạng thái; mục9 | FE có màn hình và trạng thái dữ liệu/lỗi thực | FE còn skeleton |
 
@@ -38,14 +38,14 @@ SHA256 bản thể lệ Quốc gia đã đọc: `7a9625672075eab29e77033a1b4c11c
 | B02 | LICENSE phù hợp và bảng dependency/license | Apache-2.0, SPDX/notices và npm inventory có; audit FE/AI/model/data/image phải bổ sung khi sử dụng |
 | B03 | ≥1 release/tag có version | Local có v0.1.0-base.1; release nền không thay bản sản phẩm hoàn chỉnh; cần kiểm URL/assets/commit nộp |
 | B04 | Build/install/run từ source theo README | BE smoke/checks có; full FE/BE/AI trên máy mới chưa chứng minh |
-| B05 | README đủ kiến trúc/công nghệ/install/config/run/API/demo account | Có README/INSTALL/contract/Identity guide; demo accounts/tài liệu các module còn thiếu |
+| B05 | README đủ kiến trúc/công nghệ/install/config/run/API/demo account | README/INSTALL/API/demo local có; xem CURRENT_STATUS và KEYCLOAK; tài liệu FE/AI bổ sung khi triển khai |
 | B06 | CHANGELOG và issue/bug tracker | Có file và issue URL; dùng issue/commit thực tế, không tạo lịch sử giả |
 | B07 | Không secret/API key/token/PII trong source | .env.example/ignore/base checks có; tiếp tục kiểm source, history và artifacts trước release |
 | B08 | Không thành phần đóng/không rõ giấy phép ở core; ghi origin/version/license/role của bên ngoài | npm notices có; không coi đó là audit toàn distribution/container/model |
-| B09 | Tests tối thiểu cho chức năng lõi | 17 tests thường +15 identity pass local; parser/workflow/reconstruction/E2E cần bổ sung |
-| B10 | RBAC, hash mật khẩu, quản lý secret/.env.example | DB permissions có; để IdP lưu/hash mật khẩu, BE không tự lưu plaintext; IdP thật chưa nghiệm thu |
+| B09 | Tests tối thiểu cho chức năng lõi | 73 unit/HTTP/contract,49 DB,45 identity-native pass; full app E2E/evaluation chưa có |
+| B10 | RBAC, hash mật khẩu, quản lý secret/.env.example | DB permissions + Keycloak local có; credentials sinh local; production SSO riêng |
 | B11 | Dữ liệu mẫu đủ cho D/I; mỗi nguồn có origin/quyền sử dụng/provenance | Fixtures schema synthetic có; dataset demo/training/manifest thực chưa có |
-| B12 | Nguồn/API ngoài không ổn định có snapshot/fallback; không dùng dữ liệu nhạy cảm/trái quyền | Cần dataset offline và cơ chế degraded; fixture token/JWKS test không phải fallback nghiệp vụ |
+| B12 | Nguồn/API ngoài không ổn định có snapshot/fallback; không dùng dữ liệu nhạy cảm/trái quyền | Hybrid degraded rule_only đã có; dataset/full offline replay chưa có |
 
 ## C. Hồ sơ và trình diễn — HaUI mục 9–10
 

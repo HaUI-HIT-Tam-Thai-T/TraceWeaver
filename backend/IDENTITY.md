@@ -42,6 +42,6 @@ Sources/knowledge: limit default50/max100, keyset sort id tăng; knowledge có q
 
 `npm test` / `npm run check:base` / `npm run licenses:check` kiểm phần thông thường. `npm run test:identity` cần PostgreSQL/quyền CREATEDB và Postman CLI >=1.74.0, chạy BE thật + DB test riêng + Postman JWKS qua HTTP. Private key chỉ sinh trong bộ nhớ; mock chỉ nhận public keys, logs được test kiểm tra và không commit. DB test giữ lại sau chạy, không tự drop.
 
-Đã kiểm token sai/hết hạn/missing exp/future nbf/wrong client; JWKS JSON/HTML error/timeout/unreachable; direct/group scope, admin, cursor, revocation, latest knowledge và DB failure. Response được validate theo schema. Chưa kiểm login PKCE/SSO/refresh/logout với Keycloak thật.
+Đã kiểm token sai/hết hạn/missing exp/future nbf/wrong client, JWKS JSON/HTML/timeout/unreachable, DB scope/cursor/revocation và failures. Local Keycloak PKCE/refresh/delegated core đã kiểm theo [Keycloak guide](KEYCLOAK.md); logout/introspection/production riêng.
 
-CLI signed out nên không tìm owner's cloud mock; mock local tạo từ contract certs endpoint tại `postman/oidc-jwks.openapi.json`, không publish/deploy. CI scaffold hiện chưa cài Postman để chạy test:identity; suite được chạy local, không tuyên bố CI identity pass.
+Mock local xuất phát từ contract certs endpoint tại postman/oidc-jwks.openapi.json; không publish/deploy. `npm run test:identity:native` giữ assertions, thay duy nhất helper JWKS bằng HTTP native, chạy tuần tự để tránh test timeout300ms dưới tải song song. CI PostgreSQL đã gọi suite native; chưa xác nhận kết quả remote. Postman command giữ để kiểm CLI lifecycle riêng. Secrets/private keys không được ghi log/file.

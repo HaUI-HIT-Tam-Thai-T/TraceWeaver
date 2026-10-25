@@ -2,6 +2,8 @@
 
 Base dự án tái dựng hành trình yêu cầu cấp môi trường thực hành từ dấu vết của ba dịch vụ intake, account và provision, định hướng DX-Lab HaUI 2026.
 
+Hiện trạng nhánh phát triển, kết quả kiểm và giới hạn deployment được giữ tại [CURRENT_STATUS](docs/CURRENT_STATUS.md). Sau sửa audit:73 unit/HTTP/contract,49 DB,45 identity-native pass; npm audit0. Source sửa không tự cập nhật container đang chạy.
+
 ## Cấu trúc
 
 ```text
@@ -83,12 +85,12 @@ Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi tri�
 
 | Thành phần | Hiện trạng bộ khung | Phần cần triển khai tiếp |
 |---|---|---|
-| API trung gian | Express, health, giới hạn body, lỗi/request ID | Endpoint nghiệp vụ có xác thực |
-| Data | PostgreSQL, transaction, migrations nền | Repository và service nghiệp vụ |
-| Identity | Keycloak local/PKCE, JWT/JWKS user/ingest client, membership/role/group/source grants cho chín API | Production SSO và quyền cho các API còn lại |
-| Workflow | Khung module và API contract | Engine dùng chung, guard và audit |
-| H-P-D-I / ứng dụng | Khung frontend và contract | Workspace/tri thức, hồ sơ, tìm kiếm/dashboard |
-| Intelligence | Khung scorer/training và contract | Luật/scorer, giải thích, đánh giá và fallback |
+| API trung gian | Express,20 operations có auth, health/body bounds, CORS allowlist | Scorer adapter và tích hợp FE |
+| Data | PostgreSQL,7 migrations, repositories/transactions/snapshot/provenance | Raw parsers/dataset/backup restore |
+| Identity | Local Keycloak PKCE; JWT/JWKS user/ingest/core và DB grants | Production SSO, FE login UI |
+| Workflow | Hai definitions, shared engine/HTTP, guard/history/audit | UI và full E2E |
+| H-P-D-I / ứng dụng | BE workspace/knowledge/cases/search/dashboard | Frontend/runtime/screens |
+| Intelligence | Rule engine/version/evidence/unresolved, degraded fallback | Scorer/features/model/evaluation |
 | Dữ liệu demo | Fixtures kiểm schema synthetic | Dataset có provenance/manifest và kịch bản đầu-cuối |
 
 ## API và tài khoản demo

@@ -10,7 +10,7 @@ Nguồn: đề HaUI mục5/9/10/11 và thể lệ Quốc gia trang2–3 đã đ�
 | LICENSE/SPDX/notices | Mỗi phần giữ attribution/deps của mình | License text, header/sidecar, npm/Python/model/data/image inventory | Apache/npm có; audit toàn sản phẩm còn thiếu |
 | Source build/install/config/run | BE/FE/AI theo module | Exact commands, env.example, máy mới/commit/hash, hoạt động ngoài source tree khi đóng gói | BE nền có; FE/AI/full app chưa có |
 | Release/tag đúng version trước hạn | Bản tích hợp đủ điều kiện | URL, commit, source tar.gz/checksum, nội dung và giới hạn thật | Có tag nền v0.1.0-base.1; chưa xác nhận artifact sản phẩm hoàn chỉnh |
-| README/API/demo accounts | BE cung cấp API/seed, FE hướng dẫn thao tác | Hướng dẫn 3 tầng/H-P-D-I/tính năng/install/run/API; account tạo local | Có docs nền; demo accounts/flow còn thiếu |
+| README/API/demo accounts | BE cung cấp API/seed, FE hướng dẫn thao tác | Hướng dẫn 3 tầng/H-P-D-I/tính năng/install/run/API; account tạo local | Có local Keycloak/demo accounts và20 API; full UI flow còn thiếu |
 | CHANGELOG/bug tracker | Từng phần cập nhật thay đổi/lỗi thật | Changelog và issue URL có hoạt động thực | Có khung/lịch sử; duy trì đến freeze |
 | Báo cáo kỹ thuật | BE kiến trúc/API/quyền/workflow; FE UX; AI data/model/metrics | Kiến trúc, luồng, phần tự xây/tích hợp, kết quả và giới hạn | Chưa có bản kết quả sản phẩm |
 | Slide ≤12, demo 10+5 phút | Mỗi phần chuẩn bị evidence; đội chốt người trình bày | Luồng thật, chỉ rõ tầng1/2/3, rehearsal đúng thời gian | Chưa có demo toàn luồng |
@@ -20,7 +20,7 @@ Nguồn: đề HaUI mục5/9/10/11 và thể lệ Quốc gia trang2–3 đã đ�
 | Video 3–5 phút | Đội ghi sau flow ổn định | Video đúng bản demo, ghi replay nếu dùng | Khuyến nghị; chưa có |
 | Tên đội/thành viên/GV/deadline | Đội tự xác nhận | Thông tin đăng ký và hạn nộp chính xác | Không suy từ ngày hiện tại hoặc lịch tương đối |
 
-Không đánh dấu repo URL hoặc có tag là toàn bộ PoF đã đạt. Bản nền không chứa workflow/Intelligence/UI đầy đủ. Không chép mục tiêu vào bảng actual hoặc chụp mock thành ảnh tính năng thật.
+Không đánh dấu repo URL hoặc có tag là toàn bộ PoF đã đạt. Nhánh hiện tại có workflow/rules backend; UI/model/full demo chưa đầy đủ. Xem [hiện trạng](CURRENT_STATUS.md). Không chép mục tiêu vào actual hoặc chụp mock thành ảnh tính năng thật.
 
 ## Kịch bản demo HaUI 10 phút đề xuất
 

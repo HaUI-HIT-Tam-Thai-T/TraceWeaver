@@ -8,7 +8,7 @@
 
 Từ root chạy `npm run test:contracts`; `npm test` cũng bao gồm contract tests. Swagger Parser kiểm OpenAPI/refs với remote resolution tắt; Ajv compile strict và kiểm UUID/date-time, positive/negative fixtures, finite score. Chưa có Postman workspace, mock được publish.
 
-`fixtures/valid.json` là map theo tên schema, mỗi entry là một payload ví dụ cho kiểu đó. `fixtures/invalid.json` ghi schema, payload và keyword lỗi mong đợi. Dữ liệu hoàn toàn synthetic, score là ví dụ cấu trúc, không phải kết quả model. Hash trong positive Event fixtures được tính từ canonical JSON của observable event, bỏ event_id/received_at/provenance; convention canonical/dedup runtime sẽ được khóa ở bước ingestion. Không lấy UUID/cursor/credential mẫu làm dữ liệu hoặc token dùng thật.
+`fixtures/valid.json` là map theo tên schema; `fixtures/invalid.json` ghi schema/payload/expected keyword. Dữ liệu synthetic, score chỉ là ví dụ cấu trúc. Runtime hash dùng canonical redacted normalized content, bỏ event_id/source_id/received_at/provenance, giữ parser_version, sort object keys và array order. Timestamp canonical giữ chính xác tới microsecond; giữ legacy millisecond hashes, reject nonzero precision vượt6digits. Xem [ingestion](../INGESTION.md). Không lấy UUID/cursor/credential mẫu làm dữ liệu/token thật.
 
 ## Semantics cần giữ khi implement
 

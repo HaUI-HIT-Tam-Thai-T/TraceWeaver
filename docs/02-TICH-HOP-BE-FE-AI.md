@@ -6,7 +6,7 @@ Phạm vi TraceWeaver do dự án chọn; đối chiếu yêu cầu BTC ở [01]
 
 - [INSTALL](../INSTALL.md): lệnh Node/npm/PostgreSQL/Compose đã có. Không chia sẻ .env/token/private key; mỗi máy tạo secrets riêng.
 - [OpenAPI](../backend/contracts/openapi.json), [schema](../backend/contracts/schemas/domain.schema.json), [fixtures](../backend/contracts/fixtures/valid.json): DTO/enum/error/limits dùng chung. Fixtures là map theo tên schema, không phải response đã lấy từ app.
-- [Identity BE](../backend/IDENTITY.md): issuer/audience/azp, Bearer access token, quyền DB và CURSOR_SECRET. Chưa có demo user hoặc Keycloak chạy thật; membership/grants không tự sinh khi login.
+- [Identity BE](../backend/IDENTITY.md): issuer/audience/azp, Bearer token và quyền DB. Keycloak/demo users local đã có; membership/grants không tự sinh khi login. Xem [hiện trạng](CURRENT_STATUS.md).
 - [frontend](../frontend/README.md), [ai](../ai/README.md), [simulator](../simulator/README.md) mới là skeleton; chưa có lệnh build/run cho những module đó. Không chạy lệnh tưởng tượng hoặc coi chúng là đã tích hợp.
 
 | API | Hiện trạng | FE/AI dùng thế nào |
@@ -15,20 +15,19 @@ Phạm vi TraceWeaver do dự án chọn; đối chiếu yêu cầu BTC ở [01]
 | GET /api/v1/me | Implemented, JWT/JWKS + DB | Lấy subject, memberships, roles/group_ids theo workspace |
 | GET /api/v1/workspaces/{wid}/sources | Implemented, direct/group read grants | Nguồn được phép; admin không mặc định có mọi nguồn |
 | GET /api/v1/workspaces/{wid}/knowledge | Implemented, latest article version | Workspace knowledge và q/limit/cursor |
-| Events/ingest/runs/graph/reviews/cases/dashboard | Planned | Có thể làm giao diện với fixtures theo contract, đánh dấu mock rõ; chưa gọi như API thật |
-| /core/v1/instances và transitions | Implemented BE-22, service nội bộ | App JWT riêng + original user JWT được verify độc lập, current DB membership/role/source scope; hai definitions chạy qua API, dùng chung case guards/run lock. Cần provision core client/subject; xem backend/WORKFLOW.md; không gọi trực tiếp từ browser |
+| Events/ingest/runs/graph/reviews/cases/dashboard | Implemented | Gọi API thật với user/ingest JWT đúng loại; fixtures chỉ dùng khi chủ động mock và ghi nhãn |
+| /core/v1/instances và transitions | Implemented, local client đã provision | App JWT riêng + original user JWT, current DB scope; không gọi trực tiếp từ browser. Xem [core workflow](../backend/WORKFLOW.md) |
 | POST /internal/v1/score-pairs | Planned, service nội bộ | AI hiện thực response contract; BE tích hợp sau, không expose secret ra FE |
 
 Mỗi lần đổi schema/field/enum/status phải cập nhật consumer và fixtures trong cùng thay đổi. Chỉ chuyển operation sang implemented khi handler/quyền/tests thực sự có.
 
 ## 2. Phần BE cần tiếp tục
 
-1. Ingest ba parser định trước, redaction, batch validation, duplicate/conflict, provenance và event search/cursor.
-2. Workflow core dùng chung, definition/version, guard/owner/history/audit transaction; chứng minh reuse bằng definition thứ hai là cách dự án chọn.
-3. Run snapshot/job, rule baseline/candidate filtering theo quyền, graph/evidence và unresolved.
-4. Scorer adapter với timeout/schema/version/exact pair IDs; degraded rule-only có lý do, không giả kết quả AI.
-5. Review append-only/version conflict, case/evidence/verification/reopen, dashboard đúng scope.
-6. Identity thật/SSO integration cùng FE, test quyền trên mọi artifact, source build/backup/restore và tài liệu vận hành.
+1. Raw parsers/polling cho ba format simulator; normalized batch/redaction/dedup/events đã có.
+2. Scorer adapter với timeout/schema/version/exact pair IDs sau khi khóa features/model artifacts; hiện hybrid degraded rule_only.
+3. Tích hợp FE qua origins/callback rõ ràng, E2E, representative performance và source build/backup/restore.
+
+Workflow hai definitions, run snapshot/rules, review/cases/dashboard và kiểm quyền đã có. FE development dùng FRONTEND_PORT hoặc exact FRONTEND_ORIGINS, callback `/auth/callback`; provision theo [Keycloak](../backend/KEYCLOAK.md). Public API/health có CORS allowlist, core HTTP giữ nội bộ. Request nén không được hỗ trợ (415).
 
 BE lọc quyền trước candidate/scorer và kiểm lại artifact khi grant bị thu hồi. AI chỉ trả score, FE chỉ hiển thị/hỏi thao tác; hai bên không tự ghi DB hoặc đổi workflow state.
 
@@ -66,6 +65,8 @@ Schema request hiện là numeric features, không phải raw log text:
 Response gồm model_version, feature_schema_version=1, predictions chứa đúng pair_id và score hữu hạn [0,1]; tối đa100 cặp. Sai feature/schema ->422 cả batch; model chưa ready ->503. BE kiểm không thiếu/thừa/trùng pair_id và xử lý fallback. Score chưa được gọi là xác suất đã hiệu chuẩn.
 
 AI và BE cần chốt ai tính TF-IDF/text_similarity và cách chia sẻ feature/model version trước khi code tích hợp; không fit vocabulary/scaler trên test hoặc tự đổi API sang raw text. Logistic regression + TF-IDF là phương án dự án, không phải model BTC bắt buộc.
+
+Đọc [backend response](BACKEND_HANDOFF_RESPONSE.md) trước gán label/train: action thực tế là request.accepted/account.created/provision.completed|failed; default policy không có skip Intake→Provision. Các quyết định outcome/retry còn mở.
 
 Bàn giao AI: source/deps lock, feature schema/version, model artifact do pipeline tạo/checksum, dataset manifest/hash/splits, thresholds/margin chọn trên validation, metrics thật/giới hạn/RAM/latency, model/data/library license. Không gửi pickle/joblib nguồn không tin cậy hoặc oracle vào runtime.
 

@@ -22,6 +22,9 @@ coverage/
 !/docs/02-TICH-HOP-BE-FE-AI.md
 !/docs/03-DU-LIEU-KIEM-THU-MINH-CHUNG.md
 !/docs/04-DEMO-VA-HO-SO-NOP.md
+!/docs/CURRENT_STATUS.md
+!/docs/BACKEND_HANDOFF.md
+!/docs/BACKEND_HANDOFF_RESPONSE.md
 /.planning/
 /data/
 /templates/

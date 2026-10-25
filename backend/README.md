@@ -1,5 +1,7 @@
 # TraceWeaver backend
 
+Current capabilities/verification: [CURRENT_STATUS](../docs/CURRENT_STATUS.md). Audit fixes include compressed-body415, patched dependencies, canonical microseconds, post-redaction validation, exact filters, transaction reuse and browser-origin config. Restart source/rebuild Docker to activate code changes.
+
 Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện có20/21 API: GET /me, sources, knowledge, events, event detail; POST batch ingestion; POST run, GET run và graph; POST review và manual link; tạo/list/detail/evidence/transition case; dashboard và3 core workflow operations. Xem [Identity BE](IDENTITY.md), [ingestion](INGESTION.md), [events](EVENTS.md), [reconstruction](RECONSTRUCTION.md), [case/workflow](CASES.md), [dashboard](DASHBOARD.md) và [core HTTP](WORKFLOW.md) về cấu hình/quyền và giới hạn kiểm chứng.
 
 BE-22 bổ sung core HTTP dùng app-service JWT riêng và user JWT được kiểm độc lập, current DB permissions/service membership và cùng bộ guard/run lock của case. Cùng engine chạy case_handling/document_review qua HTTP; CORE_APP_SUBJECT trống mặc định khiến core trả503. BE-23 thêm bootstrap client/membership local, đã rebuild Docker API healthy và kiểm cả hai workflow với Keycloak-issued app/user tokens thật. Xem [WORKFLOW.md](WORKFLOW.md) và [KEYCLOAK.md](KEYCLOAK.md). Hybrid hiện degraded về rule_only vì chưa có scorer; production identity/performance vẫn cần nghiệm thu riêng.
@@ -39,7 +41,7 @@ npm.cmd run db:migrate
 npm.cmd run dev:be
 ```
 
-API chạy trên host mặc định bind `127.0.0.1:8080`; có thể đổi bằng API_HOST/API_PORT. Dùng `npm.cmd run start:be` để chạy không watch. Không tự migration lúc khởi động server; thiếu schema thì readiness chưa đạt. `npm.cmd run db:stop` dừng DB, giữ nguyên volume. `compose.dev.yaml` chỉ chạy PostgreSQL; `compose.yaml` bổ sung migration/API, chưa có FE/IdP/AI.
+API host mặc định127.0.0.1:8080; API_HOST/API_PORT tùy cấu hình. `npm.cmd run start:be` chạy không watch; thiếu migrations thì unready, không auto migrate. `db:stop` giữ volume. compose.dev.yaml chỉ chạy PostgreSQL; compose.yaml có migration/API/Keycloak, chưa FE/AI.
 
 ## Endpoint hiện có
 
@@ -90,7 +92,7 @@ Integration tests tạo database riêng `traceweaver_test_<uuid>` trong containe
 
 BE-03 đã bổ sung [OpenAPI và schema dùng chung](contracts/README.md) cho 21 operation, migration 002 cho memberships/roles/groups/sources/grants/knowledge/audit. Chạy `npm run test:contracts` để kiểm OpenAPI/49 schema/fixtures; `npm run test:db` còn kiểm ràng buộc cross-workspace, duplicate grants, knowledge version và audit append-only/rollback thật. Sau khi thêm migration phải migrate và restart BE vì server nạp danh sách migration lúc startup.
 
-Mười bảy API đã implemented với JWT/JWKS và DB permissions. `npm run test:identity` kiểm token/quyền/revocation/cursor/run snapshot/review/manual/case workflow/dashboard; xem [EVENTS.md](EVENTS.md), [RECONSTRUCTION.md](RECONSTRUCTION.md) và [DASHBOARD.md](DASHBOARD.md). Tiếp theo phía BE là cơ chế trusted context cho core HTTP; raw simulator parsers và scorer là việc riêng.
+Hiện20 operations implemented với JWT/JWKS/DB scope; trusted core HTTP đã có. `npm run test:identity:native` chạy cùng assertions qua native JWKS HTTP trong CI/local, không cần Postman. Lệnh Postman test:identity giữ nguyên để kiểm dependency runner đó. Raw parsers/scorer và full app E2E vẫn riêng; các counts theo BE phía trên là lịch sử.
 
 ## Phân tầng
 

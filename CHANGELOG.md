@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Integration and handoff alignment
+
+- Add exact-origin API/health CORS and safe local Keycloak frontend callback provisioning; preserve Swagger, S256 PKCE, credentials and service clients. Production origins remain explicit HTTPS; core HTTP stays server-only. Existing realm frontend redirects return login200; rerun leaves credential/env/import file hashes unchanged.
+- Add native HTTP JWKS identity suite to the PostgreSQL CI job and dependency audit gate. Preserve original Postman command/assertions; native suite runs sequentially and passes45/45 locally. Remote CI has not been verified.
+- Refresh shared capability/acceptance/docs, correct fresh Keycloak image-pull instructions, and track original AI handoff plus backend response. Existing rule vocabulary/labels are documented; outcome/retry/features/model thresholds remain decisions to agree with AI. FE/scorer/simulator/full product gates are not marked complete.
+
 ## Unreleased — Audit runtime corrections
 
 - Reject compressed public/core bodies415 before decompression; pin body-parser2.4.0 and fast-uri3.1.9, refresh notices. Child-process regression verifies process survival. Full npm audit reports0 advisories at verification time.

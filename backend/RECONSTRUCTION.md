@@ -1,6 +1,6 @@
 # Reconstruction runs and headless rules
 
-BE-17 bổ sung candidate generation và rule baseline trong `src/core/reconstruction/`. BE-18 bổ sung run persistence/snapshot, idempotency/audit; BE-19 bổ sung review/manual links. BE-20 bổ sung [case/workflow](CASES.md) và guard cho hồ sơ đóng. Backend hiện **16/21 implemented**, còn 5 planned.
+Candidate/rule baseline, durable snapshots/idempotency/audit, reviews/manual links, [cases](CASES.md), dashboard và core HTTP đã có. Backend hiện **20/21 implemented**, chỉ scorer planned. Xem [hiện trạng](../docs/CURRENT_STATUS.md); các mốc BE cũ là lịch sử.
 
 ## API run và graph
 
@@ -109,4 +109,4 @@ npm.cmd run test:identity
 
 Unit tests kiểm namespace/conflict, partial IDs, actor/time hard negatives, redaction sentinel, scope/window/root/limit, exact fractional time/skew, ambiguity, retry/branch, root ở giữa hành trình, evidence theo Link schema và loại cycle độc lập thứ tự input. Unit/contract không cần DB. DB/identity tests cần PostgreSQL; identity dùng Postman JWKS simulation hiện có, backend/JOSE/HTTP/DB chạy thật. Kiểm snapshot late commit, concurrency/expiry/idempotency, revoke toàn artifact, FK/immutability và rollback audit. Không cần dependency mới.
 
-[Dashboard](DASHBOARD.md) đã có số đếm theo current scope, graph/workflow mới nhất và bộ lọc thời gian tạo run khớp case drill-down. Bước kế tiếp: trusted user context cho core HTTP nội bộ. Giữ scorer/model, raw simulator parsers và feasibility benchmark là phần việc riêng. API mới kiểm trong process test/smoke; Docker API image chưa rebuild trong BE-21. Trước chạy bản mới bằng Docker, build lại image theo [hướng dẫn Docker](DOCKER.md).
+[Dashboard](DASHBOARD.md) và [trusted core HTTP](WORKFLOW.md) đã có. Scorer/model, raw parsers và feasibility benchmark vẫn riêng. Sau cập nhật source phải rebuild Docker API theo [hướng dẫn](DOCKER.md); không suy image hiện tại đã có các bản sửa audit.
