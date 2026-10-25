@@ -1,6 +1,6 @@
 # Case workflow
 
-BE-20 implements five case APIs. Backend contract progress is **16/21 implemented**, five planned; this is not overall product completion. Apply migration007 and restart the source server, or rebuild the API Docker image before using new routes there.
+BE-20 implements five case APIs; BE-21 adds dashboard and case time filters. Backend contract progress is **17/21 implemented**, four planned; this is not overall product completion. Apply migration007 and restart the source server, or rebuild the API Docker image before using new routes there.
 
 ## API
 
@@ -9,7 +9,7 @@ Paths below are relative to `/api/v1/workspaces/{wid}`. All use a verified user-
 | Method/path | Input and result |
 |---|---|
 | `POST /cases` | `{run_id,title}`; 201 Case in `new`, owner null, version1, Location to detail |
-| `GET /cases` | Optional `state,owner_id,limit,cursor`; 200 CasesPage |
+| `GET /cases` | Optional `state,owner_id,from,to,limit,cursor`; 200 CasesPage |
 | `GET /cases/{cid}` | 200 `{case,history,evidence}` |
 | `POST /cases/{cid}/evidence` | `{kind,event_ids,note}`; 201 Evidence |
 | `POST /cases/{cid}/transitions` | `{action,expected_version,reason,owner_id?}`; 200 Case |
@@ -55,7 +55,7 @@ Create and transition accept optional Idempotency-Key using the existing1–200 
 
 Replay rechecks current actor membership/role/full grants and transition role/ownership. It does not reapply the old state transition or re-evaluate already-completed evidence guards. A replay may return an older Case version after later transitions; GET detail obtains the current version. No extra history/audit is appended on replay.
 
-List sorts immutable case UUID ascending, default50/max100. Signed cursor binds actor/workspace/state/owner/limit/current membership-role-source scope. Filter, caller, limit, scope changes or tampering invalidate it with400. SQL removes hidden cases before applying limit, so hidden rows do not influence cursor presence. This is **live-state pagination**, not the immutable event pagination snapshot: concurrent state/owner changes may alter filter membership between pages.
+List sorts immutable case UUID ascending, default50/max100. Optional inclusive UTC `from`/`to` filter parent run creation time, matching [dashboard](DASHBOARD.md). Signed cursor binds actor/workspace/state/owner/from/to/limit/current membership-role-source scope. Filter, caller, limit, scope changes or tampering invalidate it with400. SQL removes hidden cases before applying limit, so hidden rows do not influence cursor presence. This is **live-state pagination**, not the immutable event pagination snapshot: concurrent state/owner changes may alter filter membership between pages.
 
 ## Storage, engine and remaining work
 
@@ -63,7 +63,7 @@ Migration007 adds immutable workflow_instances, workflow_history, cases, case_ev
 
 `src/core/workflow/engine.js` evaluates trusted versioned definitions, role/owner rules, expected version and declared server-fact guards. It has no Express/DB/network dependency. Definitions are copied when compiled; instances persist a full definition snapshot. The same engine runs `case_handling` and `document_review` (draft → in_review → approved, or revise back to draft). Tests also persist a document_review instance through the same workflow store.
 
-This demonstrates headless reuse. `POST /core/v1/instances`, `POST /core/v1/instances/{id}/transitions` and `GET /core/v1/instances/{id}` remain **planned**: app-service authentication plus trusted end-user context must be implemented and tested before exposing generic workflows. The store assumes its trusted caller has validated identity/scope and shares the transaction; it is not a public authorization bypass. Dashboard, scorer/model, frontend and representative performance/evaluation remain separate. Live Keycloak login and Docker API image were not rebuilt/rerun in BE-20.
+This demonstrates headless reuse. `POST /core/v1/instances`, `POST /core/v1/instances/{id}/transitions` and `GET /core/v1/instances/{id}` remain **planned**: app-service authentication plus trusted end-user context must be implemented and tested before exposing generic workflows. The store assumes its trusted caller has validated identity/scope and shares the transaction; it is not a public authorization bypass. [Dashboard](DASHBOARD.md) is implemented in BE-21; scorer/model, frontend and representative performance/evaluation remain separate. Live Keycloak login and Docker API image were not rebuilt/rerun in BE-21.
 
 ## Verification
 

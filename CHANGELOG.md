@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Dashboard and case time filters
+
+- Implement GET workspace dashboard:17/21 operations implemented, four planned. One SQL statement counts current full-source visible runs, degraded runs, per-run unresolved events from live graph links/reviews and new/assigned cases from latest workflow history.
+- Share inclusive UTC parent-run creation-time filters with case listing; preserve fractional boundaries at PostgreSQL microsecond precision and bind signed case cursors to both filters. Unknown/duplicate/invalid queries fail400; membership, reader role and direct/group grants apply without admin bypass.
+- Verify60 unit/HTTP/contract,40 PostgreSQL and39 identity/HTTP/DB tests; base/license98packages and source process smoke pass. Reuse Postman JWKS simulation, no live Keycloak claim. Restore existing PostgreSQL container networking while retaining its data volume.
+- No dependencies, migrations, image builds or frontend changes. Three core workflow HTTP operations and scorer remain planned. No global run-list route or representative performance claim.
+
 ## Unreleased — Case workflow APIs
 
 - Implement create/list/detail/evidence/transition case APIs:16/21 implemented. Current full run-source scope applies to every case artifact, signed live-list cursor and idempotent response.

@@ -17,7 +17,7 @@ simulator/       # Khung sinh dữ liệu giả
 .github/         # Issue/PR templates và CI
 ```
 
-Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, Keycloak local/Swagger PKCE login, JWT/JWKS, batch ingestion, GET /me, sources, knowledge, events, event detail và [run/graph, review/manual links](backend/RECONSTRUCTION.md) với quyền từ DB, snapshot, version và audit. [Case/workflow](backend/CASES.md) đã có 5 API; core HTTP nội bộ và AI còn planned; OpenAPI phân biệt 16 implemented/5 planned. Hybrid hiện degraded về rule_only vì chưa có scorer. Phạm vi triển khai hiện tại là BE.
+Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, Keycloak local/Swagger PKCE login, JWT/JWKS, batch ingestion, GET /me, sources, knowledge, events, event detail và [run/graph, review/manual links](backend/RECONSTRUCTION.md) với quyền từ DB, snapshot, version và audit. [Case/workflow](backend/CASES.md) đã có 5 API; [dashboard](backend/DASHBOARD.md) có số đếm cùng scope và bộ lọc thời gian cho case drill-down. Core HTTP nội bộ và AI còn planned; OpenAPI phân biệt 17 implemented/4 planned. Hybrid hiện degraded về rule_only vì chưa có scorer. Phạm vi triển khai hiện tại là BE.
 
 Chạy API bằng Docker sau bước [chuẩn bị Keycloak/demo](backend/KEYCLOAK.md): `docker compose up -d --build --wait api`. Mặc định API tại `http://localhost:8080`; đăng nhập Swagger bằng **Authorize → keycloakLogin**. Máy hiện tại đã chuẩn bị xong; mật khẩu nằm trong `demo-credentials.local.json` bị Git ignore. Chi tiết tại [Docker API](backend/DOCKER.md).
 

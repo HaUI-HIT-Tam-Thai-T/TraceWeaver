@@ -90,7 +90,7 @@ Integration tests tạo database riêng `traceweaver_test_<uuid>` trong containe
 
 BE-03 đã bổ sung [OpenAPI và schema dùng chung](contracts/README.md) cho 21 operation, migration 002 cho memberships/roles/groups/sources/grants/knowledge/audit. Chạy `npm run test:contracts` để kiểm OpenAPI/49 schema/fixtures; `npm run test:db` còn kiểm ràng buộc cross-workspace, duplicate grants, knowledge version và audit append-only/rollback thật. Sau khi thêm migration phải migrate và restart BE vì server nạp danh sách migration lúc startup.
 
-Mười sáu API đã implemented với JWT/JWKS và DB permissions. `npm run test:identity` kiểm token/quyền/revocation/cursor/run snapshot/review/manual/case workflow; xem [EVENTS.md](EVENTS.md) và [RECONSTRUCTION.md](RECONSTRUCTION.md). Tiếp theo phía BE là dashboard cùng scope/filter và cơ chế trusted context cho core HTTP; raw simulator parsers và scorer là việc riêng.
+Mười bảy API đã implemented với JWT/JWKS và DB permissions. `npm run test:identity` kiểm token/quyền/revocation/cursor/run snapshot/review/manual/case workflow/dashboard; xem [EVENTS.md](EVENTS.md), [RECONSTRUCTION.md](RECONSTRUCTION.md) và [DASHBOARD.md](DASHBOARD.md). Tiếp theo phía BE là cơ chế trusted context cho core HTTP; raw simulator parsers và scorer là việc riêng.
 
 ## Phân tầng
 
