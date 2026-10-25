@@ -44,5 +44,7 @@ jobs:
       - run: npm run db:migrate
       - run: npm run smoke
       - run: npm run test:db
+      - run: npm run test:identity:native
+      - run: npm audit --omit=dev --audit-level=moderate
       - if: always()
         run: npm run db:stop
