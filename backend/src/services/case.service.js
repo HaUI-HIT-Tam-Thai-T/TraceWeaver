@@ -23,14 +23,14 @@ export function createCaseService(repository, access, cursors) {
     transition(subject, workspace, id, input, key) {
       return protect(() => repository.transition(subject, workspace, id, caseInput('CaseTransition', input), idempotencyKey(key)));
     },
-    page(subject, workspace, { state, owner_id, limit, cursor }) {
+    page(subject, workspace, { state, owner_id, limit, cursor, from, to }) {
       return protect(async () => {
         const [membership] = await access.memberships(subject, workspace);
         if (!membership) throw new ApiError(404, 'NOT_FOUND', 'Resource not found');
         if (!membership.roles.some((role) => ['viewer', 'operator', 'reviewer', 'admin'].includes(role))) throw new ApiError(403, 'FORBIDDEN', 'Action is not permitted');
-        const context = { kind: 'cases', subject, workspace, state, owner_id, limit, scope: digest(membership), sort: 'id_asc' };
+        const context = { kind: 'cases', subject, workspace, state, owner_id, limit, from: from ?? '', to: to ?? '', scope: digest(membership), sort: 'id_asc' };
         const last = cursor ? cursors.decode(cursor, context) : null;
-        const rows = await repository.list(subject, workspace, last, limit + 1, state, owner_id), items = rows.slice(0, limit);
+        const rows = await repository.list(subject, workspace, last, limit + 1, state, owner_id, { from, to }), items = rows.slice(0, limit);
         return { items, next_cursor: rows.length > limit ? cursors.encode(context, items.at(-1).id) : null };
       });
     },

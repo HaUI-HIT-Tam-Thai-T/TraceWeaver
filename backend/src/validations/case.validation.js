@@ -7,6 +7,7 @@ import schema from '../../contracts/schemas/domain.schema.json' with { type: 'js
 import { redactText } from '../core/data/event-normalizer.js';
 import { ApiError } from '../core/identity/api-error.js';
 import { queryParams } from './access.validation.js';
+import { dashboardQuery } from './dashboard.validation.js';
 const ajv = new Ajv2020({ strict: true }); addFormats(ajv); ajv.addSchema(schema);
 const validators = Object.fromEntries(['CaseCreate', 'EvidenceCreate', 'CaseTransition', 'CaseState'].map((name) => [name, ajv.getSchema(`${schema.$id}#/$defs/${name}`)]));
 export function caseInput(kind, body) {
@@ -28,12 +29,13 @@ export function caseInput(kind, body) {
   } catch { throw fail(); }
 }
 export function caseQuery(query) {
-  const { state = '', owner_id = '', ...page } = query;
+  const { state = '', owner_id = '', from, to, ...page } = query;
+  const filters = dashboardQuery({ ...(from === undefined ? {} : { from }), ...(to === undefined ? {} : { to }) });
   const base = queryParams(page, 'cases');
   if (typeof state !== 'string' || (state && !validators.CaseState(state)) || typeof owner_id !== 'string' ||
       owner_id.length > 255 || owner_id.includes('\u0000') || !owner_id.isWellFormed() ||
       (query.owner_id !== undefined && !owner_id.trim()) || (query.state !== undefined && !state)) {
     throw new ApiError(400, 'INVALID_QUERY', 'Case query parameters are invalid');
   }
-  return { limit: base.limit, cursor: base.cursor, state, owner_id };
+  return { limit: base.limit, cursor: base.cursor, state, owner_id, ...filters };
 }

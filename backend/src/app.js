@@ -12,8 +12,9 @@ import { createDocsRouter } from './routers/docs.route.js';
 import { createRunRouter } from './routers/run.route.js';
 import { createReviewRouter } from './routers/review.route.js';
 import { createCaseRouter } from './routers/case.route.js';
+import { createDashboardRouter } from './routers/dashboard.route.js';
 
-export function createApp({ checkReadiness, verifyToken, verifyIngestToken, access, ingestion, events, runs, reviews, cases, oidc, logError = () => {} }) {
+export function createApp({ checkReadiness, verifyToken, verifyIngestToken, access, ingestion, events, runs, reviews, cases, dashboard, oidc, logError = () => {} }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(requestContext);
@@ -26,6 +27,7 @@ export function createApp({ checkReadiness, verifyToken, verifyIngestToken, acce
   app.use('/api/v1', createRunRouter({ verifyToken, access, runs }));
   app.use('/api/v1', createReviewRouter({ verifyToken, access, reviews }));
   app.use('/api/v1', createCaseRouter({ verifyToken, access, cases }));
+  app.use('/api/v1', createDashboardRouter({ verifyToken, access, dashboard }));
   app.use(notFound);
   app.use(errorHandler(logError));
   return app;

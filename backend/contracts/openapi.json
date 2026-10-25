@@ -840,7 +840,7 @@
       "get": {
         "operationId": "listCases",
         "summary": "listCases",
-        "description": "Current full run-source scope, including empty sources. New/assigned are waiting states. Live state/owner filters, UUID ascending cursor binds actor/workspace/filters/limit/current scope; no immutable case-list snapshot.",
+        "description": "Current full run-source scope, including empty sources. New/assigned are waiting states. Optional inclusive UTC from/to filter parent run created_at, matching dashboard. Live state/owner filters, UUID ascending cursor binds actor/workspace/filters/limit/current scope; no immutable case-list snapshot.",
         "x-implementation-status": "implemented",
         "security": [
           {
@@ -908,6 +908,18 @@
             "schema": {
               "$ref": "./schemas/domain.schema.json#/$defs/Subject"
             }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Inclusive lower bound on parent run created_at (UTC).",
+            "schema": { "$ref": "./schemas/domain.schema.json#/$defs/UtcTime" }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "Inclusive upper bound on parent run created_at (UTC).",
+            "schema": { "$ref": "./schemas/domain.schema.json#/$defs/UtcTime" }
           }
         ]
       }
@@ -1122,8 +1134,8 @@
       "get": {
         "operationId": "getDashboard",
         "summary": "getDashboard",
-        "description": "Counts and filters for drill-down; only full-scope artifacts, including source grant revocation. No count leakage.",
-        "x-implementation-status": "planned",
+        "description": "One statement snapshot of current membership/reader role and full requested run-source grants, including empty sources. Inclusive UTC from/to filter parent run created_at for every counter. Unresolved events count per-run event occurrences outside the root component of pending/accepted live links in completed runs. Waiting cases are new/assigned from latest workflow history. Echoed filters apply unchanged to listCases; run detail/graph require known IDs (no global run-list route).",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
