@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Live local core identity
+
+- Add development/loopback-only bootstrap for confidential core Keycloak client through Admin REST, signed service JWT/subject verification, service workspace membership only and CORE_APP configuration. Preserve existing user/ingest/admin credentials, realm and other environment values; reruns preserve file hashes and revoked membership remains revoked. Save core credential only in ignored local JSON/import.
+- Extend live PKCE verifier with core/user/ingest token isolation, wrong-secret/creator/workspace/role/version checks, document workflow and guarded case transitions through shared history. Live audit check confirms verified user+service identity and no core data roles/source grants. Tokens are never printed or written to disk; smoke documents/cases/evidence retained.
+- Recreate only the Keycloak container after its old network disappeared, preserving its named volume. Rebuild API using existing pinned base image; dependency cache was absent, so89 runtime packages were installed inside the image from unchanged lockfile. No host dependency install or image pull. Docker API/Keycloak/PostgreSQL healthy; migration container exit0.
+- Verify66 unit/HTTP/contract and10 targeted core PostgreSQL/JWT/HTTP tests, live Keycloak protocol/delegation, base/license98packages and Compose config. API count stays20/21; scorer/FE/AI, production identity and performance remain separate.
+
 ## Unreleased — Trusted core workflow HTTP
 
 - Implement three internal core workflow operations:20/21 API operations implemented, scorer still planned. Require distinct configured app-client JWT/exact service subject, independently verified original user JWT and explicit workspace. Current service/user memberships, user roles and case full-source grants apply; token role/actor/fact spoofing cannot authorize.

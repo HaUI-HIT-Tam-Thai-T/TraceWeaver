@@ -23,17 +23,24 @@ Use Node24 and installed root dependencies. First create the existing applicatio
 npm run db:up
 npm run db:migrate
 node --env-file-if-exists=.env backend/scripts/setup-identity-demo.js
-docker compose up -d --build --wait api
+docker compose up -d --wait --pull never keycloak
+node --env-file-if-exists=.env backend/scripts/setup-core-identity-demo.js
+docker compose up -d --build --wait --pull never api
 node --env-file-if-exists=.env backend/scripts/verify-keycloak-demo.js
 ```
 
-Setup generates `demo-credentials.local.json`, `.env.keycloak.local` and `.local/keycloak/traceweaver-realm.json`, all Git-ignored, and seeds only reserved demo IDs. It reuses existing credentials, realm and DB rows on reruns. It does not reset existing passwords, replace .env or drop volumes. Keep the credentials/import files matched to the existing Keycloak volume; do not delete/regenerate them to reset a running realm. Keycloak startup import does not overwrite an already imported realm. The default local demo uses realm traceweaver, clients traceweaver-web/traceweaver-ingest and audience traceweaver-api.
+Base setup generates `demo-credentials.local.json`, `.env.keycloak.local` and `.local/keycloak/traceweaver-realm.json`, all Git-ignored, and seeds only reserved demo IDs. It reuses existing credentials, realm and DB rows on reruns. It does not reset existing passwords, replace .env or drop volumes. Keep the credentials/import files matched to the existing Keycloak volume; do not delete/regenerate them to reset a running realm. Keycloak startup import does not overwrite an already imported realm. The default local demo uses realm traceweaver, clients traceweaver-web/traceweaver-ingest/traceweaver-core and audience traceweaver-api.
+
+`setup-core-identity-demo.js` runs after Keycloak is healthy. It authenticates the saved local administrator against master/admin-cli, then adds only the dedicated confidential core client via Admin REST. Public login still uses Authorization Code+PKCE; no password grant is enabled for user/core clients. Core has service accounts enabled, browser/password/implicit flows disabled, empty origins/redirects and fullScopeAllowed=false. The script verifies the service token signature/audience/client and matches its sub to the client-specific service-account endpoint. It seeds active membership in the reserved demo workspace, with no app data roles/source grants, and appends the client/account to the existing import for a future fresh volume.
+
+The core secret and subject are saved under `core` in the ignored credentials JSON; only CORE_APP_CLIENT_ID/CORE_APP_SUBJECT are added to `.env`, preserving other values and line endings. Reruns do not rotate credentials or rewrite unchanged files (hash checked). Existing unmanaged/misconfigured core client, conflicting nonempty environment values, mismatched saved subject/secret or revoked membership make setup stop; it does not reset/repair those permissions silently. The tool is restricted to development and a loopback HTTP `/realms/traceweaver` issuer, uses bounded requests and rejects redirects. Production configuration is separate.
 
 ## Accounts and service tokens
 
 - `demo.operator`: database role operator, read grants for three demo sources.
 - `demo.viewer`: database role viewer, read grants for the same sources.
 - `traceweaver-ingest`: confidential client with service-account subject and database ingest_service role plus ingest grants. Its generated secret is in the credentials file; never put it in Swagger's public OAuth2 client_secret field.
+- `traceweaver-core`: confidential service client with exact configured subject and workspace membership only. Its credential is `core.clientSecret` in the ignored JSON. The trusted app calls core with its JWT plus independently verified original user JWT; see [Core workflow HTTP](WORKFLOW.md). Do not distribute its secret/token to browser clients.
 - `local-admin`: Keycloak administration only, password in the same ignored file. Admin console: `http://localhost:8081/admin/`. This account is not automatically a workspace admin.
 
 For manual ingestion testing in Swagger, obtain a short-lived service token in PowerShell, then copy only the access_token into **ingestBearer**:
@@ -60,6 +67,8 @@ Swagger tokens are not persisted. Reloading Swagger clears its authorization sta
 
 JWT issuer stays `http://localhost:8081/realms/traceweaver`, matching browser-issued tokens. Docker API retrieves JWKS from `http://keycloak:8080/realms/traceweaver/protocol/openid-connect/certs`. OIDC_LOCAL_KEYCLOAK=true permits **only that exact internal host/port/path outside production**; arbitrary HTTP endpoints and production HTTP remain rejected. Signature/RS256/issuer/audience/azp/expiry checks are unchanged. No certificates are bypassed and ports are published only on host loopback. Production requires a separately configured HTTPS IdP and production database setup.
 
-`verify-keycloak-demo.js` uses real HTTP Authorization Code+S256 PKCE and Keycloak-issued tokens, not mocks/password grant. It checks wrong/missing PKCE, CORS, operator/viewer login, refresh, /me/sources/knowledge, outside-scope404, confidential service token, user/service401 separation, scoped batch ingestion and redacted event read. Passwords and tokens are withheld from output; tokens are never written to disk. Demo event/audit rows are retained. No claim of production deployment or every Keycloak feature being tested.
+`verify-keycloak-demo.js` uses real HTTP Authorization Code+S256 PKCE and Keycloak-issued tokens, not mocks/password grant. It checks wrong/missing PKCE, CORS, operator/viewer login, refresh, /me/sources/knowledge, outside-scope404, confidential ingest/core tokens, wrong core secret and user/ingest/core401 isolation, scoped batch ingestion and redacted event read. Core checks create/get/submit document, duplicate/stale409, denied operator/viewer approval403, creator mismatch422 and workspace404; case create/core GET/assign/start, missing-evidence422, adding evidence and request_verification, then reads the same state through the public case API. A live DB check confirms audit user+service identities and no service data roles/grants. Reviewer close/reopen, revocation and concurrency have separate integration tests; the live verifier does not impersonate a reviewer.
 
-Sources: [official container guide](https://www.keycloak.org/server/containers), [hostname guide](https://www.keycloak.org/server/hostname), [Swagger OAuth2 configuration](https://swagger.io/docs/open-source-tools/swagger-ui/usage/oauth2/).
+Passwords/tokens are withheld from output; tokens are never written to disk. Demo event/audit rows, documents and case/evidence smoke artifacts are retained. Each verifier invocation creates one document and one case; its run uses a stable idempotency key. BE-23 rebuilt Docker API and verified these live paths, API/Keycloak/PostgreSQL healthy. No claim of production deployment or every Keycloak feature being tested.
+
+Sources: [official container guide](https://www.keycloak.org/server/containers), [hostname guide](https://www.keycloak.org/server/hostname), [Admin REST API: clients and service-account-user](https://www.keycloak.org/docs-api/latest/rest-api/index.html), [Swagger OAuth2 configuration](https://swagger.io/docs/open-source-tools/swagger-ui/usage/oauth2/).

@@ -18,7 +18,7 @@ DATABASE_URL và CURSOR_SECRET ngẫu nhiên ≥32 ký tự là bắt buộc. `d
 | CORE_APP_CLIENT_ID | traceweaver-core; client riêng cho core HTTP, khác user/ingest |
 | CORE_APP_SUBJECT | Exact service-account sub; trống khiến core503, không ảnh hưởng API user |
 
-BE-22: [Core workflow HTTP](WORKFLOW.md) dùng app JWT trong Authorization và original user JWT trong X-End-User-Authorization, cả hai được core verify độc lập. X-Workspace-Id bắt buộc; service và user đều cần membership active. Role/source grants của user vẫn đọc DB. Local Keycloak bootstrap chưa provision client core mới; cần cấu hình confidential client và membership theo tài liệu trước khi sử dụng.
+BE-22: [Core workflow HTTP](WORKFLOW.md) dùng app JWT trong Authorization và original user JWT trong X-End-User-Authorization, cả hai được core verify độc lập. X-Workspace-Id bắt buộc; service và user đều cần membership active. Role/source grants của user vẫn đọc DB. BE-23 thêm setup-core-identity-demo.js để provision confidential client/membership local, đã kiểm token thật và cả hai workflow qua Docker API; xem [Keycloak](KEYCLOAK.md). Cấu hình production vẫn riêng.
 
 Production bắt buộc HTTPS; development chỉ cho HTTP loopback. Token profile Keycloak-compatible: RS256, iss/aud đúng, sub không rỗng ≤255 ký tự, exp/iat bắt buộc, payload typ=Bearer và azp đúng user client. Clock tolerance 5s, JWKS cache 5 phút qua JOSE. ID token và token ingest client bị từ chối. IdP cần audience mapper cấp API audience cho access token; không nới audience để né lỗi.
 
