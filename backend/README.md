@@ -1,8 +1,8 @@
 # TraceWeaver backend
 
-Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện có 16/21 API: GET /me, sources, knowledge, events, event detail; POST batch ingestion; POST run, GET run và graph; POST review và manual link; tạo/list/detail/evidence/transition case. Xem [Identity BE](IDENTITY.md), [ingestion](INGESTION.md), [events](EVENTS.md), [reconstruction](RECONSTRUCTION.md) và [case/workflow](CASES.md) về cấu hình/quyền và giới hạn kiểm chứng.
+Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện có20/21 API: GET /me, sources, knowledge, events, event detail; POST batch ingestion; POST run, GET run và graph; POST review và manual link; tạo/list/detail/evidence/transition case; dashboard và3 core workflow operations. Xem [Identity BE](IDENTITY.md), [ingestion](INGESTION.md), [events](EVENTS.md), [reconstruction](RECONSTRUCTION.md), [case/workflow](CASES.md), [dashboard](DASHBOARD.md) và [core HTTP](WORKFLOW.md) về cấu hình/quyền và giới hạn kiểm chứng.
 
-BE-20 bổ sung case/workflow, owner/role/evidence/version guards, idempotency, lịch sử/audit và closed-case graph protection. Engine dùng chung đã kiểm headless với case_handling/document_review; core HTTP nội bộ còn planned. Hybrid hiện degraded về rule_only vì chưa có scorer. API mới được kiểm trong process test; Docker image cần build lại trước sử dụng.
+BE-22 bổ sung core HTTP dùng app-service JWT riêng và user JWT được kiểm độc lập, current DB permissions/service membership và cùng bộ guard/run lock của case. Cùng engine chạy case_handling/document_review qua HTTP; CORE_APP_SUBJECT trống mặc định khiến core trả503. Xem [WORKFLOW.md](WORKFLOW.md) để provision client/membership. Hybrid hiện degraded về rule_only vì chưa có scorer. API mới được kiểm trong source process test; Docker image cần build lại trước sử dụng.
 
 Swagger UI tại `http://localhost:8080/docs/`; OpenAPI JSON tại `/docs/openapi.json`. Chọn API/Health, dùng **Authorize** để nhập Bearer token; operation có nhãn implemented/planned.
 

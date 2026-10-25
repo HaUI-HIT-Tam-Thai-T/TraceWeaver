@@ -16,7 +16,7 @@ Phạm vi TraceWeaver do dự án chọn; đối chiếu yêu cầu BTC ở [01]
 | GET /api/v1/workspaces/{wid}/sources | Implemented, direct/group read grants | Nguồn được phép; admin không mặc định có mọi nguồn |
 | GET /api/v1/workspaces/{wid}/knowledge | Implemented, latest article version | Workspace knowledge và q/limit/cursor |
 | Events/ingest/runs/graph/reviews/cases/dashboard | Planned | Có thể làm giao diện với fixtures theo contract, đánh dấu mock rõ; chưa gọi như API thật |
-| /core/v1/instances và transitions | Planned, service nội bộ | BE làm workflow adapter/engine; không gọi trực tiếp từ browser |
+| /core/v1/instances và transitions | Implemented BE-22, service nội bộ | App JWT riêng + original user JWT được verify độc lập, current DB membership/role/source scope; hai definitions chạy qua API, dùng chung case guards/run lock. Cần provision core client/subject; xem backend/WORKFLOW.md; không gọi trực tiếp từ browser |
 | POST /internal/v1/score-pairs | Planned, service nội bộ | AI hiện thực response contract; BE tích hợp sau, không expose secret ra FE |
 
 Mỗi lần đổi schema/field/enum/status phải cập nhật consumer và fixtures trong cùng thay đổi. Chỉ chuyển operation sang implemented khi handler/quyền/tests thực sự có.

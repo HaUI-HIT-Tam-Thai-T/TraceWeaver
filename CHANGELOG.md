@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Trusted core workflow HTTP
+
+- Implement three internal core workflow operations:20/21 API operations implemented, scorer still planned. Require distinct configured app-client JWT/exact service subject, independently verified original user JWT and explicit workspace. Current service/user memberships, user roles and case full-source grants apply; token role/actor/fact spoofing cannot authorize.
+- Persist workspace-scoped document_review v1 instances with entity uniqueness, serialized expected-version transitions and atomic history/audit. Case instances retain existing createCase ownership of run scope; core GET/transitions share authoritative case state, repository/run locks, evidence/owner/close/reopen guards and graph freeze. Both definitions verified through core HTTP.
+- Add CORE_APP_CLIENT_ID/CORE_APP_SUBJECT configuration, closed input/media/query bounds, credential isolation and OpenAPI dual-credential contract. Empty subject disables core503; live Keycloak bootstrap does not yet provision the additional service client. Document references have workspace permissions, no content store or separate document ACL.
+- Verify62 unit/HTTP/contract,44 PostgreSQL and45 identity/HTTP/DB tests, base/license98packages, Compose config and source process smoke. Existing Postman JWKS simulation reused with real JOSE/Express/DB. No dependency/migration/FE/AI/image build; PostgreSQL restarted with existing volume. Live core-client Keycloak delegation and Docker API rebuild remain unverified.
+
 ## Unreleased — Dashboard and case time filters
 
 - Implement GET workspace dashboard:17/21 operations implemented, four planned. One SQL statement counts current full-source visible runs, degraded runs, per-run unresolved events from live graph links/reviews and new/assigned cases from latest workflow history.
