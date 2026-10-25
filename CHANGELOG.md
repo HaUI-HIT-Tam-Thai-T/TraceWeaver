@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Council backend evidence
+
+- Map all8 eligibility conditions and11 scored criteria from the HaUI2026 council form to backend evidence and remaining FE/AI/release gates; record public repository/release/CI observations without claiming a judge score.
+- Add clean-commit `evidence:backend` collector with bounded sequential DB/identity files, no skip/todo/cancel acceptance and sanitized summaries. Add `package:source` for exact Git source archives with sensitive-path exclusions, manifest and SHA256; neither command publishes or creates a tag.
+- Verify collector at2db195d:73 unit/HTTP/contract,49 PostgreSQL,45 native identity tests, base/license98, source readiness and audit0. Retain an initial failed parallel DB collector run; its cause remains undiagnosed, independent full DB49/49 and subsequent bounded collector pass. This is not load verification.
+- Install89 runtime packages from source archive c6c15cb outside checkout and pass live/ready200 with external DB configuration. Existing machine/cache/DB used; no fresh OS/offline/full product/image verification. Runtime source/contracts/manifest/lock unchanged between the archived commit and2db195d.
+
 ## Unreleased — Integration and handoff alignment
 
 - Add exact-origin API/health CORS and safe local Keycloak frontend callback provisioning; preserve Swagger, S256 PKCE, credentials and service clients. Production origins remain explicit HTTPS; core HTTP stays server-only. Existing realm frontend redirects return login200; rerun leaves credential/env/import file hashes unchanged.

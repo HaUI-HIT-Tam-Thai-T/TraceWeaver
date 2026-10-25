@@ -2,6 +2,10 @@
 
 Đây là bảng capability hiện tại của nhánh phát triển; các mục BE cũ trong changelog/SUMMARY là lịch sử. API và DTO authoritative ở [contracts](../backend/contracts/README.md). Không dùng số API để suy phần trăm hoàn thành toàn sản phẩm.
 
+[Đối chiếu phiếu hội đồng 2026](COUNCIL_READINESS.md) đã bao phủ8điều kiện/11tiêu chí và ghi kết quả collector tại2db195d:73unit/49DB/45identity-native pass, audit0; source archive đã cài/chạy ngoài checkout. Phạm vi backend+bằng chứng; chưa xác nhận toàn sản phẩm đạt. Repo GitHub đã xác minh PUBLIC/Issues bật/prerelease scaffold; CI xanh quan sát được gắn commit7908d46 cũ, không phải HEAD local. FE/AI chưa có source runtime trong checkout, deadline chưa được cung cấp.
+
+[Đối chiếu phiếu hội đồng 2026](COUNCIL_READINESS.md) đã bao phủ8điều kiện/11tiêu chí và ghi kết quả collector tại2db195d:73unit/49DB/45identity-native pass, audit0; source archive đã cài/chạy ngoài checkout. Phạm vi backend+bằng chứng; chưa xác nhận toàn sản phẩm đạt. Repo GitHub đã xác minh PUBLIC/Issues bật/prerelease scaffold; CI xanh quan sát được gắn commit7908d46 cũ, không phải HEAD local. FE/AI chưa có source runtime trong checkout, deadline chưa được cung cấp.
+
 | Thành phần | Đã có | Còn thiếu |
 |---|---|---|
 | Backend API | 20/21 operations: me/sources/knowledge, batch/events, run/graph, review/manual links, cases/dashboard, core workflows | Scorer HTTP adapter |

@@ -63,3 +63,31 @@ API Docker đang chạy có thể còn image cũ; phải rebuild theo [Docker gu
 ## Chốt bản nộp
 
 Người phụ trách FE/AI đưa source vào cùng repo, khai báo license/provenance và hoàn thành các cổng C7–C10. Đội điền tên/mã đội, tên sản phẩm, link release/demo, thời gian thi/hạn nộp và người trình bày từ thông tin thật. Sau tích hợp, chạy lại checks toàn bộ, xác minh CI đúng commit, source build và demo nhiều vai trò, rà secrets/history; tạo release trước hạn và giữ checksum. Chỉ đánh dấu mục đạt khi có bằng chứng tương ứng. Quyết định cho điểm/tuyển tối đa hai đội thuộc hội đồng.
+
+## Kết quả backend đã thực hiện — 25/10/2026
+
+| Kiểm chứng | Kết quả và phạm vi |
+|---|---|
+| Collector tại `2db195d35812b0cb7cf6c453d4e38f26d8924e12` | 7/7 nhóm pass; 73 unit/HTTP/contract + 49 PostgreSQL + 45 identity-native, không skip/todo/cancel; base/license98, source live/ready200, npm audit0. JSON local: `.local/council-evidence/2026-10-25T14-50-57-632Z/backend-evidence.json` |
+| Lượt đầu tại `c6c15cb42bc87b7da6c8cd6c76fd9cc63fa3dddb` | Collector fail: DB12/19 pass,7fail; chưa lưu được nguyên nhân chi tiết. Chạy riêng nguyên bộ DB ngay sau đó49/49 pass. Giữ report fail tại `.local/council-evidence/2026-10-25T14-47-47-221Z`; collector mới ghi mã lỗi và chạy từng file DB. Chưa kết luận nguyên nhân hoặc coi đây là kiểm tải |
+| Source archive chạy ngoài checkout | Commit `c6c15cb42bc8`; SHA256 `83ee4b794429b3b5aa27e7db9733d9e763bf1e296e172732a598cc3367584b2c`; `npm ci --omit=dev --ignore-scripts` exit0,89 packages; smoke của source giải nén live/ready200 port18081, child đã dừng. Source runtime/contracts/backend manifest/lock không đổi giữa c6c15cb và2db195d |
+| Giới hạn kiểm source | Windows/Node/npm/DB đã có; dùng cache cho dependency, không cô lập network; `.env` được tham chiếu từ ngoài gói, không copy. Không phải kiểm máy sạch, offline hay full FE/AI; không thay release trước hạn |
+| Rà nguồn/lịch sử | 75 commit qua mọi refs local: không khớp chữ ký private key/GitHub token/AWS key hay đường dẫn env/key/credentials thật. Không phải chứng nhận mọi secret/PII đều vắng mặt |
+| Docs | 36 Markdown tracked,135 relative links,0 hỏng tại2db195d |
+| CI công khai | [Run39827203718](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/runs/39827203718) success cho commit `7908d46c24926324beff93a3d9310e3b5441fd8d` ngày22/10; cùng commit có một run failure. Các commit local mới chưa được remote CI xác nhận |
+
+Bằng chứng thô local được ignore có chủ đích; khi bàn giao bộ nộp, chạy lại collector rồi chọn các summary đã rà và Git metadata cần thiết. Không đóng gói `.local` nguyên thư mục vì có cache/cấu hình riêng. Các commit cuối chỉ cập nhật tài liệu không tự biến kết quả trên thành kiểm chứng cho FE/AI hoặc image mới.
+
+## Kết quả backend đã thực hiện — 25/10/2026
+
+| Kiểm chứng | Kết quả và phạm vi |
+|---|---|
+| Collector tại `2db195d35812b0cb7cf6c453d4e38f26d8924e12` | 7/7 nhóm pass; 73 unit/HTTP/contract + 49 PostgreSQL + 45 identity-native, không skip/todo/cancel; base/license98, source live/ready200, npm audit0. JSON local: `.local/council-evidence/2026-10-25T14-50-57-632Z/backend-evidence.json` |
+| Lượt đầu tại `c6c15cb42bc87b7da6c8cd6c76fd9cc63fa3dddb` | Collector fail: DB12/19 pass,7fail; chưa lưu được nguyên nhân chi tiết. Chạy riêng nguyên bộ DB ngay sau đó49/49 pass. Giữ report fail tại `.local/council-evidence/2026-10-25T14-47-47-221Z`; collector mới ghi mã lỗi và chạy từng file DB. Chưa kết luận nguyên nhân hoặc coi đây là kiểm tải |
+| Source archive chạy ngoài checkout | Commit `c6c15cb42bc8`; SHA256 `83ee4b794429b3b5aa27e7db9733d9e763bf1e296e172732a598cc3367584b2c`; `npm ci --omit=dev --ignore-scripts` exit0,89 packages; smoke của source giải nén live/ready200 port18081, child đã dừng. Source runtime/contracts/backend manifest/lock không đổi giữa c6c15cb và2db195d |
+| Giới hạn kiểm source | Windows/Node/npm/DB đã có; dùng cache cho dependency, không cô lập network; `.env` được tham chiếu từ ngoài gói, không copy. Không phải kiểm máy sạch, offline hay full FE/AI; không thay release trước hạn |
+| Rà nguồn/lịch sử | 75 commit qua mọi refs local: không khớp chữ ký private key/GitHub token/AWS key hay đường dẫn env/key/credentials thật. Không phải chứng nhận mọi secret/PII đều vắng mặt |
+| Docs | 36 Markdown tracked,135 relative links,0 hỏng tại2db195d |
+| CI công khai | [Run39827203718](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/runs/39827203718) success cho commit `7908d46c24926324beff93a3d9310e3b5441fd8d` ngày22/10; cùng commit có một run failure. Các commit local mới chưa được remote CI xác nhận |
+
+Bằng chứng thô local được ignore có chủ đích; khi bàn giao bộ nộp, chạy lại collector rồi chọn các summary đã rà và Git metadata cần thiết. Không đóng gói `.local` nguyên thư mục vì có cache/cấu hình riêng. Các commit cuối chỉ cập nhật tài liệu không tự biến kết quả trên thành kiểm chứng cho FE/AI hoặc image mới.
