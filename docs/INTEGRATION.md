@@ -4,6 +4,8 @@ Hợp đồng dùng chung: [OpenAPI](../backend/contracts/openapi.json), [JSON S
 
 ## Frontend và Identity
 
+Bàn giao cụ thể cho React/Vite local5173 và domain `traceweaver.quizlearn.tech`: [Frontend handoff](FRONTEND_HANDOFF.md), [API reference](FRONTEND_API_REFERENCE.md). Tài liệu này ghi rõ API Oracle, proxy local, cấu hình origin/callback còn cần đăng ký và giới hạn hiện có; không đưa credentials vào source FE.
+
 1. Cài backend theo [INSTALL](../INSTALL.md), cấu hình local Identity theo [Keycloak](../backend/KEYCLOAK.md). Mỗi máy giữ `.env` và credentials riêng.
 2. Login Authorization Code + S256 PKCE với public client; không đưa client secret vào browser. Lấy workspace/roles từ `/api/v1/me`, rồi gọi sources/knowledge bằng user token. Đăng nhập thành công không tự tạo membership hoặc source grant.
 3. Dùng origin chính xác. Development mặc định `http://localhost:3000`, `http://127.0.0.1:3000`; thay bằng `FRONTEND_ORIGINS` và provision callback `/auth/callback` theo Keycloak guide. Production cấu hình HTTPS origins rõ ràng. CORS không thay xác thực/quyền DB.

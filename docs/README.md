@@ -8,6 +8,7 @@ Tài liệu được chia theo tổng quan, vận hành và thành phần kỹ t
 | Cài từ source, cấu hình và kiểm thử | [INSTALL](../INSTALL.md) |
 | Docker, local Identity và demo login | [Docker](../backend/DOCKER.md), [Keycloak](../backend/KEYCLOAK.md) |
 | Backend/API | [Backend](../backend/README.md), [OpenAPI và schemas](../backend/contracts/README.md) |
+| Bàn giao React/Vite | [Luồng và tích hợp FE](FRONTEND_HANDOFF.md), [API reference chi tiết](FRONTEND_API_REFERENCE.md) |
 | Xác thực và quyền dữ liệu | [Identity](../backend/IDENTITY.md) |
 | Dữ liệu đầu vào và truy vấn | [Ingestion](../backend/INGESTION.md), [Events](../backend/EVENTS.md) |
 | Tái dựng và duyệt liên kết | [Reconstruction](../backend/RECONSTRUCTION.md) |

@@ -18,6 +18,8 @@ coverage/
 /docs/*
 !/docs/README.md
 !/docs/INTEGRATION.md
+!/docs/FRONTEND_HANDOFF.md
+!/docs/FRONTEND_API_REFERENCE.md
 !/docs/CURRENT_STATUS.md
 !/docs/BACKEND_HANDOFF.md
 !/docs/BACKEND_HANDOFF_RESPONSE.md
