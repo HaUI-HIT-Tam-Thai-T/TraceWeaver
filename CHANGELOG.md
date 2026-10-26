@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Frontend API handoff
+
+- Add Vietnamese React/Vite handoff for localhost:5173 and traceweaver.quizlearn.tech: PKCE/session startup, API proxy, workspace/source permissions, graph review, case workflow, pagination, concurrency, retries and UI error handling.
+- Document all21 contract operations plus2 health routes and49 DTOs with field constraints and examples. Distinguish16 browser operations, server-only ingest/core and planned scorer. Explicitly record pending frontend origin/callback registration, reviewer provisioning and demo data; no deployment configuration changed in this documentation task.
+- Verify60 JSON examples against the existing schema,440 local links/anchors, operation/schema coverage,5 contract tests, base checks and license inventory98packages. React/Vite snippets are integration examples, not a built or end-to-end-tested frontend. No runtime, dependency, schema, credential or database changes.
+
 ## Unreleased — Documentation cleanup
 
 - Consolidate integration/data handoff guidance into docs/INTEGRATION.md and license maintenance into CONTRIBUTING.md. Keep runtime/API/install/security/license documentation; remove duplicate preparation/progress checklists from public docs. Council evidence remains local.
