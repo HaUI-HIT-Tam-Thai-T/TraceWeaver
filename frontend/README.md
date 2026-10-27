@@ -1,7 +1,7 @@
 # TraceWeaver Frontend
 
-React + TypeScript + Vite, có cấu hình, routing và quản lý phiên Keycloak.
-Chưa triển khai API client, workspace/phân quyền hoặc UI nghiệp vụ.
+React + TypeScript + Vite, có cấu hình, routing, quản lý phiên Keycloak và Axios client.
+Chưa triển khai service nghiệp vụ, workspace/phân quyền hoặc UI nghiệp vụ.
 
 ## Công cụ và phần đã làm
 
@@ -32,7 +32,7 @@ npm run dev
 
 Tạo `.env.development.local` từ `.env.example`, đặt `VITE_API_BASE_URL=` rỗng cho local.
 Nếu đã có `.env.development` thì giữ hoặc ghi đè bằng `.env.development.local`.
-`VITE_API_BASE_URL=` rỗng ở local để API client tương lai gọi `/api/v1/...` qua Vite.
+`VITE_API_BASE_URL=` rỗng ở local để API client gọi `/api/v1/...` qua Vite.
 `API_PROXY_TARGET` chỉ dùng phía dev server, không có prefix `VITE_`.
 Sau khi sửa env, khởi động lại Vite.
 
@@ -82,6 +82,68 @@ Nếu thử auth trên preview, BE cần đăng ký riêng origin/callback cổn
 race với logout, lỗi và subscription; kiểm thử UI dùng SSR với Context giả, không chứng minh SSO thật.
 UAT thật cần kiểm operator/viewer, hủy login, callback, reload, refresh và logout trên trình duyệt.
 
+## Axios client — task 3
+
+- `src/services/apiClient.ts` export `apiClient` dùng trong browser. Instance lấy API origin
+  từ env đã validate; local origin rỗng đi qua Vite proxy. Factory `createApiClient` nhận
+  baseURL và token provider để kiểm thử độc lập với Keycloak, không cần thư viện mới.
+- Timeout HTTP mặc định 10 giây, Accept JSON, withCredentials=false để không gửi cookie
+  khác origin. Axios tự đặt Content-Type JSON khi service gửi body dạng object.
+  Không tự JSON.stringify body trong service nếu không có nhu cầu riêng.
+- Mỗi request await `getAccessToken()` của auth trước khi gắn Bearer. Auth quản lý refresh
+  dùng chung; client không tạo cơ chế refresh khác. Refresh thất bại thì request không gửi.
+- Chỉ dùng path bắt đầu `/api/v1/`, gồm cả prefix. Client chặn URL tuyệt đối, đổi baseURL,
+  Basic Auth và path traversal ra ngoài API scope trước khi gọi token provider.
+  Không dùng instance này cho health public, Identity, core hoặc service bên ngoài.
+- Giữ AxiosResponse khi thành công: service lấy `response.data`, còn headers/status vẫn có
+  khi cần. Generic TypeScript không xác thực JSON lúc chạy; service phải validate boundary
+  theo DTO khi cần. Client chỉ kiểm tra shape của phần lỗi chung.
+- Client không retry, kể cả 401 hoặc GET. Không tự logout/redirect/alert khi lỗi HTTP.
+  Session auth tự xóa phiên khi refresh thất bại; UI/caller xử lý HTTP 401 và 403 riêng.
+- Service quyết định Idempotency-Key theo endpoint. Client chuyển nguyên key và body;
+  không tự sinh hoặc thay key. POST timeout có thể đã commit ở BE.
+
+`ApiError` có kind (`http`, `network`, `timeout`, `auth`, `client`), code, status và requestId.
+Status/requestId là null nếu không có. HTTP 401 có kind=auth, 403 có kind=http.
+Code backend hợp lệ được giữ, fallback HTTP_<status>. Request ID ưu tiên body.request_id,
+rồi header X-Request-ID không phân biệt hoa/thường. Message dùng thông báo an toàn;
+không đính kèm raw body, HTML, config, request hoặc cause có thể chứa token.
+Network error không khẳng định là CORS vì browser có thể không cung cấp nguyên nhân.
+
+Truyền AbortController.signal qua request config. Hủy khi chờ token kết thúc request ngay,
+không hủy refresh chung; sau khi hủy, request đó không được gửi. Lỗi cancellation vẫn kiểm
+tra bằng `axios.isCancel(error)`, không hiển thị như lỗi hệ thống. Abort POST không bảo đảm rollback.
+Không log toàn bộ response, Axios config hoặc cancellation object vì có thể chứa Authorization.
+
+Ví dụ gọi từ service (DTO và schema nghiệp vụ sẽ được thêm trong task tương ứng):
+
+```ts
+import axios from 'axios'
+import { apiClient } from './src/services/apiClient'
+import { ApiError } from './src/services/apiError'
+
+const controller = new AbortController()
+try {
+  const response = await apiClient.get<unknown>('/api/v1/me', {
+    signal: controller.signal,
+  })
+  // response.data là unknown: service validate theo DTO trước khi trả cho UI.
+} catch (error: unknown) {
+  if (axios.isCancel(error)) {
+    // Thao tác hủy chủ động: không hiển thị lỗi hệ thống.
+  } else if (error instanceof ApiError) {
+    // Caller dùng kind/status/code để xử lý; requestId dành cho hỗ trợ.
+  } else {
+    throw error
+  }
+}
+```
+
+Đây là mẫu sử dụng, chưa triển khai service /me hoặc nối request vào UI.
+`tests/api-client.test.mjs` dùng Axios adapter và token provider giả, kiểm token/refresh,
+scope URL, cancellation khi chờ token/HTTP, các kiểu lỗi JSON/HTML/network/timeout,
+request ID, không lộ token và POST không retry. `npm test` chạy cả tests auth và client.
+
 ## Deploy SPA và phụ thuộc tiếp theo
 
 Deploy thư mục `dist/`. Hosting phải phục vụ static assets trước và fallback `index.html`
@@ -99,5 +161,6 @@ production CORS và post-logout redirect trước khi kiểm auth/API thật.
 Kiểm tra thực tế ngày 27/10/2026: authorize endpoint nhận request Code + PKCE S256 nhưng trả
 `Invalid parameter: redirect_uri` cho `http://localhost:5173/auth/callback`.
 Chưa thể nghiệm thu login/token exchange/refresh/logout thật trước khi BE đăng ký callback.
-Chưa có tài khoản được cung cấp cho phiên làm việc này; không đặt thông tin đăng nhập vào source.
-Sau auth là API client (task 3), rồi `/me` và workspace (task 4).
+Không đặt thông tin đăng nhập vào source. Chưa nghiệm thu API có access token thật khi
+callback local chưa được đăng ký; lỗi cấu hình Identity không được giải quyết bằng retry API.
+Task 3 đã có HTTP client; tiếp theo là `/me` và workspace (task 4).
