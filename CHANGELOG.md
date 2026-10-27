@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — AI MVP confirmation response
+
+- Answer all five questions from AI_BE_CONFIRMATION: retain scorer schema1 and all-namespace shared_id_count; BE owns unresolved/strong-ID guards; AI ranks/proposes only; unknown/conflicting outcomes require review; retry ambiguity stays unresolved with cardinality per transition ID.
+- Distinguish intended BE integration choices from current runtime: outcome guard, persisted/exposed abstention reasons, namespace alias mapper, feature extractor and scorer adapter remain unimplemented. Record policy versioning and separate provision-outcome transition caveats. Align existing AI/integration/status documentation without changing runtime, contracts, deployment or data.
+- Verify18 existing reconstruction/contract tests, base checks and29 local Markdown links/anchors. No claim of AI artifact evaluation, bilateral approval, scorer integration or deployed compliance.
+
 ## Unreleased — Frontend demo dataset
 
 - Add explicit-target, dry-run-first frontend seed using existing ingestion/run/case repositories in one transaction. Label 36 synthetic events, 12 runs and 12 cases with FE-DEMO; cover four workflow states, missing identifiers, retry, provision failure and hybrid degradation. Reruns preserve user edits and add no duplicate artifacts.
