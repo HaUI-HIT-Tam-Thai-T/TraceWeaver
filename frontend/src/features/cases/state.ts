@@ -1,10 +1,12 @@
 import type { ApiError } from "../../services/apiError.ts";
 import type { Case, CaseDetail, CaseFilters } from "./schemas.ts";
+import type { Event } from '../events/schemas.ts';
 
 export type CasesScope = {
   subject: string;
   workspaceId: string;
   accessKey: object;
+  canWrite?: boolean;
 };
 export type CasesState = {
   scope: CasesScope | null;
@@ -25,7 +27,11 @@ export type CasesState = {
   index: number;
   nextCursor: string | null;
   error: ApiError | null;
+  snapshot: { status: 'idle' | 'loading' | 'ready' | 'error'; runId: string | null; events: Event[]; error: ApiError | null };
+  evidenceMutation: { status: 'idle' | 'sending' | 'success' | 'uncertain' | 'error' | 'locked'; error: ApiError | null; savedId: string | null };
 };
+export const initialEvidenceMutation = (): CasesState['evidenceMutation'] => ({ status: 'idle', error: null, savedId: null });
+export const initialEvidenceSnapshot = (): CasesState['snapshot'] => ({ status: 'idle', runId: null, events: [], error: null });
 export function initialCasesState(
   scope: CasesScope | null = null,
   filters: CaseFilters = { limit: 50 },
@@ -40,6 +46,8 @@ export function initialCasesState(
     index: 0,
     nextCursor: null,
     error: null,
+    snapshot: initialEvidenceSnapshot(),
+    evidenceMutation: initialEvidenceMutation(),
   };
 }
 export type CasesAction =

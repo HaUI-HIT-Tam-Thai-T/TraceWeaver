@@ -1,6 +1,8 @@
 import { z } from "zod";
 import type { AxiosInstance } from "axios";
 import { ApiError } from "../../services/apiError.ts";
+import { evidenceCreateSchema, evidenceSchema } from './schemas.ts';
+import type { EvidenceCreate } from './schemas.ts';
 import {
   caseCreateSchema,
   caseSchema,
@@ -101,6 +103,17 @@ export function createCasesService(
       throw invalidResponse();
     return result.data;
   }
-  return { createCase, listCases, getCase };
+  async function addEvidence(wid: string, cid: string, body: EvidenceCreate, signal?: AbortSignal) {
+    const url = `${path(wid, cid)}/evidence`;
+    const parsed = evidenceCreateSchema.safeParse(body);
+    if (!parsed.success) throw invalidCaseInput();
+    const response = await client.post<unknown>(url, parsed.data, { signal });
+    const result = evidenceSchema.safeParse(response.data);
+    if (!result.success || result.data.case_id !== cid || result.data.kind !== parsed.data.kind ||
+      result.data.event_ids.length !== parsed.data.event_ids.length ||
+      result.data.event_ids.some(id => !parsed.data.event_ids.includes(id))) throw invalidResponse();
+    return result.data;
+  }
+  return { createCase, listCases, getCase, addEvidence };
 }
 export type CasesService = ReturnType<typeof createCasesService>;

@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import type { CasesState } from "./state";
 import type { CaseFilters } from "./schemas";
+import type { EvidenceCreate } from './schemas';
 
 export type CasesContextValue = {
   state: CasesState;
@@ -8,6 +9,9 @@ export type CasesContextValue = {
   refresh: () => void;
   previousPage: () => void;
   nextPage: () => void;
+  loadEvidenceSnapshot: () => Promise<void>;
+  submitEvidence: (body: EvidenceCreate) => Promise<void>;
+  beginNewEvidence: () => void;
 };
 export const CasesContext = createContext<CasesContextValue | undefined>(
   undefined,

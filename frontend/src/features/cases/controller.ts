@@ -1,10 +1,13 @@
 import axios from "axios";
 import { z } from "zod";
-import { normalizeApiError } from "../../services/apiError.ts";
+import { ApiError as SafeApiError, normalizeApiError } from "../../services/apiError.ts";
 import type { ApiError } from "../../services/apiError.ts";
 import type { CasesService } from "./createCasesService.ts";
 import { readCaseQuery } from "./query.ts";
-import { casesReducer, initialCasesState } from "./state.ts";
+import { casesReducer, initialCasesState, initialEvidenceMutation, initialEvidenceSnapshot } from "./state.ts";
+import { evidenceCreateSchema } from './schemas.ts';
+import type { EvidenceCreate } from './schemas.ts';
+import type { Graph } from '../reconstruction/schemas.ts';
 import type { CasesScope, CasesState } from "./state.ts";
 
 export type CasesView =
@@ -16,12 +19,15 @@ const scopeId = (scope: CasesScope) =>
 export function createCasesController(
   service: Pick<CasesService, "listCases" | "getCase">,
   revalidate: () => Promise<void>,
+  evidence?: { addEvidence: CasesService['addEvidence']; getGraph: (wid: string, rid: string, signal?: AbortSignal) => Promise<Graph> },
 ) {
   let state = initialCasesState();
   let view: CasesView = { kind: "none" };
   let generation = 0;
   let request: AbortController | null = null;
   let busy = false;
+  let snapshotRequest: AbortController | null = null;
+  let snapshotSequence = 0;
   let blocked: { key: string; error: ApiError } | null = null;
   const listeners = new Set<() => void>();
   function reset(next: CasesState) {
@@ -35,6 +41,8 @@ export function createCasesController(
   function abort() {
     generation++;
     request?.abort();
+    snapshotRequest?.abort();
+    snapshotSequence++;
     busy = false;
   }
   function deny(error: ApiError) {
@@ -54,6 +62,7 @@ export function createCasesController(
   async function load(
     index = 0,
     history: (string | null)[] = [null],
+    retainDetail = false,
   ): Promise<void> {
     if (
       busy ||
@@ -65,6 +74,7 @@ export function createCasesController(
     const scope = state.scope;
     const currentView = view;
     const filters = state.filters;
+    const previousDetail = retainDetail ? state.detail.data : null;
     const controller = new AbortController();
     request = controller;
     const version = generation;
@@ -85,7 +95,7 @@ export function createCasesController(
         detail: {
           status: "loading",
           id: currentView.caseId,
-          data: null,
+          data: previousDetail,
           error: null,
         },
       });
@@ -108,7 +118,9 @@ export function createCasesController(
           currentView.caseId,
           controller.signal,
         );
-        if (current())
+        if (current()) {
+          const runChanged = previousDetail !== null && previousDetail.case.run_id !== detail.case.run_id;
+          if (runChanged) { snapshotRequest?.abort(); snapshotSequence++; }
           update({
             detail: {
               status: "ready",
@@ -116,13 +128,15 @@ export function createCasesController(
               data: detail,
               error: null,
             },
+            ...(runChanged ? { snapshot: initialEvidenceSnapshot(), evidenceMutation: initialEvidenceMutation() } : {}),
           });
+        }
       }
     } catch (error: unknown) {
       if (!current()) return;
       if (axios.isCancel(error)) {
         if (currentView.kind === 'list') update({ list: { status: 'idle', items: [], error: null } });
-        else update({ detail: { status: 'idle', id: currentView.caseId, data: null, error: null } });
+        else update({ detail: { status: 'idle', id: currentView.caseId, data: previousDetail, error: null } });
         return;
       }
       const safe = normalizeApiError(error);
@@ -141,7 +155,7 @@ export function createCasesController(
           detail: {
             status: "error",
             id: currentView.caseId,
-            data: null,
+            data: previousDetail,
             error: safe,
           },
         });
@@ -171,6 +185,7 @@ export function createCasesController(
       state.scope?.accessKey === scope.accessKey &&
       state.scope.workspaceId === scope.workspaceId &&
       state.scope.subject === scope.subject;
+    const samePermissions = state.scope?.canWrite === scope.canWrite;
     if (blocked && blocked.key !== scopeId(scope)) blocked = null;
     if (blocked) {
       abort();
@@ -183,6 +198,7 @@ export function createCasesController(
     }
     if (
       !same ||
+      !samePermissions ||
       state.status === 'invalid' ||
       previousView.kind !== nextView.kind ||
       (previousView.kind === "detail" &&
@@ -196,6 +212,7 @@ export function createCasesController(
     }
   }
   function refresh(): Promise<void> {
+    if (busy) return Promise.resolve();
     if (
       !state.scope ||
       view.kind === "none" ||
@@ -204,6 +221,7 @@ export function createCasesController(
     )
       return Promise.resolve();
     blocked = null;
+    if (view.kind === 'detail' && state.detail.data) return load(0, [null], true);
     abort();
     reset(initialCasesState(state.scope, state.filters));
     return load();
@@ -220,6 +238,76 @@ export function createCasesController(
         : state.history;
     return load(index, history);
   }
+  function editable() {
+    return state.status === 'active' && state.scope?.canWrite === true && view.kind === 'detail' &&
+      state.detail.status === 'ready' && state.detail.id === view.caseId && state.detail.data !== null &&
+      state.detail.data.case.state !== 'closed';
+  }
+  async function loadEvidenceSnapshot(): Promise<void> {
+    if (!evidence || busy || !editable() || !state.scope || !state.detail.data || state.snapshot.status === 'loading') return;
+    const wid = state.scope.workspaceId;
+    const rid = state.detail.data.case.run_id;
+    const cid = state.detail.data.case.id;
+    if (state.snapshot.status === 'ready' && state.snapshot.runId === rid) return;
+    snapshotRequest?.abort();
+    const controller = new AbortController();
+    snapshotRequest = controller;
+    const version = generation;
+    const sequence = ++snapshotSequence;
+    const current = () => version === generation && sequence === snapshotSequence && !controller.signal.aborted;
+    update({ snapshot: { status: 'loading', runId: rid, events: [], error: null } });
+    try {
+      const graph = await evidence.getGraph(wid, rid, controller.signal);
+      if (!current()) return;
+      if (graph.run_id !== rid || state.detail.id !== cid) throw new SafeApiError({ kind: 'client', code: 'INVALID_API_RESPONSE', message: 'Snapshot không đúng run của case.' });
+      update({ snapshot: { status: 'ready', runId: rid, events: graph.nodes, error: null } });
+    } catch (error: unknown) {
+      if (!current()) return;
+      if (axios.isCancel(error)) { update({ snapshot: initialEvidenceSnapshot() }); return; }
+      const safe = normalizeApiError(error);
+      if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) deny(safe);
+      else update({ snapshot: { status: 'error', runId: rid, events: [], error: safe } });
+    }
+  }
+  async function submitEvidence(input: EvidenceCreate): Promise<void> {
+    if (!evidence || busy || !editable() || !state.scope || !state.detail.data ||
+      ['sending', 'uncertain', 'locked'].includes(state.evidenceMutation.status)) return;
+    const parsed = evidenceCreateSchema.safeParse(input);
+    const detail = state.detail.data;
+    if (!parsed.success || (input.kind === 'note' && input.event_ids.length > 0) ||
+      (input.kind === 'events' && (state.snapshot.status !== 'ready' || state.snapshot.runId !== detail.case.run_id ||
+      input.event_ids.some(id => !state.snapshot.events.some(event => event.event_id === id))))) {
+      update({ evidenceMutation: { status: 'error', savedId: null, error: new SafeApiError({ kind: 'client', code: 'INVALID_EVIDENCE_INPUT', message: 'Kiểm tra note và các event thuộc snapshot của case.' }) } });
+      return;
+    }
+    const wid = state.scope.workspaceId;
+    const cid = detail.case.id;
+    const version = generation;
+    const controller = new AbortController();
+    request = controller;
+    const current = () => version === generation && !controller.signal.aborted;
+    busy = true;
+    update({ evidenceMutation: { status: 'sending', savedId: null, error: null } });
+    let refetch = false;
+    try {
+      const result = await evidence.addEvidence(wid, cid, parsed.data, controller.signal);
+      if (!current()) return;
+      update({ evidenceMutation: { status: 'success', savedId: result.id, error: null } });
+      refetch = true;
+    } catch (error: unknown) {
+      if (!current()) return;
+      const safe = normalizeApiError(error);
+      if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) { deny(safe); return; }
+      const uncertain = axios.isCancel(error) || safe.kind === 'network' || safe.kind === 'timeout' || safe.code === 'INVALID_API_RESPONSE' || (safe.status ?? 0) >= 500;
+      const locked = safe.code === 'CASE_CLOSED';
+      update({ evidenceMutation: { status: uncertain ? 'uncertain' : locked ? 'locked' : 'error', savedId: null, error: axios.isCancel(error) ? null : safe } });
+      refetch = uncertain || locked;
+    } finally { if (current()) busy = false; }
+    if (refetch && current()) await load(0, [null], true);
+  }
+  function beginNewEvidence() {
+    if (!busy && editable() && state.evidenceMutation.status === 'uncertain') update({ evidenceMutation: initialEvidenceMutation() });
+  }
   return {
     getSnapshot: () => state,
     subscribe(listener: () => void) {
@@ -230,6 +318,7 @@ export function createCasesController(
     },
     sync,
     refresh,
+    loadEvidenceSnapshot, submitEvidence, beginNewEvidence,
     previousPage: () => page(-1),
     nextPage: () => page(1),
     stop() {

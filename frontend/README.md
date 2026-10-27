@@ -435,3 +435,61 @@ vẫn có thể về `/` thay vì khôi phục route sau callback. Dev server ki
 Kiến thức rule: feature/service/tách trách nhiệm (3,5); strict/Zod/RHF (4,11); reducer/Context,
 cleanup/AbortController/generation (6,8); params/URL filters/Link/lazy (9); Axios/idempotency/
 cursor/lỗi (10,12); scope, escape, accessibility và kiểm thử/phạm vi (14–16).
+
+## Case evidence — task 9
+
+Nhánh `ThienBao/feature/case-evidence-logic`; chỉ frontend, không dependency mới.
+Form dưới evidence tại `/cases/:caseId` mặc định Note. Chỉ operator/reviewer trong scope
+ready và case chưa closed có quyền gửi; viewer/admin đơn thuần chỉ đọc. Chưa có workflow
+transition/reopen, sửa hoặc xóa evidence.
+
+- `addEvidence(wid, cid, {kind,event_ids,note}, signal)` POST
+  `/api/v1/workspaces/{wid}/cases/{cid}/evidence`. Luôn đủ ba field; không gửi version,
+  expected_version hoặc Idempotency-Key. Zod validate request và Evidence response,
+  đúng case/kind/tập event IDs; không so note nguyên văn vì BE có thể redact.
+- Note phải có nội dung không trắng, tối đa 10.000 ký tự; giữ nguyên newline/khoảng trắng.
+  Note UI gửi event_ids=[] và không tải graph. Events chọn 1–1.000 UUID duy nhất thuộc
+  graph snapshot của chính case.run_id; note được rỗng nhưng field vẫn bắt buộc. Đổi về
+  Note xóa lựa chọn events, giữ note. Không nhập UUID tự do hoặc lấy từ Event explorer.
+- Graph được tải lười khi chuyển Events, dùng getGraph đã validate run ID. Snapshot có
+  loading/empty/error/retry GET; lỗi mạng/schema của picker không ngăn note nếu case còn
+  hợp lệ. Không kết luận nguồn mất quyền từ lỗi mạng; 401/403/404 vẫn xử lý toàn artifact.
+- CasesProvider/reducer/controller sở hữu snapshot và mutation. Khóa gửi trong POST/refetch,
+  không optimistic append evidence/history, không tự tăng Case.version. POST xác nhận thành
+  công mới xóa nháp; GET detail lấy evidence/history/version hiện tại (có thể đổi do workflow
+  đồng thời). Form giữ mounted khi refetch, còn detail cũ không được hiển thị như dữ liệu mới.
+- POST thành công + GET lỗi: báo đã lưu nhưng chưa đồng bộ, retry chỉ GET. Timeout/network/
+  5xx/response sai schema sau POST: kết quả chưa rõ, GET detail đúng một lần, không replay
+  POST. Giữ nháp; sau GET hợp lệ phải chủ động Bắt đầu thao tác evidence mới để gửi tiếp,
+  cảnh báo có thể tạo bản trùng. Nội dung giống nhau trong detail không chứng minh actor
+  hoặc request vừa rồi đã commit. GET lỗi giữ binding/nháp, không cho gửi khi chưa đồng bộ.
+- CASE_CLOSED khóa form và đọc lại detail; cần reviewer xử lý ở workflow, không tự reopen.
+  422 giữ input để sửa; 401 yêu cầu login; 403/404 purge và revalidate một lần. AbortController,
+  generation và sequence snapshot chặn response cũ khi đổi case/run/user/workspace/access,
+  mất quyền/revalidation/logout hoặc rời detail; xóa snapshot/nháp/mutation. Abort không
+  chứng minh BE rollback. Note/payload chỉ memory, không URL/storage/log và dùng React escape.
+
+Kiểm tra tự động: lint, build TypeScript strict với env hợp lệ, toàn bộ **131 tests** và
+git diff --check. 15 tests mới kiểm limits, note giữ whitespace, exact body/no key/version,
+DTO sai case/kind/refs, graph sai run, snapshot membership, closed/readonly, double submit,
+timeout không replay, GET lỗi sau POST giữ binding, permissions và response cũ; Case.version
+không tự tăng, version từ workflow đồng thời chỉ lấy qua GET. SSR dùng cache riêng.
+
+Đã kiểm UI tương tác bằng fixture cục bộ (không gọi BE): Note không GET graph; timeout +
+GET lỗi giữ nguyên textarea và khóa submit; GET thành công rồi xác nhận thao tác mới;
+Events tải graph một lần; đổi Note xóa selection nhưng giữ note; submit Events thành công
+gửi đúng IDs/body, GET detail lại, xóa nháp sau thành công và giữ Case.version theo fixture.
+Fixture kiểm thử nằm trong node_modules/.tmp, không nằm trong production build.
+
+UAT thật: BE hiện đã có dataset FE-DEMO-20261027-v1. Operator mở case demo
+`02 - Cap moi truong that bai`, thêm một note đánh dấu FE-UAT Task9 và một evidence
+tham chiếu event provision.failed trong snapshot của case.run_id (note rỗng hợp lệ).
+Hai POST thành công, GET detail sau mỗi lần hiển thị evidence đã lưu; state vẫn new,
+Case.version vẫn 1. Viewer đăng nhập lại đọc được cả hai evidence, không có form ghi.
+Đã kiểm logout/đổi user xóa scope. Không ingest, đổi workflow hoặc sửa grants BE.
+Timeout/GET lỗi/CLOSED/mất quyền được kiểm bằng tests/fixture, chưa cố tình gây trên BE thật.
+Hai evidence UAT là append-only và được giữ trong case demo; không có API xóa ở task này.
+
+Kiến thức rule: service/feature/tách form (3,5), TypeScript strict/Zod/RHF (4,11), reducer/
+Context/lifecycle/AbortController/generation (6,8), Axios và phân loại kết quả POST/refetch
+(10,12), scope/snapshot/escape/accessibility (9,14), kiểm thử theo rủi ro và phạm vi (15–16).

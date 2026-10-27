@@ -51,6 +51,15 @@ export const evidenceSchema = z.strictObject({
   creator_subject: subject,
   created_at: utcSchema,
 });
+export const evidenceCreateSchema = z.strictObject({
+  kind: z.enum(['events', 'note']),
+  event_ids: z.array(id).max(1000, 'Chọn tối đa 1.000 events.').refine(ids => new Set(ids).size === ids.length, 'Event không được lặp.'),
+  note: z.string().max(10000, 'Note tối đa 10.000 ký tự.'),
+}).superRefine((body, ctx) => {
+  if (body.kind === 'events' && body.event_ids.length === 0) ctx.addIssue({ code: 'custom', path: ['event_ids'], message: 'Chọn ít nhất một event trong snapshot.' });
+  if (body.kind === 'note' && !/\S/.test(body.note)) ctx.addIssue({ code: 'custom', path: ['note'], message: 'Nhập note có nội dung.' });
+});
+export type EvidenceCreate = z.infer<typeof evidenceCreateSchema>;
 export const caseDetailSchema = z
   .strictObject({
     case: caseSchema,

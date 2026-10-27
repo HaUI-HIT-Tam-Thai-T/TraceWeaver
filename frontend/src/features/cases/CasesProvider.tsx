@@ -8,6 +8,7 @@ import { createCasesController } from "./controller";
 import { CasesContext } from "./casesContext";
 import { initialCasesState } from "./state";
 import { readCaseQuery, writeCaseQuery } from "./query";
+import { reconstructionService } from '../reconstruction/service';
 
 const hiddenState = initialCasesState();
 export function CasesProvider({ children }: { children: ReactNode }) {
@@ -19,7 +20,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     refreshAccess,
   } = useWorkspace();
   const [controller] = useState(() =>
-    createCasesController(casesService, refreshAccess),
+    createCasesController(casesService, refreshAccess, { addEvidence: casesService.addEvidence, getGraph: reconstructionService.getGraph }),
   );
   const snapshot = useSyncExternalStore(
     controller.subscribe,
@@ -60,7 +61,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     const key = JSON.stringify([me.subject, wid]);
     const changed = lastScope.current !== null && lastScope.current !== key;
     lastScope.current = key;
-    const scope = { subject: me.subject, workspaceId: wid, accessKey: me };
+    const scope = { subject: me.subject, workspaceId: wid, accessKey: me, canWrite: permissions.canWrite };
     if (changed && isCases) {
       controller.sync(scope, { kind: "list", search: "" });
       navigate("/cases", { replace: true });
@@ -68,6 +69,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
   }, [
     auth.status,
     allowed,
+    permissions.canWrite,
     me,
     wid,
     detailId,
@@ -108,6 +110,9 @@ export function CasesProvider({ children }: { children: ReactNode }) {
         nextPage() {
           void controller.nextPage();
         },
+        loadEvidenceSnapshot: controller.loadEvidenceSnapshot,
+        submitEvidence: controller.submitEvidence,
+        beginNewEvidence: controller.beginNewEvidence,
       }}
     >
       {children}
