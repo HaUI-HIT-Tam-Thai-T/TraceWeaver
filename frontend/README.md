@@ -535,3 +535,43 @@ chưa có tài khoản reviewer; đã kiểm bằng service giả/test. Timeout/
 chỉ mô phỏng, không cố tình gây trên BE thật. Lỗi proxy EACCES ban đầu do sandbox;
 chạy dev server với quyền kết nối được cấp đã tải /me/sources thành công.
 Ảnh kiểm thử cục bộ: node_modules/.tmp/workflow-operator-real.png (không commit).
+
+### Task 11 — Knowledge chỉ đọc
+
+Route lazy `/knowledge`, liên kết từ trang chủ. Chỉ gọi
+`GET /api/v1/workspaces/{wid}/knowledge` khi auth/workspace ready và có role đọc.
+Form React Hook Form + Zod: nhập nháp, bấm Tìm kiếm mới áp dụng q/limit vào URL;
+q tối đa 500 ký tự, giữ literal text, không xử lý wildcard hoặc lọc lại dữ liệu ở FE.
+BE tìm substring không phân biệt hoa/thường trên title/body của latest version.
+Mặc định 50, chọn 25/50/100. Không có API detail riêng hoặc API CRUD knowledge.
+
+Phân trang Trước/Tiếp bằng cursor stack trong memory, không cache payload các trang
+hoặc bịa tổng trang. Đổi q/limit hoặc Làm mới xóa lịch sử cursor và tải trang đầu.
+INVALID_CURSOR/cursor lặp dừng tải và chờ thao tác bắt đầu lại; không tự retry vô hạn.
+Knowledge không có bảo đảm snapshot cố định, bài viết/version có thể đổi giữa các GET.
+
+Validate KnowledgeArticle/KnowledgePage: UUID, đúng workspace, title/body, version >=1,
+subject, source_ref URI, timestamp UTC, duplicate IDs và next_cursor. UI đọc body trong
+`details`, hiển thị version, source_ref, author subject, created_at UTC nguyên gốc.
+Không có nút tạo/sửa/xóa, không có POST/PUT/PATCH/DELETE. Body/source_ref render bằng
+React text; source_ref kể cả URN chỉ là tham chiếu, không mở link URI tùy ý hoặc render HTML.
+
+Controller + reducer thuần, useSyncExternalStore và AbortController/generation:
+response cũ không ghi đè query/scope mới. Auth/logout, mất quyền, đổi user/workspace,
+revalidation và rời route purge payload/cursor và hủy chờ. URL q/limit giữ nguyên khi
+đổi scope; form nháp reset, tải mới trang đầu sau khi scope hợp lệ. 401 yêu cầu đăng nhập;
+403/404 purge và revalidate workspace một lần, latch qua revalidation để tránh loop.
+Mạng/timeout/schema có retry GET, cancellation không hiển thị lỗi hệ thống.
+
+Kiểm tra: toàn bộ 153 tests pass (9 test knowledge mới), lint và TypeScript strict.
+UAT viewer với BE thật: mở /knowledge, list rỗng và tìm kiếm q có dấu thành công;
+nhập nháp không thay URL, submit cập nhật URL rồi GET. BE hiện chưa có bài knowledge,
+nên chưa nghiệm thu nội dung/version/source_ref và nhiều trang với dữ liệu thật.
+Không tạo hoặc ingest bài mẫu. Đã kiểm UI bằng service giả cục bộ: đọc version 3/2,
+source_ref URN/HTTPS, body có HTML được escape, Trước/Tiếp GET đúng trang và nút disabled.
+Ảnh cục bộ trong node_modules/.tmp/knowledge-viewer-real.png và knowledge-content-fixture.png.
+
+Kiến thức rule áp dụng: feature/service và tách UI (3,5); TypeScript strict, Zod,
+RHF (4,11); effect cleanup, AbortController/generation, reducer/external store (6,8);
+Router/lazy/search params (9); Axios/cursor/ApiError (10,12); scope quyền, escape,
+semantic HTML/keyboard (14); node:test/SSR và giữ phạm vi frontend (15–16).

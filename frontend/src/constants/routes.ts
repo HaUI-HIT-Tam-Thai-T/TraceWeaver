@@ -19,7 +19,10 @@ const CaseDetailPage = lazy(() =>
   })),
 );
 
+const KnowledgePage = lazy(() => import('../pages/KnowledgePage').then(module => ({ default: module.KnowledgePage })));
+
 export const ROUTES = [
+  { path: '/knowledge', element: createElement(Suspense, { fallback: createElement('p', { role: 'status' }, 'Đang tải Knowledge…') }, createElement(KnowledgePage)) },
   {
     path: "/cases",
     element: createElement(
