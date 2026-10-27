@@ -7,7 +7,7 @@ import { createServer } from 'vite'
 import { event, scope, WID, SID } from './event-fixtures.mjs'
 
 test('events UI renders filters, outcomes, precision, provenance, escaped payload and role-gated root', async () => {
-  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false, ws: false } })
+  const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-events', server: { middlewareMode: true, hmr: false, ws: false } })
   try {
     const { EventsExplorer } = await server.ssrLoadModule('/src/features/events/EventsExplorer.tsx')
     const { EventsContext } = await server.ssrLoadModule('/src/features/events/eventsContext.ts')

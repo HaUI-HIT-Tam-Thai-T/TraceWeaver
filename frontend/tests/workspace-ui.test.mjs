@@ -5,7 +5,7 @@ import { renderToString } from 'react-dom/server'
 import { createServer } from 'vite'
 
 test('workspace UI renders access states, labeled picker, current roles, pagination, and safe recovery', async () => {
-  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false, ws: false } })
+  const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-workspace', server: { middlewareMode: true, hmr: false, ws: false } })
   try {
     const { WorkspacePanel } = await server.ssrLoadModule('/src/features/workspace/WorkspacePanel.tsx')
     const { WorkspaceContext } = await server.ssrLoadModule('/src/features/workspace/workspaceContext.ts')

@@ -6,7 +6,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { createServer } from 'vite'
 
 test('auth UI renders loading, session failure, login/logout, and callback feedback', async () => {
-  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false, ws: false } })
+  const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-auth', server: { middlewareMode: true, hmr: false, ws: false } })
   try {
     const { AuthContext } = await server.ssrLoadModule('/src/features/auth/authContext.ts')
     const { HomePage } = await server.ssrLoadModule('/src/pages/HomePage.tsx')

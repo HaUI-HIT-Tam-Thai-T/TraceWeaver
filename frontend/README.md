@@ -259,3 +259,55 @@ chưa khôi phục URL events/filter sau vòng redirect này. Không thay đổi
 Kiến thức theo rule: feature/service (3,5), TypeScript strict + Zod (4), async cleanup và race
 condition (6), reducer/Context/state URL (8,9), Axios/RHF/ApiError (10–12), scope quyền,
 escape nội dung/keyboard/semantic HTML (14), kiểm thử và giới hạn frontend (15,16).
+
+## Reconstruction — task 6
+
+Trong `/events`, operator/reviewer chọn root từ detail đã validate để mở form tạo run.
+Mặc định nguồn root, `rule_only`, window root ±5 phút. Nhập thời gian UTC+7 theo
+`YYYY-MM-DDTHH:mm:ss.ffffff` (phần thập phân tùy chọn). Dùng text input để giữ precision
+vượt milliseconds; không để native datetime input làm mất fractional seconds.
+Source picker có tải thêm; không coi nguồn chưa nằm trong trang đầu là mất grant.
+
+Feature `src/features/reconstruction/` tách schema, form helpers, service factory,
+reducer/controller và UI. Service dùng Axios hiện có, trả Run/Graph đã validate Zod:
+`createRun(workspaceId, body, {idempotencyKey, signal})`, `getRun(workspaceId, runId, signal)`
+và `getGraph(workspaceId, runId, signal)`. Endpoint poll luôn được dựng từ workspace/run UUID
+đã validate, không theo Location bên ngoài. Không thêm dependency.
+
+- Trước POST đọc lại root detail, kiểm đúng ID/source và root trong window inclusive.
+  UUID nguồn phải duy nhất, chứa nguồn root; window đúng thứ tự, tối đa một giờ. UTC API
+  được giữ nguyên precision; phép so sánh duration dùng integer BigInt. BE quyết định grants
+  và tối đa 1.000 events trước candidate filtering; FE không cắt dataset hoặc gửi action/q.
+- Sinh `crypto.randomUUID()` một lần sau preflight cho thao tác, giữ body/key trong memory,
+  khóa submit. Không tự retry POST. Network/timeout/5xx/response sai contract sau POST là
+  kết quả chưa rõ: nút gửi lại dùng cùng body/key, kiểm root lại, trong TTL 24h. Đổi body
+  phải bắt đầu thao tác mới; cảnh báo run trước có thể đã được tạo. Sau khi có run ID chỉ
+  GET trạng thái/graph. Reload hoặc đổi scope không khôi phục thao tác từ storage.
+- Xét Run.status thay vì HTTP 202: completed tải graph ngay; failed dừng và không gọi graph.
+  Degraded là cờ trên run, không phải status; ai_unavailable vẫn hiển thị graph rule-only.
+  Không hiển thị raw Run.error.message, chỉ mã hợp lệ và thông báo an toàn.
+- Chỉ queued/running được poll, setTimeout sau mỗi response theo 1/2/4/8/10 giây,
+  tối đa 5 phút mỗi lượt theo dõi. Không chồng request; dừng khi terminal/lỗi và cho kiểm tra
+  tiếp thủ công. Hết thời gian theo dõi không có nghĩa run failed. Graph lỗi có nút tải lại;
+  RUN_NOT_READY không tạo vòng lặp. Graph kiểm ID run, node/link/evidence references, source/window
+  của attempt; giữ score null, review state, version, unresolved và nhãn chưa có bằng chứng.
+- AbortController + generation bảo vệ request và timer. Đổi root/snapshot/scope, revalidation,
+  logout hoặc rời route xóa artifact/key, dừng theo dõi; không tự POST khi quay lại. 401 yêu cầu
+  đăng nhập; 403/404 purge và yêu cầu workspace revalidate một lần. Abort không hủy run ở BE.
+- UI dùng bảng nodes/links/evidence và React escape. Chưa làm sơ đồ tương tác/review/case.
+
+Kiểm tra triển khai: lint, toàn bộ 84 tests, build TypeScript strict với env hợp lệ và
+`git diff --check`. Tests dùng adapter/service/timer giả và SSR: window biên/precision,
+idempotency/double submit/TTL, completed/degraded/failed, polling/cleanup/stale responses,
+401/403/404, graph sai contract/scope, escape và lỗi an toàn.
+Các test SSR có cacheDir riêng trong node_modules/.tmp để không ghi đè cache dev server.
+
+Đã kiểm tra operator thật: login/workspace/sources và `/events` hoạt động; danh sách events
+không lọc trả rỗng. Chưa có root để nghiệm thu POST run, polling/degraded/graph trên deployment.
+Không ingest dữ liệu hoặc sửa grants. Backend local còn mô tả runs planned; chưa xác nhận
+tương thích production chỉ bằng tests giả. Dev server có sẵn ở 5173 được giữ chạy.
+
+Kiến thức rule: service/feature và tách trách nhiệm (3,5); strict/Zod/RHF (4,11);
+lifecycle, timer, cancellation/generation, reducer (6,8); scope auth/workspace, escape,
+semantic HTML/label/keyboard (9,14); Axios, idempotency và lỗi/retry có chủ đích (10,12);
+kiểm thử theo rủi ro, bảo toàn source và giới hạn frontend (15,16).

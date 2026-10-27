@@ -1,5 +1,5 @@
-import { apiClient } from '../../services/apiClient'
-import { createEventsService } from './createEventsService'
+import { apiClient } from "../../services/apiClient";
+import { createEventsService } from "./createEventsService";
 
-export const eventsService = createEventsService(apiClient)
-export const { listEvents, getEvent } = eventsService
+export const eventsService = createEventsService(apiClient);
+export const { listEvents, getEvent } = eventsService;
