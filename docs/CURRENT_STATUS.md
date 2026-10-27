@@ -1,6 +1,6 @@
 # Hiện trạng TraceWeaver
 
-Cập nhật 26/10/2026. Phạm vi checkout hiện tại là backend; [contracts](../backend/contracts/README.md) xác định DTO và trạng thái implemented/planned. Source AI trên branch remote khác chưa được tích hợp vào checkout này.
+Cập nhật phản hồi AI 28/10/2026. Phạm vi checkout hiện tại là backend; [contracts](../backend/contracts/README.md) xác định DTO và trạng thái implemented/planned. Source AI trên branch remote khác chưa được tích hợp vào checkout này. Phản hồi mới là lựa chọn tích hợp phía BE, chưa thay runtime/deployment hoặc chứng nhận dữ liệu/model offline của AI.
 
 | Thành phần | Đã có | Còn thiếu |
 |---|---|---|
@@ -24,5 +24,5 @@ Chạy các lệnh trong [INSTALL](../INSTALL.md) và [backend README](../backen
 - Source sửa không tự cập nhật container. Rebuild theo [Docker guide](../backend/DOCKER.md) trước khi demo bằng image; không có kết quả image scan/production deployment ở đây.
 - Ingest nhận EventInput chuẩn hóa. Timestamp phải biểu diễn chính xác bằng microsecond, chữ số thừa chỉ được là0; không cắt/làm tròn ngầm. Xem [ingestion](../backend/INGESTION.md)/[events](../backend/EVENTS.md).
 - CORS development mặc định localhost/127.0.0.1:3000; production cần HTTPS exact origins. Core workflow chỉ dành cho app server. Xem [Integration](INTEGRATION.md).
-- Policy giữ request.accepted → account.created → provision.completed|failed. Outcome/retry/account replacement, extractor/text_similarity và thresholds còn cần chốt theo [backend response](BACKEND_HANDOFF_RESPONSE.md).
+- Policy giữ request.accepted → account.created → provision.completed|failed. [Phản hồi AI ngày28/10](BACKEND_HANDOFF_RESPONSE.md#phản-hồi-ai_be_confirmation--28102026) chọn schema1/5 feature, BE giữ unresolved, AI chỉ đề xuất và unknown/mâu thuẫn outcome phải review. Outcome guard, lưu/trả reason, alias mapper và extractor chưa có runtime; scorer/fixture/text_similarity/policy version khi triển khai còn phải đồng bộ. Ambiguity không được phá bằng score; cardinality theo transition ID, chưa gộp hai outcome provision thành một slot.
 - Production least privilege/TLS, backup/restore, tải đại diện, FE/AI E2E và release sản phẩm cần kiểm riêng. Tag v0.1.0-base.1 mới là scaffold.

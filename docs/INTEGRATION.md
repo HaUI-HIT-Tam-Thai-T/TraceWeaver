@@ -26,7 +26,7 @@ Không giữ token/payload nhạy cảm trong localStorage. Core, FE và AI khô
 
 ## Scorer và dữ liệu
 
-Đọc [handoff AI](BACKEND_HANDOFF.md) và [phản hồi backend](BACKEND_HANDOFF_RESPONSE.md) trước tích hợp. Policy hiện dùng `intake/request.accepted → account/account.created → provision/provision.completed|provision.failed`; default policy không có skip Intake→Provision. Label1 là **cạnh trực tiếp có hướng**. Outcome/retry/account replacement, text similarity extractor và model thresholds còn cần chốt.
+Đọc [handoff AI](BACKEND_HANDOFF.md) và [phản hồi backend ngày 28/10](BACKEND_HANDOFF_RESPONSE.md#phản-hồi-ai_be_confirmation--28102026) trước tích hợp. Policy hiện dùng `intake/request.accepted → account/account.created → provision/provision.completed|provision.failed`; default policy không có skip Intake→Provision. Label1 là **cạnh trực tiếp có hướng**. Phía BE chọn giữ schema1/5 feature, BE quản lý unresolved và AI chỉ xếp hạng/đề xuất; unknown/mâu thuẫn outcome phải review. Outcome guard, lưu reason và alias mapper/extractor chưa có runtime; text similarity/fixture tương đương và version policy khi thực thi guard còn phải đồng bộ với AI. Không dùng score để phá ambiguity hoặc ngưỡng synthetic0.20 để tự nối. Cardinality hiện theo từng transition ID, hai outcome provision là hai transition riêng; xem phản hồi để biết giới hạn.
 
 Scorer contract hiện nhận numeric features, tối đa100 cặp:
 
