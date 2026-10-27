@@ -1,4 +1,6 @@
 import axios from "axios";
+import { transitionSchema, transitionIssue } from './workflow.ts';
+import type { CaseTransition } from './workflow.ts';
 import { z } from "zod";
 import { ApiError as SafeApiError, normalizeApiError } from "../../services/apiError.ts";
 import type { ApiError } from "../../services/apiError.ts";
@@ -20,6 +22,7 @@ export function createCasesController(
   service: Pick<CasesService, "listCases" | "getCase">,
   revalidate: () => Promise<void>,
   evidence?: { addEvidence: CasesService['addEvidence']; getGraph: (wid: string, rid: string, signal?: AbortSignal) => Promise<Graph> },
+  workflow?: { transitionCase: CasesService['transitionCase']; now?: () => number; newKey?: () => string },
 ) {
   let state = initialCasesState();
   let view: CasesView = { kind: "none" };
@@ -128,7 +131,8 @@ export function createCasesController(
               data: detail,
               error: null,
             },
-            ...(runChanged ? { snapshot: initialEvidenceSnapshot(), evidenceMutation: initialEvidenceMutation() } : {}),
+            ...(state.workflow.status === 'success' && state.workflow.attempt?.body.action === 'reopen' && detail.case.state !== 'closed' && state.evidenceMutation.status === 'locked' ? { evidenceMutation: initialEvidenceMutation() } : {}),
+            ...(runChanged ? { snapshot: initialEvidenceSnapshot(), evidenceMutation: initialEvidenceMutation(), workflow: initialCasesState().workflow, workflowGraph: initialCasesState().workflowGraph } : {}),
           });
         }
       }
@@ -185,7 +189,7 @@ export function createCasesController(
       state.scope?.accessKey === scope.accessKey &&
       state.scope.workspaceId === scope.workspaceId &&
       state.scope.subject === scope.subject;
-    const samePermissions = state.scope?.canWrite === scope.canWrite;
+    const samePermissions = state.scope?.canWrite === scope.canWrite && state.scope?.canVerify === scope.canVerify;
     if (blocked && blocked.key !== scopeId(scope)) blocked = null;
     if (blocked) {
       abort();
@@ -270,7 +274,7 @@ export function createCasesController(
     }
   }
   async function submitEvidence(input: EvidenceCreate): Promise<void> {
-    if (!evidence || busy || !editable() || !state.scope || !state.detail.data ||
+    if (!evidence || busy || state.workflow.status === 'uncertain' || !editable() || !state.scope || !state.detail.data ||
       ['sending', 'uncertain', 'locked'].includes(state.evidenceMutation.status)) return;
     const parsed = evidenceCreateSchema.safeParse(input);
     const detail = state.detail.data;
@@ -308,6 +312,75 @@ export function createCasesController(
   function beginNewEvidence() {
     if (!busy && editable() && state.evidenceMutation.status === 'uncertain') update({ evidenceMutation: initialEvidenceMutation() });
   }
+  async function executeTransition(input: CaseTransition, replay: boolean): Promise<void> {
+    if (!workflow || busy || state.status !== 'active' || !state.scope?.canWrite || view.kind !== 'detail' || state.detail.status !== 'ready' || !state.detail.data || state.evidenceMutation.status === 'uncertain') return;
+    const retained = state.workflow.attempt;
+    if ((!replay && retained) || (replay && (state.workflow.status !== 'uncertain' || !retained))) return;
+    const parsed = transitionSchema.safeParse(replay && retained ? retained.body : input);
+    if (!parsed.success) return;
+    const scope = state.scope;
+    const original = state.detail.data;
+    const now = workflow.now ?? Date.now;
+    const fail = (code: string, message: string) => new SafeApiError({ kind: 'client', code, message });
+    const expired = () => retained !== null && now() - retained.createdAt >= 86400000;
+    if (replay && expired()) {
+      update({ workflow: { ...state.workflow, error: fail('IDEMPOTENCY_EXPIRED', 'Đã hết 24 giờ; đọc detail rồi bắt đầu thao tác mới nếu cần.') } }); return;
+    }
+    const controller = new AbortController();
+    request = controller;
+    const version = generation;
+    const current = () => version === generation && !controller.signal.aborted;
+    busy = true;
+    let posted = false;
+    let refetch = false;
+    update({ workflow: { ...state.workflow, status: 'validating', error: null, resultVersion: null } });
+    try {
+      const latest = await service.getCase(scope.workspaceId, original.case.id, controller.signal);
+      if (!current()) return;
+      if (latest.case.run_id !== original.case.run_id) throw fail('INVALID_API_RESPONSE', 'Run của case đã thay đổi; tải lại detail.');
+      update({ detail: { status: 'ready', id: latest.case.id, data: latest, error: null } });
+      if (replay && expired()) throw fail('IDEMPOTENCY_EXPIRED', 'Đã hết 24 giờ; không gửi lại thao tác.');
+      if (!replay) {
+        if (latest.case.version !== parsed.data.expected_version) throw fail('VERSION_CONFLICT', 'Case đã thay đổi. Đọc detail mới và chủ động dùng version hiện tại.');
+        const issue = transitionIssue(latest, scope, parsed.data.action, parsed.data.reason);
+        if (issue) throw fail('GUARD_FAILED', issue);
+        if (parsed.data.action === 'verify_close') {
+          if (!evidence) throw fail('GUARD_FAILED', 'Chưa thể kiểm tra pending links.');
+          update({ workflowGraph: { status: 'loading', runId: latest.case.run_id, pendingCount: null, error: null } });
+          const graph = await evidence.getGraph(scope.workspaceId, latest.case.run_id, controller.signal);
+          if (!current()) return;
+          if (graph.run_id !== latest.case.run_id) throw fail('INVALID_API_RESPONSE', 'Graph không đúng run.');
+          const pending = graph.links.filter(link => link.review_state === 'pending').length;
+          update({ workflowGraph: { status: 'ready', runId: graph.run_id, pendingCount: pending, error: null } });
+          const graphIssue = transitionIssue(latest, scope, parsed.data.action, parsed.data.reason, pending);
+          if (graphIssue) throw fail('GUARD_FAILED', graphIssue);
+        }
+      }
+      const attempt = replay && retained ? retained : { body: parsed.data, key: (workflow.newKey ?? (() => crypto.randomUUID()))(), createdAt: now() };
+      update({ workflow: { status: 'sending', attempt, error: null, resultVersion: null } });
+      posted = true;
+      const result = await workflow.transitionCase(scope.workspaceId, original.case.id, attempt.body, { idempotencyKey: attempt.key, signal: controller.signal });
+      if (!current()) return;
+      if (result.run_id !== original.case.run_id) throw fail('INVALID_API_RESPONSE', 'Response không đúng run của case.');
+      update({ workflow: { ...state.workflow, status: 'success', error: null, resultVersion: result.version } });
+      refetch = true;
+    } catch (error: unknown) {
+      if (!current()) return;
+      const safe = normalizeApiError(error);
+      if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) { deny(safe); return; }
+      const uncertain = (replay && !posted) || (posted && (axios.isCancel(error) || safe.kind === 'network' || safe.kind === 'timeout' || safe.code === 'INVALID_API_RESPONSE' || (safe.status ?? 0) >= 500));
+      update({ workflow: { ...state.workflow, status: uncertain ? 'uncertain' : safe.code === 'VERSION_CONFLICT' ? 'conflict' : 'error', error: safe }, workflowGraph: { ...state.workflowGraph, status: state.workflowGraph.status === 'loading' ? 'error' : state.workflowGraph.status, error: state.workflowGraph.status === 'loading' ? safe : state.workflowGraph.error } });
+      refetch = posted || safe.code === 'VERSION_CONFLICT';
+    } finally { if (current()) busy = false; }
+    if (refetch && current()) await load(0, [null], true);
+  }
+  function retryTransition() {
+    const attempt = state.workflow.attempt;
+    return attempt ? executeTransition(attempt.body, true) : Promise.resolve();
+  }
+  function beginNewTransition() {
+    if (!busy && state.detail.status === 'ready' && state.status === 'active') update({ workflow: initialCasesState().workflow });
+  }
   return {
     getSnapshot: () => state,
     subscribe(listener: () => void) {
@@ -319,6 +392,7 @@ export function createCasesController(
     sync,
     refresh,
     loadEvidenceSnapshot, submitEvidence, beginNewEvidence,
+    submitTransition: (input: CaseTransition) => executeTransition(input, false), retryTransition, beginNewTransition,
     previousPage: () => page(-1),
     nextPage: () => page(1),
     stop() {

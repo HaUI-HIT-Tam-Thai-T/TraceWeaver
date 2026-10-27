@@ -493,3 +493,45 @@ Hai evidence UAT là append-only và được giữ trong case demo; không có 
 Kiến thức rule: service/feature/tách form (3,5), TypeScript strict/Zod/RHF (4,11), reducer/
 Context/lifecycle/AbortController/generation (6,8), Axios và phân loại kết quả POST/refetch
 (10,12), scope/snapshot/escape/accessibility (9,14), kiểm thử theo rủi ro và phạm vi (15–16).
+
+### Task 10 — Case workflow
+
+Thêm form chuyển trạng thái trong detail: assign, start, request_verification,
+verify_close, verification_failed, reopen. Owner là subject; nút Giao cho tôi lấy
+/me.subject, không suy username hoặc gọi API users chưa có. FE kiểm state/role/owner,
+evidence và note đã lưu; reviewer đóng case phải GET graph mới và kiểm pending links
+trên toàn run. Reopen phải có reason khác verify_close gần nhất. BE vẫn kiểm grants,
+owner còn hợp lệ và guard tại thời điểm ghi.
+
+Service POST /cases/{cid}/transitions chỉ gửi action, expected_version (Case.version),
+reason trim 1–1.000 ký tự, và owner_id chỉ khi assign. Một UUID Idempotency-Key cho một
+thao tác sau preflight. Không tự retry POST, không tự cập nhật version/state/history.
+Thành công luôn GET detail; GET lỗi sau thành công chỉ tải lại GET. VERSION_CONFLICT
+giữ nháp, yêu cầu chủ động dùng version hiện tại. IDEMPOTENCY_CONFLICT không tự đổi key.
+
+Timeout/network/5xx/DTO lỗi sau POST giữ body/key trong memory và GET detail một lần.
+Gửi lại thủ công dùng đúng body/key trong 24 giờ (kiểm TTL trước/sau preflight), kể cả
+khi POST trước đã thành công và state/version hiện tại thay đổi. Thao tác mới cần bấm
+chủ động, có cảnh báo có thể ghi thêm transition. Form evidence và workflow dùng chung
+khóa request. Logout/đổi scope/role/case/run/rời route hủy chờ, purge attempt và chống
+response cũ bằng generation. Abort không chứng minh backend rollback.
+
+Kiến thức rule sử dụng: service/feature (3,5); strict TypeScript, Zod, RHF (4,11);
+Context/reducer, cleanup, cancellation/generation (6,8); role và owner theo scope,
+semantic form/keyboard/escape (9,14); Axios, optimistic concurrency bằng Case.version,
+idempotency và phân loại kết quả không rõ (10,12); kiểm thử theo rủi ro và phạm vi (15–16).
+
+Nghiệm thu Task 10 ngày 27/10/2026: lint, build strict với env hợp lệ, toàn bộ 144 tests
+và git diff --check đều pass. Tests bao gồm DTO/guard sáu action, owner/reviewer, pending
+links, reopen reason, conflict, key/body/TTL, timeout đã commit, GET lỗi sau success,
+double submit, event submit không được hiểu nhầm là replay, 401/403/404 và response cũ.
+
+UAT operator trên case demo 02: assign thành công (version 2), start (version 3),
+request_verification (version 4); mỗi lần GET lại detail/history từ BE. Case hiện ở
+awaiting_verification, owner là subject operator. Ba reason có prefix FE-UAT Task10;
+không thêm evidence hoặc sửa grants/config BE. UI operator chặn verify_close vì cần
+reviewer. Ba action verify_close/verification_failed/reopen chưa nghiệm thu BE thật vì
+chưa có tài khoản reviewer; đã kiểm bằng service giả/test. Timeout/conflict/TTL cũng
+chỉ mô phỏng, không cố tình gây trên BE thật. Lỗi proxy EACCES ban đầu do sandbox;
+chạy dev server với quyền kết nối được cấp đã tải /me/sources thành công.
+Ảnh kiểm thử cục bộ: node_modules/.tmp/workflow-operator-real.png (không commit).

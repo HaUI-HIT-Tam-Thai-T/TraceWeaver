@@ -3,6 +3,8 @@ import type { AxiosInstance } from "axios";
 import { ApiError } from "../../services/apiError.ts";
 import { evidenceCreateSchema, evidenceSchema } from './schemas.ts';
 import type { EvidenceCreate } from './schemas.ts';
+import { transitionSchema, transitionStates } from './workflow.ts';
+import type { CaseTransition } from './workflow.ts';
 import {
   caseCreateSchema,
   caseSchema,
@@ -114,6 +116,16 @@ export function createCasesService(
       result.data.event_ids.some(id => !parsed.data.event_ids.includes(id))) throw invalidResponse();
     return result.data;
   }
-  return { createCase, listCases, getCase, addEvidence };
+  async function transitionCase(wid: string, cid: string, body: CaseTransition, options: { idempotencyKey: string; signal?: AbortSignal }) {
+    const url = `${path(wid, cid)}/transitions`;
+    const parsed = transitionSchema.safeParse(body);
+    if (!parsed.success || !/^[\x21-\x7e]{1,200}$/.test(options.idempotencyKey)) throw invalidCaseInput();
+    const response = await client.post<unknown>(url, parsed.data, { signal: options.signal, headers: { 'Idempotency-Key': options.idempotencyKey } });
+    const result = caseSchema.safeParse(response.data);
+    if (!result.success || result.data.id !== cid || result.data.workspace_id !== wid || result.data.version !== parsed.data.expected_version + 1 ||
+      result.data.state !== transitionStates[parsed.data.action].to || (parsed.data.action === 'assign' && result.data.owner_id !== parsed.data.owner_id)) throw invalidResponse();
+    return result.data;
+  }
+  return { createCase, listCases, getCase, addEvidence, transitionCase };
 }
 export type CasesService = ReturnType<typeof createCasesService>;

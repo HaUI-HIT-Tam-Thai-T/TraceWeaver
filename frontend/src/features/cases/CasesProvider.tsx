@@ -20,7 +20,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     refreshAccess,
   } = useWorkspace();
   const [controller] = useState(() =>
-    createCasesController(casesService, refreshAccess, { addEvidence: casesService.addEvidence, getGraph: reconstructionService.getGraph }),
+    createCasesController(casesService, refreshAccess, { addEvidence: casesService.addEvidence, getGraph: reconstructionService.getGraph }, { transitionCase: casesService.transitionCase }),
   );
   const snapshot = useSyncExternalStore(
     controller.subscribe,
@@ -61,7 +61,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     const key = JSON.stringify([me.subject, wid]);
     const changed = lastScope.current !== null && lastScope.current !== key;
     lastScope.current = key;
-    const scope = { subject: me.subject, workspaceId: wid, accessKey: me, canWrite: permissions.canWrite };
+    const scope = { subject: me.subject, workspaceId: wid, accessKey: me, canWrite: permissions.canWrite, canVerify: permissions.canVerify };
     if (changed && isCases) {
       controller.sync(scope, { kind: "list", search: "" });
       navigate("/cases", { replace: true });
@@ -70,6 +70,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     auth.status,
     allowed,
     permissions.canWrite,
+    permissions.canVerify,
     me,
     wid,
     detailId,
@@ -86,7 +87,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     allowed &&
     aligned &&
     snapshot.scope?.accessKey === me &&
-    snapshot.scope.workspaceId === wid
+    snapshot.scope.workspaceId === wid && snapshot.scope.canWrite === permissions.canWrite && snapshot.scope.canVerify === permissions.canVerify
       ? snapshot
       : hiddenState;
   return (
@@ -113,6 +114,9 @@ export function CasesProvider({ children }: { children: ReactNode }) {
         loadEvidenceSnapshot: controller.loadEvidenceSnapshot,
         submitEvidence: controller.submitEvidence,
         beginNewEvidence: controller.beginNewEvidence,
+        submitTransition: controller.submitTransition,
+        retryTransition: controller.retryTransition,
+        beginNewTransition: controller.beginNewTransition,
       }}
     >
       {children}
