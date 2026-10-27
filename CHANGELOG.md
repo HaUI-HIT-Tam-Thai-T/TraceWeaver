@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — Frontend demo dataset
+
+- Add explicit-target, dry-run-first frontend seed using existing ingestion/run/case repositories in one transaction. Label 36 synthetic events, 12 runs and 12 cases with FE-DEMO; cover four workflow states, missing identifiers, retry, provision failure and hybrid degradation. Reruns preserve user edits and add no duplicate artifacts.
+- Apply to the user-selected Oracle demo workspace; verify 148 HTTPS/PKCE assertions for operator/viewer, events/cursors, graph evidence, case filters/history and dashboard. Second seed inserts zero events/runs/cases. Fixture normalization/rule test and base checks pass. Preserve accounts, ACLs, schema, runtime and existing records; no reviewer provisioning or frontend E2E claim.
+
 ## Unreleased — Local frontend login callback
 
 - Register the exact localhost:5173 callback, Web Origin and logout redirect on Oracle's live `traceweaver-web` Keycloak client. Verify local and Swagger login forms200, token preflight200, logout302, rejection of unregistered redirects and API health200. Record pending realm-import synchronization and frontend end-to-end verification in the handoff; API CORS and runtime source remain unchanged.

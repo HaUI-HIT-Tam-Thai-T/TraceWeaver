@@ -438,8 +438,20 @@ Gợi ý cache keys: gồm subject, workspace, endpoint và normalized filters; 
 
 ## 10. Giới hạn và bằng chứng bàn giao
 
+### Dữ liệu giả để test frontend — 27/10/2026
+
+Workspace `10000000-0000-4000-8000-000000000015` trên `https://api.quizlearn.tech` đã nạp bộ `FE-DEMO-20261027-v1` qua các repository nghiệp vụ hiện có: **36 events, 12 runs, 12 cases**, 15 links pending. Có ba case mỗi trạng thái `new`, `assigned`, `investigating`, `awaiting_verification`; bốn run hybrid degraded `ai_unavailable`, chín event unresolved, sáu waiting cases. Tình huống gồm thành công, lỗi capacity, thiếu log provision, thiếu định danh và retry. Đây là dữ liệu tổng hợp để test giao diện, không phải dataset đánh giá AI.
+
+- Đăng nhập operator hoặc viewer hiện có, chọn workspace trên. Tìm log bằng `GET /api/v1/workspaces/{wid}/events?q=FE-DEMO&limit=100`.
+- Lấy hồ sơ bằng `GET /api/v1/workspaces/{wid}/cases?limit=100`, rồi dùng `run_id` của từng case gọi graph. Ví dụ run `ce202b63-8b2e-4220-b92a-588054381a19`, root `85553210-b8ff-4fdc-94b7-54b56fdbfd80`, case `47a441b8-ed39-485e-a908-b001c29b6dd5`.
+- Events nằm trong ngày 27/10/2026; nếu UI bật bộ lọc thời gian, chọn đúng ngày hoặc bỏ lọc. Case/dashboard lọc theo thời điểm tạo run, không phải thời điểm event.
+- [Script seed](../backend/scripts/seed-frontend-demo.js) mặc định dry-run; chỉ ghi khi có `--apply --workspace=UUID --operator=SUBJECT --ingest=SUBJECT` và cấu hình DB của đích. Không đưa credentials vào command line. Toàn bộ seed nằm trong một transaction; chạy lại cùng bộ không tạo thêm event/run/case và không đưa case đã được người test sửa về trạng thái ban đầu.
+- Dữ liệu/audit có tính bất biến theo thiết kế hiện tại; bộ này không tự hết hạn và script không xóa dữ liệu. Reviewer/closed case chưa được provision trong lần seed này.
+
+Đã kiểm 148 assertions qua HTTPS với PKCE operator và viewer: event reads, phân trang không trùng, state filters, 12 graph, case history và dashboard. Chạy seed lần hai thêm 0 event/run/case. Không đổi tài khoản, mật khẩu, ACL, schema hoặc runtime container. Đây chưa phải kiểm thử E2E giao diện React.
+
 Chưa có API CRUD users/roles/grants/sources/knowledge, list workspace ngoài `/me`, list tất cả runs, review history riêng, upload raw log, tự đăng ký user trong realm Oracle, quản trị workflow definition từ browser hoặc scorer đã tích hợp. Những màn hình cần các API đó phải thống nhất BE trước; không tự suy endpoint từ bảng DB.
 
 Đã kiểm Oracle trong phiên triển khai: HTTPS/ready/docs200, PKCE operator/viewer, refresh, `/me`, sources và hai service clients;49 assertions trong verifier vận hành pass. Website cũ vẫn trả200. Đây không phải full FE E2E hoặc kiểm mọi write API trên production. Tài liệu/example được kiểm riêng theo schema và contract ở lượt bàn giao; kết quả ghi trong CHANGELOG/planning.
 
-Các snippet React/TypeScript/Vite là mẫu tích hợp, chưa được build hoặc chạy trong một app React của repo này. Handover chỉ gồm tài liệu, không gửi mật khẩu hay service secret. Tài khoản/người duyệt/dataset demo và việc bật origin/callback là các mục cần bàn giao riêng. Xem thêm [Identity](../backend/IDENTITY.md), [Events](../backend/EVENTS.md), [Reconstruction](../backend/RECONSTRUCTION.md), [Cases](../backend/CASES.md), [Core](../backend/WORKFLOW.md). Các tài liệu kỹ thuật cũ mô tả nhiều mốc local; thông tin deployment trong mục1–2 của tài liệu này là snapshot Oracle ngày26/10/2026, không tự thay thế cho xác minh vận hành sau này.
+Các snippet React/TypeScript/Vite là mẫu tích hợp, chưa được build hoặc chạy trong một app React của repo này. Không gửi mật khẩu hay service secret trong tài liệu. Dataset demo đã nạp như trên; reviewer, production frontend origin/callback và E2E giao diện còn cần hoàn tất. Xem thêm [Identity](../backend/IDENTITY.md), [Events](../backend/EVENTS.md), [Reconstruction](../backend/RECONSTRUCTION.md), [Cases](../backend/CASES.md), [Core](../backend/WORKFLOW.md). Các tài liệu kỹ thuật cũ mô tả nhiều mốc local; thông tin deployment trong mục1–2 là snapshot có cập nhật đến ngày27/10/2026, không tự thay thế cho xác minh vận hành sau này.
