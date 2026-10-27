@@ -1,4 +1,5 @@
 node_modules
+/.npm-cache/
 dist
 # Environment files stay local; only the public template is tracked.
 .env

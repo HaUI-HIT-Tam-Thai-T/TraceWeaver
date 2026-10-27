@@ -1,11 +1,16 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
+import { useAuth } from '../features/auth/authContext'
+import { AuthStatus } from '../features/auth/AuthStatus'
 
 export function AuthCallbackPage() {
+  const { state } = useAuth()
+  if (state.status === 'authenticated') return <Navigate to="/" replace />
   return (
     <>
-      <h1>Đăng nhập chưa sẵn sàng</h1>
-      <p>Chức năng đăng nhập sẽ được bổ sung trong bước tiếp theo.</p>
-      <Link to="/">Về trang chủ</Link>
+      <h1 className="mb-4 text-2xl font-bold">Đăng nhập</h1>
+      {state.status === 'unauthenticated' && <p>Đăng nhập chưa hoàn tất hoặc đã bị hủy.</p>}
+      <AuthStatus />
+      <Link className="mt-4 block underline" to="/">Về trang chủ</Link>
     </>
   )
 }
