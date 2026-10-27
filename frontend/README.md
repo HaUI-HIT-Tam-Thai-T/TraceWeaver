@@ -1,7 +1,7 @@
 # TraceWeaver Frontend
 
-Nền tảng React + TypeScript + Vite. Nhánh foundation chuẩn bị cấu hình và routing;
-chưa triển khai đăng nhập Keycloak, API client hoặc UI nghiệp vụ.
+React + TypeScript + Vite, có cấu hình, routing và quản lý phiên Keycloak.
+Chưa triển khai API client, workspace/phân quyền hoặc UI nghiệp vụ.
 
 ## Công cụ và phần đã làm
 
@@ -13,39 +13,44 @@ chưa triển khai đăng nhập Keycloak, API client hoặc UI nghiệp vụ.
 - Proxy development: chỉ `/api` tới `API_PROXY_TARGET`, giữ nguyên path và Authorization,
   kiểm TLS, bỏ Origin ở chặng server tới server. OAuth dùng issuer HTTPS thật;
   không proxy `/identity`, `/core` hoặc service secrets. Proxy không chạy trong production build.
-- React Router: BrowserRouter, routes tập trung trong `src/routes/AppRoutes.tsx`.
-  `/` là trang chủ; `/auth/callback` là route chuẩn bị cho auth;
-  `*` hiển thị trang không tìm thấy. Callback chưa xử lý code/token và không giả đăng nhập thành công.
+- React Router: BrowserRouter, cấu hình trong `src/constants/routes.ts`.
+  `/` hiển thị trạng thái phiên; callback thành công về `/` bằng replace;
+  `*` hiển thị trang không tìm thấy. SDK xử lý code/state trước khi mount Router.
+- Keycloak JS 26.2.4 (Apache-2.0, không phụ thuộc React): một instance, init một lần,
+  Code flow + PKCE S256, response query, check-sso và tắt session-status iframe.
+  Context + useSyncExternalStore theo dõi phiên, không sao chép token vào React state/Redux.
 - TypeScript: `strict: true` cho app và Vite config; entrypoint kiểm tra DOM root thay assertion.
 
 ## Chạy local
 
-Dùng Node tương thích Vite 8 (20.19+ hoặc 22.12+), npm và lockfile hiện có.
+Dùng Node 22.18+ hoặc 24 LTS, npm và lockfile hiện có; test dùng TypeScript stripping của Node.
 Nếu chưa có dependencies, chạy `npm ci` từ thư mục `frontend/`.
 
 ```powershell
 npm run dev
 ```
 
-`.env.development` chứa cấu hình công khai theo tài liệu bàn giao. Không cần tạo env để chạy local.
-Muốn thay cấu hình máy mình, sao chép sang `.env.development.local` (được Git bỏ qua).
+Tạo `.env.development.local` từ `.env.example`, đặt `VITE_API_BASE_URL=` rỗng cho local.
+Nếu đã có `.env.development` thì giữ hoặc ghi đè bằng `.env.development.local`.
 `VITE_API_BASE_URL=` rỗng ở local để API client tương lai gọi `/api/v1/...` qua Vite.
 `API_PROXY_TARGET` chỉ dùng phía dev server, không có prefix `VITE_`.
 Sau khi sửa env, khởi động lại Vite.
 
 Kiểm tra bằng trình duyệt:
 
-1. Mở `http://localhost:5173/` và thấy TraceWeaver.
-2. Mở trực tiếp `http://localhost:5173/auth/callback`, nhấn reload;
-   thấy thông báo đăng nhập chưa sẵn sàng, không phải lỗi 404 từ server.
-3. Mở `/khong-ton-tai`, thấy trang không tìm thấy; bấm về trang chủ.
-4. Khi dev server đang chạy, chạy thêm `npm run dev`: tiến trình thứ hai phải báo cổng bận.
+1. Mở `http://localhost:5173/`: kiểm phiên SSO qua Keycloak. Nếu chưa có phiên,
+   redirect kiểm tra với prompt=none rồi trở lại FE, hiện nút đăng nhập.
+2. Bấm đăng nhập và đăng nhập trên Keycloak; callback thành công chuyển về trang chủ.
+3. Reload để kiểm lại SSO; bấm đăng xuất để kết thúc phiên và quay về origin ứng dụng.
+4. Hủy login/callback lỗi phải hiện thông báo an toàn; lỗi init dùng tải lại trang, không init lại SDK.
+5. Mở `/khong-ton-tai` khi phiên đã khởi tạo để kiểm tra trang không tìm thấy.
 
 ## Build và kiểm tra
 
 ```powershell
 Copy-Item .env.example .env.production.local
 npm run lint
+npm test
 npm run build
 npm run preview
 ```
@@ -55,6 +60,27 @@ npm run preview
 Production bắt buộc API HTTPS origin khác rỗng cùng đủ ba biến Keycloak;
 thiếu/sai env sẽ làm build dừng. `npm run build` chạy `tsc -b` với strict rồi Vite build.
 Preview phục vụ bản build tại URL Vite in ra (mặc định cổng 4173), không dùng dev proxy.
+Nếu thử auth trên preview, BE cần đăng ký riêng origin/callback cổng 4173; mặc định dùng dev 5173 để UAT.
+
+## Quản lý phiên và giao diện tích hợp
+
+- `src/features/auth/auth.ts` cung cấp `initializeAuth`, `signIn`, `signOut`, `getAccessToken`.
+  `initializeAuth` được await trước mount, giữ chung Promise kể cả lỗi.
+- `getAccessToken()` chia sẻ Promise refresh đang chạy, gọi `updateToken(30)` và chỉ trả access token.
+  Khi refresh lỗi: clear token, cập nhật UI yêu cầu đăng nhập lại; không tự retry API.
+  Refresh đến muộn sau logout không được trả token hoặc khôi phục phiên.
+- `useAuth()` trong provider cung cấp trạng thái và các thao tác cho UI. Trạng thái gồm
+  initializing/authenticated/unauthenticated/error, không chứa token hoặc quyền workspace.
+- onTokenExpired gọi refresh; onAuthRefreshError/onAuthLogout cập nhật trạng thái.
+  Tắt iframe đồng nghĩa logout tab khác được phát hiện ở lần refresh sau, không tức thì.
+- Không persist access/refresh token hoặc log chúng. SDK tự quản lý dữ liệu giao dịch OAuth
+  ngắn hạn (state/nonce/PKCE verifier); điều này khác với lưu token ứng dụng.
+- SDK logout tạo request trước khi FE xóa token trong memory. Nếu điều hướng logout lỗi,
+  FE báo chưa xác nhận kết thúc SSO; xóa local không được coi là đã logout toàn bộ Keycloak.
+
+`npm test` dùng node:test, không thêm framework. Adapter giả kiểm tra lifecycle, refresh,
+race với logout, lỗi và subscription; kiểm thử UI dùng SSR với Context giả, không chứng minh SSO thật.
+UAT thật cần kiểm operator/viewer, hủy login, callback, reload, refresh và logout trên trình duyệt.
 
 ## Deploy SPA và phụ thuộc tiếp theo
 
@@ -70,5 +96,8 @@ location / {
 
 BE/vận hành cần đăng ký callback `http://localhost:5173/auth/callback`, Web Origins,
 production CORS và post-logout redirect trước khi kiểm auth/API thật.
-Nhánh tiếp theo bổ sung `keycloak-js`, init PKCE một lần trước mount React,
-sau đó mới API client và workspace. Không có request API hay token storage trong foundation.
+Kiểm tra thực tế ngày 27/10/2026: authorize endpoint nhận request Code + PKCE S256 nhưng trả
+`Invalid parameter: redirect_uri` cho `http://localhost:5173/auth/callback`.
+Chưa thể nghiệm thu login/token exchange/refresh/logout thật trước khi BE đăng ký callback.
+Chưa có tài khoản được cung cấp cho phiên làm việc này; không đặt thông tin đăng nhập vào source.
+Sau auth là API client (task 3), rồi `/me` và workspace (task 4).
