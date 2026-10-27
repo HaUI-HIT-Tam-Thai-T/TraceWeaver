@@ -8,7 +8,34 @@ const EventsPage = lazy(() =>
   })),
 );
 
+const CasesPage = lazy(() =>
+  import("../pages/CasesPage").then((module) => ({
+    default: module.CasesPage,
+  })),
+);
+const CaseDetailPage = lazy(() =>
+  import("../pages/CaseDetailPage").then((module) => ({
+    default: module.CaseDetailPage,
+  })),
+);
+
 export const ROUTES = [
+  {
+    path: "/cases",
+    element: createElement(
+      Suspense,
+      { fallback: createElement("p", { role: "status" }, "Đang tải Cases…") },
+      createElement(CasesPage),
+    ),
+  },
+  {
+    path: "/cases/:caseId",
+    element: createElement(
+      Suspense,
+      { fallback: createElement("p", { role: "status" }, "Đang tải case…") },
+      createElement(CaseDetailPage),
+    ),
+  },
   { path: "/", element: createElement(HomePage) },
   {
     path: "/events",

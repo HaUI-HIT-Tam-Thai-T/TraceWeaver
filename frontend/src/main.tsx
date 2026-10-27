@@ -8,6 +8,7 @@ import { initializeAuth } from './features/auth/auth'
 import { AuthProvider } from './features/auth/AuthProvider'
 import { WorkspaceProvider } from './features/workspace/WorkspaceProvider'
 import { EventsProvider } from './features/events/EventsProvider'
+import { CasesProvider } from './features/cases/CasesProvider'
 
 const root = document.getElementById('root')
 if (!root) throw new Error('Missing root element')
@@ -36,7 +37,7 @@ createRoot(root).render(
     <AuthProvider>
       <WorkspaceProvider>
         <BrowserRouter>
-          <EventsProvider><App /></EventsProvider>
+          <EventsProvider><CasesProvider><App /></CasesProvider></EventsProvider>
         </BrowserRouter>
       </WorkspaceProvider>
     </AuthProvider>

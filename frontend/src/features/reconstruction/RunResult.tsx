@@ -1,7 +1,7 @@
 import type { ReconstructionState } from "./state";
 import { GraphTable } from "./GraphTable";
-import { LinkReviewPanel } from '../link-review/LinkReviewPanel';
-import type { LinkReviewActions } from '../link-review/types';
+import { LinkReviewPanel } from "../link-review/LinkReviewPanel";
+import type { LinkReviewActions } from "../link-review/types";
 
 export function RunResult({
   state,
@@ -102,8 +102,19 @@ export function RunResult({
           Tải lại graph
         </button>
       )}
-      {state.graph && state.graphStatus === 'ready' && <GraphTable graph={state.graph} />}
-      {state.run?.status === 'completed' && linkActions && <LinkReviewPanel graph={state.graph} graphReady={state.graphStatus === 'ready'} mutation={state.mutation} caseLocked={state.caseLocked} canWrite={canWrite} actions={linkActions} />}
+      {state.graph && state.graphStatus === "ready" && (
+        <GraphTable graph={state.graph} />
+      )}
+      {state.run?.status === "completed" && linkActions && (
+        <LinkReviewPanel
+          graph={state.graph}
+          graphReady={state.graphStatus === "ready"}
+          mutation={state.mutation}
+          caseLocked={state.caseLocked}
+          canWrite={canWrite}
+          actions={linkActions}
+        />
+      )}
     </div>
   );
 }

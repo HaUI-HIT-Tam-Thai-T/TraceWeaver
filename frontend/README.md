@@ -362,3 +362,76 @@ Không khẳng định tích hợp mutation đã hoàn tất chỉ dựa trên t
 Kiến thức rule: service/feature và tách trách nhiệm (3,5); strict/Zod/RHF (4,11);
 cleanup, reducer, cancellation/generation (6,8); Axios/Link.version/refetch/lỗi có phân loại
 (10,12); auth scope, dữ liệu memory, escape và accessibility (9,14); kiểm thử/phạm vi (15,16).
+
+## Case management — task 8
+
+Nhánh `ThienBao/feature/case-management-logic`; chỉ frontend, không dependency mới.
+Hai route lazy `/cases` và `/cases/:caseId`, link từ Home. `CasesProvider` dưới Router/Workspace
+quản lý read state bằng Context + reducer/controller; chỉ fetch khi route cases và scope đọc
+đang hợp lệ. Form tạo case nằm dưới kết quả run completed trong `/events`, controller riêng
+gắn user/workspace/access scope/run/root. Các thay đổi source có sẵn hoặc phát sinh đồng thời
+được giữ nguyên; không tự stage/commit/push.
+
+### API và dữ liệu
+
+- `createCase(wid, {run_id,title}, {idempotencyKey,signal})`: POST `/api/v1/workspaces/{wid}/cases`.
+  Chỉ operator/reviewer; đọc lại run trước POST để xác minh completed và current grants.
+  Title trim, có nội dung, tối đa 300. Không gửi state/owner/creator/workflow hoặc tự áp graph
+  closed-case lock sang create case khi API không quy định.
+- Sinh UUID key một lần sau preflight, giữ body/key trong memory và khóa submit. Timeout,
+  network/5xx/response sai schema sau POST báo kết quả chưa rõ; retry thủ công giữ nguyên
+  body/key trong 24h, kiểm TTL trước và sau preflight. Thao tác mới dùng key mới và có thể
+  tạo thêm case. Không tự retry POST hoặc khôi phục attempt sau reload/đổi scope.
+- POST thành công chỉ lấy case ID đã validate để điều hướng sang detail rồi GET mới. Không
+  tin Case từ replay là workflow hiện tại; không đi theo Location tùy ý. Backend sở hữu
+  state/owner/version; không tự tăng Case.version vì đọc/thêm evidence.
+- `listCases(wid, filters, {cursor,limit,signal})` GET collection, `getCase(wid,cid,signal)`
+  GET detail không query. Zod validate Case/Create/CasesPage/CaseDetail/WorkflowHistory/Evidence,
+  UUID, subject (không bắt buộc UUID), workspace/run/case tương ứng và evidence.case_id.
+  Detail phải là `{case,history,evidence}`, không phải Case hoặc LinkEvidence.
+
+### Filter và pagination
+
+- Form nháp RHF + Zod, chỉ bấm Tìm kiếm mới áp dụng một lần lên URL. Trường chưa chọn được bỏ.
+  Filter: một state enum, owner_id là subject tối đa 255, from/to UTC, limit 25/50/100 mặc định50.
+  Không có waiting tổng hợp, user lookup, run_id filter hoặc filter nhiều state ở API này.
+- Thời gian nhập text UTC+7 `YYYY-MM-DDTHH:mm:ss.ffffff`, chuyển UTC và giữ microseconds;
+  kiểm ngày/from<=to, không giới hạn một giờ. Filter áp **parent run.created_at**, không
+  phải case.created_at, updated_at hoặc event.occurred_at. Không lọc case date lại ở FE.
+- Trước/Tiếp giữ stack cursor trong memory, gửi đúng filters/limit; không cache payload mọi
+  trang, offset/total hoặc bảo đảm snapshot. Cases là live-state, state có thể đổi giữa trang.
+  Search/limit/refresh reset stack. INVALID_CURSOR chờ Bắt đầu lại; không retry vô hạn.
+  Link detail giữ filter query để quay về danh sách; khi đổi route, list tải lại từ trang đầu.
+
+### Detail và scope
+
+- Hiển thị metadata Case, owner null là chưa được gán. History không có ID: action,
+  from_state nullable/to_state, actor, reason, version, occurred_at, evidence_refs (evidence IDs).
+  Evidence có kind/events hoặc note, event_ids, note, creator, timestamp; không nhầm các refs.
+  Có empty/loading/error/retry, UI chỉ đọc, UTC gốc với precision và giờ UTC+7. React escape
+  text; không log token/payload hoặc persist dữ liệu. Chưa có assign/transition/add evidence.
+- List/detail/create có AbortController và generation; response cũ không thể khôi phục data.
+  Scope chưa ready/revalidation/logout purge, ẩn ngay dữ liệu cũ. Cùng subject/workspace sau
+  revalidation giữ URL rồi tải mới, không khôi phục cursor hoặc tự POST; đổi scope xóa filter/ID
+  và về /cases. Đổi user/workspace remount form để bỏ nháp. Rời route dừng request đọc.
+- 401 dừng và yêu cầu login; 403/404 purge dữ liệu phụ thuộc và revalidate một lần, không lặp
+  tự động. Lỗi network/timeout/schema có retry GET và giữ nháp phù hợp. RUN_NOT_READY khi tạo
+  yêu cầu kiểm tra run. Hủy chờ POST không chứng minh BE đã rollback.
+
+### Kiểm tra
+
+Lint, toàn bộ **116 tests**, build TypeScript strict + Vite với env hợp lệ và git diff --check.
+Test service/query/controller/create/UI SSR (cache riêng) kiểm title/DTO, opaque owner, UTC+7,
+run.created_at filter semantics, cursor, response ngược thứ tự, scope/401/403/404/cancellation,
+key/body/TTL/double submit, replay chỉ lấy ID rồi đọc detail mới, owner null, history/evidence,
+precision và escape. UI SSR dùng fixtures; không được coi là UAT dữ liệu thật.
+
+Operator thật login, tải workspace/sources, /cases và bộ lọc state/time/limit thành công.
+Nhập nháp chưa đổi URL; submit chuyển UTC giữ microseconds, window nhiều ngày được chấp nhận.
+Cases hiện trả rỗng; chưa có case/run để nghiệm thu detail/history/evidence/create thật hoặc
+nhiều trang. Không ingest hoặc sửa grants BE. Luồng auth giữ nguyên: reload qua check-sso
+vẫn có thể về `/` thay vì khôi phục route sau callback. Dev server kiểm thử được dừng sau bàn giao.
+
+Kiến thức rule: feature/service/tách trách nhiệm (3,5); strict/Zod/RHF (4,11); reducer/Context,
+cleanup/AbortController/generation (6,8); params/URL filters/Link/lazy (9); Axios/idempotency/
+cursor/lỗi (10,12); scope, escape, accessibility và kiểm thử/phạm vi (14–16).

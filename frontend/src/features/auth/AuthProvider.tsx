@@ -1,18 +1,23 @@
-import { useSyncExternalStore } from 'react'
-import type { ReactNode } from 'react'
-import { authSession } from './auth'
-import { AuthContext } from './authContext'
+import { useSyncExternalStore } from "react";
+import type { ReactNode } from "react";
+import { authSession } from "./auth";
+import { AuthContext } from "./authContext";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const state = useSyncExternalStore(authSession.subscribe, authSession.getSnapshot)
+  const state = useSyncExternalStore(
+    authSession.subscribe,
+    authSession.getSnapshot,
+  );
   return (
-    <AuthContext.Provider value={{
-      state,
-      signIn: authSession.signIn,
-      signOut: authSession.signOut,
-      getAccessToken: authSession.getAccessToken,
-    }}>
+    <AuthContext.Provider
+      value={{
+        state,
+        signIn: authSession.signIn,
+        signOut: authSession.signOut,
+        getAccessToken: authSession.getAccessToken,
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }

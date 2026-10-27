@@ -1,5 +1,5 @@
-import { apiClient } from '../../services/apiClient'
-import { createWorkspaceService } from './createWorkspaceService'
+import { apiClient } from "../../services/apiClient";
+import { createWorkspaceService } from "./createWorkspaceService";
 
-export const workspaceService = createWorkspaceService(apiClient)
-export const { getMe, listSources } = workspaceService
+export const workspaceService = createWorkspaceService(apiClient);
+export const { getMe, listSources } = workspaceService;

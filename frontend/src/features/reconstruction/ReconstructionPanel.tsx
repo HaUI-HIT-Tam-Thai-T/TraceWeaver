@@ -13,7 +13,8 @@ import type { RunFormValues } from "./form";
 import type { Event } from "../events/schemas";
 import type { EventsScope } from "../events/state";
 import { RunResult } from "./RunResult";
-import { linkReviewService } from '../link-review/service';
+import { linkReviewService } from "../link-review/service";
+import { CreateCasePanel } from "../cases/CreateCasePanel";
 
 const hiddenState = initialReconstructionState();
 export function ReconstructionPanel() {
@@ -74,7 +75,7 @@ function ReconstructionForm({
   const busy =
     state.phase === "sending" ||
     state.phase === "validating" ||
-    state.mutation.status === 'sending' ||
+    state.mutation.status === "sending" ||
     state.tracking === "loading" ||
     state.graphStatus === "loading";
   const missingRoot = !workspace.sources.items.some(
@@ -92,7 +93,10 @@ function ReconstructionForm({
         Root: {root.event_id} — UTC gốc: {root.occurred_at}. Múi giờ nhập
         Asia/Ho_Chi_Minh (UTC+7).
       </p>
-      <p>Nhập theo dạng YYYY-MM-DDTHH:mm:ss, có thể thêm phần giây thập phân. Window tối đa một giờ và phải chứa root.</p>
+      <p>
+        Nhập theo dạng YYYY-MM-DDTHH:mm:ss, có thể thêm phần giây thập phân.
+        Window tối đa một giờ và phải chứa root.
+      </p>
       <form
         onSubmit={handleSubmit((value) =>
           controller.create(toRunBody(value, root)),
@@ -216,6 +220,9 @@ function ReconstructionForm({
           void signIn();
         }}
       />
+      {state.run?.status === "completed" && scope.canWrite && (
+        <CreateCasePanel runId={state.run.id} scope={scope} anchor={root} />
+      )}
     </section>
   );
 }

@@ -8,9 +8,13 @@ import { runCreateSchema, validateRoot } from "./schemas.ts";
 import type { Run, RunCreate } from "./schemas.ts";
 import { initialReconstructionState, reconstructionReducer } from "./state.ts";
 import type { ReconstructionState } from "./state.ts";
-import type { LinkReviewService } from '../link-review/createLinkReviewService.ts';
-import { manualLinkCreateSchema, reviewCreateSchema, manualLinkIssue } from '../link-review/schemas.ts';
-import type { ManualLinkCreate, ReviewCreate } from '../link-review/schemas.ts';
+import type { LinkReviewService } from "../link-review/createLinkReviewService.ts";
+import {
+  manualLinkCreateSchema,
+  reviewCreateSchema,
+  manualLinkIssue,
+} from "../link-review/schemas.ts";
+import type { ManualLinkCreate, ReviewCreate } from "../link-review/schemas.ts";
 
 type Dependencies = {
   service: ReconstructionService;
@@ -266,7 +270,15 @@ export function createReconstructionController(deps: Dependencies) {
       )
         throw invalidInput();
       if (retry && retained && now() - retained.createdAt >= 86400000) {
-        update({ phase: "error", error: new ApiError({ kind: "client", code: "IDEMPOTENCY_EXPIRED", message: "Đã quá 24 giờ; không gửi lại thao tác cũ. Run trước vẫn có thể đã được tạo." }) });
+        update({
+          phase: "error",
+          error: new ApiError({
+            kind: "client",
+            code: "IDEMPOTENCY_EXPIRED",
+            message:
+              "Đã quá 24 giờ; không gửi lại thao tác cũ. Run trước vẫn có thể đã được tạo.",
+          }),
+        });
         return;
       }
       const attempt =
@@ -295,41 +307,147 @@ export function createReconstructionController(deps: Dependencies) {
       if (operation.current()) busy = false;
     }
   }
-  async function mutateLink(input: { kind: 'review'; linkId: string; body: ReviewCreate } | { kind: 'manual'; body: ManualLinkCreate }): Promise<void> {
-    if (busy || !available() || !scope || state.run?.status !== 'completed' || state.graphStatus !== 'ready' || !state.graph || state.caseLocked || !deps.linkService) return;
+  async function mutateLink(
+    input:
+      | { kind: "review"; linkId: string; body: ReviewCreate }
+      | { kind: "manual"; body: ManualLinkCreate },
+  ): Promise<void> {
+    if (
+      busy ||
+      !available() ||
+      !scope ||
+      state.run?.status !== "completed" ||
+      state.graphStatus !== "ready" ||
+      !state.graph ||
+      state.caseLocked ||
+      !deps.linkService
+    )
+      return;
     const graph = state.graph;
     const wid = scope.workspaceId;
     const rid = state.run.id;
-    const body = input.kind === 'review' ? reviewCreateSchema.safeParse(input.body) : manualLinkCreateSchema.safeParse(input.body);
-    const link = input.kind === 'review' ? graph.links.find(link => link.id === input.linkId) : undefined;
-    const issue = input.kind === 'manual' && body.success ? manualLinkIssue(input.body, graph) : null;
-    const conflict = input.kind === 'review' && link && link.version !== input.body.expected_version;
-    if (!body.success || (input.kind === 'review' && !link) || issue || conflict) {
-      const code = conflict ? 'VERSION_CONFLICT' : issue ?? 'INVALID_LINK_INPUT';
-      update({ mutation: { status: conflict ? 'conflict' : issue === 'LINK_EXISTS' ? 'duplicate' : 'error',
-        error: new ApiError({ kind: 'client', code, message: 'Kiểm tra link, phiên bản và lý do trước khi gửi.' }),
-        linkId: input.kind === 'review' ? input.linkId : graph.links.find(link => link.from_event_id === input.body.from_event_id && link.to_event_id === input.body.to_event_id)?.id ?? null } });
-      if (issue === 'LINK_EXISTS' || conflict) await loadGraph();
+    const body =
+      input.kind === "review"
+        ? reviewCreateSchema.safeParse(input.body)
+        : manualLinkCreateSchema.safeParse(input.body);
+    const link =
+      input.kind === "review"
+        ? graph.links.find((link) => link.id === input.linkId)
+        : undefined;
+    const issue =
+      input.kind === "manual" && body.success
+        ? manualLinkIssue(input.body, graph)
+        : null;
+    const conflict =
+      input.kind === "review" &&
+      link &&
+      link.version !== input.body.expected_version;
+    if (
+      !body.success ||
+      (input.kind === "review" && !link) ||
+      issue ||
+      conflict
+    ) {
+      const code = conflict
+        ? "VERSION_CONFLICT"
+        : (issue ?? "INVALID_LINK_INPUT");
+      update({
+        mutation: {
+          status: conflict
+            ? "conflict"
+            : issue === "LINK_EXISTS"
+              ? "duplicate"
+              : "error",
+          error: new ApiError({
+            kind: "client",
+            code,
+            message: "Kiểm tra link, phiên bản và lý do trước khi gửi.",
+          }),
+          linkId:
+            input.kind === "review"
+              ? input.linkId
+              : (graph.links.find(
+                  (link) =>
+                    link.from_event_id === input.body.from_event_id &&
+                    link.to_event_id === input.body.to_event_id,
+                )?.id ?? null),
+        },
+      });
+      if (issue === "LINK_EXISTS" || conflict) await loadGraph();
       return;
     }
     const operation = beginRequest();
-    update({ mutation: { status: 'sending', error: null, linkId: input.kind === 'review' ? input.linkId : null } });
+    update({
+      mutation: {
+        status: "sending",
+        error: null,
+        linkId: input.kind === "review" ? input.linkId : null,
+      },
+    });
     let refetch = false;
     try {
-      if (input.kind === 'review') await deps.linkService.reviewLink(wid, rid, input.linkId, reviewCreateSchema.parse(input.body), operation.signal);
-      else await deps.linkService.createManualLink(wid, rid, manualLinkCreateSchema.parse(input.body), operation.signal);
+      if (input.kind === "review")
+        await deps.linkService.reviewLink(
+          wid,
+          rid,
+          input.linkId,
+          reviewCreateSchema.parse(input.body),
+          operation.signal,
+        );
+      else
+        await deps.linkService.createManualLink(
+          wid,
+          rid,
+          manualLinkCreateSchema.parse(input.body),
+          operation.signal,
+        );
       if (!operation.current()) return;
-      update({ mutation: { status: 'success', error: null, linkId: input.kind === 'review' ? input.linkId : null } });
+      update({
+        mutation: {
+          status: "success",
+          error: null,
+          linkId: input.kind === "review" ? input.linkId : null,
+        },
+      });
       refetch = true;
     } catch (error: unknown) {
       if (!operation.current()) return;
       const safe = normalizeApiError(error);
-      if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) { failure(error, 'graph'); return; }
-      const uncertain = axios.isCancel(error) || safe.kind === 'network' || safe.kind === 'timeout' || safe.code === 'INVALID_API_RESPONSE' || (safe.status ?? 0) >= 500;
-      const status = uncertain ? 'uncertain' : safe.code === 'VERSION_CONFLICT' ? 'conflict' : safe.code === 'LINK_EXISTS' ? 'duplicate' : safe.code === 'CASE_CLOSED' ? 'locked' : 'error';
-      update({ mutation: { status, error: axios.isCancel(error) ? null : safe, linkId: input.kind === 'review' ? input.linkId : null }, caseLocked: status === 'locked' || state.caseLocked });
-      refetch = uncertain || status === 'conflict' || status === 'duplicate' || status === 'locked';
-    } finally { if (operation.current()) busy = false; }
+      if (safe.kind === "auth" || safe.status === 403 || safe.status === 404) {
+        failure(error, "graph");
+        return;
+      }
+      const uncertain =
+        axios.isCancel(error) ||
+        safe.kind === "network" ||
+        safe.kind === "timeout" ||
+        safe.code === "INVALID_API_RESPONSE" ||
+        (safe.status ?? 0) >= 500;
+      const status = uncertain
+        ? "uncertain"
+        : safe.code === "VERSION_CONFLICT"
+          ? "conflict"
+          : safe.code === "LINK_EXISTS"
+            ? "duplicate"
+            : safe.code === "CASE_CLOSED"
+              ? "locked"
+              : "error";
+      update({
+        mutation: {
+          status,
+          error: axios.isCancel(error) ? null : safe,
+          linkId: input.kind === "review" ? input.linkId : null,
+        },
+        caseLocked: status === "locked" || state.caseLocked,
+      });
+      refetch =
+        uncertain ||
+        status === "conflict" ||
+        status === "duplicate" ||
+        status === "locked";
+    } finally {
+      if (operation.current()) busy = false;
+    }
     if (refetch && operation.current()) await loadGraph();
   }
   return {
@@ -355,11 +473,21 @@ export function createReconstructionController(deps: Dependencies) {
     },
     track,
     loadGraph,
-    reviewLink: (linkId: string, body: ReviewCreate) => mutateLink({ kind: 'review', linkId, body }),
-    createManualLink: (body: ManualLinkCreate) => mutateLink({ kind: 'manual', body }),
+    reviewLink: (linkId: string, body: ReviewCreate) =>
+      mutateLink({ kind: "review", linkId, body }),
+    createManualLink: (body: ManualLinkCreate) =>
+      mutateLink({ kind: "manual", body }),
     probeClosedCase() {
-      if (!busy && available() && state.graphStatus === 'ready' && state.caseLocked) {
-        update({ caseLocked: false, mutation: { status: 'idle', error: null, linkId: null } });
+      if (
+        !busy &&
+        available() &&
+        state.graphStatus === "ready" &&
+        state.caseLocked
+      ) {
+        update({
+          caseLocked: false,
+          mutation: { status: "idle", error: null, linkId: null },
+        });
       }
     },
   };
