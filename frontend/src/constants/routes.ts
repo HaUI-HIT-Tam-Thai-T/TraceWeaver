@@ -21,7 +21,10 @@ const CaseDetailPage = lazy(() =>
 
 const KnowledgePage = lazy(() => import('../pages/KnowledgePage').then(module => ({ default: module.KnowledgePage })));
 
+const DashboardPage = lazy(() => import('../pages/DashboardPage').then(module => ({ default: module.DashboardPage })));
+
 export const ROUTES = [
+  { path: '/dashboard', element: createElement(Suspense, { fallback: createElement('p', { role: 'status' }, 'Đang tải Dashboard…') }, createElement(DashboardPage)) },
   { path: '/knowledge', element: createElement(Suspense, { fallback: createElement('p', { role: 'status' }, 'Đang tải Knowledge…') }, createElement(KnowledgePage)) },
   {
     path: "/cases",

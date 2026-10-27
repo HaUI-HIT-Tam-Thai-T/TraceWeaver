@@ -575,3 +575,53 @@ Kiến thức rule áp dụng: feature/service và tách UI (3,5); TypeScript st
 RHF (4,11); effect cleanup, AbortController/generation, reducer/external store (6,8);
 Router/lazy/search params (9); Axios/cursor/ApiError (10,12); scope quyền, escape,
 semantic HTML/keyboard (14); node:test/SSR và giữ phạm vi frontend (15–16).
+
+### Task 12 — Dashboard, thời gian và waiting drill-down
+
+Route lazy /dashboard, liên kết từ trang chủ. GET dashboard hiển thị đúng bốn counter
+runs, degraded_runs, unresolved_events, waiting_cases; số 0 là dữ liệu hợp lệ, không
+thay lỗi/loading bằng số 0. unresolved_events là occurrence cộng theo từng run completed,
+không phải event duy nhất toàn hệ thống. Không tự suy run-list/global-unresolved endpoint.
+
+RHF/Zod quản lý form nháp from/to nhập UTC+7; bấm Áp dụng mới chuyển UTC và cập nhật URL.
+Kiểm ngày hợp lệ, from <= to, giữ precision, cho phép một biên hoặc không giới hạn thời gian.
+Cả dashboard và list cases dùng from/to inclusive theo parent run.created_at.
+Validate Dashboard DTO: số nguyên không âm, safe integer, filters echo đúng thời điểm yêu cầu.
+
+Nút Xem waiting cases mở hai query riêng state=new và state=assigned, cùng from/to,
+50/trang. Mỗi danh sách có status/error/cursor Trước/Tiếp riêng, tái sử dụng Cases controller;
+không gửi multi-state, không ghép cursor, không đếm trang đầu làm tổng counter.
+Hai danh sách là live-state, có thể quan sát tại các thời điểm khác nhau. Link detail giữ
+state/from/to; Browser Back trở lại URL dashboard với filter và GET dữ liệu mới.
+
+Bổ sung workspaceMutations (chỉ truyền workspace ID, không lưu payload/token). Service
+production createRun, reviewLink, createManualLink, createCase, addEvidence và transitionCase
+phát thông báo sau mỗi lần thao tác kết thúc, gồm cả lỗi/kết quả chưa rõ. Không đổi body/key,
+không replay POST. Khi dashboard đang mở, thông báo đúng workspace hủy GET cũ, ẩn dữ liệu,
+GET lại counters và reset cả hai drill-down. Khi rời dashboard không tải nền hoặc giữ cache;
+quay lại luôn GET mới. Không triển khai realtime/polling dashboard hoặc đồng bộ tab khác.
+Subscriber lỗi bị gỡ, không được làm đổi kết quả mutation hay kích hoạt retry.
+
+Scope/auth/mất quyền/rời route purge dữ liệu và hủy request; generation ngăn response cũ.
+401 yêu cầu đăng nhập; 403/404 ở counter hoặc waiting list purge dashboard, revalidate một
+lần và latch qua access reload để tránh lặp. Network/timeout/schema có retry GET thủ công.
+
+Kiểm thử tự động: 162 tests pass, gồm 9 test dashboard mới cho DTO, time/precision,
+zero counters, single-state queries/cursor riêng, mutation invalidation, lỗi auth/quyền,
+subscriber lỗi không đổi kết quả POST, stale response và SSR accessibility.
+
+UAT operator trên dataset FE-DEMO-20261027-v1 ngày 27/10/2026:
+- Window 27/10 theo UTC+7 trả runs=12, degraded_runs=4, unresolved_events=9, waiting_cases=5.
+- Waiting có 2 new + 3 assigned. Mở demo 05 từ drill-down giữ from/to và Case.version=2.
+- Start demo 05 thành công, investigating/version=3; reason có prefix FE-UAT Dashboard.
+  Quay lại cùng URL dashboard GET mới: waiting_cases=4, gồm 2 new + 2 assigned;
+  case demo 05 rời waiting. Các counter còn lại giữ 12/4/9.
+- Window 01/12/2026 trả bốn số 0 và cả hai danh sách rỗng.
+Không ingest, sửa grants hoặc tạo case/run để kiểm thử. Không nghiệm thu pagination nhiều
+trang, review/manual link và timeout thật do không tạo thêm tình huống/dataset BE;
+các tình huống đó kiểm bằng service giả. Ảnh: node_modules/.tmp/dashboard-after-mutation.png.
+
+Kiến thức rule: feature/service (3,5); strict TS/Zod/RHF (4,11); reducer, external store,
+cleanup/cancellation/generation và subscription (6,8); Router/lazy/URL filters (9);
+Axios, cursor và refetch sau mutation (10,12); scope/grants, escape/keyboard (14);
+node:test/SSR, giữ thay đổi không liên quan và phạm vi frontend (15–16).
