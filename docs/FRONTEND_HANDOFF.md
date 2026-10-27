@@ -1,6 +1,6 @@
 # Bàn giao Frontend — TraceWeaver
 
-Cập nhật 26/10/2026, theo source và API Oracle tại commit `116e156`. FE dùng **React/Vite**, local **http://localhost:5173**, production dự kiến **https://traceweaver.quizlearn.tech**. Các bước cấu hình chưa thực hiện được ghi rõ ở mục 2; tài liệu này không tự thay đổi deployment.
+Cập nhật 27/10/2026, theo source và API Oracle tại commit `116e156`. FE dùng **React/Vite**, local **http://localhost:5173**, production dự kiến **https://traceweaver.quizlearn.tech**. Trạng thái cấu hình đang chạy và các bước còn thiếu được ghi ở mục 2.
 
 Đọc tài liệu này để triển khai luồng; tra từng endpoint, field, enum và ví dụ JSON tại [API reference](FRONTEND_API_REFERENCE.md). [OpenAPI](../backend/contracts/openapi.json) và [JSON Schema](../backend/contracts/schemas/domain.schema.json) là hợp đồng chuẩn. Ví dụ trong tài liệu là dữ liệu minh họa, không phải ID/token/response production để sao chép nguyên vào request.
 
@@ -30,7 +30,9 @@ Client `traceweaver-ingest` và `traceweaver-core` dùng secret phía server. FE
 
 ## 2. Những việc cần hoàn tất trước khi nối FE vào Oracle
 
-Tại thời điểm kiểm tra, API CORS chỉ cho `https://api.quizlearn.tech`; public client chỉ có callback trên origin đó. **Local 5173 và domain FE chưa được đăng ký.** DNS frontend chưa được xác nhận có bản ghi; frontend chưa deploy. Các cấu hình dưới đây là checklist cần áp dụng, không phải trạng thái đã sẵn sàng.
+Ngày 27/10/2026 đã bổ sung trực tiếp trên Keycloak Oracle, realm `traceweaver`, client `traceweaver-web`: **Valid Redirect URIs** `http://localhost:5173/auth/callback`, **Web Origins** `http://localhost:5173`, **Valid Post Logout Redirect URIs** `http://localhost:5173`. Callback local trước sửa trả400 `Invalid parameter: redirect_uri`, sau sửa trả200 với form đăng nhập; token preflight cho origin local trả200; logout chưa có phiên trả302 đúng URL local. Callback Swagger vẫn trả200 và URI ngoài allowlist vẫn bị từ chối. Chưa kiểm toàn bộ đăng nhập/đổi code từ FE.
+
+API CORS production chưa đổi: local vẫn dùng Vite proxy ở mục 2.2. `127.0.0.1:5173` và domain FE chưa được đăng ký; DNS frontend chưa xác nhận, frontend chưa deploy. File realm import trên server chưa đồng bộ thay đổi này; cấu hình live được lưu trong database Keycloak và giữ qua restart với database hiện tại. Khi dựng realm mới cần áp dụng lại cấu hình. Checklist dưới đây vẫn áp dụng cho phần còn thiếu.
 
 ### 2.1. Cấu hình do BE/vận hành thực hiện
 
@@ -416,7 +418,8 @@ Gợi ý cache keys: gồm subject, workspace, endpoint và normalized filters; 
 
 ## 9. Checklist nghiệm thu FE với BE
 
-- [ ] BE đã đăng ký CORS production, callback/Web Origins local+production và logout redirects ở mục 2.
+- [x] Keycloak live đã đăng ký callback/Web Origin/logout cho `http://localhost:5173` (27/10/2026).
+- [ ] BE đã đăng ký CORS production, callback/Web Origins cho `127.0.0.1:5173` và domain production, đồng bộ realm import ở mục 2.
 - [ ] Local Vite luôn ở5173; API đi proxy, OAuth dùng issuer HTTPS thật.
 - [ ] Login cả operator/viewer, refresh, logout, reload `/auth/callback`, phiên hết hạn.
 - [ ] `/me` empty memberships hiển thị đúng; không hardcode workspace hay subject.

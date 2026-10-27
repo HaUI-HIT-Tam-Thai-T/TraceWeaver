@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — Local frontend login callback
+
+- Register the exact localhost:5173 callback, Web Origin and logout redirect on Oracle's live `traceweaver-web` Keycloak client. Verify local and Swagger login forms200, token preflight200, logout302, rejection of unregistered redirects and API health200. Record pending realm-import synchronization and frontend end-to-end verification in the handoff; API CORS and runtime source remain unchanged.
+
 ## Unreleased — Frontend API handoff
 
 - Add Vietnamese React/Vite handoff for localhost:5173 and traceweaver.quizlearn.tech: PKCE/session startup, API proxy, workspace/source permissions, graph review, case workflow, pagination, concurrency, retries and UI error handling.
