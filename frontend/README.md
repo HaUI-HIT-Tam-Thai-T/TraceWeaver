@@ -1,7 +1,7 @@
 # TraceWeaver Frontend
 
-React + TypeScript + Vite, có cấu hình, routing, quản lý phiên Keycloak và Axios client.
-Chưa triển khai service nghiệp vụ, workspace/phân quyền hoặc UI nghiệp vụ.
+React + TypeScript + Vite, có cấu hình, routing, phiên Keycloak, Axios client, workspace/sources và event explorer.
+Chưa triển khai reconstruction, dashboard hoặc các thao tác case.
 
 ## Công cụ và phần đã làm
 
@@ -158,9 +158,104 @@ location / {
 
 BE/vận hành cần đăng ký callback `http://localhost:5173/auth/callback`, Web Origins,
 production CORS và post-logout redirect trước khi kiểm auth/API thật.
-Kiểm tra thực tế ngày 27/10/2026: authorize endpoint nhận request Code + PKCE S256 nhưng trả
-`Invalid parameter: redirect_uri` cho `http://localhost:5173/auth/callback`.
-Chưa thể nghiệm thu login/token exchange/refresh/logout thật trước khi BE đăng ký callback.
-Không đặt thông tin đăng nhập vào source. Chưa nghiệm thu API có access token thật khi
-callback local chưa được đăng ký; lỗi cấu hình Identity không được giải quyết bằng retry API.
-Task 3 đã có HTTP client; tiếp theo là `/me` và workspace (task 4).
+Lần kiểm tra ban đầu gặp `Invalid parameter: redirect_uri`; khi kiểm task 4 ngày 27/10/2026,
+callback local đã hoạt động. Operator và viewer đăng nhập, tải `/me` cùng ba nguồn thật
+intake/account/provision, hiển thị đúng roles. Viewer làm mới quyền/nguồn và logout thành công;
+UI xóa dữ liệu workspace sau logout. Khởi động lại dev server cũng khôi phục SSO operator.
+Không đặt thông tin đăng nhập vào source. Lỗi cấu hình Identity không giải quyết bằng retry API.
+
+## Workspace và quyền truy cập — task 4
+
+`src/features/workspace/` gồm schema/service, reducer thuần, controller điều phối request,
+Context/provider và panel tối thiểu trên trang chủ. Controller chỉ có một state trong memory;
+React theo dõi bằng useSyncExternalStore và Context. Không có Redux store hoặc cache lưu đĩa.
+
+- Service `getMe(signal)` đọc `/api/v1/me`; `listSources(workspaceId, options)` đọc sources.
+  Dữ liệu được validate bằng Zod; sai UUID/role/group/source scope/DTO trả ApiError an toàn,
+  không đưa payload gốc vào thông báo. Options gồm signal, cursor, limit mặc định 50/max 100.
+- Provider chỉ bắt đầu sau auth authenticated. Không có membership thì dừng, hiện tài khoản
+  chưa được cấp workspace. Một membership được tự chọn; nhiều membership cần chọn thủ công.
+  Picker hiển thị workspace ID vì API không có tên. Reload phải lấy `/me` lại.
+- `useWorkspace()` cung cấp state (/me, selectedWorkspaceId, sources), membership và permissions,
+  cùng selectWorkspace/loadMoreSources/refreshAccess. Quyền dẫn xuất từ membership hiện tại;
+  không decode JWT hoặc sao chép role sang state khác.
+- Role đọc: viewer/operator/reviewer/admin. Role ghi: operator/reviewer. Xác minh: reviewer.
+  Admin đơn thuần không có quyền ghi; ingest_service đơn thuần không phải role đọc browser.
+  Đây là khả năng theo role cho UI, không bảo đảm đủ read grants, owner hoặc case guards.
+- Sources phân trang cursor với nút tải thêm; không có total hoặc tổng trang. Workspace chỉ hiện
+  nguồn BE trả về. Đổi workspace bỏ ngay sources/cursor cũ; không giữ selection nguồn ở task này.
+- Logout/hết phiên/lỗi auth: ẩn ngay dữ liệu cũ rồi hủy request và reset state. Subject `/me`
+  thay đổi không được kế thừa workspace của user trước. AbortController cùng request generation
+  chặn response cũ ghi lại state, kể cả khi service/adapter không thực sự hỗ trợ abort.
+- Focus cửa sổ hoặc bấm làm mới sẽ revalidate `/me`, gộp request trùng và ẩn dữ liệu/quyền cũ.
+  Giữ workspace nếu cùng subject và còn membership, sau đó tải lại sources từ trang đầu.
+  Không polling nền hoặc theo dõi quyền realtime; thay đổi quyền được phát hiện qua request.
+- Sources 403/404: purge nguồn/cursor, recheck `/me` đúng một lần. Membership còn thì hiện lỗi
+  truy cập và không tự lặp gọi sources; membership mất thì chọn scope hợp lệ hoặc hiện chưa cấp.
+  HTTP 401 purge toàn bộ scope, dừng tự tải và hiện nút đăng nhập lại, không tự logout SSO.
+- Lỗi network/timeout/schema có thông báo, request ID nếu có và nút thử lại. Cancellation
+  không hiện lỗi hệ thống. Làm mới sau lỗi bắt đầu lại từ identity và cursor mới.
+
+Kiểm thử: `npm run lint`, `npm test`, `npm run build` với env hợp lệ. Tests dùng node:test,
+service/adapter giả và React SSR cho các trạng thái UI, không sửa grants trên BE.
+Tổng 51 tests pass tại lần triển khai. Các ca nhiều/không workspace, mất quyền, 401/403/404, đổi user, request cũ, pagination,
+cleanup kiểu StrictMode và dữ liệu sai contract được kiểm tự động. Chưa có dataset/tài khoản
+thật cho mọi tình huống; không coi tests giả là nghiệm thu thu hồi grants trên production.
+
+Kiến thức theo rule: kiến trúc service/feature (3,5), TypeScript strict + Zod (4), lifecycle và
+cancellation/race condition (6), Context + reducer và state dẫn xuất (8), provider trong cây auth (9),
+Axios/ApiError (10,12), phân quyền và keyboard/label/escape nội dung (14), kiểm thử/phạm vi (15,16).
+Workspace không tự gọi API dashboard hoặc thao tác case.
+
+## Event explorer — task 5
+
+Mở `/events` từ link trang chủ. Route được lazy load qua React Suspense. Feature trong
+`src/features/events/` gồm schema/service, query/form helpers, reducer/controller, Context/provider
+và UI tối thiểu. Không thêm dependency; giữ nguyên phần workspace chưa commit.
+
+- `listEvents(workspaceId, filters, {cursor, signal})` và `getEvent(workspaceId, eventId, signal)`
+  dùng Axios client hiện có, validate JSON bằng Zod. API fields: source_id/from/to/action/q/limit;
+  detail không gửi query. Không có filter outcome hoặc endpoint reconstruction ở task này.
+- Filter đã áp dụng và event_id nằm trên URL; form dùng React Hook Form + Zod giữ bản nhập nháp.
+  Chỉ bấm Tìm kiếm mới cập nhật URL và gọi API. URL lạ/lặp/sai UUID/time/limit không được gửi
+  nguyên xuống backend. Trường chưa chọn được bỏ hẳn, không gửi chuỗi rỗng.
+- Nhập thời gian theo Asia/Ho_Chi_Minh (UTC+7), chuyển sang UTC kết thúc Z khi submit;
+  kiểm ngày thực và from <= to tới fractional seconds. Timestamp event/provenance nhận từ API
+  giữ nguyên chuỗi và precision, dùng Date/Intl chỉ để hiển thị; không sửa hoặc serialize lại event.
+- Mặc định 50/trang, UI cho chọn 25/50/100. Trước/Tiếp giữ stack opaque cursors trong memory,
+  không cache payload mọi trang hoặc bịa total. Request các trang giữ nguyên filters/limit.
+  Làm mới/filter/scope mới bỏ history và root để bắt đầu snapshot mới; event đến muộn không tự nối.
+- Context `useEvents()` cung cấp state, filter/detail/page/refresh và selectRoot/clearRoot.
+  List và detail có trạng thái/request riêng; AbortController + generation kiểm cả list và detail.
+  Đổi detail không tải lại list; đổi trang đóng detail và giữ root trong cùng snapshot.
+- Root chỉ được chọn từ detail đã validate thành công, khi role hiện tại có canWrite
+  (operator/reviewer). Viewer/admin đơn thuần chỉ đọc. Root chứa Event đã xác minh trong memory,
+  không lên URL/storage và không tự tạo run. Task 6 vẫn phải kiểm source scope và window.
+- Mỗi response `/me` mới là một access scope mới dù subject/workspace ID không đổi. Khi
+  workspace chưa ready, revalidate, đổi user/workspace hoặc logout, UI ẩn và purge events/root.
+  Cùng subject/workspace sau revalidation giữ filter, bắt đầu snapshot mới; đổi scope xóa filter.
+  Ra khỏi trang events dừng request; root có thể dùng tiếp trong cùng access scope cho task sau.
+- 403/404 purge events và revalidate workspace một lần; giữ latch để không lặp khi `/me` vẫn
+  cho thấy cùng membership. Thử lại do người dùng mới mở một lượt kiểm tra nữa. 401 dừng tải,
+  hiện đăng nhập lại, không tự logout/retry. INVALID_CURSOR reset history/detail/root và chờ
+  người dùng bắt đầu lại. Lỗi network/timeout/schema có thông báo an toàn và giữ filter.
+- Bảng và detail chỉ dùng React text/JSON đã escape. Hiển thị outcome bằng text, identifiers,
+  payload_redacted, parser version, batch_id, locator, sha256_redacted và UTC gốc. Source picker
+  có tải thêm; source chưa nằm trong trang sources hiện tại không bị tự coi là mất quyền.
+
+Kiểm thử bằng `npm run lint`, `npm test` (69 tests pass), `npm run build` với env hợp lệ và `git diff --check`.
+Tests service/query/controller/UI SSR kiểm conversion UTC+7, microseconds, filter validation,
+cursor, response ngược thứ tự, quyền/root, escape payload, 401/403/404 và cancellation.
+Lần kiểm tra operator trên backend thật: login, route, form nháp, submit source/time/action/search
+và limit hoạt động; danh sách events trả rỗng, không phải lỗi schema/network. Không ingest thêm
+dữ liệu hoặc sửa grants để tạo demo. Detail/provenance/root và nhiều trang hiện kiểm bằng
+fixtures; chưa được coi là UAT các phần đó trên dataset thật.
+
+Viewer thật cũng đăng nhập, tải workspace/sources và events rỗng thành công; UI hiển thị
+quyền đọc có, ghi không. Chưa kiểm root trên detail thật vì chưa có event trong kết quả.
+Reload `/events` qua check-sso hiện có đi qua callback rồi về `/` theo luồng auth task 2;
+chưa khôi phục URL events/filter sau vòng redirect này. Không thay đổi callback auth trong task 5.
+
+Kiến thức theo rule: feature/service (3,5), TypeScript strict + Zod (4), async cleanup và race
+condition (6), reducer/Context/state URL (8,9), Axios/RHF/ApiError (10–12), scope quyền,
+escape nội dung/keyboard/semantic HTML (14), kiểm thử và giới hạn frontend (15,16).
