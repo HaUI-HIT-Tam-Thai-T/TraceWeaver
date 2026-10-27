@@ -625,3 +625,55 @@ Kiến thức rule: feature/service (3,5); strict TS/Zod/RHF (4,11); reducer, ex
 cleanup/cancellation/generation và subscription (6,8); Router/lazy/URL filters (9);
 Axios, cursor và refetch sau mutation (10,12); scope/grants, escape/keyboard (14);
 node:test/SSR, giữ thay đổi không liên quan và phạm vi frontend (15–16).
+
+### Task 13 — Kiểm thử tích hợp xuyên module
+
+Nhánh ThienBao/feature/integration-tests. Thêm integration-fixtures.mjs,
+integration.test.mjs và integration-ui.test.mjs. Không thêm dependency hoặc sửa source
+production trong task này. Fixture dùng AuthSession thật với SDK giả, Axios instance và
+adapter giả, các service Zod/controller thật; subscription trong fixture mô phỏng dây nối
+Auth/Workspace/Events/Cases và cleanup tương ứng provider. Vì vậy đây là integration
+service/controller, không thay thế browser E2E toàn bộ React provider tree.
+
+10 test mới kiểm:
+- Auth → /me/sources → event detail/root → create run completed HTTP202/graph → review
+  bằng Link.version → create case → evidence → assign/start/request verification →
+  reviewer fail/close/reopen → dashboard. UI SSR trang detail thật kiểm role controls.
+- Viewer/admin chỉ đọc; operator không verify; reviewer lấy quyền từ /me revalidation.
+- Concurrent Axios services dùng chung SDK refresh; hủy một request không hủy refresh
+  chung. Refresh thất bại không gửi HTTP và purge toàn bộ artifact/attempt đang có.
+- Logout trong POST đang chờ, response muộn không khôi phục dữ liệu; revalidation/đổi
+  subject khi event detail đang chờ không ghi payload của user cũ vào scope mới.
+- VERSION_CONFLICT của link refetch graph, không replay; Case.version conflict giữ
+  thao tác, chỉ gửi sau xác nhận version mới với key mới.
+- Create case timeout đã commit: retry thủ công giữ đúng body/key; evidence timeout chỉ
+  đọc lại detail, không tự gửi POST hoặc tự tăng Case.version.
+- Mất grants khi vẫn còn membership: 403 purge case/graph/dashboard/knowledge, /me lấy
+  scope mới và sources rỗng, không loop; mất membership tiếp theo purge toàn bộ scope.
+
+UAT thật ngày 27/10/2026 (operator):
+1. Chọn root event 85553210-b8ff-4fdc-94b7-54b56fdbfd80 từ dataset FE-DEMO hiện có.
+2. Tạo run 98fbc5d8-20b8-46c8-a32a-ff5854d17b7d với ba nguồn, rule_only/root±5 phút;
+   completed, graph 3 nodes/2 links. Accept một link: Link.version 1→2, graph revision2.
+3. Tạo case d4b425d6-db18-43fe-b09d-b16dcd8dd4da có tiêu đề prefix FE-UAT Integration;
+   GET detail mới; thêm note 16d6533c-f15c-427a-8ffd-de9014c3c33f, Case.version giữ1.
+4. Hai tab giữ version1. Tab đầu assign thành công version2; tab thứ hai submit nháp
+   version1 bị preflight VERSION_CONFLICT, giữ nguyên reason và yêu cầu chủ động dùng
+   version hiện tại. History chỉ có một assign. Case được giữ assigned/version2.
+5. Mở tab thứ hai đã đi qua check-sso thành công và trở về home (giới hạn route callback
+   hiện có); chưa khôi phục deep link tự động. Không sửa auth redirect ở task này.
+
+Giới hạn nghiệm thu: người dùng xác nhận không có tài khoản reviewer, nên reviewer
+fail/close/reopen chỉ kiểm bằng fixture/SSR. Trình duyệt cục bộ bị tắt trong Work settings
+khi tiếp tục phiên, không thể hoàn tất logout/đổi viewer thật trong lượt kiểm này. Các
+lượt task trước đã kiểm viewer chỉ đọc; không gộp kết quả cũ thành UAT mới. Logout,
+refresh token, retry timeout, mất grants và purge xuyên module đã pass mô phỏng; chưa
+cố tình thu hồi grants hoặc gây lỗi hạ tầng trên BE thật. Không thay config/grants BE.
+Một run, một case, một note và một review UAT thật được giữ lại; không tự xóa dữ liệu.
+Chưa có ảnh UAT mới được lưu thành công trước khi browser bị tắt.
+
+Kết quả: npm run lint pass; npm test 172/172 pass, không skip (10 integration mới).
+Build strict với env hợp lệ và git diff --check được chạy khi bàn giao.
+Kiến thức rule: test theo rủi ro (15–16), service boundary/DTO strict (3–5,10), lifecycle,
+shared refresh/cancellation/generation/cleanup (6,8), scope/role/owner và purge (9,14),
+optimistic concurrency, idempotency và phân loại kết quả chưa rõ (12).
