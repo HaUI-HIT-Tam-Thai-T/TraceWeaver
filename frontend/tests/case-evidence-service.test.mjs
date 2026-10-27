@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { evidenceCreateSchema } from '../src/features/cases/schemas.ts'
-import { createCasesService } from '../src/features/cases/createCasesService.ts'
+import { createCasesService } from '../src/features/cases/services/createCasesService.ts'
 import { WID, EID, EID2 } from './event-fixtures.mjs'
 import { CID, caseDetail } from './case-fixtures.mjs'
 

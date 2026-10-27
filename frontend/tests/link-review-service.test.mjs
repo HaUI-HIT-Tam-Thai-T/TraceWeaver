@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { createLinkReviewService } from '../src/features/link-review/createLinkReviewService.ts'
+import { createLinkReviewService } from '../src/features/link-review/services/createLinkReviewService.ts'
 import { reasonSchema, manualLinkCreateSchema, manualLinkIssue } from '../src/features/link-review/schemas.ts'
 import { graph, RID } from './reconstruction-fixtures.mjs'
 import { WID, EID, EID2 } from './event-fixtures.mjs'

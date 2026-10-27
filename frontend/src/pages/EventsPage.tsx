@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { AuthStatus } from "../features/auth/AuthStatus";
-import { WorkspacePanel } from "../features/workspace/WorkspacePanel";
-import { EventsExplorer } from "../features/events/EventsExplorer";
-import { ReconstructionPanel } from "../features/reconstruction/ReconstructionPanel";
+import { AuthStatus } from "../features/auth/components/AuthStatus";
+import { WorkspacePanel } from "../features/workspace/components/WorkspacePanel";
+import { EventsExplorer } from "../features/events/components/EventsExplorer";
+import { ReconstructionPanel } from "../features/reconstruction/components/ReconstructionPanel";
 
 export function EventsPage() {
   return (

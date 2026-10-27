@@ -8,7 +8,7 @@ import { graph } from './reconstruction-fixtures.mjs'
 test('link editor has labeled review/manual forms, readonly guard, locks and safe feedback',async()=>{
   const server=await createServer({configFile:false,cacheDir:'node_modules/.tmp/ssr-link-review',server:{middlewareMode:true,hmr:false,ws:false}})
   try {
-    const {LinkReviewPanel}=await server.ssrLoadModule('/src/features/link-review/LinkReviewPanel.tsx')
+    const {LinkReviewPanel}=await server.ssrLoadModule('/src/features/link-review/components/LinkReviewPanel.tsx')
     const actions={reviewLink:async()=>{},createManualLink:async()=>{},probeClosedCase(){}}
     const render=(patch={})=>renderToString(createElement(LinkReviewPanel,{graph:graph(),graphReady:true,mutation:{status:'idle',error:null,linkId:null},caseLocked:false,canWrite:true,actions,...patch})).replace(/<!--.*?-->/g,'')
     const html=render()

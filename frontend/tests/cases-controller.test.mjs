@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { CanceledError } from 'axios'
-import { createCasesController } from '../src/features/cases/controller.ts'
+import { createCasesController } from '../src/features/cases/state/controller.ts'
 import { ApiError } from '../src/services/apiError.ts'
 import { caseItem, caseDetail, CID, CID2 } from './case-fixtures.mjs'
 import { scope } from './event-fixtures.mjs'

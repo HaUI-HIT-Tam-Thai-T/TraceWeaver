@@ -7,10 +7,10 @@ import { createServer } from 'vite'
 test('workspace UI renders access states, labeled picker, current roles, pagination, and safe recovery', async () => {
   const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-workspace', server: { middlewareMode: true, hmr: false, ws: false } })
   try {
-    const { WorkspacePanel } = await server.ssrLoadModule('/src/features/workspace/WorkspacePanel.tsx')
-    const { WorkspaceContext } = await server.ssrLoadModule('/src/features/workspace/workspaceContext.ts')
-    const { AuthContext } = await server.ssrLoadModule('/src/features/auth/authContext.ts')
-    const { initialWorkspaceState, workspacePermissions, activeMembership } = await server.ssrLoadModule('/src/features/workspace/state.ts')
+    const { WorkspacePanel } = await server.ssrLoadModule('/src/features/workspace/components/WorkspacePanel.tsx')
+    const { WorkspaceContext } = await server.ssrLoadModule('/src/features/workspace/state/workspaceContext.ts')
+    const { AuthContext } = await server.ssrLoadModule('/src/features/auth/state/authContext.ts')
+    const { initialWorkspaceState, workspacePermissions, activeMembership } = await server.ssrLoadModule('/src/features/workspace/state/state.ts')
     const { ApiError } = await server.ssrLoadModule('/src/services/apiError.ts')
     const id = '10000000-0000-4000-8000-000000000001'
     const membership = { workspace_id: id, roles: ['admin'], group_ids: [] }

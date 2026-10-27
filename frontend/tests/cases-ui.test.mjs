@@ -11,11 +11,11 @@ test('case pages render filters, owner null, exact history/evidence DTO, precisi
   const server=await createServer({configFile:false,cacheDir:'node_modules/.tmp/ssr-cases',server:{middlewareMode:true,hmr:false,ws:false}})
   try {
     const {CasesPage}=await server.ssrLoadModule('/src/pages/CasesPage.tsx')
-    const {CaseDetailView}=await server.ssrLoadModule('/src/features/cases/CaseDetailView.tsx')
-    const {CasesContext}=await server.ssrLoadModule('/src/features/cases/casesContext.ts')
-    const {AuthContext}=await server.ssrLoadModule('/src/features/auth/authContext.ts')
-    const {WorkspaceContext}=await server.ssrLoadModule('/src/features/workspace/workspaceContext.ts')
-    const {initialCasesState}=await server.ssrLoadModule('/src/features/cases/state.ts')
+    const {CaseDetailView}=await server.ssrLoadModule('/src/features/cases/components/CaseDetailView.tsx')
+    const {CasesContext}=await server.ssrLoadModule('/src/features/cases/state/casesContext.ts')
+    const {AuthContext}=await server.ssrLoadModule('/src/features/auth/state/authContext.ts')
+    const {WorkspaceContext}=await server.ssrLoadModule('/src/features/workspace/state/workspaceContext.ts')
+    const {initialCasesState}=await server.ssrLoadModule('/src/features/cases/state/state.ts')
     const initial=initialCasesState(scope())
     const noop=()=>{}
     const render=(state,authenticated=true)=>renderToString(createElement(MemoryRouter,null,

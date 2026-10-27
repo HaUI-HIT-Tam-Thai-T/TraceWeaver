@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { CaseDetail } from './schemas.ts'
-import type { CasesScope } from './state.ts'
+import type { CasesScope } from './state/state.ts'
 
 export const caseActionSchema = z.enum(['assign', 'start', 'request_verification', 'verify_close', 'verification_failed', 'reopen'])
 export type CaseAction = z.infer<typeof caseActionSchema>

@@ -10,7 +10,7 @@ test('integration UI: actual case detail composes role guards and hides artifact
  const server=await createServer({configFile:false,cacheDir:'node_modules/.tmp/ssr-integration',server:{middlewareMode:true,hmr:false,ws:false}})
  try{
  const [{CaseDetailPage},{AuthContext},{WorkspaceContext},{CasesContext},{initialCasesState},{workspacePermissions}]=await Promise.all([
-  server.ssrLoadModule('/src/pages/CaseDetailPage.tsx'),server.ssrLoadModule('/src/features/auth/authContext.ts'),server.ssrLoadModule('/src/features/workspace/workspaceContext.ts'),server.ssrLoadModule('/src/features/cases/casesContext.ts'),server.ssrLoadModule('/src/features/cases/state.ts'),server.ssrLoadModule('/src/features/workspace/state.ts')])
+  server.ssrLoadModule('/src/pages/CaseDetailPage.tsx'),server.ssrLoadModule('/src/features/auth/state/authContext.ts'),server.ssrLoadModule('/src/features/workspace/state/workspaceContext.ts'),server.ssrLoadModule('/src/features/cases/state/casesContext.ts'),server.ssrLoadModule('/src/features/cases/state/state.ts'),server.ssrLoadModule('/src/features/workspace/state/state.ts')])
  const noop=()=>{},asyncNoop=async()=>{}
  function render(role,{auth='authenticated',access='ready',state='awaiting_verification'}={}){
   const member={workspace_id:WID,roles:[role],group_ids:[]},permissions=workspacePermissions(member)

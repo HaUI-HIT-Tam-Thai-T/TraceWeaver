@@ -9,11 +9,11 @@ import { event, scope, WID, SID } from './event-fixtures.mjs'
 test('events UI renders filters, outcomes, precision, provenance, escaped payload and role-gated root', async () => {
   const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-events', server: { middlewareMode: true, hmr: false, ws: false } })
   try {
-    const { EventsExplorer } = await server.ssrLoadModule('/src/features/events/EventsExplorer.tsx')
-    const { EventsContext } = await server.ssrLoadModule('/src/features/events/eventsContext.ts')
-    const { WorkspaceContext } = await server.ssrLoadModule('/src/features/workspace/workspaceContext.ts')
-    const { AuthContext } = await server.ssrLoadModule('/src/features/auth/authContext.ts')
-    const { initialEventsState } = await server.ssrLoadModule('/src/features/events/state.ts')
+    const { EventsExplorer } = await server.ssrLoadModule('/src/features/events/components/EventsExplorer.tsx')
+    const { EventsContext } = await server.ssrLoadModule('/src/features/events/state/eventsContext.ts')
+    const { WorkspaceContext } = await server.ssrLoadModule('/src/features/workspace/state/workspaceContext.ts')
+    const { AuthContext } = await server.ssrLoadModule('/src/features/auth/state/authContext.ts')
+    const { initialEventsState } = await server.ssrLoadModule('/src/features/events/state/state.ts')
     const { ApiError } = await server.ssrLoadModule('/src/services/apiError.ts')
     const noop = () => {}
     const actions = { setFilters: noop, showEvent: noop, refresh: noop, previousPage: noop, nextPage: noop, selectRoot: () => true, clearRoot: noop, retryDetail: noop }

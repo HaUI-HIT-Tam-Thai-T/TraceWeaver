@@ -3,12 +3,12 @@ import { test } from 'node:test'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { createServer } from 'vite'
-import { initialKnowledgeState } from '../src/features/knowledge/controller.ts'
+import { initialKnowledgeState } from '../src/features/knowledge/state/controller.ts'
 import { WID } from './event-fixtures.mjs'
 test('knowledge read-only UI renders search, escaped body/URI, version, empty/loading/error and cursor controls',async()=>{
  const server=await createServer({configFile:false,cacheDir:'node_modules/.tmp/ssr-knowledge',server:{middlewareMode:true,hmr:false,ws:false}})
  try{
- const {KnowledgeSearchForm,KnowledgeResults}=await server.ssrLoadModule('/src/features/knowledge/KnowledgeView.tsx')
+ const {KnowledgeSearchForm,KnowledgeResults}=await server.ssrLoadModule('/src/features/knowledge/components/KnowledgeView.tsx')
  const render=state=>renderToString(createElement(KnowledgeResults,{state,refresh(){},previous(){},next(){},signIn(){}})).replace(/<!--.*?-->/g,'')
  const form=renderToString(createElement(KnowledgeSearchForm,{filters:{q:'abc',limit:25},apply(){}}));assert.match(form,/Tìm kiếm/);assert.match(form,/name="q"/);assert.match(form,/không phân biệt hoa/)
  const initial=initialKnowledgeState(),ready={...initial,status:'ready'}

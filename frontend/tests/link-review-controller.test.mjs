@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { createReconstructionController } from '../src/features/reconstruction/controller.ts'
+import { createReconstructionController } from '../src/features/reconstruction/state/controller.ts'
 import { ApiError } from '../src/services/apiError.ts'
 import { runFormDefaults, toRunBody } from '../src/features/reconstruction/form.ts'
 import { event, scope, EID, EID2 } from './event-fixtures.mjs'

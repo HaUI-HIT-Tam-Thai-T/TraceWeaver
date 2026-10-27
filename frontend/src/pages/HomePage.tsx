@@ -1,5 +1,5 @@
-import { AuthStatus } from "../features/auth/AuthStatus";
-import { WorkspacePanel } from "../features/workspace/WorkspacePanel";
+import { AuthStatus } from "../features/auth/components/AuthStatus";
+import { WorkspacePanel } from "../features/workspace/components/WorkspacePanel";
 import { Link } from "react-router-dom";
 
 export function HomePage() {

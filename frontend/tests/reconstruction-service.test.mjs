@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { createReconstructionService } from '../src/features/reconstruction/createReconstructionService.ts'
+import { createReconstructionService } from '../src/features/reconstruction/services/createReconstructionService.ts'
 import { runCreateSchema, validateRoot, shiftUtc, graphSchema } from '../src/features/reconstruction/schemas.ts'
 import { runFormDefaults, toRunBody, runFormSchema } from '../src/features/reconstruction/form.ts'
 import { event, WID, SID, EID2 } from './event-fixtures.mjs'

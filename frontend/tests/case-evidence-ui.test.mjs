@@ -7,7 +7,7 @@ import { createServer } from 'vite'
 test('evidence form defaults to Note, guards roles/closed/sync and distinguishes confirmed versus uncertain outcomes',async()=>{
   const server=await createServer({configFile:false,cacheDir:'node_modules/.tmp/ssr-case-evidence',server:{middlewareMode:true,hmr:false,ws:false}})
   try {
-    const {EvidenceForm}=await server.ssrLoadModule('/src/features/cases/EvidenceForm.tsx')
+    const {EvidenceForm}=await server.ssrLoadModule('/src/features/cases/components/EvidenceForm.tsx')
     const render=(patch={})=>renderToString(createElement(EvidenceForm,{snapshot:{status:'idle',runId:null,events:[],error:null},mutation:{status:'idle',savedId:null,error:null},detailReady:true,closed:false,canWrite:true,loadSnapshot:async()=>{},submit:async()=>{},beginNew(){},...patch})).replace(/<!--.*?-->/g,'')
     const html=render();assert.match(html,/<option value="note">Note<\/option><option value="events">/);assert.doesNotMatch(html,/type="checkbox"/)
     assert.match(html,/Loại evidence/);assert.match(html,/10.000/);assert.match(html,/FE không tự tăng Case.version/)

@@ -1,15 +1,15 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useAuth } from "../features/auth/authContext";
-import { AuthStatus } from "../features/auth/AuthStatus";
-import { useWorkspace } from "../features/workspace/workspaceContext";
-import { WorkspacePanel } from "../features/workspace/WorkspacePanel";
+import { useAuth } from "../features/auth/state/authContext";
+import { AuthStatus } from "../features/auth/components/AuthStatus";
+import { useWorkspace } from "../features/workspace/state/workspaceContext";
+import { WorkspacePanel } from "../features/workspace/components/WorkspacePanel";
 import {
   createKnowledgeController,
   initialKnowledgeState,
-} from "../features/knowledge/controller";
-import type { KnowledgeScope } from "../features/knowledge/controller";
-import { knowledgeService } from "../features/knowledge/service";
+} from "../features/knowledge/state/controller";
+import type { KnowledgeScope } from "../features/knowledge/state/controller";
+import { knowledgeService } from "../features/knowledge/services/service";
 import {
   readKnowledgeQuery,
   writeKnowledgeQuery,
@@ -17,7 +17,7 @@ import {
 import {
   KnowledgeResults,
   KnowledgeSearchForm,
-} from "../features/knowledge/KnowledgeView";
+} from "../features/knowledge/components/KnowledgeView";
 
 export function KnowledgePage() {
   const { state: auth } = useAuth();

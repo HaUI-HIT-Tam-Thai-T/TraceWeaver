@@ -1,11 +1,11 @@
-import { WorkflowForm } from '../features/cases/WorkflowForm';
+import { WorkflowForm } from '../features/cases/components/WorkflowForm';
 import { Link, useLocation, useParams } from "react-router-dom";
-import { useCases } from "../features/cases/casesContext";
-import { CasesLayout } from "../features/cases/CasesLayout";
-import { CasesFeedback } from "../features/cases/CasesFeedback";
-import { CaseDetailView } from "../features/cases/CaseDetailView";
-import { EvidenceForm } from '../features/cases/EvidenceForm';
-import { useWorkspace } from '../features/workspace/workspaceContext';
+import { useCases } from "../features/cases/state/casesContext";
+import { CasesLayout } from "../features/cases/components/CasesLayout";
+import { CasesFeedback } from "../features/cases/components/CasesFeedback";
+import { CaseDetailView } from "../features/cases/components/CaseDetailView";
+import { EvidenceForm } from '../features/cases/components/EvidenceForm';
+import { useWorkspace } from '../features/workspace/state/workspaceContext';
 
 export function CaseDetailPage() {
   const { state, refresh, loadEvidenceSnapshot, submitEvidence, beginNewEvidence, submitTransition, retryTransition, beginNewTransition } = useCases();

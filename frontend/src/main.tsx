@@ -4,11 +4,11 @@ import { BrowserRouter } from 'react-router-dom'
 import { parseEnv } from './config/env'
 import './index.css'
 import App from './App.tsx'
-import { initializeAuth } from './features/auth/auth'
-import { AuthProvider } from './features/auth/AuthProvider'
-import { WorkspaceProvider } from './features/workspace/WorkspaceProvider'
-import { EventsProvider } from './features/events/EventsProvider'
-import { CasesProvider } from './features/cases/CasesProvider'
+import { initializeAuth } from './features/auth/services/auth'
+import { AuthProvider } from './features/auth/state/AuthProvider'
+import { WorkspaceProvider } from './features/workspace/state/WorkspaceProvider'
+import { EventsProvider } from './features/events/state/EventsProvider'
+import { CasesProvider } from './features/cases/state/CasesProvider'
 
 const root = document.getElementById('root')
 if (!root) throw new Error('Missing root element')

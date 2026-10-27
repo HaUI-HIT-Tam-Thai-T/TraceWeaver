@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import { setImmediate } from 'node:timers/promises'
 import { CanceledError } from 'axios'
 import { ApiError } from '../src/services/apiError.ts'
-import { createEventsController } from '../src/features/events/controller.ts'
+import { createEventsController } from '../src/features/events/state/controller.ts'
 import { readEventQuery } from '../src/features/events/query.ts'
 import { EID, EID2, event, scope } from './event-fixtures.mjs'
 

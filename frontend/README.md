@@ -677,3 +677,102 @@ Build strict với env hợp lệ và git diff --check được chạy khi bàn 
 Kiến thức rule: test theo rủi ro (15–16), service boundary/DTO strict (3–5,10), lifecycle,
 shared refresh/cancellation/generation/cleanup (6,8), scope/role/owner và purge (9,14),
 optimistic concurrency, idempotency và phân loại kết quả chưa rõ (12).
+
+
+### Sắp xếp thư mục feature
+
+Đã di chuyển 53 file theo trách nhiệm trong 8 feature; giữ nguyên tên file, exports,
+API, route và logic. components/ chứa UI của feature; services/ chứa API/factory;
+state/ chứa state/reducer/controller/Context/Provider. schemas.ts, query.ts, form.ts,
+workflow.ts và types.ts giữ ở gốc feature khi hiện có. Không thêm Redux store, barrel
+index.ts, dependency hoặc thư mục rỗng. Pages vẫn ở src/pages/, HTTP client và
+workspaceMutations vẫn ở src/services/, tests vẫn ở tests/.
+
+Danh sách file đã di chuyển (đường dẫn tính từ frontend/):
+
+**auth**
+
+- `src/features/auth/AuthStatus.tsx` → `src/features/auth/components/AuthStatus.tsx`
+- `src/features/auth/auth.ts` → `src/features/auth/services/auth.ts`
+- `src/features/auth/AuthProvider.tsx` → `src/features/auth/state/AuthProvider.tsx`
+- `src/features/auth/authContext.ts` → `src/features/auth/state/authContext.ts`
+- `src/features/auth/session.ts` → `src/features/auth/state/session.ts`
+
+**workspace**
+
+- `src/features/workspace/WorkspacePanel.tsx` → `src/features/workspace/components/WorkspacePanel.tsx`
+- `src/features/workspace/createWorkspaceService.ts` → `src/features/workspace/services/createWorkspaceService.ts`
+- `src/features/workspace/service.ts` → `src/features/workspace/services/service.ts`
+- `src/features/workspace/WorkspaceProvider.tsx` → `src/features/workspace/state/WorkspaceProvider.tsx`
+- `src/features/workspace/workspaceContext.ts` → `src/features/workspace/state/workspaceContext.ts`
+- `src/features/workspace/controller.ts` → `src/features/workspace/state/controller.ts`
+- `src/features/workspace/state.ts` → `src/features/workspace/state/state.ts`
+
+**events**
+
+- `src/features/events/EventsExplorer.tsx` → `src/features/events/components/EventsExplorer.tsx`
+- `src/features/events/EventFiltersForm.tsx` → `src/features/events/components/EventFiltersForm.tsx`
+- `src/features/events/createEventsService.ts` → `src/features/events/services/createEventsService.ts`
+- `src/features/events/service.ts` → `src/features/events/services/service.ts`
+- `src/features/events/EventsProvider.tsx` → `src/features/events/state/EventsProvider.tsx`
+- `src/features/events/eventsContext.ts` → `src/features/events/state/eventsContext.ts`
+- `src/features/events/controller.ts` → `src/features/events/state/controller.ts`
+- `src/features/events/state.ts` → `src/features/events/state/state.ts`
+
+**reconstruction**
+
+- `src/features/reconstruction/ReconstructionPanel.tsx` → `src/features/reconstruction/components/ReconstructionPanel.tsx`
+- `src/features/reconstruction/RunResult.tsx` → `src/features/reconstruction/components/RunResult.tsx`
+- `src/features/reconstruction/GraphTable.tsx` → `src/features/reconstruction/components/GraphTable.tsx`
+- `src/features/reconstruction/createReconstructionService.ts` → `src/features/reconstruction/services/createReconstructionService.ts`
+- `src/features/reconstruction/service.ts` → `src/features/reconstruction/services/service.ts`
+- `src/features/reconstruction/controller.ts` → `src/features/reconstruction/state/controller.ts`
+- `src/features/reconstruction/state.ts` → `src/features/reconstruction/state/state.ts`
+
+**link-review**
+
+- `src/features/link-review/LinkReviewPanel.tsx` → `src/features/link-review/components/LinkReviewPanel.tsx`
+- `src/features/link-review/createLinkReviewService.ts` → `src/features/link-review/services/createLinkReviewService.ts`
+- `src/features/link-review/service.ts` → `src/features/link-review/services/service.ts`
+
+**cases**
+
+- `src/features/cases/CasesLayout.tsx` → `src/features/cases/components/CasesLayout.tsx`
+- `src/features/cases/CasesFeedback.tsx` → `src/features/cases/components/CasesFeedback.tsx`
+- `src/features/cases/CaseFiltersForm.tsx` → `src/features/cases/components/CaseFiltersForm.tsx`
+- `src/features/cases/CaseDetailView.tsx` → `src/features/cases/components/CaseDetailView.tsx`
+- `src/features/cases/CreateCasePanel.tsx` → `src/features/cases/components/CreateCasePanel.tsx`
+- `src/features/cases/EvidenceForm.tsx` → `src/features/cases/components/EvidenceForm.tsx`
+- `src/features/cases/WorkflowForm.tsx` → `src/features/cases/components/WorkflowForm.tsx`
+- `src/features/cases/createCasesService.ts` → `src/features/cases/services/createCasesService.ts`
+- `src/features/cases/service.ts` → `src/features/cases/services/service.ts`
+- `src/features/cases/CasesProvider.tsx` → `src/features/cases/state/CasesProvider.tsx`
+- `src/features/cases/casesContext.ts` → `src/features/cases/state/casesContext.ts`
+- `src/features/cases/controller.ts` → `src/features/cases/state/controller.ts`
+- `src/features/cases/createCaseController.ts` → `src/features/cases/state/createCaseController.ts`
+- `src/features/cases/state.ts` → `src/features/cases/state/state.ts`
+
+**knowledge**
+
+- `src/features/knowledge/KnowledgeView.tsx` → `src/features/knowledge/components/KnowledgeView.tsx`
+- `src/features/knowledge/createKnowledgeService.ts` → `src/features/knowledge/services/createKnowledgeService.ts`
+- `src/features/knowledge/service.ts` → `src/features/knowledge/services/service.ts`
+- `src/features/knowledge/controller.ts` → `src/features/knowledge/state/controller.ts`
+
+**dashboard**
+
+- `src/features/dashboard/DashboardView.tsx` → `src/features/dashboard/components/DashboardView.tsx`
+- `src/features/dashboard/WaitingCaseList.tsx` → `src/features/dashboard/components/WaitingCaseList.tsx`
+- `src/features/dashboard/createDashboardService.ts` → `src/features/dashboard/services/createDashboardService.ts`
+- `src/features/dashboard/service.ts` → `src/features/dashboard/services/service.ts`
+- `src/features/dashboard/controller.ts` → `src/features/dashboard/state/controller.ts`
+
+Cập nhật 301 tham chiếu import/module trong source, main.tsx, pages và tests (gồm
+ssrLoadModule). Đối chiếu nội dung 117 file source/tests với HEAD sau chuẩn hóa đường
+dẫn: không có thay đổi ngoài path, không có module reference thiếu hoặc path cũ.
+
+Kiểm tra: lint pass, TypeScript strict/build với env hợp lệ pass, 172/172 tests pass.
+HTTP smoke trên server có sẵn tại localhost:5173: tám URL gồm home/events/cases/detail/
+knowledge/dashboard/callback/not-found và bảy entry/page modules đều 200. Không mở được
+Vite thứ hai vì port 5173 đã được dùng; giữ nguyên tiến trình đang có, không đổi cổng.
+Chưa nghiệm thu lại tương tác UI/login qua browser trong refactor này.

@@ -1,15 +1,15 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../features/auth/authContext';
-import { AuthStatus } from '../features/auth/AuthStatus';
-import { useWorkspace } from '../features/workspace/workspaceContext';
-import { WorkspacePanel } from '../features/workspace/WorkspacePanel';
-import { createDashboardController, initialDashboardState } from '../features/dashboard/controller';
-import type { DashboardScope } from '../features/dashboard/controller';
-import { dashboardService } from '../features/dashboard/service';
+import { useAuth } from '../features/auth/state/authContext';
+import { AuthStatus } from '../features/auth/components/AuthStatus';
+import { useWorkspace } from '../features/workspace/state/workspaceContext';
+import { WorkspacePanel } from '../features/workspace/components/WorkspacePanel';
+import { createDashboardController, initialDashboardState } from '../features/dashboard/state/controller';
+import type { DashboardScope } from '../features/dashboard/state/controller';
+import { dashboardService } from '../features/dashboard/services/service';
 import { readDashboardQuery, writeDashboardQuery } from '../features/dashboard/query';
-import { DashboardCounters, DashboardTimeForm } from '../features/dashboard/DashboardView';
-import { WaitingCaseList } from '../features/dashboard/WaitingCaseList';
+import { DashboardCounters, DashboardTimeForm } from '../features/dashboard/components/DashboardView';
+import { WaitingCaseList } from '../features/dashboard/components/WaitingCaseList';
 import { workspaceMutations } from '../services/workspaceMutations';
 
 export function DashboardPage() {

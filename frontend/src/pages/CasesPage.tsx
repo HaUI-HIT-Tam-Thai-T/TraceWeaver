@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { useCases } from "../features/cases/casesContext";
-import { CasesLayout } from "../features/cases/CasesLayout";
-import { CasesFeedback } from "../features/cases/CasesFeedback";
-import { CaseFiltersForm } from "../features/cases/CaseFiltersForm";
-import { CaseTime } from "../features/cases/CaseDetailView";
+import { useCases } from "../features/cases/state/casesContext";
+import { CasesLayout } from "../features/cases/components/CasesLayout";
+import { CasesFeedback } from "../features/cases/components/CasesFeedback";
+import { CaseFiltersForm } from "../features/cases/components/CaseFiltersForm";
+import { CaseTime } from "../features/cases/components/CaseDetailView";
 import { writeCaseQuery } from "../features/cases/query";
 
 export function CasesPage() {
