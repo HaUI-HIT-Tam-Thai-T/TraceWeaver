@@ -86,22 +86,22 @@ const evidenceSchema = z.strictObject({
     z.union([z.string(), z.number().finite(), z.boolean(), z.null()]),
   ),
 });
+export const linkSchema = z.strictObject({
+  id,
+  from_event_id: id,
+  to_event_id: id,
+  method: z.enum(["rule", "model", "manual"]),
+  score: z.number().finite().min(0).max(1).nullable(),
+  evidence: z.array(evidenceSchema).min(1),
+  review_state: z.enum(["pending", "accepted", "rejected"]),
+  version: z.number().int().min(1),
+});
+export type Link = z.infer<typeof linkSchema>;
 export const graphSchema = z
   .strictObject({
     run_id: id,
     nodes: z.array(eventSchema),
-    links: z.array(
-      z.strictObject({
-        id,
-        from_event_id: id,
-        to_event_id: id,
-        method: z.enum(["rule", "model", "manual"]),
-        score: z.number().finite().min(0).max(1).nullable(),
-        evidence: z.array(evidenceSchema).min(1),
-        review_state: z.enum(["pending", "accepted", "rejected"]),
-        version: z.number().int().min(1),
-      }),
-    ),
+    links: z.array(linkSchema),
     unresolved_event_ids: uniqueIds,
     missing_expected_steps: z.array(
       z.strictObject({

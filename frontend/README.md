@@ -311,3 +311,54 @@ Kiến thức rule: service/feature và tách trách nhiệm (3,5); strict/Zod/R
 lifecycle, timer, cancellation/generation, reducer (6,8); scope auth/workspace, escape,
 semantic HTML/label/keyboard (9,14); Axios, idempotency và lỗi/retry có chủ đích (10,12);
 kiểm thử theo rủi ro, bảo toàn source và giới hạn frontend (15,16).
+
+## Link review và manual link — task 7
+
+Nhánh triển khai `ThienBao/feature/link-review-logic`. Feature `src/features/link-review/`
+thêm service factory, schema/types và một panel dưới bảng graph của reconstruction.
+Không thêm dependency. Các thay đổi có sẵn ở routes/WorkspacePanel và thay đổi workspace
+khác trong lúc làm việc được giữ nguyên, không stage/commit thêm.
+
+- Một form review cho link đang chọn: hướng, trạng thái, Link.version, accepted/rejected
+  và reason. Một form manual gồm event nguồn/đích lấy từ nodes snapshot và reason.
+  Chỉ operator/reviewer có controls ghi; run phải completed và graph ready.
+- `reviewLink(wid, rid, lid, body, signal)` POST `/api/v1/workspaces/{wid}/runs/{rid}/links/{lid}/reviews`
+  chỉ gửi decision/reason/expected_version. Version lấy từ link người dùng chọn, không lấy
+  Graph.version và không tự tăng. Response Review được validate link/decision/link_version.
+- `createManualLink(wid, rid, body, signal)` POST `/api/v1/workspaces/{wid}/runs/{rid}/links`
+  chỉ gửi from_event_id/to_event_id/reason. Hai ID phải khác nhau, thuộc graph; cạnh cùng
+  hướng đã tồn tại (kể cả rejected) được chuyển sang review. BE quyết định cycle/quyền.
+  Response phải manual/pending/null score/version1, đúng pair. Schema Link dùng chung
+  với graph; request/response đều Zod và TypeScript strict.
+- Reason trim trước gửi, 1–1000 ký tự và không trắng. Không đưa nháp lên URL/storage/log.
+  Form có label/fieldset, lỗi field, keyboard; nội dung render bằng React text đã escape.
+- Controller reconstruction sở hữu graph và mutation, khóa cả hai form khi gửi hoặc graph
+  chưa đồng bộ. Không optimistic update. POST thành công refetch graph; chỉ mở controls sau
+  GET hợp lệ. Nếu GET lỗi vẫn báo POST đã ghi, nút tải lại chỉ GET. Giữ graph cũ trong memory
+  cho lựa chọn/nháp nhưng không render bảng khi graph chưa ready; mất scope purge toàn bộ.
+- Timeout/network/5xx/response sai contract sau POST: kết quả chưa rõ, GET graph đúng một lần,
+  không tự gửi lại POST. Graph hiện tại không chứng minh ai đã ghi review bị mất response.
+  Hai mutation không gửi Idempotency-Key, không dùng retry của createRun.
+- VERSION_CONFLICT giữ reason/decision nháp, refetch và yêu cầu chọn sử dụng phiên bản hiện
+  tại trước submit mới. LINK_EXISTS refetch và chọn cạnh có sẵn; SELF_LINK/LINK_CYCLE báo
+  lỗi để sửa đề xuất. Không tự bỏ cạnh hoặc tính cycle thay BE.
+- CASE_CLOSED khóa mutation theo run, vẫn đọc/refetch graph; GET không tự mở khóa. Nút
+  Thử chỉnh sửa lại chỉ cho phép lần gửi chủ động tiếp theo được BE kiểm lại, không POST
+  tự động hoặc gọi reopen. Bất kỳ case closed nào trên run đều có thể giữ khóa.
+- 401 yêu cầu login; 403/404 purge artifact và revalidate workspace một lần. AbortController
+  + generation chặn response POST/GET cũ sau đổi root/run/scope/logout/revalidation/rời route.
+  Abort không chứng minh BE rollback; nháp được xóa khi panel/scope không còn hợp lệ.
+
+Kiểm tra: lint không warning, build với env hợp lệ (tsc strict + Vite), toàn bộ 99 tests
+và git diff --check. Test mới kiểm reason/DTO/Link.version khác Graph.version, accept/reject/
+reaccept, duplicate/self/cycle, double submit, closed-case lock/probe, timeout không replay,
+refetch thất bại sau commit, scope đổi giữa POST/GET và SSR controls/error/escape/readonly.
+SSR dùng cache riêng node_modules/.tmp/ssr-link-review, không ghi đè cache dev server.
+
+UAT: operator thật login/workspace/sources/events thành công, nhưng events không lọc trả rỗng.
+Chưa có root/run/graph để nghiệm thu mutation thật. Không ingest hoặc sửa grants/case BE.
+Không khẳng định tích hợp mutation đã hoàn tất chỉ dựa trên tests giả.
+
+Kiến thức rule: service/feature và tách trách nhiệm (3,5); strict/Zod/RHF (4,11);
+cleanup, reducer, cancellation/generation (6,8); Axios/Link.version/refetch/lỗi có phân loại
+(10,12); auth scope, dữ liệu memory, escape và accessibility (9,14); kiểm thử/phạm vi (15,16).

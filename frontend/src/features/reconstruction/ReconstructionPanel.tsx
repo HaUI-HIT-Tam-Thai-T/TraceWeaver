@@ -13,6 +13,7 @@ import type { RunFormValues } from "./form";
 import type { Event } from "../events/schemas";
 import type { EventsScope } from "../events/state";
 import { RunResult } from "./RunResult";
+import { linkReviewService } from '../link-review/service';
 
 const hiddenState = initialReconstructionState();
 export function ReconstructionPanel() {
@@ -43,6 +44,7 @@ function ReconstructionForm({
   const [controller] = useState(() =>
     createReconstructionController({
       service: reconstructionService,
+      linkService: linkReviewService,
       getEvent: eventsService.getEvent,
       revalidate: refreshAccess,
     }),
@@ -72,6 +74,7 @@ function ReconstructionForm({
   const busy =
     state.phase === "sending" ||
     state.phase === "validating" ||
+    state.mutation.status === 'sending' ||
     state.tracking === "loading" ||
     state.graphStatus === "loading";
   const missingRoot = !workspace.sources.items.some(
@@ -197,6 +200,8 @@ function ReconstructionForm({
         </p>
       )}
       <RunResult
+        linkActions={controller}
+        canWrite={scope.canWrite}
         state={state}
         retry={() => {
           void controller.retry();

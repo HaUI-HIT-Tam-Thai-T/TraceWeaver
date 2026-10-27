@@ -1,5 +1,7 @@
 import type { ReconstructionState } from "./state";
 import { GraphTable } from "./GraphTable";
+import { LinkReviewPanel } from '../link-review/LinkReviewPanel';
+import type { LinkReviewActions } from '../link-review/types';
 
 export function RunResult({
   state,
@@ -7,12 +9,16 @@ export function RunResult({
   track,
   loadGraph,
   signIn,
+  linkActions,
+  canWrite = false,
 }: {
   state: ReconstructionState;
   retry: () => void;
   track: () => void;
   loadGraph: () => void;
   signIn: () => void;
+  linkActions?: LinkReviewActions;
+  canWrite?: boolean;
 }) {
   const { run, error } = state;
   const runErrorCode =
@@ -96,7 +102,8 @@ export function RunResult({
           Tải lại graph
         </button>
       )}
-      {state.graph && <GraphTable graph={state.graph} />}
+      {state.graph && state.graphStatus === 'ready' && <GraphTable graph={state.graph} />}
+      {state.run?.status === 'completed' && linkActions && <LinkReviewPanel graph={state.graph} graphReady={state.graphStatus === 'ready'} mutation={state.mutation} caseLocked={state.caseLocked} canWrite={canWrite} actions={linkActions} />}
     </div>
   );
 }
