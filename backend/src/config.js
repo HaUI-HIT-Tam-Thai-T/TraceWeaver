@@ -57,7 +57,11 @@ export function readConfig(env = process.env) {
       (oidcAppSubject && !oidcAppSubject.trim())) throw new Error('OIDC core app configuration is invalid');
   if (![oidcAudience, oidcUserClientId, oidcIngestClientId].every((value) => value.trim().length > 0 && value.length <= 255) || oidcUserClientId === oidcIngestClientId) throw new Error('OIDC client/audience configuration is invalid');
   if (typeof env.CURSOR_SECRET !== 'string' || env.CURSOR_SECRET.length < 32) throw new Error('CURSOR_SECRET must contain at least 32 characters');
+  const scorerUrl = env.SCORER_URL ? identityUrl(env.SCORER_URL, 'SCORER_URL', appEnv) : null;
+  const scorerSecret = env.SCORER_SERVICE_SECRET ?? '';
+  if (scorerUrl && (scorerSecret.length < 32 || !/^[\x21-\x7e]+$/.test(scorerSecret))) throw new Error('SCORER_SERVICE_SECRET must contain at least 32 printable ASCII characters');
   return Object.freeze({
+    scorerUrl, scorerSecret, scorerTimeoutMs: positiveInteger(env.SCORER_TIMEOUT_MS, 'SCORER_TIMEOUT_MS', 5000, 5000),
     appEnv,
     frontendOrigins: Object.freeze([...new Set(frontendOrigins)]),
     host: env.API_HOST ?? '127.0.0.1',

@@ -3,7 +3,7 @@
 
 // Supported sandbox actions, not a generic parser or a learned process template.
 export function sandboxRulePolicy() {
-  return { version: 'sandbox-rules-1', strong_namespaces: ['request', 'account', 'job'], clock_skew_ms: 5000,
+  return { version: 'sandbox-rules-2', outcome_guard: true, strong_namespaces: ['request', 'account', 'job'], clock_skew_ms: 5000,
     transitions: [
       { id: 'intake-account', from: { service: 'intake', action: 'request.accepted' },
         to: { service: 'account', action: 'account.created' }, max_gap_ms: 3600000 },

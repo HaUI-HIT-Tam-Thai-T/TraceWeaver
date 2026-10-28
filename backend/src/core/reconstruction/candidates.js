@@ -21,7 +21,8 @@ const bounded = (value, max) => Number.isSafeInteger(value) && value >= 0 && val
 
 export function compileRulePolicy(policy) {
   const invalid = () => { throw new TypeError('Invalid reconstruction rule policy'); };
-  if (!closed(policy, ['version', 'strong_namespaces', 'clock_skew_ms', 'transitions']) || !text(policy.version, 100)
+  if (!closed(policy, ['version', 'strong_namespaces', 'clock_skew_ms', 'transitions', 'outcome_guard']) || !text(policy.version, 100)
+      || (policy.outcome_guard !== undefined && typeof policy.outcome_guard !== 'boolean')
       || !bounded(policy.clock_skew_ms, 5000) || !Array.isArray(policy.strong_namespaces)
       || !policy.strong_namespaces.length || !policy.strong_namespaces.every((name) => text(name, 100))
       || new Set(policy.strong_namespaces).size !== policy.strong_namespaces.length

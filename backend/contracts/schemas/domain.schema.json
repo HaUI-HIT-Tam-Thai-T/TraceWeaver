@@ -839,6 +839,49 @@
             "$ref": "#/$defs/MissingStep"
           }
         },
+        "abstentions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "event_id": {
+                "$ref": "#/$defs/Id"
+              },
+              "transition_id": {
+                "type": "string"
+              },
+              "from_event_id": {
+                "$ref": "#/$defs/Id"
+              },
+              "to_event_id": {
+                "$ref": "#/$defs/Id"
+              },
+              "reason_code": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "reason_code"
+            ],
+            "anyOf": [
+              {
+                "properties": { "event_id": {} },
+                "required": [
+                  "event_id"
+                ]
+              },
+              {
+                "properties": { "transition_id": {}, "from_event_id": {}, "to_event_id": {} },
+                "required": [
+                  "transition_id",
+                  "from_event_id",
+                  "to_event_id"
+                ]
+              }
+            ]
+          }
+        },
         "version": {
           "type": "integer",
           "minimum": 1

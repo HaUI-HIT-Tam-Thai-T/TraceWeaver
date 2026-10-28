@@ -7,6 +7,17 @@ import { readConfig } from '../../src/config.js';
 
 const valid = { DATABASE_URL: 'postgresql://app:local-password@localhost:5432/traceweaver', CURSOR_SECRET: 'test-only-secret-with-at-least-32-characters' };
 
+test('scorer config is optional, private, bounded and rejects unsafe destinations/credentials', () => {
+  assert.equal(readConfig(valid).scorerUrl, null);
+  const enabled = { ...valid, SCORER_URL: 'http://127.0.0.1:8000/internal/v1/score-pairs', SCORER_SERVICE_SECRET: 's'.repeat(32) };
+  assert.equal(readConfig(enabled).scorerTimeoutMs, 5000);
+  for (const patch of [{ SCORER_SERVICE_SECRET: '' }, { SCORER_SERVICE_SECRET: 's'.repeat(32) + '\n' },
+    { SCORER_TIMEOUT_MS: '5001' }, { SCORER_URL: 'http://untrusted.example.test/score' },
+    { SCORER_URL: 'https://user:password@example.test/score' }]) {
+    assert.throws(() => readConfig({ ...enabled, ...patch }), /SCORER/);
+  }
+});
+
 test('configuration validates defaults and explicit ports', () => {
   assert.equal(readConfig(valid).port, 8080);
   assert.equal(readConfig({ ...valid, API_PORT: '8090' }).port, 8090);
