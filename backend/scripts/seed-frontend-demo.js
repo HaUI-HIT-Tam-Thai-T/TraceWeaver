@@ -42,11 +42,12 @@ export function frontendDemo(baseTime) {
   });
 }
 
-export async function seedFrontendDemo(pool, { workspace, operator, ingest }) {
+export async function seedFrontendDemo(pool, { workspace, operator, ingest, dataset = demoTag, generate = frontendDemo }) {
   assert.ok(workspace && operator && ingest && operator !== ingest, 'Explicit workspace/operator/ingest required');
+  assert.match(dataset, /^[A-Z0-9-]+$/i, 'Explicit safe dataset tag required');
   // One outer transaction keeps partial fixtures out of the deployed workspace.
   return withTransaction(pool, async (connection) => {
-    await connection.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [`${demoTag}:${workspace}`]);
+    await connection.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [`${dataset}:${workspace}`]);
     let sequence = 0;
     const transactional = {
       query: connection.query.bind(connection),
@@ -67,10 +68,11 @@ export async function seedFrontendDemo(pool, { workspace, operator, ingest }) {
     const sourceIds = sources.map((source) => source.id);
     const sourceId = (service) => sources.find((source) => source.service === service).id;
     const { rows: existing } = await connection.query(`SELECT source_event_id,event_id,occurred_at FROM core.events
-      WHERE workspace_id=$1 AND source_event_id LIKE $2 ORDER BY occurred_at`, [workspace, `${demoTag}-%`]);
-    const first = existing.find((event) => event.source_event_id === `${demoTag}-01-0`);
+      WHERE workspace_id=$1 AND source_event_id LIKE $2 ORDER BY occurred_at`, [workspace, `${dataset}-%`]);
+    const first = existing.find((event) => event.source_event_id === `${dataset}-01-0`);
     const base = first?.occurred_at ?? new Date(Date.now() - 120 * 60000);
-    const scenarios = frontendDemo(base), events = new Map(existing.map((event) => [event.source_event_id, event.event_id]));
+    const scenarios = generate(base), events = new Map(existing.map((event) => [event.source_event_id, event.event_id]));
+    assert.ok(scenarios.length > 0 && scenarios.every((scenario) => scenario.events.every((event) => event.source_event_id.startsWith(`${dataset}-`))), 'Dataset must own every generated event');
     const ingestion = createIngestionService(createIngestionRepository(transactional));
     const runs = createRunRepository(transactional), cases = createCaseRepository(transactional);
     // Repository authorization checks current memberships/roles/grants; no ACL writes.
@@ -101,9 +103,9 @@ export async function seedFrontendDemo(pool, { workspace, operator, ingest }) {
         item = await cases.create(operator, workspace, caseInput('CaseCreate', { run_id: run.id, title: scenario.title })); newCases++;
         for (const action of ['assign', 'start', 'request_verification'].slice(0, states.indexOf(scenario.state))) {
           if (action === 'request_verification') await cases.evidence(operator, workspace, item.id,
-            caseInput('EvidenceCreate', { kind: 'events', event_ids: scenario.events.map((event) => events.get(event.source_event_id)), note: '[FE-DEMO] Synthetic logs for frontend verification.' }));
+            caseInput('EvidenceCreate', { kind: 'events', event_ids: scenario.events.map((event) => events.get(event.source_event_id)), note: scenario.evidenceNote ?? '[FE-DEMO] Synthetic logs for frontend verification.' }));
           item = await cases.transition(operator, workspace, item.id, caseInput('CaseTransition', { action, expected_version: item.version,
-            reason: '[FE-DEMO] Prepare test workflow state', ...(action === 'assign' ? { owner_id: operator } : {}) }));
+            reason: scenario.transitionReasons?.[action] ?? '[FE-DEMO] Prepare test workflow state', ...(action === 'assign' ? { owner_id: operator } : {}) }));
         }
       }
       const graph = await runs.get(operator, workspace, run.id, true);
@@ -111,7 +113,7 @@ export async function seedFrontendDemo(pool, { workspace, operator, ingest }) {
         mode: run.mode, links: graph.links.length, unresolved: graph.unresolved_event_ids.length, window: scenario.window });
     }
     const after = await createDashboardRepository(transactional).get(operator, workspace, {});
-    return { dataset: demoTag, workspace_id: workspace, inserted_events: inserted, inserted_runs: newRuns, inserted_cases: newCases,
+    return { dataset, workspace_id: workspace, inserted_events: inserted, inserted_runs: newRuns, inserted_cases: newCases,
       total_demo_events: events.size, before, after, scenarios: manifest };
   });
 }
