@@ -2,6 +2,8 @@
 
 Base dự án tái dựng hành trình yêu cầu cấp môi trường thực hành từ dấu vết của ba dịch vụ intake, account và provision, định hướng DX-Lab HaUI 2026.
 
+Hiện trạng nhánh phát triển, kết quả kiểm và giới hạn deployment được giữ tại [CURRENT_STATUS](docs/CURRENT_STATUS.md). Sau sửa audit:73 unit/HTTP/contract,49 DB,45 identity-native pass; npm audit0. Source sửa không tự cập nhật container đang chạy.
+
 ## Cấu trúc
 
 ```text
@@ -17,7 +19,9 @@ simulator/       # Khung sinh dữ liệu giả
 .github/         # Issue/PR templates và CI
 ```
 
-Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có cấu hình môi trường, healthcheck, xử lý lỗi, transaction và migrations. Các phần còn lại mới là khung; API nghiệp vụ, OIDC và AI chưa triển khai. OpenAPI đánh dấu rõ các operation dự kiến.
+Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, Keycloak local/Swagger PKCE login, JWT/JWKS, batch ingestion, GET /me, sources, knowledge, events, event detail và [run/graph, review/manual links](backend/RECONSTRUCTION.md) với quyền từ DB, snapshot, version và audit. [Case/workflow](backend/CASES.md) đã có 5 API; [dashboard](backend/DASHBOARD.md) có số đếm cùng scope và bộ lọc thời gian cho case drill-down. [Core workflow HTTP](backend/WORKFLOW.md) có ba API dùng app JWT riêng và JWT người dùng được kiểm độc lập; OpenAPI phân biệt20 implemented/1 planned (scorer). Hybrid hiện degraded về rule_only vì chưa có scorer. Phạm vi triển khai hiện tại là BE.
+
+Chạy API bằng Docker sau bước [chuẩn bị Keycloak/demo](backend/KEYCLOAK.md): `docker compose up -d --build --wait api`. Mặc định API tại `http://localhost:8080`; đăng nhập Swagger bằng **Authorize → keycloakLogin**. Máy hiện tại đã chuẩn bị xong; mật khẩu nằm trong `demo-credentials.local.json` bị Git ignore. Chi tiết tại [Docker API](backend/DOCKER.md).
 
 ## Chạy backend
 
@@ -33,12 +37,13 @@ npm run db:migrate
 npm run dev:be
 ```
 
-Nếu đã có `.env`, bỏ qua `db:setup`. Script giữ nguyên cấu hình hiện có. Có thể dùng PostgreSQL riêng bằng `DATABASE_URL`.
+Nếu đã có `.env`, bỏ qua `db:setup`; bổ sung CURSOR_SECRET ngẫu nhiên ≥32 ký tự nếu thiếu và giữ DB credentials. Xem [cấu hình Identity phía BE](backend/IDENTITY.md). Có thể dùng PostgreSQL riêng bằng DATABASE_URL.
 
 - `GET http://127.0.0.1:8080/health/live`: tiến trình hoạt động.
 - `GET http://127.0.0.1:8080/health/ready`: DB và migrations sẵn sàng.
 - `npm test`: unit, HTTP và contract tests, không cần DB.
 - `npm run test:db`: integration, cần PostgreSQL và quyền tạo DB test.
+- `npm run test:identity`: JWT/quyền nguồn qua PostgreSQL và Postman CLI >=1.74.0, không chạy FE/AI.
 - `npm run start:be`: chạy backend không watch.
 - `npm run db:stop`: dừng DB và giữ dữ liệu.
 
@@ -46,7 +51,7 @@ PowerShell có thể dùng `npm.cmd`. Makefile cung cấp lệnh tương đươn
 
 ## Ranh giới kiến trúc
 
-Core cung cấp Identity/Data/Workflow dùng chung, không phụ thuộc UI. Backend là lớp HTTP trung gian. Các module sau sẽ bổ sung workspace/tri thức, dữ liệu có provenance, review và workflow có audit, cùng scorer có bằng chứng và giới hạn rõ ràng. Base hiện tại chưa phải sản phẩm hoàn chỉnh hoặc bằng chứng đạt nghiệm thu bài thi.
+Core cung cấp Identity/Data/Workflow dùng chung, không phụ thuộc UI. Backend là lớp HTTP trung gian. Identity/Data, dữ liệu có provenance, review và case/workflow có audit đã có runtime. Cùng engine chạy case_handling/document_review headless và qua core HTTP với app/user JWT, quyền hiện tại, guard và audit transaction. Scorer còn planned. Base hiện tại chưa phải sản phẩm hoàn chỉnh hoặc bằng chứng đạt nghiệm thu bài thi.
 
 Xem [cài đặt](INSTALL.md), [đóng góp](CONTRIBUTING.md), [bảo mật](SECURITY.md) và [API contracts](backend/contracts/README.md).
 
@@ -80,19 +85,19 @@ Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi tri�
 
 | Thành phần | Hiện trạng bộ khung | Phần cần triển khai tiếp |
 |---|---|---|
-| API trung gian | Express, health, giới hạn body, lỗi/request ID | Endpoint nghiệp vụ có xác thực |
-| Data | PostgreSQL, transaction, migrations nền | Repository và service nghiệp vụ |
-| Identity | Khung module và schema membership/role/grant | OIDC/SSO và enforcement quyền |
-| Workflow | Khung module và API contract | Engine dùng chung, guard và audit |
-| H-P-D-I / ứng dụng | Khung frontend và contract | Workspace/tri thức, hồ sơ, tìm kiếm/dashboard |
-| Intelligence | Khung scorer/training và contract | Luật/scorer, giải thích, đánh giá và fallback |
+| API trung gian | Express,20 operations có auth, health/body bounds, CORS allowlist | Scorer adapter và tích hợp FE |
+| Data | PostgreSQL,7 migrations, repositories/transactions/snapshot/provenance | Raw parsers/dataset/backup restore |
+| Identity | Local Keycloak PKCE; JWT/JWKS user/ingest/core và DB grants | Production SSO, FE login UI |
+| Workflow | Hai definitions, shared engine/HTTP, guard/history/audit | UI và full E2E |
+| H-P-D-I / ứng dụng | BE workspace/knowledge/cases/search/dashboard | Frontend/runtime/screens |
+| Intelligence | Rule engine/version/evidence/unresolved, degraded fallback | Scorer/features/model/evaluation |
 | Dữ liệu demo | Fixtures kiểm schema synthetic | Dataset có provenance/manifest và kịch bản đầu-cuối |
 
 ## API và tài khoản demo
 
-Health API đang chạy được mô tả tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) là hợp đồng nghiệp vụ dự kiến, có cờ `planned`; không phải danh sách endpoint đã triển khai.
+Health API tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) đánh dấu20 operation implemented: GET /me, sources, knowledge, events, event detail; POST batch ingestion; POST run, GET run và graph; POST review và manual link; 5 API case/workflow; dashboard và3 API core workflow. Scorer còn planned. Run/link/case/dashboard/core đã kiểm HTTP/JWT/PostgreSQL với Postman JWKS simulation. BE-23 đã provision client core local, cấu hình CORE_APP_CLIENT_ID/CORE_APP_SUBJECT/membership và rebuild Docker API healthy. Verifier kiểm Authorization Code/PKCE/refresh cùng token user/ingest/core thật, hai workflow qua core HTTP và case history dùng chung; xem [KEYCLOAK.md](backend/KEYCLOAK.md) và [WORKFLOW.md](backend/WORKFLOW.md). Chưa nghiệm thu triển khai production.
 
-Base chưa có đăng nhập nên chưa có tài khoản demo. Khi triển khai Identity, tài khoản và mật khẩu demo phải được tạo tại máy qua seed, không lưu mật khẩu/token thật trong repository.
+Tài khoản local `demo.operator`/`demo.viewer` được seed theo [hướng dẫn Keycloak](backend/KEYCLOAK.md); mật khẩu sinh ngẫu nhiên nằm trong `demo-credentials.local.json` bị ignore. Không lưu mật khẩu/token thật trong repository.
 
 ## Kiểm chứng và phát triển
 

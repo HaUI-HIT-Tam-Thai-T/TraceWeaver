@@ -2,9 +2,9 @@
   "openapi": "3.1.0",
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
-    "title": "TraceWeaver planned API contract",
+    "title": "TraceWeaver API",
     "version": "0.1.0",
-    "description": "Planned public/core/scorer interfaces from docs03-05. Business handlers and auth are NOT implemented yet; use health.openapi.json for currently running health routes. Schema validation does not establish runtime ACL, transactions, idempotency or business guards."
+    "description": "Public/core/scorer interfaces. Six operations are implemented: getMe, listSources, listKnowledge, ingestEvents, listEvents and getEvent, with JWT verification and PostgreSQL authorization. The other 15 operations remain planned. Health routes are in health.openapi.json."
   },
   "paths": {
     "/api/v1/me": {
@@ -12,7 +12,7 @@
         "operationId": "getMe",
         "summary": "getMe",
         "description": "Validated Identity subject and memberships. Roles are per workspace; admin does not imply source access.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -61,7 +61,7 @@
         "operationId": "listSources",
         "summary": "listSources",
         "description": "Viewer/operator/reviewer or admin with source read grants. Returns only granted sources; ingest credential does not imply read access.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -121,7 +121,7 @@
         "operationId": "listKnowledge",
         "summary": "listKnowledge",
         "description": "",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -190,8 +190,8 @@
       "post": {
         "operationId": "ingestEvents",
         "summary": "ingestEvents",
-        "description": "Service token restricted to this source. Envelope 1-500 records, HTTP body <=1 MiB. Each record validates against EventInput independently; invalid record becomes rejected, valid records continue. Same source_event_id and canonical content = duplicate; changed content = per-item SOURCE_EVENT_CONFLICT. Server owns IDs/received_at/provenance/parser_version. Redact before persistence/logging. Unique key survives retries indefinitely; no Idempotency-Key needed.",
-        "x-implementation-status": "planned",
+        "description": "Service token restricted to this source. Envelope 1-500 records, HTTP body <=1 MiB. Each record validates against EventInput independently; invalid record becomes rejected, valid records continue. Same source_event_id and canonical content = duplicate; changed content = per-item SOURCE_EVENT_CONFLICT. Server owns IDs/received_at/provenance/parser_version. Redact before persistence/logging. Unique key survives retries indefinitely; no Idempotency-Key needed. Compressed request bodies return 415. Records are revalidated after redaction. Timestamps support exact microseconds; nonzero fractional digits beyond 6 reject per record as UNSUPPORTED_TIMESTAMP_PRECISION.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "ingestBearer": []
@@ -264,7 +264,7 @@
         "operationId": "listEvents",
         "summary": "listEvents",
         "description": "Sort occurred_at,event_id; fixed snapshot across cursor pages. Apply source ACL before search/counts.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -368,7 +368,7 @@
         "operationId": "getEvent",
         "summary": "getEvent",
         "description": "",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -424,8 +424,8 @@
       "post": {
         "operationId": "createRun",
         "summary": "createRun",
-        "description": "Operator/reviewer only. Root must belong to requested source scope and window. Max window 1h, max 1000 events before candidate filtering; 422 WINDOW_TOO_LARGE, never silently truncate. Freeze input IDs/watermark and source scope; late events need a new run. Poll Location; queued/running/completed/failed. Hybrid failure completes degraded=true, reason=ai_unavailable, effective_method=rule_only; requested mode remains hybrid.",
-        "x-implementation-status": "planned",
+        "description": "Operator/reviewer only, with current read grants for every requested source. Root must belong to scope/window. Max window 1h and 1000 events before candidate filtering; 422 WINDOW_TOO_LARGE, never truncate. Freeze event IDs, full requested source scope and rule policy atomically with audit. Initial bounded execution completes in the request transaction; 202 returns completed Run and Location to poll. Same actor/workspace/route Idempotency-Key replays the committed response for 24h after rechecking current authorization; different canonical normalized input returns 409. No key creates a new run. Hybrid currently completes degraded=true, reason=ai_unavailable, effective_method=rule_only because scorer is not configured; requested mode stays hybrid. See backend/RECONSTRUCTION.md for the pinned sandbox action policy and limits.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -507,7 +507,7 @@
         "operationId": "getRun",
         "summary": "getRun",
         "description": "Require current grants for all sources in the run; revoked grant blocks the whole artifact.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -564,7 +564,7 @@
         "operationId": "getGraph",
         "summary": "getGraph",
         "description": "Completed run only; otherwise 409 RUN_NOT_READY. Evidence is redacted, missing expected steps mean no evidence, not a fabricated outcome. Recheck grants for whole artifact.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -620,8 +620,8 @@
       "post": {
         "operationId": "reviewLink",
         "summary": "reviewLink",
-        "description": "Operator/reviewer. Append-only history, required reason/expected_version; stale ->409. Reject edits to evidence underlying a closed case until reopen. State update and audit share one transaction.",
-        "x-implementation-status": "planned",
+        "description": "Operator/reviewer with current read grants for every run source. Append-only history, required reason/expected_version; stale ->409, cycle ->422. Latest review overlays immutable link evidence; review and audit share one transaction. Any closed case for the run blocks graph edits with409 CASE_CLOSED until reopened.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -696,8 +696,8 @@
       "post": {
         "operationId": "createManualLink",
         "summary": "createManualLink",
-        "description": "Operator/reviewer; server sets manual and pending. Same workspace/run, no self-link/cycle; cannot silently replace prior links.",
-        "x-implementation-status": "planned",
+        "description": "Operator/reviewer with current read grants for every run source; server sets manual/pending, null score and reason evidence. Endpoints must belong to the immutable run snapshot. Self-link/cycle ->422, duplicate pair ->409 even if rejected; cannot replace prior links. Mutations serialize per run and commit with audit. Any closed case for the run blocks graph edits with409 CASE_CLOSED until reopened.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -770,7 +770,7 @@
         "operationId": "createCase",
         "summary": "createCase",
         "description": "Operator/reviewer; case starts new. Workflow engine is the sole state source, no competing case state column.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -840,8 +840,8 @@
       "get": {
         "operationId": "listCases",
         "summary": "listCases",
-        "description": "Only cases with full current source scope. New/assigned are waiting states.",
-        "x-implementation-status": "planned",
+        "description": "Current full run-source scope, including empty sources. New/assigned are waiting states. Optional inclusive UTC from/to filter parent run created_at, matching dashboard. Live state/owner filters, UUID ascending cursor binds actor/workspace/filters/limit/current scope; no immutable case-list snapshot.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -908,6 +908,18 @@
             "schema": {
               "$ref": "./schemas/domain.schema.json#/$defs/Subject"
             }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Inclusive lower bound on parent run created_at (UTC).",
+            "schema": { "$ref": "./schemas/domain.schema.json#/$defs/UtcTime" }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "Inclusive upper bound on parent run created_at (UTC).",
+            "schema": { "$ref": "./schemas/domain.schema.json#/$defs/UtcTime" }
           }
         ]
       }
@@ -917,7 +929,7 @@
         "operationId": "getCase",
         "summary": "getCase",
         "description": "",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -973,8 +985,8 @@
       "post": {
         "operationId": "addEvidence",
         "summary": "addEvidence",
-        "description": "Operator/reviewer; event references must be within case/source scope. Note or observed event evidence, no oracle/secret.",
-        "x-implementation-status": "planned",
+        "description": "Operator/reviewer with full current run-source grants; event references must belong to exact run snapshot. Notes are redacted. Closed case returns409 until reopen. Evidence append and audit are atomic; workflow version is unchanged.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -1046,8 +1058,8 @@
       "post": {
         "operationId": "transitionCase",
         "summary": "transitionCase",
-        "description": "assign: operator/reviewer, valid owner with full scope; start/request_verification: owner or reviewer; verify_close/verification_failed/reopen: reviewer. Version required; stale 409, invalid action/guard 422, role 403. Verification needs note/evidence; close needs reviewed evidence and no pending link used in conclusion; reopen needs new evidence/reason and valid owner. Preserve state+history+audit atomically.",
-        "x-implementation-status": "planned",
+        "description": "assign: operator/reviewer, valid owner with full scope; start/request_verification: owner or reviewer; verify_close/verification_failed/reopen: reviewer. Version required; stale 409, invalid action/guard 422, role 403. Verification needs note/evidence; close conservatively requires no pending link anywhere in run, then freezes all run graph edits. Reopen needs a reason different from last close and valid owner. Case state/owner derive only from workflow history. Preserve state+history+audit atomically.",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -1122,8 +1134,8 @@
       "get": {
         "operationId": "getDashboard",
         "summary": "getDashboard",
-        "description": "Counts and filters for drill-down; only full-scope artifacts, including source grant revocation. No count leakage.",
-        "x-implementation-status": "planned",
+        "description": "One statement snapshot of current membership/reader role and full requested run-source grants, including empty sources. Inclusive UTC from/to filter parent run created_at for every counter. Unresolved events count per-run event occurrences outside the root component of pending/accepted live links in completed runs. Waiting cases are new/assigned from latest workflow history. Echoed filters apply unchanged to listCases; run detail/graph require known IDs (no global run-list route).",
+        "x-implementation-status": "implemented",
         "security": [
           {
             "userBearer": []
@@ -1192,11 +1204,15 @@
       "post": {
         "operationId": "createWorkflowInstance",
         "summary": "createWorkflowInstance",
-        "description": "Internal app credential only. Actor/creator derived from validated end-user context; never trust arbitrary client actor headers. Engine validates definition/version and workspace membership.",
-        "x-implementation-status": "planned",
+        "description": "Internal app JWT (distinct client and configured service subject) plus independently verified end-user JWT; both require active workspace membership. X-Workspace-Id must match body workspace_id and creator_subject must match verified user. Creates standalone workspace-scoped document_review v1/document entities; no document content is stored. Case workflows are created by createCase; duplicate core case creation returns409 after current source ACL. Server definitions only. Entity uniqueness409; no Idempotency-Key support.",
+        "x-implementation-status": "implemented",
+        "parameters": [
+          { "$ref": "#/components/parameters/coreWorkspace" }
+        ],
         "security": [
           {
-            "appServiceBearer": []
+            "appServiceBearer": [],
+            "delegatedUserBearer": []
           }
         ],
         "responses": {
@@ -1257,11 +1273,12 @@
       "post": {
         "operationId": "transitionWorkflowInstance",
         "summary": "transitionWorkflowInstance",
-        "description": "Internal app credential plus trusted user context; core enforces definition/role/guard/version and commits history+audit in the same transaction.",
-        "x-implementation-status": "planned",
+        "description": "Verified app plus end-user JWT and current DB permissions. Definition/role/owner/guard/expected_version enforced; history and audit commit atomically. Case transitions share case repository and run lock, evidence/close/reopen guards; supplied evidence_refs must belong to that case, server records full current evidence. document_review v1 rejects owner/evidence refs. Stale version409; no Idempotency-Key support.",
+        "x-implementation-status": "implemented",
         "security": [
           {
-            "appServiceBearer": []
+            "appServiceBearer": [],
+            "delegatedUserBearer": []
           }
         ],
         "responses": {
@@ -1307,6 +1324,7 @@
           }
         },
         "parameters": [
+          { "$ref": "#/components/parameters/coreWorkspace" },
           {
             "$ref": "#/components/parameters/id"
           }
@@ -1327,11 +1345,12 @@
       "get": {
         "operationId": "getWorkflowInstance",
         "summary": "getWorkflowInstance",
-        "description": "Internal app service only; enforce workspace and trusted actor scope.",
-        "x-implementation-status": "planned",
+        "description": "Verified app JWT plus independently verified user JWT, X-Workspace-Id and current memberships/reader role. Case instances also require current read grants for every requested run source including empty sources. Returns persisted definition identity, latest state/version and sanitized history; no internal facts or definition payload.",
+        "x-implementation-status": "implemented",
         "security": [
           {
-            "appServiceBearer": []
+            "appServiceBearer": [],
+            "delegatedUserBearer": []
           }
         ],
         "responses": {
@@ -1371,6 +1390,7 @@
           }
         },
         "parameters": [
+          { "$ref": "#/components/parameters/coreWorkspace" },
           {
             "$ref": "#/components/parameters/id"
           }
@@ -1445,6 +1465,13 @@
   },
   "components": {
     "parameters": {
+      "coreWorkspace": {
+        "name": "X-Workspace-Id",
+        "in": "header",
+        "required": true,
+        "description": "Explicit workspace scope; must equal WorkflowCreate.workspace_id. Both service and user need active membership.",
+        "schema": { "$ref": "./schemas/domain.schema.json#/$defs/Id" }
+      },
       "wid": {
         "name": "wid",
         "in": "path",
@@ -1663,7 +1690,13 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "Internal app service plus trusted validated end-user context."
+        "description": "App access JWT with distinct CORE_APP_CLIENT_ID azp and exact CORE_APP_SUBJECT sub. Requires active workspace membership; empty CORE_APP_SUBJECT disables core503. Pair with delegatedUserBearer; never send app credentials to browser."
+      },
+      "delegatedUserBearer": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-End-User-Authorization",
+        "description": "Bearer <original user access JWT>. Core independently verifies signature/issuer/audience/expiry/user client. Current user roles and grants come from DB, never arbitrary actor headers. Send only through a trusted server over HTTPS."
       },
       "scorerServiceSecret": {
         "type": "http",

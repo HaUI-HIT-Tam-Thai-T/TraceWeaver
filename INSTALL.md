@@ -15,11 +15,13 @@
 
 ## Môi trường
 
-Biến bắt buộc: `DATABASE_URL`. Các biến tùy chọn: `APP_ENV`, `API_HOST`, `API_PORT`, `DB_POOL_MAX`, `SHUTDOWN_TIMEOUT_MS`. Mẫu tại `.env.example`; các biến OIDC/scorer dành cho module tương lai.
+Biến bắt buộc: DATABASE_URL và CURSOR_SECRET (ngẫu nhiên ≥32 ký tự, db:setup sinh khi tạo env mới). Với env cũ, bổ sung cursor key và giữ DB credentials. OIDC_ISSUER/API_AUDIENCE/CLIENT_ID và trusted OIDC_JWKS_URI tùy chọn phải khớp provider. Production dùng HTTPS. Xem [Identity BE](backend/IDENTITY.md). Scorer dành cho bước sau.
 
 API mặc định bind loopback 8080; PostgreSQL Compose bind loopback 55432. `npm run db:stop` dừng DB và giữ volume. Không sửa migration đã áp dụng; thêm migration mới.
 
-Base chưa bao gồm OIDC, giao diện, scorer hoặc simulator chạy được. Không có tài khoản hay mật khẩu demo cố định.
+BE có20/21 operations và local Keycloak PKCE/demo accounts; xem [bootstrap Keycloak](backend/KEYCLOAK.md) và [hiện trạng](docs/CURRENT_STATUS.md). Mật khẩu sinh local nằm trong ignored credentials JSON, không có mật khẩu mặc định public. FE/AI/simulator chưa có runtime. `npm run test:identity` dùng Postman CLI>=1.74.0; `npm run test:identity:native` chạy cùng assertions với JWKS HTTP native và PostgreSQL, không cần CLI.
+
+Frontend development mặc định cổng3000, callback `/auth/callback`. FRONTEND_ORIGINS chứa exact origins, rỗng để tắt; production chỉ HTTPS origins explicit. Chạy `node --env-file-if-exists=.env backend/scripts/setup-frontend-origin.js` sau khi Keycloak healthy để cập nhật public client, không reset credentials. API/health hỗ trợ CORS allowlist; core HTTP chỉ dùng từ app server. Request nén trả415. Event timestamps giữ precision microsecond; nonzero precision vượt6 digits bị reject per record.
 
 ## Kiểm tra bộ khung sau khi clone
 
@@ -36,4 +38,4 @@ CI lặp lại cài từ lockfile trên Linux và Windows; job PostgreSQL tạo 
 
 ## Offline
 
-Sau khi đã cache npm packages và PostgreSQL image, có thể dùng `npm ci --offline --ignore-scripts`, `npm run db:up` (không pull), migrate và start như trên. Máy chưa có cache cần Internet ở lần chuẩn bị đầu. Base không gọi API bên ngoài; dataset demo và fallback nghiệp vụ chưa triển khai.
+Sau khi cache npm packages và PostgreSQL/Keycloak images, có thể cài offline và chạy DB/migrate/start như trên. Auth API cần trusted JWKS endpoint hoặc khóa còn trong cache hợp lệ; thiếu khóa cần thiết thì503, không bypass. Hybrid hiện fallback rule_only khi chưa có scorer; dataset và full app offline demo chưa có.

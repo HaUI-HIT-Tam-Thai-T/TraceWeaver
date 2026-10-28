@@ -14,7 +14,13 @@ coverage/
 *.log
 
 # Local project preparation
-/docs/
+# Shared team documentation is tracked explicitly; preparation stays local.
+/docs/*
+!/docs/README.md
+!/docs/INTEGRATION.md
+!/docs/CURRENT_STATUS.md
+!/docs/BACKEND_HANDOFF.md
+!/docs/BACKEND_HANDOFF_RESPONSE.md
 /.planning/
 /data/
 /templates/

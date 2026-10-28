@@ -20,11 +20,19 @@
     "db:stop": "docker compose -f compose.dev.yaml stop postgres",
     "test:db": "node --env-file-if-exists=.env --test backend/tests/integration/*.test.js",
     "test:contracts": "node --test backend/tests/contracts/*.test.js",
+    "test:identity": "node --env-file-if-exists=.env --test backend/tests/identity/*.test.js",
+    "test:identity:native": "node --env-file-if-exists=.env --import ./backend/tests/support/oidc-native-loader.js --test --test-concurrency=1 backend/tests/identity/*.test.js",
     "test": "node --test backend/tests/backend/*.test.js backend/tests/contracts/*.test.js",
     "check:base": "node backend/scripts/check-base.js",
     "licenses": "node backend/scripts/dependency-inventory.js",
     "licenses:check": "node backend/scripts/dependency-inventory.js --check",
-    "smoke": "node backend/scripts/smoke.js"
+    "smoke": "node backend/scripts/smoke.js",
+    "evidence:backend": "node backend/scripts/council-evidence.js",
+    "package:source": "node backend/scripts/package-source.js"
+  },
+  "overrides": {
+    "body-parser": "2.4.0",
+    "fast-uri": "3.1.9"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "13.1.0",
