@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — Realistic deployed lab demo
+
+- Append LAB-DEMO-20261028-v2 to the existing Oracle demo workspace: 36 Vietnamese operational events, 12 runs and 12 cases with readable request codes, synthetic student accounts, courses, resource sizes, varied timings and three specific provisioning failures. Preserve missing-evidence and missing-correlation scenarios and mark every message/case as demo.
+- Reuse the transactional seed runner and current authorization/workflow repositories. Rerun inserts zero artifacts; hashes of the previous 36 events and their runs/cases are unchanged. Verify 278 HTTPS assertions with operator/viewer, including search `[Demo]`, pagination, event details, case history and graphs. Local suite:129 pass,2 optional Python tests skipped; base checks pass. No frontend changes, dependencies, schema/ACL changes, API rebuild or remote Git push.
+
 ## Unreleased — AI MVP confirmation response
 
 - Answer all five questions from AI_BE_CONFIRMATION: retain scorer schema1 and all-namespace shared_id_count; BE owns unresolved/strong-ID guards; AI ranks/proposes only; unknown/conflicting outcomes require review; retry ambiguity stays unresolved with cardinality per transition ID.

@@ -438,6 +438,14 @@ Gợi ý cache keys: gồm subject, workspace, endpoint và normalized filters; 
 
 ## 10. Giới hạn và bằng chứng bàn giao
 
+### Dữ liệu lab dễ đọc hơn — 28/10/2026
+
+Cùng workspace/server bên dưới đã thêm bộ `LAB-DEMO-20261028-v2`: **36 log, 12 run, 12 hồ sơ** mới. Nội dung tiếng Việt có dấu, mã `LAB-20261028-001` đến `012`, mã sinh viên/tài khoản giả, lớp/học phần, image và cấu hình máy. Từng bước có kết quả riêng; lỗi cấp máy gồm hết RAM, timeout tải image và lỗi cấp mạng. Có tình huống thiếu log cấp máy hoặc gửi lại bản tin thiếu mã tương quan; không tự gán chúng thành kết luận chắc chắn.
+
+Trên trang Sự kiện, nhập **`[Demo]`** vào ô tìm nội dung rồi bấm **Tìm kiếm**; bỏ lọc ngày cũ nếu đang bật. API tương ứng: `GET /api/v1/workspaces/{wid}/events?q=%5BDemo%5D&limit=100`. Hồ sơ mới có tiêu đề `[Demo] LAB-20261028-...`; xem theo danh sách cases rồi mở run tương ứng. Mỗi trạng thái `new`, `assigned`, `investigating`, `awaiting_verification` có ba hồ sơ trong bộ này. Các số này là riêng bộ v2, không phải tổng workspace.
+
+[Script lab demo](../backend/scripts/seed-lab-demo.js) mặc định dry-run, dùng cùng cờ đích như seed cũ. Bộ v1 được giữ nguyên; chạy lại v2 không thêm bản ghi và không đặt lại trạng thái người dùng đã sửa. Đã kiểm 278 assertions HTTPS qua operator/viewer, 15 liên kết và chín event unresolved của riêng v2; API healthy. FE React E2E và chất lượng AI chưa được đánh giá trong lần nạp dữ liệu này.
+
 ### Dữ liệu giả để test frontend — 27/10/2026
 
 Workspace `10000000-0000-4000-8000-000000000015` trên `https://api.quizlearn.tech` đã nạp bộ `FE-DEMO-20261027-v1` qua các repository nghiệp vụ hiện có: **36 events, 12 runs, 12 cases**, 15 links pending. Có ba case mỗi trạng thái `new`, `assigned`, `investigating`, `awaiting_verification`; bốn run hybrid degraded `ai_unavailable`, chín event unresolved, sáu waiting cases. Tình huống gồm thành công, lỗi capacity, thiếu log provision, thiếu định danh và retry. Đây là dữ liệu tổng hợp để test giao diện, không phải dataset đánh giá AI.
