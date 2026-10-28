@@ -883,11 +883,12 @@ không tồn tại. 404 được kiểm bằng SSR; chưa xác nhận màn hình
 browser do luồng auth đó. Không mở rộng nhiệm vụ sang sửa auth hoặc BE. Giữ các thay
 đổi chưa commit trước đó; không thêm dependency, commit hoặc push.
 
-## UI Foundation — xám đậm và xanh
+## UI Foundation — trắng và xanh dương
 
-Theme ở `src/index.css` dùng Tailwind v4 `@theme`: canvas #181B20, panel #25292E,
-control #343E4D, line #414852, primary #0066CC (hover #0057AD), focus/link #66B3FF,
-foreground #F4F6F8, muted #B5BDC8, success #73D6A2, warning #F2C166, danger #FF9292.
+Theme hiện tại ở `src/index.css` dùng Tailwind v4 `@theme`: canvas #F5F8FC, panel #FFFFFF,
+control #F1F5FB, line #D7E1EE, primary #0066CC (hover #0057AD), focus/link #005EB8,
+foreground #172B4D, muted #52627A, success #18794E, warning #8A5A00, danger #C62828.
+Native controls dùng color-scheme: light. Đây là palette mới thay cho theme xám đậm trước đó.
 Font Segoe UI/Roboto/system, spacing theo bước 4px, control tối thiểu 40px, bo 6px.
 Chỉ dùng token và component chung thay vì chép màu vào từng feature.
 
@@ -1032,3 +1033,305 @@ src/pages/AuthCallbackPage.tsx, src/routes/PageLoadFeedback.tsx,
 src/components/ui/LoadingState.tsx, src/components/ui/EmptyState.tsx,
 src/components/ui/ErrorState.tsx, tests/auth-ui.test.mjs, tests/workspace-ui.test.mjs,
 tests/ui-foundation.test.mjs và README.md. Không sửa primitive shadcn hoặc dependency trong lượt này.
+
+## AppShell — Header / Sidebar / Main
+
+Nhánh triển khai: `ThienBao/feature/app-shell-ui`. Layout dùng theme và typography hiện có.
+
+- `src/components/layout/AppLayout.tsx`: một Main với Outlet/Suspense, skip link, state sidebar
+  mobile, cleanup listener matchMedia và đóng Sheet khi location.key thay đổi.
+- `AppHeader.tsx`: logo về `/dashboard`, workspace picker từ memberships, role badge, refreshAccess,
+  đăng nhập/đăng xuất. Không suy tên/email từ token. Khi workspace đang xác minh lại, picker
+  disabled, bỏ options/role cũ; Header không tự gọi `/me` trong effect hoặc render.
+- `AppSidebar.tsx`: NavLink tới dashboard/events/cases/knowledge; Cases active tại detail.
+  Sidebar desktop 240px, Header 64px; breakpoint desktop 1024px. Main padding responsive,
+  min-width 0; bảng cuộn trong component. `/` không có mục active riêng.
+- `WorkspaceAccessState.tsx`: presentation guard; mặc định Outlet, hoặc nhận children cho
+  vùng sources của Home. Phân biệt auth init/error/unauthenticated, workspace loading/error/
+  reauth, không membership, chưa chọn, membership không hợp lệ/không có quyền đọc và ready.
+  Không tự gọi API hoặc lưu quyền; nút thao tác gọi hành động của provider hiện có.
+- `PublicLayout.tsx`: main gọn cho `/auth/callback` và `*`, không có Header/Sidebar.
+
+`src/constants/routes.ts` có APP_ROUTES (6) và PUBLIC_ROUTES (2), ROUTES tổng hợp vẫn 8
+object path/element. AppRoutes dùng nested route AppLayout + WorkspaceAccessState;
+App không bọc thêm main. Năm business page vẫn lazy; Suspense ở Main nên shell giữ nguyên
+khi chờ code. Đường dẫn `/` chuyển sang `/dashboard`; HomePage cũ không còn được route sử dụng; page nghiệp vụ
+bỏ nav/AuthStatus/WorkspacePanel lặp lại. CasesLayout vẫn giữ guard và key scope riêng;
+provider/controller/auth/API và cơ chế abort/purge không bị viết lại.
+
+Sidebar mobile dùng source Sheet chính thức:
+https://ui.shadcn.com/r/styles/new-york-v4/sheet.json
+ở `src/components/ui/primitives/sheet.tsx`, import trực tiếp @radix-ui/react-dialog.
+Đây là dependency trực tiếp mới duy nhất; lockfile đi kèm. Source đổi import cn/Dialog,
+nhãn Close thành Đóng menu, bỏ class animation cần plugin. Dialog quản lý Escape, overlay,
+focus trap và restore focus; có SheetTitle/Description và aria-modal. Không thêm Redux,
+useMemo/useCallback hoặc animation package. Source dùng kiểu thư viện tại điểm tích hợp.
+
+### Kiểm tra AppShell
+
+- `npm run lint`: sạch. `npm test`: 177/177 pass. `npm run build`: TypeScript strict và Vite
+  pass, không có chunk vượt ngưỡng cảnh báo. `git diff --check`: pass (có thông báo LF/CRLF).
+- SSR kiểm đủ 8 route, một Main, callback/404 không Sidebar, case detail active Cases,
+  loading/error lazy giữ Header/Sidebar, guard không gọi auth/selection/refresh khi render.
+- `tests/app-shell-ui.test.mjs` kiểm auth/workspace states, purge thông tin Header khi
+  revalidation; lỗi sources riêng không chặn nội dung route khi membership/read còn hợp lệ.
+  Các controller regression tests hiện có tiếp tục kiểm stale response, đổi scope và logout.
+- `tests/fixtures/shell.html` + `app-shell.tsx` là fixture tương tác riêng qua Vite, Context giả,
+  không Keycloak/API, không thêm route vào ứng dụng và không nằm trong build production.
+  Mở `/tests/fixtures/shell.html` khi dev để thử các trạng thái. Các URL con của fixture chỉ
+  phục vụ Back/Forward trong phiên; reload fixture dùng URL gốc trên.
+- Browser fixture: 390px không tràn toàn trang, Sheet mở/đóng, chọn mục đóng menu,
+  Tab quay vòng trong Sheet, Escape/overlay trả focus về trigger; resize sang 1280px đóng
+  Sheet. Header đo 64px, Sidebar 240px. Cases detail active, Back/Forward đã kiểm.
+  Revalidation ẩn payload/role cũ và khóa picker; ingest_service đơn thuần bị chặn đọc;
+  logout ẩn nội dung. Các trạng thái khác được kiểm SSR.
+- Browser thật: operator đăng nhập qua Keycloak, Home có 3 sources; navigation Cases/Events/
+  Dashboard/Knowledge dùng chung shell, một picker/main; mobile Home 390px không tràn ngang.
+  Reload qua check-sso vẫn có thể về `/`: giới hạn có sẵn, không sửa redirect auth trong task.
+  Lỗi proxy EACCES ban đầu do sandbox được kiểm lại sau khi chạy Vite với quyền mạng được duyệt.
+- Chưa kiểm lại mọi mutation, tài khoản viewer/reviewer thật hoặc thu hồi grants trên BE.
+  Không có tài khoản reviewer, không sửa grants/dataset/case BE để tạo tình huống thử.
+
+Các file thay đổi: package.json/lockfile; App, constants/routes, routes/AppRoutes;
+5 component layout + primitive Sheet; Home/Events/Dashboard/Knowledge/NotFound pages;
+WorkspacePanel và CasesLayout; tests auth-ui/routes-ui/workspace-ui/app-shell-ui và fixture;
+README này. Không thay provider/controller/service, không commit/push.
+
+
+### Trang vào mặc định
+
+`/` chuyển thẳng đến `/dashboard` bằng Navigate replace, không thêm trang chào vào lịch sử.
+Logo, link trở về của callback/404 và callback đăng nhập thành công đều trỏ `/dashboard`.
+Chưa đăng nhập/chưa chọn workspace vẫn thấy AppShell và guard tương ứng, không tải dữ liệu
+Dashboard khi quyền chưa hợp lệ. Năm page lazy và tám đường dẫn hiện có được giữ nguyên.
+HomePage/WorkspacePanel cũ chưa xóa để tránh gộp dọn source không liên quan vào thay đổi này.
+
+### Icon — MUI Icons
+
+Theo yêu cầu mới, toàn bộ icon runtime chuyển sang `@mui/icons-material`.
+Nguồn và hướng dẫn chính thức: https://mui.com/material-ui/material-icons/
+
+| Vị trí | Icon MUI |
+| --- | --- |
+| Tổng quan | DashboardOutlined |
+| Sự kiện | TimelineOutlined |
+| Cases | FolderOpenOutlined |
+| Tri thức | MenuBookOutlined |
+| Menu mobile / làm mới | Menu / Refresh |
+| Đóng Sheet / mũi tên Select | Close / KeyboardArrowDown |
+| Loading | Autorenew |
+
+Import trực tiếp từng icon để tránh barrel import toàn bộ thư viện:
+
+```tsx
+import DashboardOutlined from '@mui/icons-material/DashboardOutlined';
+
+<DashboardOutlined sx={{ fontSize: '1.25rem' }} aria-hidden="true" />
+```
+
+Sidebar/menu dùng 1.25rem; refresh/close/select/loading dùng 1rem. `sx.fontSize` quy định
+kích thước SVG vì SvgIcon có style width/height riêng; màu vẫn kế thừa currentColor từ
+Tailwind/theme. Icon trang trí aria-hidden; accessible name nằm trên button/link.
+Spinner tiếp tục role/nhãn của LoadingState và animate-spin/motion-reduce:animate-none.
+
+Dependency: @mui/icons-material, @mui/material, @emotion/react, @emotion/styled; đã gỡ
+lucide-react khỏi package/lockfile. Material/Emotion là dependency để SvgIcon hoạt động,
+không thêm CssBaseline/ThemeProvider, font CDN hoặc thay UI shadcn sang component MUI.
+`components.json.iconLibrary` vẫn là mặc định registry shadcn (lucide), không điều khiển
+icon runtime. Khi generate component shadcn mới, rà soát import và chuyển icon sang MUI
+như các primitive đã tùy biến; không tự đặt giá trị iconLibrary không xác minh trong schema.
+
+Kiểm tra: lint sạch, 177/177 tests, build TypeScript strict và diff --check pass. Browser
+fixture cô lập: sidebar SVG 20x20px đúng currentColor, icon decorative aria-hidden; nút
+đóng Sheet hoạt động; spinner MUI 16px vẫn quay; mobile 390px không tràn ngang.
+Dùng dev server fixture tạm ở 5175 vì server 5173 đang có; không thay cấu hình port mặc định.
+Chưa chạy lại API/login thật trong lượt đổi icon. Khởi động lại dev server đang chạy sau khi
+cài dependency nếu chưa tải được module mới. Không commit/push.
+
+File đổi riêng cho MUI: AppHeader, AppSidebar, primitives/native-select, sheet, spinner;
+package.json, package-lock.json, tests/ui-foundation.test.mjs và README.
+
+
+### Theme trắng — xanh dương
+
+Nền ứng dụng xanh xám rất nhạt; Header/Sidebar/panel trắng; nút primary và trạng thái active
+màu xanh dương. Các semantic token shadcn đã ánh xạ vào palette nên Button/Input/Select,
+Table, Sheet, Alert và icon MUI dùng chung màu mới. Badge vẫn chỉ có màu chữ, không nền/viền.
+Không thêm theme switcher hoặc dependency; không thay typography, layout, quyền hay API.
+Theme Keycloak nằm ngoài frontend và không được sửa trong lượt này.
+
+Đã kiểm lint, 177/177 tests, build strict và diff --check. Browser fixture cô lập desktop/
+mobile 390px: panel/Sheet trắng, chữ tối, native controls light, active icon xanh, nút primary
+#0066CC với chữ trắng, lỗi #C62828; không tràn toàn trang. Chưa chạy lại API/login thật trong
+lượt đổi palette. Tương phản: white/primary 5.57:1, foreground/white 14.10:1,
+muted/control 5.67:1, focus/white 6.38:1, success/white 5.41:1,
+warning/white 5.93:1, danger/white 5.62:1. Các số đo theme tối ở phần lịch sử phía trên
+là kết quả trước khi đổi palette. Lượt này chỉ sửa src/index.css và README.md.
+
+
+### Header/Sidebar xanh nước biển và thu gọn
+
+Cập nhật hiện tại: Header và Sidebar dùng `--color-chrome: #064B93`, chữ/icon trắng,
+chữ phụ `#D6E7FF`; nền nội dung/panel vẫn sáng theo theme trắng–xanh. Active navigation
+có nền trắng mờ và viền để dễ nhận biết. Workspace options dùng nền trắng/chữ tối.
+Đăng xuất đã chuyển khỏi Header xuống cuối Sidebar (desktop và Sheet mobile), vẫn gọi
+`signOut()` hiện có; lỗi đăng xuất hiển thị an toàn ngay tại Sidebar.
+
+Nút menu desktop dùng `useState` trong AppLayout để đổi `data-collapsed`. CSS transition
+280ms thu chiều rộng từ 240px về 0 và `translateX(-100%)` đẩy nội dung Sidebar sang trái;
+Main mở rộng cùng lúc và không bị unmount. Khi đóng, `inert`/`aria-hidden` loại controls
+khỏi thao tác bàn phím. Nút có `aria-controls`/`aria-expanded`, bấm lại để mở.
+Mobile dùng Sheet hiện có với CSS keyframes vào 240ms/ra 200ms. `prefers-reduced-motion`
+tắt transition/animation. Không thêm dependency hoặc lưu trạng thái menu vào storage.
+
+File cập nhật riêng lượt này: `src/index.css`, `src/components/layout/AppHeader.tsx`,
+`AppSidebar.tsx`, `AppLayout.tsx`, `tests/app-shell-ui.test.mjs` và README này.
+Kiểm tra: lint sạch; 177/177 tests; build strict; git diff --check pass. Browser fixture
+không gọi API ở desktop 1280px/mobile 390px: đúng màu, logout cuối Sidebar, thu gọn/mở lại,
+Main mở rộng, Sidebar đóng không nhận focus; mobile không tràn ngang, Escape đóng và trả
+focus về nút menu, logout giả chuyển sang chưa đăng nhập. Có reduced-motion CSS nhưng
+chưa giả lập cài đặt hệ điều hành. Chưa chạy lại logout Keycloak thật trong lượt UI này.
+
+
+### Palette hiện tại — xanh lá cây
+
+Header/Sidebar (cả Sheet mobile) dùng `chrome #166534`, chữ trắng và chữ phụ `#DCFCE7`.
+Primary `#15803D`, hover/focus `#166534`; nền `#F5FAF7`, control `#EEF6F0`, viền `#D5E5DA`.
+Các token semantic shadcn tiếp tục dùng chung palette; active/hover Sidebar giữ lớp trắng mờ.
+Giữ nguyên logout cuối Sidebar và animation thu gọn. Chỉ đổi token trong `src/index.css`.
+Các phần palette xanh dương phía trên là lịch sử trước lần đổi này.
+
+Đã kiểm lint, build strict và git diff --check; browser fixture desktop 1280px/mobile 390px
+xác nhận nền Header/Sidebar/Sheet #166534, chữ trắng, mobile không tràn ngang.
+Chưa chạy lại toàn bộ tests hoặc luồng API/Keycloak vì thay đổi chỉ gồm màu CSS.
+
+
+### Nút mũi tên thu gọn Sidebar
+
+Nút desktop đã chuyển khỏi Header ra giữa mép phải Sidebar, dùng ChevronLeft/ChevronRight
+của MUI. Nút đứng ngoài vùng `inert`/overflow để vẫn dùng được khi Sidebar thu về 0;
+Main và animation hiện có giữ nguyên. Mobile mở bằng ChevronRight trên Header, đóng bằng
+ChevronLeft giữa mép phải Sheet; giữ hành vi focus/keyboard của Radix.
+
+File đổi: AppHeader.tsx, AppLayout.tsx, src/index.css, tests/app-shell-ui.test.mjs, README.
+Đã kiểm lint, 177/177 tests, build strict và diff --check. Browser fixture desktop 1280px:
+nút đúng giữa chiều cao Sidebar, thu gọn về 0 vẫn còn nút mở lại tại x=0, bàn phím hoạt động.
+Mobile 390px: nút đóng giữa Sheet, không tràn ngang. Chưa chạy lại API/Keycloak thật.
+
+
+### Đồng bộ UI nghiệp vụ với shadcn
+
+Các control phù hợp trên Dashboard, Events, Cases/detail, Knowledge, reconstruction,
+review/manual link, evidence và workflow đã tái sử dụng bộ UI shadcn hiện có:
+
+| Thành phần | Sử dụng |
+| --- | --- |
+| Button | Submit primary; refresh, phân trang, retry và thao tác phụ secondary; giữ type/disabled/handler |
+| Input | Text, datetime-local và tìm kiếm; type=search có icon MUI, ref/onChange/onBlur truyền tới input thật |
+| NativeSelect | Source, limit, state, mode, decision và picker; giữ options, register và fieldset disabled |
+| Textarea | Note và reason; giữ ref, maxLength, xuống dòng, whitespace, aria-invalid/describedby |
+| Table | Events, cases, graph nodes/links và sources; caption, heading/cell semantic, vùng cuộn có thể focus |
+| Badge | Outcome sự kiện và vai trò; tiếp tục không có background/border |
+| Alert / LoadingState / EmptyState | Validation/lỗi an toàn, thông báo chờ và kết quả rỗng |
+| Card | Bốn counter Dashboard, vẫn render dt/dd và giá trị từ BE |
+| Sheet | Menu mobile hiện có; các nút Header/thu gọn cũng dùng Button chung |
+
+Chỉ thêm hai primitive đang dùng: [Textarea](https://ui.shadcn.com/r/styles/new-york-v4/textarea.json)
+và [Card](https://ui.shadcn.com/r/styles/new-york-v4/card.json), điều chỉnh theo token xanh lá và
+React/TypeScript hiện có. Không cài dependency, không đổi HTTP/DTO/controller/provider,
+route, quyền, cursor, idempotency hoặc thời gian debounce/submit. Không thêm toàn bộ registry.
+Các label, fieldset, legend, time, details/summary và link giữ semantic HTML. Checkbox chọn
+nhiều và input hidden của RHF tiếp tục native để bảo toàn register/value và validation hiện có;
+checkbox được phối accent xanh. Phân trang vẫn là Button gọi controller, không giả URL/page
+number hoặc chuyển thành các link href không tồn tại. Lỗi inline dùng Alert với layout block
+để nội dung dài và request ID không rơi vào cột grid 0px mặc định của primitive.
+
+```tsx
+<Input type="search" id="q" {...register('q')} />
+<Textarea id="reason" maxLength={1000} {...register('reason')} />
+<Button type="submit" disabled={busy}>Tìm kiếm</Button>
+```
+
+Import Input/Button từ components/ui; Textarea từ components/ui/primitives/textarea.
+Label và aria-describedby do form quản lý. Chỉ dùng loading spinner cho trạng thái đang
+chờ, không đổi thông báo kết quả chưa rõ hoặc khóa nghiệp vụ thành lỗi hệ thống.
+
+File bổ sung: primitives/card.tsx, primitives/textarea.tsx, tests/fixtures/shadcn.html và
+shadcn.tsx. File cập nhật: components/ui/Input.tsx; layout/AppHeader.tsx, AppLayout.tsx;
+DashboardPage, CasesPage, CaseDetailPage, KnowledgePage; components DashboardView,
+WaitingCaseList, EventFiltersForm, EventsExplorer, EventPresentation, KnowledgeView,
+CaseFiltersForm, CasesFeedback, CreateCasePanel, EvidenceForm, WorkflowForm,
+ReconstructionPanel, RunResult, GraphTable, LinkReviewPanel; tests/ui-foundation,
+dashboard-ui, integration-ui và README. Giữ nguyên các thay đổi trước đó chưa commit.
+
+Kiểm tra: lint, 178/178 tests, build TypeScript strict và git diff --check pass.
+Browser fixture cô lập (không backend): Dashboard submit UTC+7 thành UTC, Knowledge tìm
+bằng Enter và limit 25, Cases giữ owner subject không phải UUID cùng limit 100; Evidence
+báo lỗi note rỗng và submit nguyên whitespace/xuống dòng. Desktop 1280px/mobile 390px:
+không tràn toàn trang, bảng cuộn trong vùng riêng, lỗi inline có chiều rộng đọc được,
+text API được escape. Fixture tại /tests/fixtures/shadcn.html chỉ phục vụ kiểm thử,
+không được import vào source production. Chưa nghiệm thu lại toàn bộ luồng API/Keycloak
+và mutation thật trong lượt thay UI. Không commit/push.
+
+
+### Sửa nút mở Sidebar đè nội dung khi thu gọn
+
+Sidebar thu gọn chừa rail 3rem (48px tại cỡ chữ mặc định), thay vì width=0.
+Nút 40px nằm trong rail với right=0.25rem; Main bắt đầu sau rail nên nút không đè
+form hoặc CTA dù nằm cùng độ cao. Giữ animation, inert/aria-hidden và mobile Sheet.
+Mô tả width=0/x=0 trong các mục kiểm thử lịch sử phía trên không còn áp dụng.
+
+File đổi riêng: src/index.css, tests/fixtures/app-shell.tsx (thêm form/counter Dashboard
+thật với dữ liệu giả để kiểm layout), README. Lint/build strict/diff check pass;
+tests AppShell/routes pass. Browser fixture ở 1280px: nút kết thúc x=44, nội dung từ x=80;
+1024px: x=44 và x=72; Sidebar mở: nút kết thúc x=260, nội dung x=264. Mobile 390px
+không có rail desktop và không tràn ngang. Chưa chạy lại toàn bộ tests hoặc API/Keycloak
+trong lượt sửa CSS này. Không commit/push.
+
+
+### Header: picker sáng và căn lề với H1
+
+Header bỏ dòng trạng thái đăng nhập và nút Làm mới quyền/nguồn. Role badge và các thao tác
+đăng nhập/đăng xuất hiện có vẫn hoạt động; không thay cơ chế refresh token/revalidation.
+Workspace NativeSelect dùng nền trắng, chữ xanh đậm và icon xanh, options dễ đọc.
+Header brand và Sidebar dùng chung biến --shell-sidebar-width (15rem mở, 3rem thu gọn).
+Khoảng đệm trái picker khớp Main (desktop 24/32px); khi thu gọn brand hiển thị TW,
+accessible name và link vẫn là TraceWeaver. Mobile giữ tên đầy đủ và picker trên hàng riêng.
+
+File đổi: components/layout/AppHeader.tsx, AppLayout.tsx, src/index.css,
+tests/app-shell-ui.test.mjs và README. Lint, 178/178 tests, build strict, diff check pass.
+Browser fixture: select/H1 cùng x=272 khi mở ở 1280px; cùng x=80 khi thu gọn;
+mobile 390px cùng x=16, không tràn ngang. Đổi sang workspace ingest_service chỉ đọc thông báo
+thiếu quyền, không giữ nội dung cũ. Chưa kiểm lại API/Keycloak thật trong lượt Header này.
+Không commit/push.
+
+
+### Workspace Combobox trên Header
+
+Workspace picker dùng Popover + Command (cmdk) theo source shadcn đã tùy biến, không
+đổi picker của những form nghiệp vụ khác. Nút nền xanh đậm hơn Header, icon MUI,
+nhãn Workspace · 10000000…0015; title và mô tả truy cập giữ UUID đầy đủ. Danh sách
+nền trắng hiển thị đầy đủ UUID, dấu check cho workspace hiện tại và input tìm kiếm.
+Tìm chuỗi con theo UUID, không phân biệt hoa/thường, bỏ khoảng trắng hai đầu; không
+có kết quả thì báo Không tìm thấy workspace. Chọn lại workspace hiện tại chỉ đóng popup.
+
+Memberships từ /me là nguồn duy nhất; tìm kiếm không gọi API, không persist vào storage.
+Chọn workspace gọi selectWorkspace hiện có, không tự thay scope hoặc quyền. Popover đóng,
+nháp tìm kiếm bị bỏ khi scope không còn ready/đổi subject; trigger bị disabled khi chưa
+đăng nhập, đang kiểm quyền hoặc chưa có membership. Giữ căn trái H1 và responsive trước đó.
+Keyboard: Enter mở, input được focus, ArrowUp/ArrowDown/Enter chọn, Escape đóng/trả focus;
+click ngoài đóng. UUID đầy đủ xem trong danh sách hoặc title, không tự bịa tên workspace.
+
+Dependency mới: @radix-ui/react-popover 1.3.1, cmdk 1.1.1. Package/lockfile cập nhật trong
+frontend; thêm primitives/popover.tsx, command.tsx, features/workspace/components/WorkspacePicker.tsx,
+tests/workspace-picker-ui.test.mjs; sửa AppHeader.tsx và README. Icon giữ MUI; không thêm
+Lucide, animation package hoặc package shadcn tổng. Nguồn tham chiếu:
+[Popover](https://ui.shadcn.com/r/styles/new-york-v4/popover.json),
+[Command](https://github.com/shadcn-ui/ui/blob/main/apps/v4/registry/new-york-v4/ui/command.tsx).
+Chỉ lấy các primitive cần dùng; không thêm CommandDialog hoặc các component không sử dụng.
+
+Kiểm tra: lint, 179/179 tests, build strict và diff check pass. Browser fixture không API:
+search không khớp, lọc UUID, chọn bằng ArrowDown/Enter, chuyển workspace mất quyền, chọn lại,
+Escape trả focus, mở lại xóa query cũ; revalidation đóng portal, khóa trigger, không còn UUID
+scope cũ trong DOM. Mobile 390px: popup bằng chiều rộng trigger, nằm trong viewport, không
+tràn ngang. Chưa kiểm thử lại API/Keycloak thật trong lượt UI này. Không commit/push.

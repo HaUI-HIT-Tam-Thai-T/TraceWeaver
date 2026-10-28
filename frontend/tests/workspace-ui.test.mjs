@@ -4,9 +4,10 @@ import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { createServer } from 'vite'
 
-test('workspace UI renders access states, labeled picker, current roles, pagination, and safe recovery', async () => {
+test('workspace access guard and sources render pagination, escaped content, and safe recovery', async () => {
   const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-workspace', server: { middlewareMode: true, hmr: false, ws: false } })
   try {
+    const { WorkspaceAccessState } = await server.ssrLoadModule('/src/components/layout/WorkspaceAccessState.tsx')
     const { WorkspacePanel } = await server.ssrLoadModule('/src/features/workspace/components/WorkspacePanel.tsx')
     const { WorkspaceContext } = await server.ssrLoadModule('/src/features/workspace/state/workspaceContext.ts')
     const { AuthContext } = await server.ssrLoadModule('/src/features/auth/state/authContext.ts')
@@ -24,27 +25,22 @@ test('workspace UI renders access states, labeled picker, current roles, paginat
       }
       const auth = { state: { status: authenticated ? 'authenticated' : 'unauthenticated' }, signIn: async () => {} }
       return renderToString(createElement(AuthContext.Provider, { value: auth },
-        createElement(WorkspaceContext.Provider, { value: workspace }, createElement(WorkspacePanel)))).replace(/<!--.*?-->/g, '')
+        createElement(WorkspaceContext.Provider, { value: workspace }, createElement(WorkspaceAccessState, null, createElement(WorkspacePanel))))).replace(/<!--.*?-->/g, '')
     }
-    assert.equal(render(ready, false), '')
+    assert.match(render(ready, false), /Vui lòng đăng nhập/)
     assert.match(render({ ...initial, status: 'loading' }), /Đang kiểm tra workspace/)
     assert.match(render({ ...ready, me: { subject: 'a', memberships: [] }, selectedWorkspaceId: null }), /Tài khoản chưa được cấp workspace/)
     const unselected = render({ ...ready, selectedWorkspaceId: null })
-    assert.match(unselected, /label for="workspace-picker"/)
-    assert.match(unselected, /Chọn một workspace/)
-    assert.match(unselected, new RegExp(id))
+    assert.match(unselected, /Vui lòng chọn workspace/)
+    assert.doesNotMatch(unselected, new RegExp(id))
     const empty = render({ ...ready, sources: { ...initial.sources, status: 'ready' } })
-    assert.match(empty, /Vai trò:/)
-    assert.match(empty, /data-slot="badge"[^>]*>admin<\/span>/)
-    assert.match(empty, /ghi không/)
     assert.match(empty, /Chưa có nguồn nào/)
     const populated = render({ ...ready, sources: {
       status: 'ready', items: [{ id: 'source-a', name: '<script>unsafe</script>', service: 'intake', parser_version: 'v1' }],
       nextCursor: 'opaque', error: null,
     } })
     assert.match(populated, /Tải thêm nguồn/)
-    assert.match(populated, /<h2[^>]*id="workspace-title"[^>]*>Workspace<\/h2>/)
-    assert.match(populated, /<h3[^>]*>Nguồn được phép đọc<\/h3>/)
+    assert.match(populated, /<h2[^>]*id="sources-title"[^>]*>Nguồn được phép đọc<\/h2>/)
     assert.match(populated, /<code[^>]*>source-a<\/code>/)
     assert.match(populated, /<caption[^>]*>Danh sách nguồn được phép đọc<\/caption>/)
     assert.match(populated, /<th[^>]*scope="col"[^>]*>Service<\/th>/)

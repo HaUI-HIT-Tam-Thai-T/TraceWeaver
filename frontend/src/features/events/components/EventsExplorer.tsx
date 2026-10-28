@@ -1,3 +1,8 @@
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Button } from "../../../components/ui/Button";
+import { LoadingState } from "../../../components/ui/LoadingState";
+import { EmptyState } from "../../../components/ui/EmptyState";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../../../components/ui/Table";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/hooks/useAuth";
@@ -7,30 +12,18 @@ import { EventFiltersForm } from "./EventFiltersForm";
 import type { ApiError } from "../../../services/apiError";
 import { writeEventQuery } from "../query";
 
-export function EventTime({ value }: { value: string }) {
-  return (
-    <time dateTime={value} title={value}>
-      {new Intl.DateTimeFormat("vi-VN", {
-        timeZone: "Asia/Ho_Chi_Minh",
-        dateStyle: "short",
-        timeStyle: "medium",
-      }).format(new Date(value))}
-      <span className="block text-xs">{value}</span>
-    </time>
-  );
-}
+import { actionLabel, requestLabel, sourceLabel } from "../presentation";
+import { EventTime, EventOutcome, EventContent, EventTechnicalDetails } from "./EventPresentation";
 
 function Failure({ error }: { error: ApiError }) {
   return (
-    <p role="alert">
+    <Alert className="block break-words" variant="destructive" role="alert">
       {error.message}
-      {error.requestId && <> Mã yêu cầu: {error.requestId}</>}
-    </p>
+      {error.requestId && <> Mã tra cứu lỗi hệ thống: {error.requestId}</>}
+    </Alert>
   );
 }
 
-const buttonClass =
-  "rounded border px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50";
 
 export function EventsExplorer() {
   const { state: auth, signIn } = useAuth();
@@ -47,9 +40,9 @@ export function EventsExplorer() {
   } = useEvents();
   const [loggingIn, setLoggingIn] = useState(false);
   if (auth.status !== "authenticated")
-    return <p>Vui lòng đăng nhập để xem events.</p>;
+    return <p>Vui lòng đăng nhập để xem sự kiện.</p>;
   if (workspace.status !== "ready" || !membership || !permissions.canRead)
-    return <p role="status">Chọn workspace có quyền đọc để xem events.</p>;
+    return <p role="status">Chọn workspace có quyền đọc để xem sự kiện.</p>;
   const detail = state.detail;
   const event = detail.event;
   async function loginAgain() {
@@ -63,18 +56,17 @@ export function EventsExplorer() {
   return (
     <section className="mt-8 space-y-4" aria-labelledby="events-title">
       <h2 id="events-title" className="text-2xl font-semibold">
-        Event explorer
+        Sự kiện
       </h2>
       <EventFiltersForm />
       {state.status === "invalid-query" && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           Tham số URL không hợp lệ. Kiểm tra bộ lọc rồi bấm Tìm kiếm.
-        </p>
+        </Alert>
       )}
       {state.error && <Failure error={state.error} />}
       {state.status === "reauth" ? (
-        <button
-          className={buttonClass}
+        <Button variant="secondary"
           type="button"
           disabled={loggingIn}
           onClick={() => {
@@ -82,90 +74,85 @@ export function EventsExplorer() {
           }}
         >
           Đăng nhập lại
-        </button>
+        </Button>
       ) : (
-        <button className={buttonClass} type="button" onClick={refresh}>
-          Làm mới snapshot
-        </button>
+        <Button variant="secondary" type="button" onClick={refresh}>
+          Làm mới danh sách
+        </Button>
       )}
       {state.root && (
         <div role="status" className="break-words rounded border p-3">
-          Root đã chọn: {state.root.event_id} · {state.root.action}
-          <button
-            className={`${buttonClass} ml-3`}
+          Điểm bắt đầu tái dựng: {requestLabel(state.root)} · {actionLabel(state.root.action)}
+          <Button variant="secondary"
+            className="ml-3"
             type="button"
             onClick={clearRoot}
           >
-            Bỏ chọn root
-          </button>
+            Bỏ chọn điểm bắt đầu
+          </Button>
         </div>
       )}
-      {state.list.status === "loading" && <p role="status">Đang tải events…</p>}
+      {state.list.status === "loading" && <LoadingState message="Đang tải sự kiện…" />}
       {state.list.error && (
         <>
           <Failure error={state.list.error} />
-          <button className={buttonClass} type="button" onClick={refresh}>
+          <Button variant="secondary" type="button" onClick={refresh}>
             Bắt đầu lại từ trang đầu
-          </button>
+          </Button>
         </>
       )}
       {state.list.status === "ready" && state.list.items.length === 0 && (
-        <p role="status">Không có event phù hợp bộ lọc trong trang này.</p>
+        <EmptyState title="Không có sự kiện phù hợp bộ lọc trong trang này." />
       )}
       {state.list.items.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <caption className="text-left">
-              Events theo thứ tự backend; outcome là kết quả quan sát.
-            </caption>
-            <thead>
-              <tr>
+          <Table caption="Kết quả từng bước đã ghi nhận; không phải kết luận cho toàn bộ yêu cầu." className="w-full text-left">
+
+            <TableHeader>
+              <TableRow>
                 {[
+                  "Mã yêu cầu",
                   "Thời gian (UTC+7)",
-                  "Nguồn / Service",
-                  "Action",
-                  "Outcome",
-                  "Message",
+                  "Nguồn xử lý",
+                  "Hoạt động",
+                  "Kết quả bước",
+                  "Nội dung",
                   "Chi tiết",
                 ].map((label) => (
-                  <th scope="col" className="p-2" key={label}>
+                  <TableHead scope="col" className="p-2" key={label}>
                     {label}
-                  </th>
+                  </TableHead>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {state.list.items.map((item) => (
-                <tr key={item.event_id} className="border-t">
-                  <td className="p-2">
+                <TableRow key={item.event_id} className="border-t align-top">
+                  <TableCell className="max-w-56 break-words p-2 font-medium">{requestLabel(item)}</TableCell>
+                  <TableCell className="p-2">
                     <EventTime value={item.occurred_at} />
-                  </td>
-                  <td className="break-all p-2">
-                    {item.source_id}
-                    <br />
-                    {item.service}
-                  </td>
-                  <td className="p-2">{item.action}</td>
-                  <td className="p-2">{item.outcome}</td>
-                  <td className="p-2">{item.message}</td>
-                  <td className="p-2">
+                  </TableCell>
+                  <TableCell className="max-w-56 break-words p-2">{sourceLabel(item, workspace.sources.items)}</TableCell>
+                  <TableCell className="p-2">{actionLabel(item.action)}</TableCell>
+                  <TableCell className="p-2"><EventOutcome outcome={item.outcome} /></TableCell>
+                  <TableCell className="min-w-56 max-w-md p-2"><EventContent event={item} /></TableCell>
+                  <TableCell className="p-2">
                     <Link
                       className="underline focus-visible:outline-2"
                       to={`/events?${writeEventQuery(state.filters, item.event_id)}`}
-                      aria-label={`Xem event ${item.event_id}`}
+                      aria-label={`Xem sự kiện ${requestLabel(item)} — ${actionLabel(item.action)}`}
                     >
                       Xem
                     </Link>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
-      <nav aria-label="Phân trang events" className="flex items-center gap-3">
-        <button
-          className={buttonClass}
+      <nav aria-label="Phân trang sự kiện" className="flex items-center gap-3">
+        <Button variant="secondary"
           type="button"
           disabled={
             state.pageIndex === 0 ||
@@ -175,10 +162,9 @@ export function EventsExplorer() {
           onClick={previousPage}
         >
           Trước
-        </button>
+        </Button>
         <span>Trang {state.pageIndex + 1}</span>
-        <button
-          className={buttonClass}
+        <Button variant="secondary"
           type="button"
           disabled={
             !state.nextCursor ||
@@ -188,7 +174,7 @@ export function EventsExplorer() {
           onClick={nextPage}
         >
           Tiếp
-        </button>
+        </Button>
       </nav>
       {detail.id && (
         <section
@@ -196,76 +182,52 @@ export function EventsExplorer() {
           className="space-y-3 rounded border p-4"
         >
           <h3 id="event-detail-title" className="text-xl font-semibold">
-            Chi tiết event
+            Chi tiết sự kiện
           </h3>
-          <button
-            className={buttonClass}
-            type="button"
+          <Button variant="secondary"
+              type="button"
             onClick={() => showEvent(null)}
           >
             Đóng chi tiết
-          </button>
+          </Button>
           {detail.status === "loading" && (
-            <p role="status">Đang tải chi tiết…</p>
+            <LoadingState message="Đang tải chi tiết…" />
           )}
           {detail.error && (
             <>
               <Failure error={detail.error} />
-              <button
-                className={buttonClass}
-                type="button"
+              <Button variant="secondary"
+                      type="button"
                 onClick={retryDetail}
               >
                 Thử lại chi tiết
-              </button>
+              </Button>
             </>
           )}
           {event && (
             <>
-              <dl className="space-y-2 break-all">
-                <dt>Event ID</dt>
-                <dd>{event.event_id}</dd>
-                <dt>Source event ID</dt>
-                <dd>{event.source_event_id}</dd>
-                <dt>Thời điểm xảy ra</dt>
-                <dd>
-                  <EventTime value={event.occurred_at} />
-                </dd>
-                <dt>Thời điểm nhận</dt>
-                <dd>
-                  <EventTime value={event.received_at} />
-                </dd>
-                <dt>Action / Outcome</dt>
-                <dd>
-                  {event.action} / {event.outcome}
-                </dd>
-                <dt>Message</dt>
-                <dd>{event.message}</dd>
-                <dt>Parser version</dt>
-                <dd>{event.parser_version}</dd>
-                <dt>Batch ID</dt>
-                <dd>{event.provenance.batch_id}</dd>
-                <dt>Locator</dt>
-                <dd>{event.provenance.locator}</dd>
-                <dt>SHA-256 redacted</dt>
-                <dd>{event.provenance.sha256_redacted}</dd>
+              <dl className="grid gap-2 break-words sm:grid-cols-[auto_1fr] sm:gap-x-6">
+                <dt className="font-medium">Mã yêu cầu</dt>
+                <dd>{requestLabel(event)}</dd>
+                <dt className="font-medium">Thời gian (UTC+7)</dt>
+                <dd><EventTime value={event.occurred_at} /></dd>
+                <dt className="font-medium">Nguồn xử lý</dt>
+                <dd>{sourceLabel(event, workspace.sources.items)}</dd>
+                <dt className="font-medium">Hoạt động</dt>
+                <dd>{actionLabel(event.action)}</dd>
+                <dt className="font-medium">Kết quả bước</dt>
+                <dd><EventOutcome outcome={event.outcome} /></dd>
+                <dt className="font-medium">Nội dung</dt>
+                <dd><EventContent event={event} /></dd>
               </dl>
-              <h4 className="font-semibold">Identifiers</h4>
-              <pre className="overflow-x-auto">
-                {JSON.stringify(event.identifiers, null, 2)}
-              </pre>
-              <h4 className="font-semibold">Payload đã redacted</h4>
-              <pre className="overflow-x-auto">
-                {JSON.stringify(event.payload_redacted, null, 2)}
-              </pre>
+              <EventTechnicalDetails key={event.event_id} event={event} />
               {permissions.canWrite && (
-                <button
-                  className={buttonClass}
-                  type="button"
+                <Button variant="secondary"
+                          type="button"
                   onClick={selectRoot}
                 >
-                  Chọn làm root
-                </button>
+                  Chọn làm điểm bắt đầu tái dựng
+                </Button>
               )}
             </>
           )}

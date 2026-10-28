@@ -1,3 +1,8 @@
+import { LoadingState } from "../../../components/ui/LoadingState";
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Button } from "../../../components/ui/Button";
+import { Select } from "../../../components/ui/Select";
+import { Textarea } from "../../../components/ui/primitives/textarea";
 import { useEffect, useState } from "react";
 import type { ChangeEvent } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -79,7 +84,7 @@ function LinkForms({
         Review và manual link
       </h3>
       {mutation.status === "sending" && (
-        <p role="status">Đang gửi thao tác link…</p>
+        <LoadingState message="Đang gửi thao tác link…" />
       )}
       {mutation.status === "success" && (
         <p role="status">
@@ -90,37 +95,37 @@ function LinkForms({
         </p>
       )}
       {mutation.status === "uncertain" && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           Chưa rõ thao tác đã được ghi hay chưa. Đã yêu cầu tải lại graph, không
           tự gửi lại POST. Kiểm tra trạng thái hiện tại trước khi quyết định
           thao tác mới.
-        </p>
+        </Alert>
       )}
       {mutation.status === "conflict" && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           Link.version đã thay đổi. Giữ lý do nháp; xem trạng thái mới và chọn
           sử dụng phiên bản hiện tại trước khi gửi lại.
-        </p>
+        </Alert>
       )}
       {mutation.status === "duplicate" && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           Cạnh cùng hướng đã tồn tại, kể cả khi rejected. Chọn link đó để
           review.
-        </p>
+        </Alert>
       )}
       {caseLocked && (
         <>
-          <p role="alert">
+          <Alert className="block break-words" variant="destructive" role="alert">
             Run bị khóa bởi ít nhất một case closed. Reviewer cần mở lại mọi
             case closed liên quan. Tải graph không chứng minh đã mở khóa.
-          </p>
-          <button
+          </Alert>
+          <Button variant="secondary"
             type="button"
             disabled={!graphReady || mutation.status === "sending"}
             onClick={actions.probeClosedCase}
           >
             Thử chỉnh sửa lại
-          </button>
+          </Button>
           <p>
             Thao tác này chỉ cho phép gửi lần tiếp theo để BE kiểm lại; không tự
             gửi POST hoặc reopen case.
@@ -128,7 +133,7 @@ function LinkForms({
         </>
       )}
       {mutation.error && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           {mutation.error.code === "SELF_LINK"
             ? "Không được nối event với chính nó."
             : mutation.error.code === "LINK_CYCLE"
@@ -137,7 +142,7 @@ function LinkForms({
           {mutation.error.requestId && (
             <>Request ID: {mutation.error.requestId}</>
           )}
-        </p>
+        </Alert>
       )}
       {!graphReady && (
         <p role="status">
@@ -151,8 +156,8 @@ function LinkForms({
       >
         <fieldset disabled={disabled} className="space-y-2">
           <legend>Duyệt link</legend>
-          <label htmlFor="review-link">Link cần duyệt</label>
-          <select
+          <label className="type-label block" htmlFor="review-link">Link cần duyệt</label>
+          <Select
             id="review-link"
             aria-invalid={!!review.formState.errors.link_id}
             {...review.register("link_id", {
@@ -167,7 +172,7 @@ function LinkForms({
                 v{link.version})
               </option>
             ))}
-          </select>
+          </Select>
           {selected && (
             <p>
               Hướng: {selected.from_event_id} → {selected.to_event_id}. Trạng
@@ -176,7 +181,7 @@ function LinkForms({
             </p>
           )}
           {stale && (
-            <button
+            <Button variant="secondary"
               type="button"
               onClick={() => {
                 review.setValue("expected_version", selected.version, {
@@ -186,19 +191,19 @@ function LinkForms({
               }}
             >
               Sử dụng phiên bản hiện tại
-            </button>
+            </Button>
           )}
           {(review.formState.errors.link_id ||
             review.formState.errors.expected_version) && (
-            <p role="alert">Chọn link và phiên bản hợp lệ.</p>
+            <Alert className="block break-words" variant="destructive" role="alert">Chọn link và phiên bản hợp lệ.</Alert>
           )}
-          <label htmlFor="review-decision">Quyết định</label>
-          <select id="review-decision" {...review.register("decision")}>
+          <label className="type-label block" htmlFor="review-decision">Quyết định</label>
+          <Select id="review-decision" {...review.register("decision")}>
             <option value="accepted">Accept (accepted)</option>
             <option value="rejected">Reject (rejected)</option>
-          </select>
-          <label htmlFor="review-reason">Lý do review</label>
-          <textarea
+          </Select>
+          <label className="type-label block" htmlFor="review-reason">Lý do review</label>
+          <Textarea
             id="review-reason"
             aria-invalid={!!review.formState.errors.reason}
             aria-describedby={
@@ -207,13 +212,13 @@ function LinkForms({
             {...review.register("reason")}
           />
           {review.formState.errors.reason && (
-            <p id="review-reason-error" role="alert">
+            <Alert className="block break-words" variant="destructive" id="review-reason-error" role="alert">
               {review.formState.errors.reason.message}
-            </p>
+            </Alert>
           )}
-          <button type="submit" disabled={!selected || stale}>
+          <Button variant="primary" type="submit" disabled={!selected || stale}>
             Gửi review
-          </button>
+          </Button>
         </fieldset>
       </form>
       <form
@@ -221,8 +226,8 @@ function LinkForms({
       >
         <fieldset disabled={disabled} className="space-y-2">
           <legend>Đề xuất manual link</legend>
-          <label htmlFor="manual-from">Event nguồn</label>
-          <select
+          <label className="type-label block" htmlFor="manual-from">Event nguồn</label>
+          <Select
             id="manual-from"
             aria-invalid={!!manual.formState.errors.from_event_id}
             {...manual.register("from_event_id")}
@@ -233,9 +238,9 @@ function LinkForms({
                 {node.event_id} — {node.action}
               </option>
             ))}
-          </select>
-          <label htmlFor="manual-to">Event đích</label>
-          <select
+          </Select>
+          <label className="type-label block" htmlFor="manual-to">Event đích</label>
+          <Select
             id="manual-to"
             aria-invalid={!!manual.formState.errors.to_event_id}
             {...manual.register("to_event_id")}
@@ -246,24 +251,24 @@ function LinkForms({
                 {node.event_id} — {node.action}
               </option>
             ))}
-          </select>
+          </Select>
           {(manual.formState.errors.from_event_id ||
             manual.formState.errors.to_event_id) && (
-            <p role="alert">
+            <Alert className="block break-words" variant="destructive" role="alert">
               {manual.formState.errors.to_event_id?.message ??
                 "Chọn event nguồn trong graph."}
-            </p>
+            </Alert>
           )}
           {duplicate && (
             <p>
               Cạnh này đã tồn tại: {duplicate.review_state}.{" "}
-              <button type="button" onClick={() => chooseLink(duplicate.id)}>
+              <Button variant="secondary" type="button" onClick={() => chooseLink(duplicate.id)}>
                 Chọn cạnh có sẵn để review
-              </button>
+              </Button>
             </p>
           )}
-          <label htmlFor="manual-reason">Lý do manual link</label>
-          <textarea
+          <label className="type-label block" htmlFor="manual-reason">Lý do manual link</label>
+          <Textarea
             id="manual-reason"
             aria-invalid={!!manual.formState.errors.reason}
             aria-describedby={
@@ -272,16 +277,16 @@ function LinkForms({
             {...manual.register("reason")}
           />
           {manual.formState.errors.reason && (
-            <p id="manual-reason-error" role="alert">
+            <Alert className="block break-words" variant="destructive" id="manual-reason-error" role="alert">
               {manual.formState.errors.reason.message}
-            </p>
+            </Alert>
           )}
           <p>
             Cạnh mới là manual/pending, chưa được accepted và vẫn cần review.
           </p>
-          <button type="submit" disabled={!!duplicate}>
+          <Button variant="primary" type="submit" disabled={!!duplicate}>
             Đề xuất link
-          </button>
+          </Button>
         </fieldset>
       </form>
     </section>

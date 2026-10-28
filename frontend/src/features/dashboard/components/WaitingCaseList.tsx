@@ -1,3 +1,5 @@
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Button } from "../../../components/ui/Button";
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createCasesController } from '../../cases/state/controller';
@@ -34,17 +36,17 @@ export function WaitingCaseList({ scope, filters, caseState, deny }: {
   return <section aria-label={`Waiting cases ${caseState}`} className="my-6 space-y-3">
     <h3 className="text-xl font-semibold">Cases {caseState}</h3>
     {state.list.status === 'loading' && <p role="status">Đang tải cases {caseState}…</p>}
-    {error && <p role="alert">{error.message} {error.requestId && <>Request ID: {error.requestId}</>}</p>}
-    {error && state.status === 'active' && <button type="button" onClick={() => void controller.refresh()}>{error.code === 'INVALID_CURSOR' ? 'Bắt đầu lại từ trang đầu' : 'Thử tải lại'}</button>}
+    {error && <Alert className="block break-words" variant="destructive" role="alert">{error.message} {error.requestId && <>Request ID: {error.requestId}</>}</Alert>}
+    {error && state.status === 'active' && <Button variant="secondary" type="button" onClick={() => void controller.refresh()}>{error.code === 'INVALID_CURSOR' ? 'Bắt đầu lại từ trang đầu' : 'Thử tải lại'}</Button>}
     {ready && state.list.items.length === 0 && <p>Không có case {caseState} trong trang này.</p>}
     {ready && <ul>{state.list.items.map(item => <li key={item.id} className="my-2">
       <Link className="underline" to={`/cases/${item.id}?${writeCaseQuery(state.filters)}`}>{item.title}</Link>
       <p>State: {item.state} · Case.version: {item.version} · Owner: {item.owner_id ?? 'Chưa được gán'}</p>
     </li>)}</ul>}
     <nav aria-label={`Phân trang cases ${caseState}`} className="space-x-4">
-      <button type="button" disabled={!ready || state.index === 0} onClick={() => void controller.previousPage()}>Trước</button>
+      <Button variant="secondary" type="button" disabled={!ready || state.index === 0} onClick={() => void controller.previousPage()}>Trước</Button>
       <span>Trang {state.index + 1}</span>
-      <button type="button" disabled={!ready || !state.nextCursor} onClick={() => void controller.nextPage()}>Tiếp</button>
+      <Button variant="secondary" type="button" disabled={!ready || !state.nextCursor} onClick={() => void controller.nextPage()}>Tiếp</Button>
     </nav>
   </section>;
 }

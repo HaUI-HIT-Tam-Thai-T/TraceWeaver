@@ -1,3 +1,9 @@
+import { Input } from "../../../components/ui/Input";
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Select } from "../../../components/ui/Select";
+import { Button } from "../../../components/ui/Button";
+import { LoadingState } from "../../../components/ui/LoadingState";
+import { EmptyState } from "../../../components/ui/EmptyState";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { knowledgeFormDefaults, knowledgeFormSchema } from "../query";
@@ -31,10 +37,11 @@ export function KnowledgeSearchForm({
         }),
       )}
     >
-      <label className="block" htmlFor="knowledge-q">
+      <label className="type-label block" htmlFor="knowledge-q">
         Tìm trong tiêu đề và nội dung
       </label>
-      <input
+      <Input
+        type="search"
         id="knowledge-q"
         {...register("q")}
         maxLength={500}
@@ -42,23 +49,23 @@ export function KnowledgeSearchForm({
         aria-describedby="knowledge-search-help knowledge-q-error"
       />
       {errors.q && (
-        <p id="knowledge-q-error" role="alert">
+        <Alert className="block break-words" variant="destructive" id="knowledge-q-error" role="alert">
           {errors.q.message}
-        </p>
+        </Alert>
       )}
       <p id="knowledge-search-help">
         Bấm Tìm kiếm để áp dụng. Tìm chuỗi con, không phân biệt hoa/thường, trên
         phiên bản mới nhất.
       </p>
-      <label className="block" htmlFor="knowledge-limit">
+      <label className="type-label block" htmlFor="knowledge-limit">
         Số bài mỗi trang
       </label>
-      <select id="knowledge-limit" {...register("limit")}>
+      <Select id="knowledge-limit" {...register("limit")}>
         <option value="25">25</option>
         <option value="50">50</option>
         <option value="100">100</option>
-      </select>
-      <button type="submit">Tìm kiếm</button>
+      </Select>
+      <Button variant="primary" type="submit">Tìm kiếm</Button>
     </form>
   );
 }
@@ -82,36 +89,36 @@ export function KnowledgeResults({
         Chỉ đọc, hiển thị phiên bản mới nhất. Dữ liệu có thể thay đổi giữa các
         lần tải; không có tổng số trang.
       </p>
-      <button
+      <Button variant="secondary"
         type="button"
         disabled={["loading", "invalid", "reauth"].includes(state.status)}
         onClick={refresh}
       >
         Làm mới knowledge
-      </button>
+      </Button>
       <div aria-live="polite">
-        {state.status === "loading" && <p role="status">Đang tải knowledge…</p>}
+        {state.status === "loading" && <LoadingState message="Đang tải knowledge…" />}
         {state.error && (
-          <p role="alert">
+          <Alert className="block break-words" variant="destructive" role="alert">
             {state.error.message}{" "}
             {state.error.requestId && <>Request ID: {state.error.requestId}</>}
-          </p>
+          </Alert>
         )}
         {state.status === "reauth" ? (
-          <button type="button" onClick={signIn}>
+          <Button variant="secondary" type="button" onClick={signIn}>
             Đăng nhập lại
-          </button>
+          </Button>
         ) : (
           state.error && (
-            <button type="button" onClick={refresh}>
+            <Button variant="secondary" type="button" onClick={refresh}>
               {state.error.code === "INVALID_CURSOR"
                 ? "Bắt đầu lại từ trang đầu"
                 : "Thử tải lại knowledge"}
-            </button>
+            </Button>
           )
         )}
         {ready && state.items.length === 0 && (
-          <p>Không có bài knowledge phù hợp.</p>
+          <EmptyState title="Không có bài knowledge phù hợp." />
         )}
       </div>
       {ready &&
@@ -134,21 +141,21 @@ export function KnowledgeResults({
           </article>
         ))}
       <nav aria-label="Phân trang knowledge" className="space-x-4">
-        <button
+        <Button variant="secondary"
           type="button"
           disabled={!ready || state.index === 0}
           onClick={previous}
         >
           Trước
-        </button>
+        </Button>
         <span>Trang {state.index + 1}</span>
-        <button
+        <Button variant="secondary"
           type="button"
           disabled={!ready || state.nextCursor === null}
           onClick={next}
         >
           Tiếp
-        </button>
+        </Button>
       </nav>
     </section>
   );

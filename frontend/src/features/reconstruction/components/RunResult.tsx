@@ -1,3 +1,6 @@
+import { LoadingState } from "../../../components/ui/LoadingState";
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Button } from "../../../components/ui/Button";
 import type { ReconstructionState } from "../state/state";
 import { GraphTable } from "./GraphTable";
 import { LinkReviewPanel } from "../../link-review/components/LinkReviewPanel";
@@ -28,34 +31,34 @@ export function RunResult({
   return (
     <div className="space-y-3" aria-live="polite">
       {state.phase === "validating" && (
-        <p role="status">Đang xác minh root và quyền truy cập…</p>
+        <LoadingState message="Đang xác minh root và quyền truy cập…" />
       )}
       {state.phase === "sending" && (
-        <p role="status">Đang gửi thao tác tạo run…</p>
+        <LoadingState message="Đang gửi thao tác tạo run…" />
       )}
       {state.phase === "uncertain" && (
         <>
-          <p role="alert">
+          <Alert className="block break-words" variant="destructive" role="alert">
             Chưa rõ kết quả thao tác. Run có thể đã được tạo; gửi lại sẽ dùng
             cùng body và Idempotency-Key.
-          </p>
-          <button type="button" onClick={retry}>
+          </Alert>
+          <Button variant="secondary" type="button" onClick={retry}>
             Gửi lại thao tác
-          </button>
+          </Button>
         </>
       )}
       {error && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           {error.code === "WINDOW_TOO_LARGE"
             ? "Window hoặc số event vượt giới hạn. Thu hẹp thời gian hoặc nguồn; không cắt dữ liệu ở FE."
             : error.message}{" "}
           {error.requestId && <>Request ID: {error.requestId}</>}
-        </p>
+        </Alert>
       )}
       {state.phase === "reauth" && (
-        <button type="button" onClick={signIn}>
+        <Button variant="secondary" type="button" onClick={signIn}>
           Đăng nhập lại
-        </button>
+        </Button>
       )}
       {run && (
         <>
@@ -76,12 +79,12 @@ export function RunResult({
             </p>
           )}
           {run.status === "failed" && (
-            <p role="alert">
+            <Alert className="block break-words" variant="destructive" role="alert">
               Run thất bại. Mã: {runErrorCode}. Không có graph để hiển thị.
-            </p>
+            </Alert>
           )}
           {(state.tracking === "loading" || state.tracking === "waiting") && (
-            <p role="status">Đang theo dõi run…</p>
+            <LoadingState message="Đang theo dõi run…" />
           )}
           {(state.tracking === "paused" || state.tracking === "error") && (
             <>
@@ -89,18 +92,18 @@ export function RunResult({
                 Theo dõi đã dừng; trạng thái cuối không phải kết luận run thất
                 bại.
               </p>
-              <button type="button" onClick={track}>
+              <Button variant="secondary" type="button" onClick={track}>
                 Kiểm tra tiếp trạng thái
-              </button>
+              </Button>
             </>
           )}
         </>
       )}
-      {state.graphStatus === "loading" && <p role="status">Đang tải graph…</p>}
+      {state.graphStatus === "loading" && <LoadingState message="Đang tải graph…" />}
       {state.graphStatus === "error" && (
-        <button type="button" onClick={loadGraph}>
+        <Button variant="secondary" type="button" onClick={loadGraph}>
           Tải lại graph
-        </button>
+        </Button>
       )}
       {state.graph && state.graphStatus === "ready" && (
         <GraphTable graph={state.graph} />

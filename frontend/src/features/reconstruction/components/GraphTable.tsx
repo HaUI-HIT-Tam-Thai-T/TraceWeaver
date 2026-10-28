@@ -1,3 +1,4 @@
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../../../components/ui/Table";
 import type { Graph } from "../schemas";
 
 export function GraphTable({ graph }: { graph: Graph }) {
@@ -10,66 +11,66 @@ export function GraphTable({ graph }: { graph: Graph }) {
         Graph — revision {graph.version}
       </h3>
       <p>Run: {graph.run_id}</p>
-      <table className="w-full text-left">
-        <caption>Nodes trong snapshot</caption>
-        <thead>
-          <tr>
-            <th>Event</th>
-            <th>UTC gốc</th>
-            <th>Source / service</th>
-            <th>Action / outcome</th>
-            <th>Message</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table caption="Nodes trong snapshot" className="w-full text-left">
+
+        <TableHeader>
+          <TableRow>
+            <TableHead>Event</TableHead>
+            <TableHead>UTC gốc</TableHead>
+            <TableHead>Source / service</TableHead>
+            <TableHead>Action / outcome</TableHead>
+            <TableHead>Message</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {graph.nodes.map((node) => (
-            <tr key={node.event_id}>
-              <td>{node.event_id}</td>
-              <td>{node.occurred_at}</td>
-              <td>
+            <TableRow key={node.event_id}>
+              <TableCell>{node.event_id}</TableCell>
+              <TableCell>{node.occurred_at}</TableCell>
+              <TableCell>
                 {node.source_id} / {node.service}
-              </td>
-              <td>
+              </TableCell>
+              <TableCell>
                 {node.action} / {node.outcome}
-              </td>
-              <td>{node.message}</td>
-            </tr>
+              </TableCell>
+              <TableCell>{node.message}</TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
       {graph.nodes.length === 0 && <p>Snapshot không có node.</p>}
-      <table className="w-full text-left">
-        <caption>Links và bằng chứng</caption>
-        <thead>
-          <tr>
-            <th>Hướng</th>
-            <th>Method / score</th>
-            <th>Review / version</th>
-            <th>Evidence</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table caption="Links và bằng chứng" className="w-full text-left">
+
+        <TableHeader>
+          <TableRow>
+            <TableHead>Hướng</TableHead>
+            <TableHead>Method / score</TableHead>
+            <TableHead>Review / version</TableHead>
+            <TableHead>Evidence</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {graph.links.map((link) => (
-            <tr key={link.id}>
-              <td>
+            <TableRow key={link.id}>
+              <TableCell>
                 {link.from_event_id} → {link.to_event_id}
-              </td>
-              <td>
+              </TableCell>
+              <TableCell>
                 {link.method} /{" "}
                 {link.score === null ? "null (không có điểm)" : link.score}
-              </td>
-              <td>
+              </TableCell>
+              <TableCell>
                 {link.review_state} / {link.version}
-              </td>
-              <td>
+              </TableCell>
+              <TableCell>
                 <pre className="whitespace-pre-wrap">
                   {JSON.stringify(link.evidence, null, 2)}
                 </pre>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
       {graph.links.length === 0 && <p>Chưa có link trong graph.</p>}
       <h4>Events chưa nối root component</h4>
       <ul>

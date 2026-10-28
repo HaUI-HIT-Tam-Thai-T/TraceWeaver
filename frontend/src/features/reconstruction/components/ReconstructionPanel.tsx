@@ -1,3 +1,7 @@
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Input } from "../../../components/ui/Input";
+import { Select } from "../../../components/ui/Select";
+import { Button } from "../../../components/ui/Button";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +19,8 @@ import type { EventsScope } from "../../events/state/state";
 import { RunResult } from "./RunResult";
 import { linkReviewService } from "../../link-review/services/service";
 import { CreateCasePanel } from "../../cases/components/CreateCasePanel";
+import { actionLabel, requestLabel, sourceLabel } from "../../events/presentation";
+import { EventTime, EventTechnicalDetails } from "../../events/components/EventPresentation";
 
 const hiddenState = initialReconstructionState();
 export function ReconstructionPanel() {
@@ -94,12 +100,13 @@ function ReconstructionForm({
       aria-labelledby="reconstruction-title"
     >
       <h2 id="reconstruction-title" className="text-2xl font-bold">
-        Tạo reconstruction từ root
+        Tái dựng từ sự kiện đã chọn
       </h2>
       <p>
-        Root: {root.event_id} — UTC gốc: {root.occurred_at}. Múi giờ nhập
-        Asia/Ho_Chi_Minh (UTC+7).
+        Điểm bắt đầu: {requestLabel(root)} — {actionLabel(root.action)}.
+        {" "}{sourceLabel(root, workspace.sources.items)} · <EventTime value={root.occurred_at} /> (UTC+7).
       </p>
+      <EventTechnicalDetails key={root.event_id} event={root} />
       <p>
         Nhập theo dạng YYYY-MM-DDTHH:mm:ss, có thể thêm phần giây thập phân.
         Window tối đa một giờ và phải chứa root.
@@ -115,9 +122,10 @@ function ReconstructionForm({
           <fieldset>
             <legend>Nguồn trong run (chọn ít nhất một)</legend>
             {missingRoot && (
-              <label className="block">
+              <label className="type-label block">
                 <input
                   type="checkbox"
+                      className="mr-2 size-4 align-middle accent-primary"
                   value={root.source_id}
                   {...register("source_ids")}
                 />
@@ -125,9 +133,10 @@ function ReconstructionForm({
               </label>
             )}
             {workspace.sources.items.map((source) => (
-              <label className="block" key={source.id}>
+              <label className="type-label block" key={source.id}>
                 <input
                   type="checkbox"
+                      className="mr-2 size-4 align-middle accent-primary"
                   value={source.id}
                   {...register("source_ids")}
                 />
@@ -136,22 +145,22 @@ function ReconstructionForm({
             ))}
           </fieldset>
           {errors.source_ids && (
-            <p role="alert">Chọn ít nhất một nguồn có chứa nguồn root.</p>
+            <Alert className="block break-words" variant="destructive" role="alert">Chọn ít nhất một nguồn có chứa nguồn root.</Alert>
           )}
-          <label className="block" htmlFor="run-from">
+          <label className="type-label block" htmlFor="run-from">
             Từ (UTC+7)
           </label>
-          <input
+          <Input
             id="run-from"
             type="text"
             placeholder="YYYY-MM-DDTHH:mm:ss.ffffff"
             aria-invalid={!!errors.from}
             {...register("from")}
           />
-          <label className="block" htmlFor="run-to">
+          <label className="type-label block" htmlFor="run-to">
             Đến (UTC+7)
           </label>
-          <input
+          <Input
             id="run-to"
             type="text"
             placeholder="YYYY-MM-DDTHH:mm:ss.ffffff"
@@ -160,22 +169,22 @@ function ReconstructionForm({
             {...register("to")}
           />
           {(errors.to || errors.from) && (
-            <p id="run-window-error" role="alert">
+            <Alert className="block break-words" variant="destructive" id="run-window-error" role="alert">
               {errors.to?.message ?? errors.from?.message}
-            </p>
+            </Alert>
           )}
-          <label className="block" htmlFor="run-mode">
+          <label className="type-label block" htmlFor="run-mode">
             Chế độ
           </label>
-          <select id="run-mode" {...register("mode")}>
+          <Select id="run-mode" {...register("mode")}>
             <option value="rule_only">rule_only</option>
             <option value="hybrid">hybrid</option>
-          </select>
-          <button type="submit">Tạo run</button>
+          </Select>
+          <Button variant="primary" type="submit">Tạo run</Button>
         </fieldset>
       </form>
       {workspace.sources.nextCursor && (
-        <button
+        <Button variant="secondary"
           type="button"
           disabled={locked || workspace.sources.status === "loading"}
           onClick={() => {
@@ -183,15 +192,15 @@ function ReconstructionForm({
           }}
         >
           Tải thêm nguồn cho run
-        </button>
+        </Button>
       )}
       {workspace.sources.error && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           Không tải được danh sách nguồn. Có thể thử lại từ phần Workspace.
-        </p>
+        </Alert>
       )}
       {locked && (
-        <button
+        <Button variant="secondary"
           type="button"
           disabled={
             busy || state.phase === "blocked" || state.phase === "reauth"
@@ -202,7 +211,7 @@ function ReconstructionForm({
           }}
         >
           Bắt đầu thao tác mới
-        </button>
+        </Button>
       )}
       {state.phase === "uncertain" && (
         <p>

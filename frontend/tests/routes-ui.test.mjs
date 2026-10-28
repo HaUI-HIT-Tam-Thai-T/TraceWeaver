@@ -91,11 +91,11 @@ test('all eight routes resolve lazy pages and preserve access guards without req
     const events = { state: initialEventsState() }, cases = { state: initialCasesState() }
     const routes = [
       ['/', /TraceWeaver/],
-      ['/events', /Vui lòng đăng nhập để xem events/],
-      ['/cases', /Đăng nhập để xem cases/],
-      ['/cases/88888888-8888-4888-8888-888888888888', /Chi tiết case/],
-      ['/knowledge', /Đăng nhập và chọn workspace có quyền đọc để tra cứu knowledge/],
-      ['/dashboard', /Đăng nhập và chọn workspace có quyền đọc để xem dashboard/],
+      ['/events', /Vui lòng đăng nhập để tiếp tục/],
+      ['/cases', /Vui lòng đăng nhập để tiếp tục/],
+      ['/cases/88888888-8888-4888-8888-888888888888', /Vui lòng đăng nhập để tiếp tục/],
+      ['/knowledge', /Vui lòng đăng nhập để tiếp tục/],
+      ['/dashboard', /Vui lòng đăng nhập để tiếp tục/],
       ['/auth/callback', /Đăng nhập chưa hoàn tất hoặc đã bị hủy/],
       ['/missing', /Không tìm thấy trang/],
     ]
@@ -107,11 +107,41 @@ test('all eight routes resolve lazy pages and preserve access guards without req
               createElement(CasesContext.Provider, { value: cases }, createElement(AppRoutes))))))
       const html = await renderStream(element).completed
       assert.match(html, expected, url)
+      assert.equal((html.match(/<main\b/g) ?? []).length, 1, url)
+      if (url === '/auth/callback' || url === '/missing') assert.doesNotMatch(html, /aria-label="Thanh bên"/)
+      else assert.match(html, /aria-label="Thanh bên"/)
+    }
+    const member = { workspace_id: '10000000-0000-4000-8000-000000000001', roles: ['viewer'], group_ids: [] }
+    auth.state = { status: 'authenticated' }
+    workspace.state = { ...initialWorkspaceState(), status: 'ready', selectedWorkspaceId: member.workspace_id, me: { subject: 'test', memberships: [member] } }
+    workspace.membership = member
+    workspace.permissions.canRead = true
+    for (const [url, title] of [['/events', 'Events'], ['/dashboard', 'Dashboard'], ['/knowledge', 'Knowledge'], ['/cases', 'Cases'], ['/cases/88888888-8888-4888-8888-888888888888', 'Chi tiết case']]) {
+      const element = createElement(MemoryRouter, { initialEntries: [url] },
+        createElement(AuthContext.Provider, { value: auth }, createElement(WorkspaceContext.Provider, { value: workspace },
+          createElement(EventsContext.Provider, { value: events }, createElement(CasesContext.Provider, { value: cases }, createElement(AppRoutes))))))
+      const html = await renderStream(element).completed
+      assert.match(html, new RegExp(title), url)
+      assert.equal((html.match(/<main\b/g) ?? []).length, 1, url)
+      assert.equal((html.match(/id="workspace-picker"/g) ?? []).length, 1, url)
     }
   } finally {
     await server.close()
   }
 })
+
+async function readyShell(server, route) {
+  const [{ AuthContext }, { WorkspaceContext }] = await Promise.all([
+    server.ssrLoadModule('/src/features/auth/state/authContext.ts'),
+    server.ssrLoadModule('/src/features/workspace/state/workspaceContext.ts'),
+  ])
+  const membership = { workspace_id: '10000000-0000-4000-8000-000000000001', roles: ['viewer'], group_ids: [] }
+  const auth = { state: { status: 'authenticated' }, signIn: async () => {}, signOut: async () => {} }
+  const workspace = { state: { status: 'ready', selectedWorkspaceId: membership.workspace_id, me: { subject: 'test', memberships: [membership] } },
+    membership, permissions: { canRead: true, canWrite: false, canVerify: false }, selectWorkspace: () => {}, refreshAccess: async () => {} }
+  return createElement(MemoryRouter, { initialEntries: ['/knowledge'] },
+    createElement(AuthContext.Provider, { value: auth }, createElement(WorkspaceContext.Provider, { value: workspace }, route)))
+}
 
 test('slow route module shows loading feedback and then replaces it with the resolved page', { timeout: 10000 }, async () => {
   let release
@@ -120,10 +150,11 @@ test('slow route module shows loading feedback and then replaces it with the res
   let rendering
   try {
     const { AppRoutes } = await server.ssrLoadModule('/src/routes/AppRoutes.tsx')
-    rendering = renderStream(createElement('div', null,
-      createElement(MemoryRouter, { initialEntries: ['/knowledge'] }, createElement(AppRoutes))), true)
+    rendering = renderStream(await readyShell(server, createElement(AppRoutes)), true)
     const shell = await rendering.loading
     assert.match(shell, /role="status"/)
+    assert.match(shell, /aria-label="Thanh bên"/)
+    assert.match(shell, /<header/)
     assert.doesNotMatch(shell, /Lazy page finished loading/)
     release()
     const html = await rendering.completed
@@ -141,7 +172,7 @@ test('failed route import renders a safe reload action instead of raw module err
   const server = await createRouteServer({ failPage: true, onPageLoad: () => { attempts++ }, name: 'failure' })
   try {
     const { AppRoutes } = await server.ssrLoadModule('/src/routes/AppRoutes.tsx')
-    const element = createElement(MemoryRouter, { initialEntries: ['/knowledge'] }, createElement(AppRoutes))
+    const element = await readyShell(server, createElement(AppRoutes))
     for (let count = 0; count < 2; count++) {
       const html = await renderStream(element).completed
       assert.match(html, /role="alert"/)

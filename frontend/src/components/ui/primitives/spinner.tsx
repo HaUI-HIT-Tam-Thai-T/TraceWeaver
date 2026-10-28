@@ -1,14 +1,16 @@
-import type * as React from "react"
+import type { SvgIconProps } from "@mui/material/SvgIcon"
+// MUI SVG icon with the existing spinner accessibility and reduced-motion behavior.
 // Source: https://ui.shadcn.com/r/styles/new-york-v4/spinner.json
 import { cn } from "../../../lib/utils"
-import { Loader2Icon } from "lucide-react"
+import AutorenewIcon from "@mui/icons-material/Autorenew"
 
-function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
+function Spinner({ className, ...props }: SvgIconProps) {
   return (
-    <Loader2Icon
+    <AutorenewIcon
+      sx={{ fontSize: "1rem" }}
       role="status"
       aria-label="Loading"
-      className={cn("size-4 animate-spin motion-reduce:animate-none", className)}
+      className={cn("animate-spin motion-reduce:animate-none", className)}
       {...props}
     />
   )

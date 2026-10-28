@@ -1,3 +1,9 @@
+import { Select } from "../../../components/ui/Select";
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Input } from "../../../components/ui/Input";
+import { Button } from "../../../components/ui/Button";
+import { Textarea } from "../../../components/ui/primitives/textarea";
+import { LoadingState } from "../../../components/ui/LoadingState";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { CaseDetail } from "../schemas";
@@ -83,9 +89,8 @@ function WorkflowEditor({
         className="space-y-3"
       >
         <fieldset disabled={busy || frozen} className="space-y-3">
-          <label className="block">
-            Action{" "}
-            <select {...register("action")}>
+          <label className="type-label block" htmlFor="workflow-action">Action</label>
+            <Select id="workflow-action" {...register("action")}>
               {caseActionSchema.options.map((value) => (
                 <option
                   key={value}
@@ -101,37 +106,36 @@ function WorkflowEditor({
                   {value}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
           <input
             type="hidden"
             {...register("expected_version", { valueAsNumber: true })}
           />
           {errors.expected_version && (
-            <p role="alert">Version không hợp lệ; chọn lại version hiện tại.</p>
+            <Alert className="block break-words" variant="destructive" role="alert">Version không hợp lệ; chọn lại version hiện tại.</Alert>
           )}
-          {errors.action && <p role="alert">Chọn action hợp lệ.</p>}
+          {errors.action && <Alert className="block break-words" variant="destructive" role="alert">Chọn action hợp lệ.</Alert>}
           {action === "assign" && (
             <div>
-              <label>
+              <label className="type-label block">
                 Owner subject{" "}
-                <input
+                <Input
                   {...register("owner_id")}
                   aria-invalid={!!errors.owner_id}
                 />
               </label>
-              <button
+              <Button variant="secondary"
                 type="button"
                 onClick={() => setValue("owner_id", scope.subject)}
               >
                 Giao cho tôi
-              </button>
-              {errors.owner_id && <p role="alert">{errors.owner_id.message}</p>}
+              </Button>
+              {errors.owner_id && <Alert className="block break-words" variant="destructive" role="alert">{errors.owner_id.message}</Alert>}
             </div>
           )}
-          <label className="block">
+          <label className="type-label block">
             Reason{" "}
-            <textarea
+            <Textarea
               {...register("reason")}
               maxLength={1000}
               aria-invalid={!!errors.reason}
@@ -139,21 +143,21 @@ function WorkflowEditor({
             />
           </label>
           {errors.reason && (
-            <p id="workflow-reason-error" role="alert">
+            <Alert className="block break-words" variant="destructive" id="workflow-reason-error" role="alert">
               {errors.reason.message}
-            </p>
+            </Alert>
           )}
           {issue && <p role="status">{issue}</p>}
-          <button type="submit" disabled={!!issue}>
+          <Button variant="primary" type="submit" disabled={!!issue}>
             Gửi transition
-          </button>
+          </Button>
         </fieldset>
       </form>
       {workflow.status === "validating" && (
-        <p role="status">Đang kiểm tra detail và điều kiện hiện tại…</p>
+        <LoadingState message="Đang kiểm tra detail và điều kiện hiện tại…" />
       )}
       {workflow.status === "sending" && (
-        <p role="status">Đang gửi transition…</p>
+        <LoadingState message="Đang gửi transition…" />
       )}
       {workflow.status === "success" && (
         <p role="status">
@@ -164,9 +168,9 @@ function WorkflowEditor({
         </p>
       )}
       {workflow.error && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           {workflow.error.code}: {workflow.error.message}
-        </p>
+        </Alert>
       )}
       {action === "verify_close" && (
         <p>
@@ -180,17 +184,17 @@ function WorkflowEditor({
             Kết quả chưa rõ. Gửi lại giữ nguyên body/key trong 24 giờ; thao tác
             mới có thể ghi thêm transition.
           </p>
-          <button
+          <Button variant="secondary"
             type="button"
             disabled={busy || workflow.error?.code === "IDEMPOTENCY_EXPIRED"}
             onClick={() => void retry()}
           >
             Gửi lại thao tác
-          </button>
+          </Button>
         </>
       )}
       {(workflow.attempt || workflow.status === "conflict") && (
-        <button
+        <Button variant="secondary"
           type="button"
           disabled={busy}
           onClick={() => {
@@ -207,7 +211,7 @@ function WorkflowEditor({
           {workflow.status === "conflict"
             ? "Dùng Case.version hiện tại"
             : "Bắt đầu thao tác mới với version hiện tại"}
-        </button>
+        </Button>
       )}
       <p>Hủy chờ ở FE không chứng minh BE đã rollback.</p>
     </section>

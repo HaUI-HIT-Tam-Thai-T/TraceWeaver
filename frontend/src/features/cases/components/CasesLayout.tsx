@@ -1,9 +1,6 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/hooks/useAuth";
-import { AuthStatus } from "../../auth/components/AuthStatus";
 import { useWorkspace } from "../../workspace/hooks/useWorkspace";
-import { WorkspacePanel } from "../../workspace/components/WorkspacePanel";
 
 export function CasesLayout({
   title,
@@ -24,14 +21,7 @@ export function CasesLayout({
     content = <p>Vai trò hiện tại không có quyền đọc cases.</p>;
   return (
     <>
-      <h1 className="mb-4 text-3xl font-bold">{title}</h1>
-      <nav className="mb-4 space-x-4" aria-label="Điều hướng cases">
-        <Link to="/">Trang chủ</Link>
-        <Link to="/cases">Danh sách cases</Link>
-        <Link to="/events">Event explorer</Link>
-      </nav>
-      <AuthStatus />
-      <WorkspacePanel />
+      <h1 className="type-h1 mb-6">{title}</h1>
       <div
         key={JSON.stringify([
           workspace.me?.subject,

@@ -1,3 +1,7 @@
+import { Button } from "../components/ui/Button";
+import { LoadingState } from "../components/ui/LoadingState";
+import { EmptyState } from "../components/ui/EmptyState";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../components/ui/Table";
 import { Link } from "react-router-dom";
 import { useCases } from "../features/cases/hooks/useCases";
 import { CasesLayout } from "../features/cases/components/CasesLayout";
@@ -15,35 +19,35 @@ export function CasesPage() {
         Phân trang theo trạng thái hiện tại (live-state); nội dung có thể thay
         đổi giữa các trang. Không có tổng số trang.
       </p>
-      <button
+      <Button variant="secondary"
         type="button"
         disabled={state.status !== "active" || state.list.status === "loading"}
         onClick={refresh}
       >
         Làm mới danh sách
-      </button>
+      </Button>
       <CasesFeedback />
-      {state.list.status === "loading" && <p role="status">Đang tải cases…</p>}
+      {state.list.status === "loading" && <LoadingState message="Đang tải cases…" />}
       {state.list.status === "ready" &&
         (state.list.items.length === 0 ? (
-          <p>Không có case phù hợp trong trang này.</p>
+          <EmptyState title="Không có case phù hợp trong trang này." />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <caption>Cases được phép đọc</caption>
-              <thead>
-                <tr>
-                  <th>Tiêu đề / ID</th>
-                  <th>State / version</th>
-                  <th>Owner subject</th>
-                  <th>Run</th>
-                  <th>Ngày tạo case (không phải thời gian lọc)</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table caption="Cases được phép đọc" className="w-full text-left">
+
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tiêu đề / ID</TableHead>
+                  <TableHead>State / version</TableHead>
+                  <TableHead>Owner subject</TableHead>
+                  <TableHead>Run</TableHead>
+                  <TableHead>Ngày tạo case (không phải thời gian lọc)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {state.list.items.map((item) => (
-                  <tr key={item.id}>
-                    <td>
+                  <TableRow key={item.id}>
+                    <TableCell>
                       <Link
                         className="underline"
                         to={`/cases/${item.id}?${writeCaseQuery(state.filters)}`}
@@ -51,23 +55,23 @@ export function CasesPage() {
                         {item.title}
                       </Link>
                       <p>{item.id}</p>
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       {item.state} / {item.version}
-                    </td>
-                    <td>{item.owner_id ?? "Chưa được gán"}</td>
-                    <td>{item.run_id}</td>
-                    <td>
+                    </TableCell>
+                    <TableCell>{item.owner_id ?? "Chưa được gán"}</TableCell>
+                    <TableCell>{item.run_id}</TableCell>
+                    <TableCell>
                       <CaseTime value={item.created_at} />
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         ))}
       <nav aria-label="Phân trang cases" className="my-4 space-x-4">
-        <button
+        <Button variant="secondary"
           type="button"
           disabled={
             state.status !== "active" ||
@@ -77,9 +81,9 @@ export function CasesPage() {
           onClick={previousPage}
         >
           Trước
-        </button>
+        </Button>
         <span>Trang {state.index + 1}</span>
-        <button
+        <Button variant="secondary"
           type="button"
           disabled={
             state.status !== "active" ||
@@ -89,7 +93,7 @@ export function CasesPage() {
           onClick={nextPage}
         >
           Tiếp
-        </button>
+        </Button>
       </nav>
     </CasesLayout>
   );

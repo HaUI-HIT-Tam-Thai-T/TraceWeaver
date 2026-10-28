@@ -1,3 +1,8 @@
+import { LoadingState } from "../../../components/ui/LoadingState";
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Button } from "../../../components/ui/Button";
+import { Select } from "../../../components/ui/Select";
+import { Textarea } from "../../../components/ui/primitives/textarea";
 import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -82,7 +87,7 @@ function EditableEvidenceForm({
           không tự gọi reopen.
         </p>
       )}
-      {mutation.status === "sending" && <p role="status">Đang gửi evidence…</p>}
+      {mutation.status === "sending" && <LoadingState message="Đang gửi evidence…" />}
       {mutation.status === "success" && (
         <p role="status">
           Đã lưu evidence.{" "}
@@ -93,18 +98,18 @@ function EditableEvidenceForm({
       )}
       {mutation.status === "uncertain" && (
         <>
-          <p role="alert">
+          <Alert className="block break-words" variant="destructive" role="alert">
             Chưa rõ POST đã được ghi hay chưa. Đã yêu cầu đọc lại detail, không
             tự gửi lại POST. Evidence trùng nội dung không chứng minh thao tác
             này thành công.
-          </p>
-          <button
+          </Alert>
+          <Button variant="secondary"
             type="button"
             disabled={!detailReady || closed}
             onClick={beginNew}
           >
             Bắt đầu thao tác evidence mới
-          </button>
+          </Button>
           <p>
             Chỉ bấm sau khi kiểm tra detail. Gửi tiếp có thể tạo evidence trùng;
             nháp hiện tại được giữ.
@@ -112,18 +117,18 @@ function EditableEvidenceForm({
         </>
       )}
       {mutation.status === "locked" && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           CASE_CLOSED: form đã khóa. Tải lại detail và nhờ reviewer xử lý
           workflow.
-        </p>
+        </Alert>
       )}
       {mutation.error && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           {mutation.error.message}{" "}
           {mutation.error.requestId && (
             <>Request ID: {mutation.error.requestId}</>
           )}
-        </p>
+        </Alert>
       )}
       {!detailReady && (
         <p role="status">
@@ -140,33 +145,33 @@ function EditableEvidenceForm({
       >
         <fieldset disabled={disabled} className="space-y-3">
           <legend>Nội dung evidence</legend>
-          <label htmlFor="evidence-kind">Loại evidence</label>
-          <select id="evidence-kind" {...register("kind")}>
+          <label className="type-label block" htmlFor="evidence-kind">Loại evidence</label>
+          <Select id="evidence-kind" {...register("kind")}>
             <option value="note">Note</option>
             <option value="events">Events trong snapshot</option>
-          </select>
+          </Select>
           {kind === "events" && (
             <fieldset>
               <legend>Chọn events trong snapshot (tối đa 1.000)</legend>
               {snapshot.status === "loading" && (
-                <p role="status">Đang tải graph snapshot…</p>
+                <LoadingState message="Đang tải graph snapshot…" />
               )}
               {snapshot.status === "error" && (
                 <>
-                  <p role="alert">
+                  <Alert className="block break-words" variant="destructive" role="alert">
                     {snapshot.error?.message}{" "}
                     {snapshot.error?.requestId && (
                       <>Request ID: {snapshot.error.requestId}</>
                     )}
-                  </p>
-                  <button
+                  </Alert>
+                  <Button variant="secondary"
                     type="button"
                     onClick={() => {
                       void loadSnapshot();
                     }}
                   >
                     Tải lại snapshot
-                  </button>
+                  </Button>
                 </>
               )}
               {snapshot.status === "ready" && snapshot.events.length === 0 && (
@@ -174,9 +179,10 @@ function EditableEvidenceForm({
               )}
               {snapshot.status === "ready" &&
                 snapshot.events.map((event) => (
-                  <label className="block" key={event.event_id}>
+                  <label className="type-label block" key={event.event_id}>
                     <input
                       type="checkbox"
+                      className="mr-2 size-4 align-middle accent-primary"
                       value={event.event_id}
                       {...register("event_ids")}
                     />
@@ -186,27 +192,27 @@ function EditableEvidenceForm({
                 ))}
               <p>Đã chọn {selected.length} events.</p>
               {errors.event_ids && (
-                <p role="alert">{errors.event_ids.message}</p>
+                <Alert className="block break-words" variant="destructive" role="alert">{errors.event_ids.message}</Alert>
               )}
             </fieldset>
           )}
-          <label htmlFor="evidence-note">
+          <label className="type-label block" htmlFor="evidence-note">
             Note (tối đa 10.000 ký tự; được rỗng với Events)
           </label>
-          <textarea
+          <Textarea
             id="evidence-note"
             aria-invalid={!!errors.note}
             aria-describedby={errors.note ? "evidence-note-error" : undefined}
             {...register("note")}
           />
           {errors.note && (
-            <p id="evidence-note-error" role="alert">
+            <Alert className="block break-words" variant="destructive" id="evidence-note-error" role="alert">
               {errors.note.message}
-            </p>
+            </Alert>
           )}
-          <button type="submit" disabled={!snapshotReady}>
+          <Button variant="primary" type="submit" disabled={!snapshotReady}>
             Thêm evidence
-          </button>
+          </Button>
         </fieldset>
       </form>
     </section>

@@ -1,3 +1,5 @@
+import { Button } from "../components/ui/Button";
+import { LoadingState } from "../components/ui/LoadingState";
 import { WorkflowForm } from '../features/cases/components/WorkflowForm';
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useCases } from "../features/cases/hooks/useCases";
@@ -19,7 +21,7 @@ export function CaseDetailPage() {
       <Link className="my-4 block underline" to={`/cases${location.search}`}>
         Về danh sách với bộ lọc hiện tại
       </Link>
-      <button
+      <Button variant="secondary"
         type="button"
         disabled={
           state.status !== "active" || state.detail.status === "loading" || state.evidenceMutation.status === 'sending' || workflowBusy
@@ -27,13 +29,13 @@ export function CaseDetailPage() {
         onClick={refresh}
       >
         Làm mới chi tiết
-      </button>
+      </Button>
       <CasesFeedback />
       {state.status !== "invalid" &&
         state.status !== "blocked" &&
         state.status !== "reauth" &&
         (!matches || state.detail.status === "loading") && (
-          <p role="status">Đang tải case/history/evidence…</p>
+          <LoadingState message="Đang tải case/history/evidence…" />
         )}
       {matches && state.detail.status === "ready" && state.detail.data && (
         <CaseDetailView detail={state.detail.data} />

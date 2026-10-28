@@ -1,3 +1,5 @@
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Button } from "../../../components/ui/Button";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { useCases } from "../hooks/useCases";
@@ -9,33 +11,33 @@ export function CasesFeedback() {
   return (
     <div aria-live="polite">
       {state.status === "invalid" && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           Case ID hoặc bộ lọc URL không hợp lệ.{" "}
           <Link to="/cases">Bắt đầu lại</Link>
-        </p>
+        </Alert>
       )}
       {error && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           {error.message}{" "}
           {error.requestId && <>Request ID: {error.requestId}</>}
-        </p>
+        </Alert>
       )}
       {state.status === "reauth" ? (
-        <button
+        <Button variant="secondary"
           type="button"
           onClick={() => {
             void signIn();
           }}
         >
           Đăng nhập lại
-        </button>
+        </Button>
       ) : (
         error && (
-          <button type="button" onClick={refresh}>
+          <Button variant="secondary" type="button" onClick={refresh}>
             {error.code === "INVALID_CURSOR"
               ? "Bắt đầu lại từ trang đầu"
               : "Thử tải lại case"}
-          </button>
+          </Button>
         )
       )}
     </div>

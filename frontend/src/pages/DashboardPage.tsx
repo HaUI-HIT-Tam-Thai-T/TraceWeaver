@@ -1,9 +1,10 @@
+import { Alert } from "../components/ui/primitives/alert";
+import { Button } from "../components/ui/Button";
+import { LoadingState } from "../components/ui/LoadingState";
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../features/auth/hooks/useAuth';
-import { AuthStatus } from '../features/auth/components/AuthStatus';
 import { useWorkspace } from '../features/workspace/hooks/useWorkspace';
-import { WorkspacePanel } from '../features/workspace/components/WorkspacePanel';
 import { createDashboardController, initialDashboardState } from '../features/dashboard/state/controller';
 import type { DashboardScope } from '../features/dashboard/state/controller';
 import { dashboardService } from '../features/dashboard/services/service';
@@ -18,9 +19,7 @@ export function DashboardPage() {
   const me = workspace.me, wid = workspace.selectedWorkspaceId;
   const allowed = auth.status === 'authenticated' && workspace.status === 'ready' && permissions.canRead && me !== null && wid !== null;
   return <>
-    <h1 className="mb-4 text-3xl font-bold">TraceWeaver — Dashboard</h1>
-    <nav aria-label="Điều hướng dashboard" className="space-x-4"><Link to="/">Trang chủ</Link><Link to="/events">Event explorer</Link><Link to="/cases">Cases</Link></nav>
-    <AuthStatus /><WorkspacePanel />
+    <h1 className="type-h1 mb-6">TraceWeaver — Dashboard</h1>
     <DashboardBrowser scope={allowed ? { subject: me.subject, workspaceId: wid, accessKey: me } : null} />
   </>;
 }
@@ -48,17 +47,17 @@ function DashboardBrowser({ scope }: { scope: DashboardScope | null }) {
   const state = aligned ? snapshot : initialDashboardState();
   if (!scope) return <p>Đăng nhập và chọn workspace có quyền đọc để xem dashboard.</p>;
   return <>
-    {!query.success && <p role="alert">Khoảng thời gian URL không hợp lệ. <Link to="/dashboard">Bắt đầu lại</Link></p>}
+    {!query.success && <Alert className="block break-words" variant="destructive" role="alert">Khoảng thời gian URL không hợp lệ. <Link to="/dashboard">Bắt đầu lại</Link></Alert>}
     <DashboardTimeForm key={JSON.stringify([scope.subject, scope.workspaceId, search])} filters={query.success ? query.filters : {}} apply={filters => {
       if (query.success && JSON.stringify(filters) === JSON.stringify(query.filters)) void controller.refresh();
       setParams(writeDashboardQuery(filters, query.success && query.waiting));
     }} />
     {query.success && <>
-      <button type="button" disabled={['loading', 'reauth'].includes(state.status)} onClick={() => void controller.refresh()}>Làm mới dashboard</button>
+      <Button variant="secondary" type="button" disabled={['loading', 'reauth'].includes(state.status)} onClick={() => void controller.refresh()}>Làm mới dashboard</Button>
       <div aria-live="polite">
-        {state.status === 'loading' && <p role="status">Đang tải dashboard…</p>}
-        {state.error && <p role="alert">{state.error.message} {state.error.requestId && <>Request ID: {state.error.requestId}</>}</p>}
-        {state.status === 'reauth' ? <button type="button" onClick={() => void signIn()}>Đăng nhập lại</button> : state.error && <button type="button" onClick={() => void controller.refresh()}>Thử tải lại dashboard</button>}
+        {state.status === 'loading' && <LoadingState message="Đang tải dashboard…" />}
+        {state.error && <Alert className="block break-words" variant="destructive" role="alert">{state.error.message} {state.error.requestId && <>Request ID: {state.error.requestId}</>}</Alert>}
+        {state.status === 'reauth' ? <Button variant="secondary" type="button" onClick={() => void signIn()}>Đăng nhập lại</Button> : state.error && <Button variant="secondary" type="button" onClick={() => void controller.refresh()}>Thử tải lại dashboard</Button>}
       </div>
       {state.status === 'ready' && state.data && <>
         <DashboardCounters data={state.data} waiting={query.waiting} showWaiting={() => setParams(writeDashboardQuery(query.filters, !query.waiting))} />

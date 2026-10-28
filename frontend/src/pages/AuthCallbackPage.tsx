@@ -4,7 +4,7 @@ import { AuthStatus } from "../features/auth/components/AuthStatus";
 
 export function AuthCallbackPage() {
   const { state } = useAuth();
-  if (state.status === "authenticated") return <Navigate to="/" replace />;
+  if (state.status === "authenticated") return <Navigate to="/dashboard" replace />;
   return (
     <>
       <h1 className="type-h1 mb-4">Đăng nhập</h1>
@@ -12,8 +12,8 @@ export function AuthCallbackPage() {
         <p className="type-body mb-4">Đăng nhập chưa hoàn tất hoặc đã bị hủy.</p>
       )}
       <AuthStatus />
-      <Link className="type-label mt-4 block underline" to="/">
-        Về trang chủ
+      <Link className="type-label mt-4 block underline" to="/dashboard">
+        Về Tổng quan
       </Link>
     </>
   );

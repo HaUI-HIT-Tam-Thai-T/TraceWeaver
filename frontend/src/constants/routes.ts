@@ -1,6 +1,6 @@
 import { createElement, lazy } from "react";
+import { Navigate } from "react-router-dom";
 import { AuthCallbackPage } from "../pages/AuthCallbackPage";
-import { HomePage } from "../pages/HomePage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 import { PageLoadError } from "../routes/PageLoadFeedback";
 
@@ -31,13 +31,18 @@ const DashboardPage = lazy(() =>
     .catch(() => ({ default: PageLoadError })),
 );
 
-export const ROUTES = [
+export const APP_ROUTES = [
   { path: "/dashboard", element: createElement(DashboardPage) },
   { path: "/knowledge", element: createElement(KnowledgePage) },
   { path: "/cases", element: createElement(CasesPage) },
   { path: "/cases/:caseId", element: createElement(CaseDetailPage) },
-  { path: "/", element: createElement(HomePage) },
+  { path: "/", element: createElement(Navigate, { to: "/dashboard", replace: true }) },
   { path: "/events", element: createElement(EventsPage) },
+];
+
+export const PUBLIC_ROUTES = [
   { path: "/auth/callback", element: createElement(AuthCallbackPage) },
   { path: "*", element: createElement(NotFoundPage) },
 ];
+
+export const ROUTES = [...APP_ROUTES, ...PUBLIC_ROUTES];

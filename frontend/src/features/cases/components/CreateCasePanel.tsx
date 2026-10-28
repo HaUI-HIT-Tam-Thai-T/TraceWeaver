@@ -1,3 +1,6 @@
+import { Input } from "../../../components/ui/Input";
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Button } from "../../../components/ui/Button";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -82,19 +85,19 @@ export function CreateCasePanel({
       </p>
       <form onSubmit={handleSubmit(({ title }) => controller.create(title))}>
         <fieldset disabled={state.status !== "idle"}>
-          <label htmlFor="case-title">Tiêu đề case</label>
-          <input
+          <label className="type-label block" htmlFor="case-title">Tiêu đề case</label>
+          <Input
             id="case-title"
             aria-invalid={!!errors.title}
             aria-describedby={errors.title ? "case-title-error" : undefined}
             {...register("title")}
           />
           {errors.title && (
-            <p id="case-title-error" role="alert">
+            <Alert className="block break-words" variant="destructive" id="case-title-error" role="alert">
               {errors.title.message}
-            </p>
+            </Alert>
           )}
-          <button type="submit">Tạo case</button>
+          <Button variant="primary" type="submit">Tạo case</Button>
         </fieldset>
       </form>
       {busy && (
@@ -105,39 +108,39 @@ export function CreateCasePanel({
         </p>
       )}
       {state.error && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           {state.error.message}{" "}
           {state.error.requestId && <>Request ID: {state.error.requestId}</>}
-        </p>
+        </Alert>
       )}
       {state.status === "uncertain" && (
         <>
-          <p role="alert">
+          <Alert className="block break-words" variant="destructive" role="alert">
             Chưa rõ case đã được tạo hay chưa. Gửi lại giữ nguyên body/key trong
             24 giờ; thao tác mới có thể tạo thêm case.
-          </p>
-          <button
+          </Alert>
+          <Button variant="secondary"
             type="button"
             onClick={() => {
               void controller.retry();
             }}
           >
             Gửi lại thao tác tạo case
-          </button>
+          </Button>
         </>
       )}
       {state.status === "reauth" && (
-        <button
+        <Button variant="secondary"
           type="button"
           onClick={() => {
             void signIn();
           }}
         >
           Đăng nhập lại
-        </button>
+        </Button>
       )}
       {["error", "uncertain"].includes(state.status) && (
-        <button
+        <Button variant="secondary"
           type="button"
           disabled={busy}
           onClick={() => {
@@ -145,7 +148,7 @@ export function CreateCasePanel({
           }}
         >
           Bắt đầu thao tác tạo case mới
-        </button>
+        </Button>
       )}
     </section>
   );
