@@ -8,6 +8,8 @@ import { caseFixture } from '../support/case-fixture.js';
 import { withTransaction } from '../../src/core/data/database.js';
 import { createWorkflow } from '../../src/core/data/workflow-store.js';
 import { documentReviewDefinition } from '../../src/core/workflow/definitions.js';
+import { seedReadableDemo, articles } from '../../scripts/seed-readable-demo.js';
+import { createAccessRepository } from '../../src/core/identity/access-repository.js';
 
 test('case workflow persistence, scope, closure lock and audit on PostgreSQL', async (t) => {
   const f = await caseFixture(t), { pool, workspace, cases, runs, reviews } = f;
@@ -15,6 +17,16 @@ test('case workflow persistence, scope, closure lock and audit on PostgreSQL', a
   const step = (id, action, version, subject = 'reviewer', extra = {}) => cases.transition(subject, workspace, id,
     { action, expected_version: version, reason: `Reason for ${action}`, ...extra });
   let main;
+  await t.test('readable seed is idempotent and preserves custom names and knowledge versions', async () => {
+    await pool.query('UPDATE core.sources SET name=service WHERE workspace_id=$1', [workspace]);
+    await pool.query("UPDATE core.sources SET name='Custom intake' WHERE id=$1", [f.sources[0]]);
+    assert.deepEqual(await seedReadableDemo(pool, workspace), { workspace_id: workspace, inserted_articles: 4, renamed_sources: 2 });
+    assert.deepEqual(await seedReadableDemo(pool, workspace), { workspace_id: workspace, inserted_articles: 0, renamed_sources: 0 });
+    const access = createAccessRepository(pool);
+    assert.equal((await access.memberships('operator', workspace))[0].workspace_name, 'Cases');
+    assert.equal((await access.knowledge('viewer', workspace, null, 50, '')).length, articles.length);
+    assert.equal((await access.sources('operator', workspace, null, 50)).find((s) => s.id === f.sources[0]).name, 'Custom intake');
+  });
   await t.test('upgrade006 preserves run; case has no competing state/owner and retries serialize with scoped 24h replay', async () => {
     assert.equal((await runs.get('viewer', workspace, f.run.id, true)).nodes.length, 3);
     const race = await Promise.all(Array.from({ length: 3 }, () => make(f.run.id, 'case-once')));
