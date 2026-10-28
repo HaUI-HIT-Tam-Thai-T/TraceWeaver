@@ -161,6 +161,47 @@ Pipeline này không ghi vào `ai/artifacts` và không thay model service đang
 BE đã chọn quản lý unresolved/reason, giữ 5 feature và nghĩa shared count mọi ID.
 Guard và adapter runtime phía BE vẫn cần kiểm tra khi tích hợp.
 
+### 7a. Xuất model sandbox để chạy thử qua API
+
+Sau khi có dataset feature v2, chạy:
+
+```powershell
+.\.venv\Scripts\python.exe -m ai.training.export_sandbox_model
+```
+
+Lệnh kiểm checksum/provenance rồi train lại, xuất model và manifest vào
+`.local/ai-artifacts/sandbox-features-2/`. Bundle gồm báo cáo đánh giá, LICENSE,
+request 23 cặp và response kỳ vọng; loader được kiểm tra khớp score offline.
+Model mang phiên bản `logistic-regression-sandbox-features-2-experiment-1`;
+schema API vẫn là `1`. Đây là bản thử nghiệm synthetic, threshold chỉ dùng
+đánh giá offline. Backend vẫn quản lý guard và unresolved.
+
+Exporter chỉ ghi dưới `.local` và từ chối ghi đè thư mục có nội dung. Muốn tạo
+bundle khác, dùng `--output-dir .local/ai-artifacts/<ten-thu-nghiem>`;
+`--dataset-dir` chọn dataset v2 khác đã có manifest hợp lệ.
+
+Để API nạp bundle mới, cấu hình trong cửa sổ PowerShell chạy service:
+
+```powershell
+$env:APP_ENV = 'development'
+$env:SCORER_MODE = 'model'
+$env:SCORER_HOST = '127.0.0.1'
+$env:SCORER_SERVICE_SECRET = .\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_hex(32))"
+$env:SCORER_MODEL_PATH = (Resolve-Path '.local/ai-artifacts/sandbox-features-2/model_sandbox_v2.json').Path
+.\.venv\Scripts\python.exe -m ai.app
+```
+
+Caller gửi `score-request.json` vào endpoint ở mục 4 với cùng credential, rồi
+đối chiếu `expected-response.json`. API trả score cho cả ca thiếu bằng chứng;
+score không phải trạng thái abstain hoặc xác nhận cạnh. Artifact bootstrap
+trong `ai/artifacts` vẫn là mặc định khi không đặt biến model path riêng.
+
+Kiểm tra tự động export, dữ liệu hỏng, checksum và config → HTTP bằng:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest ai.tests.test_sandbox_model -v
+```
+
 ## 8. Xuất bộ fixture bàn giao feature cho BE
 
 ```powershell
