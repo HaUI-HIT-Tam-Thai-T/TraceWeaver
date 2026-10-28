@@ -1,5 +1,7 @@
 # TraceWeaver
 
+BE-27 (28/10): đã nối HTTP scorer baseline, outcome guard và Graph abstentions; 82 BE/contract + 28 AI tests pass. Chưa có trained model; baseline vẫn rule_only/degraded. Kiểm DB lần này bị chặn do PostgreSQL/Docker chưa chạy. Xem [scorer integration](backend/SCORER.md). Nội dung cũ bên dưới chỉ áp dụng khi không bị cập nhật này thay thế.
+
 Base dự án tái dựng hành trình yêu cầu cấp môi trường thực hành từ dấu vết của ba dịch vụ intake, account và provision, định hướng DX-Lab HaUI 2026.
 
 Hiện trạng nhánh phát triển, kết quả kiểm và giới hạn deployment được giữ tại [CURRENT_STATUS](docs/CURRENT_STATUS.md). Sau sửa audit:73 unit/HTTP/contract,49 DB,45 identity-native pass; npm audit0. Source sửa không tự cập nhật container đang chạy.

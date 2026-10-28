@@ -1,5 +1,12 @@
 # Tích hợp backend, frontend và AI
 
+## BE-27 — 28/10/2026: baseline scorer integration
+
+AI baseline runtime imported from origin/xkhuong/feat/ai-scorer; Node adapter tested against real Python HTTP. No trained model exists. Only reviewed baseline is enabled: scores annotate guard-approved pending links; effective_method remains rule_only with ai_baseline_only. sandbox-rules-2 applies outcome guards; optional Graph.abstentions is persisted with audit. Batch <=100, total <=5s; failures discard all scores. Runtime features are independently versioned; legacy bootstrap helpers are not trained-model parity evidence. See [Scorer guide](../backend/SCORER.md).
+
+Verified this turn: 82 backend/unit/HTTP/contract tests pass (Node-to-Python enabled), 28 Python tests pass, Python/npm license inventory and base checks pass. PostgreSQL run integration was attempted but failed before assertions with ECONNREFUSED 127.0.0.1:15432; Docker engine unavailable even after launch attempts. Persistence tests were extended but remain unverified this turn. No image rebuild, live DB demo, FE E2E or deployment claimed. Earlier status below is historical where superseded.
+
+
 Hợp đồng dùng chung: [OpenAPI](../backend/contracts/openapi.json), [JSON Schema](../backend/contracts/schemas/domain.schema.json) và [fixtures](../backend/contracts/fixtures/valid.json). Fixtures là dữ liệu kiểm schema, không phải response lấy từ runtime. Thay DTO/enum/status phải cập nhật contract, consumer và tests cùng thay đổi. Xem [hiện trạng](CURRENT_STATUS.md) để phân biệt phần đã có và còn thiếu.
 
 ## Frontend và Identity

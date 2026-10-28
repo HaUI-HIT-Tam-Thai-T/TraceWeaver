@@ -1,3 +1,7 @@
+# AI integration — 28/10/2026
+
+Runtime baseline đã được nhập từ nhánh `origin/xkhuong/feat/ai-scorer`. Xem [RUN](RUN.md) để chạy Python service và [tích hợp BE](../backend/SCORER.md). Đây là heuristic baseline, chưa có model học máy. Nội dung handoff/scaffold bên dưới là lịch sử trước BE-27.
+
 # AI scorer
 
 Khung dịch vụ chấm điểm cặp sự kiện; chưa có runtime, model hoặc endpoint.
