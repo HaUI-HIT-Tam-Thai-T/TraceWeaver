@@ -19,13 +19,19 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.1'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
           cache: pip
           cache-dependency-path: ai/requirements.txt
-      - run: python -m pip install --only-binary=:all: -r ai/requirements.txt
+      - run: 'python -m pip install --only-binary=:all: -r ai/requirements.txt'
       - run: python -m pip check
       - run: python -m ai.scripts.dependency_inventory --check
       - run: python -m unittest discover -s ai/tests -p "test_*.py" -v
       - run: python -m ai.scripts.smoke
+      - run: python -m ai.scripts.smoke_model
+      - run: python -m ai.scripts.export_feature_handoff
+      - run: python .local/ai-be-feature-handoff/check_features.py
