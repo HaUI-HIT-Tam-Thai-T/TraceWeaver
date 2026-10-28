@@ -1,0 +1,14 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "OIDC JWKS dependency", "version": "1.0.0", "description": "Local contract for the only Identity HTTP dependency this BE uses. Keycloak certs endpoint shape; not a login or token issuing server." },
+  "paths": {
+    "/realms/traceweaver/protocol/openid-connect/certs": {
+      "get": { "operationId": "getRealmJwks", "responses": {
+        "200": { "description": "Public JSON Web Key Set", "content": { "application/json": { "schema": {
+          "type": "object", "required": ["keys"], "properties": { "keys": { "type": "array", "items": { "type": "object", "required": ["kty", "kid", "n", "e"], "properties": { "kty": { "type": "string", "enum": ["RSA"] }, "kid": { "type": "string" }, "n": { "type": "string" }, "e": { "type": "string" }, "alg": { "type": "string" }, "use": { "type": "string" } } } } }
+        } } } },
+        "503": { "description": "Identity unavailable" }
+      } }
+    }
+  }
+}

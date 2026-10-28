@@ -11,13 +11,13 @@ backend/
   tests/         # Backend, contract và DB integration
   contracts/     # OpenAPI, JSON Schema và fixtures
   package.json
-frontend/        # Khung giao diện
-ai/              # Khung scorer và training
+frontend/        # Giao diện React/TypeScript
+ai/              # API scorer, feature và training
 simulator/       # Khung sinh dữ liệu giả
 .github/         # Issue/PR templates và CI
 ```
 
-Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có cấu hình môi trường, healthcheck, xử lý lỗi, transaction và migrations. AI có [baseline/model bootstrap chạy độc lập](ai/RUN.md), pipeline đánh giá offline và [fixture đối chiếu feature với BE](ai/FEATURE_HANDOFF.md). Chưa tích hợp reconstruction hoặc promote model policy mới vào runtime. API nghiệp vụ backend và OIDC chưa triển khai trong checkout này; OpenAPI vẫn đánh dấu các operation dự kiến.
+Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, JWT/JWKS, batch ingestion và GET /me, sources, knowledge, events, event detail với quyền từ DB; OpenAPI phân biệt 6 implemented/15 planned. Frontend React/TypeScript có hướng dẫn riêng tại [frontend/README.md](frontend/README.md). AI có [baseline/model bootstrap chạy độc lập](ai/RUN.md), pipeline đánh giá offline, lệnh xuất model sandbox thử nghiệm và [fixture đối chiếu feature với BE](ai/FEATURE_HANDOFF.md). Identity provider/login thật và workflow BE còn cần kiểm chứng/triển khai; luồng reconstruction BE → AI chưa được tích hợp. Model policy mới chỉ được chọn khi cấu hình riêng, chưa thay artifact mặc định.
 
 ## Chạy backend
 
@@ -33,12 +33,13 @@ npm run db:migrate
 npm run dev:be
 ```
 
-Nếu đã có `.env`, bỏ qua `db:setup`. Script giữ nguyên cấu hình hiện có. Có thể dùng PostgreSQL riêng bằng `DATABASE_URL`.
+Nếu đã có `.env`, bỏ qua `db:setup`; bổ sung CURSOR_SECRET ngẫu nhiên ≥32 ký tự nếu thiếu và giữ DB credentials. Xem [cấu hình Identity phía BE](backend/IDENTITY.md). Có thể dùng PostgreSQL riêng bằng DATABASE_URL.
 
 - `GET http://127.0.0.1:8080/health/live`: tiến trình hoạt động.
 - `GET http://127.0.0.1:8080/health/ready`: DB và migrations sẵn sàng.
 - `npm test`: unit, HTTP và contract tests, không cần DB.
 - `npm run test:db`: integration, cần PostgreSQL và quyền tạo DB test.
+- `npm run test:identity`: JWT/quyền nguồn qua PostgreSQL và Postman CLI >=1.74.0, không chạy FE/AI.
 - `npm run start:be`: chạy backend không watch.
 - `npm run db:stop`: dừng DB và giữ dữ liệu.
 
@@ -82,7 +83,7 @@ Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi tri�
 |---|---|---|
 | API trung gian | Express, health, giới hạn body, lỗi/request ID | Endpoint nghiệp vụ có xác thực |
 | Data | PostgreSQL, transaction, migrations nền | Repository và service nghiệp vụ |
-| Identity | Khung module và schema membership/role/grant | OIDC/SSO và enforcement quyền |
+| Identity | JWT/JWKS user/ingest client, membership/role/group/source grants cho sáu API | IdP thật, login/SSO và quyền cho các API còn lại |
 | Workflow | Khung module và API contract | Engine dùng chung, guard và audit |
 | H-P-D-I / ứng dụng | Khung frontend và contract | Workspace/tri thức, hồ sơ, tìm kiếm/dashboard |
 | Intelligence | API bootstrap, model JSON có checksum, đánh giá offline và feature fixture | Đối chiếu extractor Node, tích hợp guard/scorer/fallback/audit và nghiệm thu model |
@@ -90,7 +91,7 @@ Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi tri�
 
 ## API và tài khoản demo
 
-Health API đang chạy được mô tả tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) là hợp đồng nghiệp vụ dự kiến, có cờ `planned`; không phải danh sách endpoint đã triển khai.
+Health API tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) đánh dấu 6 operation implemented: GET /me, sources, knowledge, events, event detail và POST batch ingestion; còn 15 planned. Đã kiểm với PostgreSQL thật và Postman JWKS stand-in; chưa kiểm login với Keycloak thật.
 
 Base chưa có đăng nhập nên chưa có tài khoản demo. Khi triển khai Identity, tài khoản và mật khẩu demo phải được tạo tại máy qua seed, không lưu mật khẩu/token thật trong repository.
 

@@ -15,7 +15,7 @@ Project code: Apache-2.0. Third-party packages retain their original licenses. T
 
 React, Identity provider, AI runtime and model are not installed in this scaffold. Add their pinned versions, licenses and notices when implemented.
 
-## npm packages (95)
+## npm packages (96)
 
 | Package | Version | Scope | License | Source |
 |---|---|---|---|---|
@@ -25,9 +25,9 @@ React, Identity provider, AI runtime and model are not installed in this scaffol
 | @apidevtools/swagger-parser | 13.1.0 | development / direct | MIT | [npm](https://www.npmjs.com/package/@apidevtools/swagger-parser/v/13.1.0) |
 | @types/json-schema | 7.0.15 | development / transitive | MIT | [npm](https://www.npmjs.com/package/@types/json-schema/v/7.0.15) |
 | accepts | 2.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/accepts/v/2.0.0) |
-| ajv | 8.20.0 | development / direct | MIT | [npm](https://www.npmjs.com/package/ajv/v/8.20.0) |
+| ajv | 8.20.0 | runtime / direct | MIT | [npm](https://www.npmjs.com/package/ajv/v/8.20.0) |
 | ajv-draft-04 | 1.0.0 | development / transitive | MIT | [npm](https://www.npmjs.com/package/ajv-draft-04/v/1.0.0) |
-| ajv-formats | 3.0.1 | development / direct | MIT | [npm](https://www.npmjs.com/package/ajv-formats/v/3.0.1) |
+| ajv-formats | 3.0.1 | runtime / direct | MIT | [npm](https://www.npmjs.com/package/ajv-formats/v/3.0.1) |
 | argparse | 3.0.3 | development / transitive | PSF-2.0 | [npm](https://www.npmjs.com/package/argparse/v/3.0.3) |
 | body-parser | 2.3.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/body-parser/v/2.3.0) |
 | bytes | 3.1.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/bytes/v/3.1.2) |
@@ -49,8 +49,8 @@ React, Identity provider, AI runtime and model are not installed in this scaffol
 | escape-html | 1.0.3 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/escape-html/v/1.0.3) |
 | etag | 1.8.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/etag/v/1.8.1) |
 | express | 5.3.0 | runtime / direct | MIT | [npm](https://www.npmjs.com/package/express/v/5.3.0) |
-| fast-deep-equal | 3.1.3 | development / transitive | MIT | [npm](https://www.npmjs.com/package/fast-deep-equal/v/3.1.3) |
-| fast-uri | 3.1.8 | development / transitive | BSD-3-Clause | [npm](https://www.npmjs.com/package/fast-uri/v/3.1.8) |
+| fast-deep-equal | 3.1.3 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/fast-deep-equal/v/3.1.3) |
+| fast-uri | 3.1.8 | runtime / transitive | BSD-3-Clause | [npm](https://www.npmjs.com/package/fast-uri/v/3.1.8) |
 | finalhandler | 2.1.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/finalhandler/v/2.1.1) |
 | forwarded | 0.2.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/forwarded/v/0.2.0) |
 | fresh | 2.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/fresh/v/2.0.0) |
@@ -65,8 +65,9 @@ React, Identity provider, AI runtime and model are not installed in this scaffol
 | inherits | 2.0.4 | runtime / transitive | ISC | [npm](https://www.npmjs.com/package/inherits/v/2.0.4) |
 | ipaddr.js | 1.9.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/ipaddr.js/v/1.9.1) |
 | is-promise | 4.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/is-promise/v/4.0.0) |
+| jose | 6.2.12 | runtime / direct | MIT | [npm](https://www.npmjs.com/package/jose/v/6.2.12) |
 | js-yaml | 5.5.0 | development / transitive | MIT | [npm](https://www.npmjs.com/package/js-yaml/v/5.5.0) |
-| json-schema-traverse | 1.0.0 | development / transitive | MIT | [npm](https://www.npmjs.com/package/json-schema-traverse/v/1.0.0) |
+| json-schema-traverse | 1.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/json-schema-traverse/v/1.0.0) |
 | math-intrinsics | 1.1.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/math-intrinsics/v/1.1.0) |
 | media-typer | 1.1.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/media-typer/v/1.1.1) |
 | merge-descriptors | 2.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/merge-descriptors/v/2.0.0) |
@@ -96,7 +97,7 @@ React, Identity provider, AI runtime and model are not installed in this scaffol
 | qs | 6.16.1 | runtime / transitive | BSD-3-Clause | [npm](https://www.npmjs.com/package/qs/v/6.16.1) |
 | range-parser | 1.3.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/range-parser/v/1.3.0) |
 | raw-body | 3.0.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/raw-body/v/3.0.2) |
-| require-from-string | 2.0.2 | development / transitive | MIT | [npm](https://www.npmjs.com/package/require-from-string/v/2.0.2) |
+| require-from-string | 2.0.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/require-from-string/v/2.0.2) |
 | router | 2.2.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/router/v/2.2.0) |
 | safer-buffer | 2.1.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/safer-buffer/v/2.1.2) |
 | send | 1.2.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/send/v/1.2.1) |
