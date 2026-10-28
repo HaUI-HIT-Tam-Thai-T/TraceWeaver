@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 import type { EventFilters } from "../schemas";
 import type { EventsState } from "./state";
 
@@ -17,8 +17,3 @@ export type EventsContextValue = {
 export const EventsContext = createContext<EventsContextValue | undefined>(
   undefined,
 );
-export function useEvents() {
-  const value = useContext(EventsContext);
-  if (!value) throw new Error("useEvents must be used inside EventsProvider");
-  return value;
-}

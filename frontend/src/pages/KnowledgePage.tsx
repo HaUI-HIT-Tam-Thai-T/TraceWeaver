@@ -1,8 +1,8 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useAuth } from "../features/auth/state/authContext";
+import { useAuth } from "../features/auth/hooks/useAuth";
 import { AuthStatus } from "../features/auth/components/AuthStatus";
-import { useWorkspace } from "../features/workspace/state/workspaceContext";
+import { useWorkspace } from "../features/workspace/hooks/useWorkspace";
 import { WorkspacePanel } from "../features/workspace/components/WorkspacePanel";
 import {
   createKnowledgeController,
@@ -65,10 +65,17 @@ function KnowledgeBrowser({
   const [controller] = useState(() =>
     createKnowledgeController(knowledgeService, refreshAccess),
   );
-  const snapshot = useSyncExternalStore(
-    controller.subscribe,
-    controller.getSnapshot,
-  );
+  const [snapshot, setSnapshot] = useState(controller.getSnapshot);
+
+  useEffect(() => {
+    function handleChange() {
+      setSnapshot(controller.getSnapshot());
+    }
+    const unsubscribe = controller.subscribe(handleChange);
+    // Catch a change between rendering and registering the listener.
+    handleChange();
+    return unsubscribe;
+  }, [controller]);
   useEffect(() => {
     controller.sync(scope, search);
   }, [controller, scope, search]);

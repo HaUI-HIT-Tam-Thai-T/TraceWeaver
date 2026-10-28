@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createCasesController } from '../../cases/state/controller';
 import { initialCasesState } from '../../cases/state/state';
@@ -13,7 +13,16 @@ export function WaitingCaseList({ scope, filters, caseState, deny }: {
   scope: DashboardScope; filters: DashboardFilters; caseState: 'new' | 'assigned'; deny: (error: ApiError) => void;
 }) {
   const [controller] = useState(() => createCasesController(casesService, async () => undefined));
-  const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
+  const [snapshot, setSnapshot] = useState(controller.getSnapshot);
+  useEffect(() => {
+    function handleChange() {
+      setSnapshot(controller.getSnapshot());
+    }
+    const unsubscribe = controller.subscribe(handleChange);
+    // Catch a change between rendering and registering the listener.
+    handleChange();
+    return unsubscribe;
+  }, [controller]);
   const search = waitingCaseQuery(filters, caseState);
   useEffect(() => { controller.sync(scope, { kind: 'list', search }); }, [controller, scope, search]);
   useEffect(() => () => controller.stop(), [controller]);

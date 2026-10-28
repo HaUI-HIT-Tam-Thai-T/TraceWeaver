@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useCases } from "../features/cases/state/casesContext";
+import { useCases } from "../features/cases/hooks/useCases";
 import { CasesLayout } from "../features/cases/components/CasesLayout";
 import { CasesFeedback } from "../features/cases/components/CasesFeedback";
 import { CaseFiltersForm } from "../features/cases/components/CaseFiltersForm";

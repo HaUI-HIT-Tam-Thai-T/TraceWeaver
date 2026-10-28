@@ -113,7 +113,15 @@ export function activeMembership(state: WorkspaceState): Membership | null {
   );
 }
 
-export function workspacePermissions(membership: Membership | null) {
+export type WorkspacePermissions = {
+  canRead: boolean;
+  canWrite: boolean;
+  canVerify: boolean;
+};
+
+export function workspacePermissions(
+  membership: Membership | null,
+): WorkspacePermissions {
   const roles = membership?.roles ?? [];
   return {
     canRead: roles.some((role) =>

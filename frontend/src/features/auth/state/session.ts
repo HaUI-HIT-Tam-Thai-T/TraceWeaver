@@ -20,10 +20,19 @@ type AuthClient = Pick<
   | "onTokenExpired"
 >;
 
+export interface AuthSession {
+  getSnapshot(): AuthState;
+  subscribe(listener: () => void): () => void;
+  initializeAuth(): Promise<void>;
+  signIn(): Promise<void>;
+  signOut(): Promise<void>;
+  getAccessToken(): Promise<string>;
+}
+
 export function createAuthSession(
   createClient: () => AuthClient,
   redirects: { callbackUri: string; logoutUri: string },
-) {
+): AuthSession {
   let client: AuthClient | undefined;
   let state: AuthState = { status: "initializing" };
   let initialization: Promise<void> | undefined;
@@ -166,5 +175,3 @@ export function createAuthSession(
     getAccessToken,
   };
 }
-
-export type AuthSession = ReturnType<typeof createAuthSession>;

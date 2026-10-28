@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../auth/state/authContext";
-import { useWorkspace } from "../../workspace/state/workspaceContext";
-import { useEvents } from "../state/eventsContext";
+import { useAuth } from "../../auth/hooks/useAuth";
+import { useWorkspace } from "../../workspace/hooks/useWorkspace";
+import { useEvents } from "../hooks/useEvents";
 import { EventFiltersForm } from "./EventFiltersForm";
 import type { ApiError } from "../../../services/apiError";
 import { writeEventQuery } from "../query";

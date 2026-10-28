@@ -1,5 +1,5 @@
 import type { CaseTransition } from '../workflow';
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 import type { CasesState } from "./state";
 import type { CaseFilters } from "../schemas";
 import type { EvidenceCreate } from '../schemas';
@@ -20,8 +20,3 @@ export type CasesContextValue = {
 export const CasesContext = createContext<CasesContextValue | undefined>(
   undefined,
 );
-export function useCases() {
-  const value = useContext(CasesContext);
-  if (!value) throw new Error("useCases must be used inside CasesProvider");
-  return value;
-}

@@ -10,6 +10,30 @@ export type CasesScope = {
   canWrite?: boolean;
   canVerify?: boolean;
 };
+export type CaseEvidenceSnapshot = {
+  status: 'idle' | 'loading' | 'ready' | 'error';
+  runId: string | null;
+  events: Event[];
+  error: ApiError | null;
+};
+export type CaseEvidenceMutation = {
+  status: 'idle' | 'sending' | 'success' | 'uncertain' | 'error' | 'locked';
+  error: ApiError | null;
+  savedId: string | null;
+};
+export type CaseWorkflow = {
+  status: 'idle' | 'validating' | 'sending' | 'success' | 'uncertain' | 'conflict' | 'error';
+  attempt: { body: CaseTransition; key: string; createdAt: number } | null;
+  error: ApiError | null;
+  resultVersion: number | null;
+};
+export type CaseWorkflowGraph = {
+  status: 'idle' | 'loading' | 'ready' | 'error';
+  runId: string | null;
+  pendingCount: number | null;
+  error: ApiError | null;
+};
+
 export type CasesState = {
   scope: CasesScope | null;
   status: "idle" | "active" | "invalid" | "blocked" | "reauth";
@@ -29,20 +53,15 @@ export type CasesState = {
   index: number;
   nextCursor: string | null;
   error: ApiError | null;
-  snapshot: { status: 'idle' | 'loading' | 'ready' | 'error'; runId: string | null; events: Event[]; error: ApiError | null };
-  evidenceMutation: { status: 'idle' | 'sending' | 'success' | 'uncertain' | 'error' | 'locked'; error: ApiError | null; savedId: string | null };
-  workflow: {
-    status: 'idle' | 'validating' | 'sending' | 'success' | 'uncertain' | 'conflict' | 'error';
-    attempt: { body: CaseTransition; key: string; createdAt: number } | null;
-    error: ApiError | null;
-    resultVersion: number | null;
-  };
-  workflowGraph: { status: 'idle' | 'loading' | 'ready' | 'error'; runId: string | null; pendingCount: number | null; error: ApiError | null };
+  snapshot: CaseEvidenceSnapshot;
+  evidenceMutation: CaseEvidenceMutation;
+  workflow: CaseWorkflow;
+  workflowGraph: CaseWorkflowGraph;
 };
-export const initialWorkflow = (): CasesState['workflow'] => ({ status: 'idle', attempt: null, error: null, resultVersion: null });
-export const initialWorkflowGraph = (): CasesState['workflowGraph'] => ({ status: 'idle', runId: null, pendingCount: null, error: null });
-export const initialEvidenceMutation = (): CasesState['evidenceMutation'] => ({ status: 'idle', error: null, savedId: null });
-export const initialEvidenceSnapshot = (): CasesState['snapshot'] => ({ status: 'idle', runId: null, events: [], error: null });
+export const initialWorkflow = (): CaseWorkflow => ({ status: 'idle', attempt: null, error: null, resultVersion: null });
+export const initialWorkflowGraph = (): CaseWorkflowGraph => ({ status: 'idle', runId: null, pendingCount: null, error: null });
+export const initialEvidenceMutation = (): CaseEvidenceMutation => ({ status: 'idle', error: null, savedId: null });
+export const initialEvidenceSnapshot = (): CaseEvidenceSnapshot => ({ status: 'idle', runId: null, events: [], error: null });
 export function initialCasesState(
   scope: CasesScope | null = null,
   filters: CaseFilters = { limit: 50 },

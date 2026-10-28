@@ -4,6 +4,17 @@ import { ApiError } from "../../../services/apiError.ts";
 import { eventSchema, eventsPageSchema, filtersSchema } from "../schemas.ts";
 import type { Event, EventFilters, EventsPage } from "../schemas.ts";
 
+export type EventsOptions = { signal?: AbortSignal; cursor?: string };
+
+export interface EventsService {
+  listEvents(
+    workspaceId: string,
+    filters: EventFilters,
+    options?: EventsOptions,
+  ): Promise<EventsPage>;
+  getEvent(workspaceId: string, eventId: string, signal?: AbortSignal): Promise<Event>;
+}
+
 function invalid(code: string) {
   return new ApiError({
     kind: "client",
@@ -12,11 +23,13 @@ function invalid(code: string) {
   });
 }
 
-export function createEventsService(client: Pick<AxiosInstance, "get">) {
+export function createEventsService(
+  client: Pick<AxiosInstance, "get">,
+): EventsService {
   async function listEvents(
     workspaceId: string,
     filters: EventFilters,
-    options: { signal?: AbortSignal; cursor?: string } = {},
+    options: EventsOptions = {},
   ): Promise<EventsPage> {
     const parsed = filtersSchema.safeParse(filters);
     if (
@@ -65,5 +78,3 @@ export function createEventsService(client: Pick<AxiosInstance, "get">) {
   }
   return { listEvents, getEvent };
 }
-
-export type EventsService = ReturnType<typeof createEventsService>;

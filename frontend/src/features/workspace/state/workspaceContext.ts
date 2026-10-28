@@ -1,7 +1,7 @@
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 import type { WorkspaceController } from "./controller";
 import type { Membership } from "../schemas";
-import type { WorkspaceState, workspacePermissions } from "./state";
+import type { WorkspaceState, WorkspacePermissions } from "./state";
 
 export type WorkspaceContextValue = Pick<
   WorkspaceController,
@@ -9,16 +9,9 @@ export type WorkspaceContextValue = Pick<
 > & {
   state: WorkspaceState;
   membership: Membership | null;
-  permissions: ReturnType<typeof workspacePermissions>;
+  permissions: WorkspacePermissions;
 };
 
 export const WorkspaceContext = createContext<
   WorkspaceContextValue | undefined
 >(undefined);
-
-export function useWorkspace() {
-  const value = useContext(WorkspaceContext);
-  if (!value)
-    throw new Error("useWorkspace must be used inside WorkspaceProvider");
-  return value;
-}

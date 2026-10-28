@@ -9,6 +9,11 @@ export type SourcesOptions = {
   limit?: number;
 };
 
+export interface WorkspaceService {
+  getMe(signal?: AbortSignal): Promise<Me>;
+  listSources(workspaceId: string, options?: SourcesOptions): Promise<SourcesPage>;
+}
+
 function invalidResponse() {
   return new ApiError({
     kind: "client",
@@ -17,7 +22,9 @@ function invalidResponse() {
   });
 }
 
-export function createWorkspaceService(client: Pick<AxiosInstance, "get">) {
+export function createWorkspaceService(
+  client: Pick<AxiosInstance, "get">,
+): WorkspaceService {
   async function getMe(signal?: AbortSignal): Promise<Me> {
     const response = await client.get<unknown>("/api/v1/me", { signal });
     const result = meSchema.safeParse(response.data);
@@ -61,5 +68,3 @@ export function createWorkspaceService(client: Pick<AxiosInstance, "get">) {
 
   return { getMe, listSources };
 }
-
-export type WorkspaceService = ReturnType<typeof createWorkspaceService>;

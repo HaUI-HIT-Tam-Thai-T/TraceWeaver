@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../auth/state/authContext";
+import { useAuth } from "../../auth/hooks/useAuth";
 import { AuthStatus } from "../../auth/components/AuthStatus";
-import { useWorkspace } from "../../workspace/state/workspaceContext";
+import { useWorkspace } from "../../workspace/hooks/useWorkspace";
 import { WorkspacePanel } from "../../workspace/components/WorkspacePanel";
 
 export function CasesLayout({
@@ -32,7 +32,14 @@ export function CasesLayout({
       </nav>
       <AuthStatus />
       <WorkspacePanel />
-      <div key={JSON.stringify([workspace.me?.subject, workspace.selectedWorkspaceId])}>{content}</div>
+      <div
+        key={JSON.stringify([
+          workspace.me?.subject,
+          workspace.selectedWorkspaceId,
+        ])}
+      >
+        {content}
+      </div>
     </>
   );
 }

@@ -8,12 +8,24 @@ import {
   workspacePermissions,
   workspaceReducer,
 } from "./state.ts";
-import type { WorkspaceAction } from "./state.ts";
+import type { WorkspaceAction, WorkspaceState } from "./state.ts";
 
 type DeniedScope = { workspaceId: string; error: ApiError };
 
+export interface WorkspaceController {
+  getSnapshot(): WorkspaceState;
+  subscribe(listener: () => void): () => void;
+  start(): Promise<void>;
+  stop(): void;
+  selectWorkspace(workspaceId: string): boolean;
+  refreshAccess(): Promise<void>;
+  loadMoreSources(): Promise<void>;
+}
+
 // One in-memory state source. Every update goes through the pure reducer.
-export function createWorkspaceController(service: WorkspaceService) {
+export function createWorkspaceController(
+  service: WorkspaceService,
+): WorkspaceController {
   let state = initialWorkspaceState();
   let enabled = false;
   let generation = 0;
@@ -193,5 +205,3 @@ export function createWorkspaceController(service: WorkspaceService) {
     loadMoreSources: () => loadSources(true),
   };
 }
-
-export type WorkspaceController = ReturnType<typeof createWorkspaceController>;

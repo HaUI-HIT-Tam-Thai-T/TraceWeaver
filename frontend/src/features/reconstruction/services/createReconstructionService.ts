@@ -2,7 +2,19 @@ import type { AxiosInstance } from "axios";
 import { z } from "zod";
 import { ApiError } from "../../../services/apiError.ts";
 import { graphSchema, runCreateSchema, runSchema } from "../schemas.ts";
-import type { RunCreate } from "../schemas.ts";
+import type { Graph, Run, RunCreate } from "../schemas.ts";
+
+export type CreateRunOptions = { idempotencyKey: string; signal?: AbortSignal };
+
+export interface ReconstructionService {
+  createRun(
+    workspaceId: string,
+    body: RunCreate,
+    options: CreateRunOptions,
+  ): Promise<Run>;
+  getRun(workspaceId: string, runId: string, signal?: AbortSignal): Promise<Run>;
+  getGraph(workspaceId: string, runId: string, signal?: AbortSignal): Promise<Graph>;
+}
 
 const idSchema = z.uuid();
 const keySchema = z.string().regex(/^[\x21-\x7e]{1,200}$/);
@@ -14,7 +26,7 @@ export const invalidRunResponse = () =>
   });
 export function createReconstructionService(
   client: Pick<AxiosInstance, "get" | "post">,
-) {
+): ReconstructionService {
   const path = (workspaceId: string, runId?: string) => {
     if (
       !idSchema.safeParse(workspaceId).success ||
@@ -26,8 +38,8 @@ export function createReconstructionService(
   async function createRun(
     workspaceId: string,
     body: RunCreate,
-    options: { idempotencyKey: string; signal?: AbortSignal },
-  ) {
+    options: CreateRunOptions,
+  ): Promise<Run> {
     const url = path(workspaceId);
     const parsed = runCreateSchema.safeParse(body);
     if (!parsed.success || !keySchema.safeParse(options.idempotencyKey).success)
@@ -54,7 +66,7 @@ export function createReconstructionService(
     workspaceId: string,
     runId: string,
     signal?: AbortSignal,
-  ) {
+  ): Promise<Run> {
     const response = await client.get<unknown>(path(workspaceId, runId), {
       signal,
     });
@@ -66,7 +78,7 @@ export function createReconstructionService(
     workspaceId: string,
     runId: string,
     signal?: AbortSignal,
-  ) {
+  ): Promise<Graph> {
     const response = await client.get<unknown>(
       `${path(workspaceId, runId)}/graph`,
       { signal },
@@ -78,6 +90,3 @@ export function createReconstructionService(
   }
   return { createRun, getRun, getGraph };
 }
-export type ReconstructionService = ReturnType<
-  typeof createReconstructionService
->;

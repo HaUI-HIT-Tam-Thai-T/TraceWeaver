@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { CaseDetail } from './schemas.ts'
+import type { CaseDetail, WorkflowHistory } from './schemas.ts'
 import type { CasesScope } from './state/state.ts'
 
 export const caseActionSchema = z.enum(['assign', 'start', 'request_verification', 'verify_close', 'verification_failed', 'reopen'])
@@ -21,7 +21,7 @@ export const transitionStates = {
   reopen: { from: 'closed', to: 'investigating' },
 } as const
 export function lastCloseReason(detail: CaseDetail): string | null {
-  const entry = detail.history.filter(item => item.action === 'verify_close').reduce<CaseDetail['history'][number] | null>((last, item) => !last || item.version > last.version ? item : last, null)
+  const entry = detail.history.filter(item => item.action === 'verify_close').reduce<WorkflowHistory | null>((last, item) => !last || item.version > last.version ? item : last, null)
   return entry?.reason ?? null
 }
 export function transitionIssue(detail: CaseDetail, scope: CasesScope, action: CaseAction, reason = '', pendingCount: number | null = null): string | null {

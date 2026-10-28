@@ -5,10 +5,14 @@ import type { EventFilters } from "./schemas.ts";
 const filterKeys = ["source_id", "from", "to", "action", "q"] as const;
 const knownKeys = [...filterKeys, "limit", "event_id"];
 
-export function readEventQuery(search: string) {
+export type EventQuery =
+  | { success: false }
+  | { success: true; filters: EventFilters; eventId: string | null };
+
+export function readEventQuery(search: string): EventQuery {
   const params = new URLSearchParams(search);
   if (knownKeys.some((key) => params.getAll(key).length > 1))
-    return { success: false } as const;
+    return { success: false };
   const result = filtersSchema.safeParse({
     ...Object.fromEntries(
       filterKeys.flatMap((key) =>
@@ -23,9 +27,9 @@ export function readEventQuery(search: string) {
     ![25, 50, 100].includes(result.data.limit) ||
     (eventId !== null && !z.uuid().safeParse(eventId).success)
   ) {
-    return { success: false } as const;
+    return { success: false };
   }
-  return { success: true, filters: result.data, eventId } as const;
+  return { success: true, filters: result.data, eventId };
 }
 
 export function writeEventQuery(

@@ -776,3 +776,109 @@ HTTP smoke trên server có sẵn tại localhost:5173: tám URL gồm home/even
 knowledge/dashboard/callback/not-found và bảy entry/page modules đều 200. Không mở được
 Vite thứ hai vì port 5173 đã được dùng; giữ nguyên tiến trình đang có, không đổi cổng.
 Chưa nghiệm thu lại tương tác UI/login qua browser trong refactor này.
+
+## React cơ bản với TSX
+
+Đã chuyển phần kết nối React với session/controller từ `useSyncExternalStore`
+sang `useState` và `useEffect`. Mỗi component đăng ký listener của controller hiện
+có, đọc lại state ngay sau đăng ký để không bỏ lỡ thay đổi giữa render và effect,
+và gỡ listener khi cleanup. Không tạo hook subscription tổng quát hoặc nguồn state
+nghiệp vụ mới; snapshot trong React chỉ phục vụ render. Các guard theo auth/scope,
+AbortController, generation, polling và khóa mutation của controller được giữ nguyên.
+
+Routes giữ tám đường dẫn và mỗi object chỉ có `path`, `element`. Lazy/Suspense cho
+năm page là ngoại lệ được người dùng yêu cầu riêng, mô tả ở mục Lazy loading bên dưới.
+Không tăng giới hạn cảnh báo, thay cấu hình strict hoặc thêm thư viện để che cảnh báo.
+
+Các file thay đổi trong lượt này:
+
+- `src/features/auth/state/AuthProvider.tsx`
+- `src/features/workspace/state/WorkspaceProvider.tsx`
+- `src/features/events/state/EventsProvider.tsx`
+- `src/features/cases/state/CasesProvider.tsx`
+- `src/features/reconstruction/components/ReconstructionPanel.tsx`
+- `src/features/cases/components/CreateCasePanel.tsx`
+- `src/features/dashboard/components/WaitingCaseList.tsx`
+- `src/pages/DashboardPage.tsx`
+- `src/pages/KnowledgePage.tsx`
+- `src/constants/routes.ts`
+- `tests/routes-ui.test.mjs`
+- `README.md`
+
+Kiến thức sử dụng: function component TSX, props/children, `useState`, `useEffect`
+và cleanup, `useRef`, Context, custom hook đơn giản, React Router và React Hook Form
+hiện có. Reducer/controller thuần JavaScript tiếp tục phục vụ nghiệp vụ và kiểm thử;
+không sử dụng thêm hook React nâng cao hoặc Redux.
+
+Kiểm tra tại bước chuyển React cơ bản trước khi thêm ngoại lệ lazy: lint không có
+cảnh báo, 173/173 tests và build strict pass. Kết quả hiện tại ở mục Lazy loading.
+
+Kiểm tra trên trình duyệt với operator và BE thật: đăng nhập, callback, reload SSO,
+workspace với ba sources; list/detail events, chọn root và form mặc định; revalidate
+quyền xóa root/reconstruction; bốn counter dashboard và hai danh sách waiting new/
+assigned; case list/detail (mở liên kết bằng bàn phím), history/evidence và guard
+reviewer; Knowledge search/empty; logout xóa dữ liệu workspace khỏi UI. Reload qua
+check-sso vẫn quay về trang chủ theo luồng auth hiện có. Proxy cần chạy dev server
+ngoài sandbox vì kết nối API trong sandbox bị EACCES.
+
+Lượt này không gửi mutation nghiệp vụ để tạo run/case hoặc ghi review/evidence/
+transition; các tình huống này được bao phủ bằng test hiện có. Chưa kiểm lại tài
+khoản viewer trên BE thật; không có tài khoản reviewer thật. Các thay đổi chưa commit
+từ những lượt trước được giữ nguyên; không commit/push.
+
+## Lazy loading theo page
+
+Dashboard, Events, Cases, Case Detail và Knowledge dùng `React.lazy` ở cấp module
+với dynamic `import()`. `.then(module => ({ default: module.Page }))` giữ named export
+của page hiện có. Home, callback đăng nhập và 404 vẫn import trực tiếp; không đổi
+đường dẫn, DTO/API hoặc cơ chế quản lý phiên/quyền.
+
+`AppRoutes` bọc `Routes` bằng `Suspense`; các provider vẫn nằm bên ngoài. Khi code
+chưa tải xong, `PageLoading` hiện “Đang tải trang…” với `role="status"`. Đây là loading
+module, độc lập loading API của từng feature. Nếu import thất bại, loader trả về
+`PageLoadError` với thông báo an toàn và nút “Tải lại trang”; không hiện raw error,
+không tự retry, gọi lại POST hoặc thêm class Error Boundary. Kết quả loader được React
+cache; khi đã lỗi, người dùng tải lại toàn trang để bắt đầu lần tải mới. Cơ chế này
+chỉ xử lý lỗi import, không thay thế xử lý lỗi render/API.
+
+Đo bằng `npm run build -- --manifest`: năm page đều có `isDynamicEntry: true` và không
+nằm trong tập dependency tĩnh của entry. Bảng tính JavaScript của entry cộng toàn bộ
+dependency tĩnh dùng chung, không chỉ riêng file entry:
+
+| Chỉ số | Import trực tiếp trước đó | Lazy hiện tại |
+| --- | --- | --- |
+| Entry JavaScript | 596.371 kB | 231.552 kB |
+| Tổng JavaScript ban đầu (gồm shared chunks) | 596.371 kB | 484.832 kB |
+| Tổng gzip của các file ban đầu | 180.479 kB | 155.632 kB |
+
+JavaScript ban đầu giảm 18,7%; gzip giảm 13,8%. Đơn vị kB = 1.000 bytes; gzip dùng
+cùng `node:zlib.gzipSync` trên từng file rồi cộng, không phải số đo băng thông thực tế
+trên browser. CSS và request dữ liệu API không nằm trong bảng. Build không còn cảnh
+báo chunk trên 500 kB; không thay ngưỡng cảnh báo hoặc cấu hình strict.
+
+File đổi trong lượt lazy loading:
+
+- `src/constants/routes.ts`
+- `src/routes/AppRoutes.tsx`
+- `src/routes/PageLoadFeedback.tsx` (mới)
+- `tests/routes-ui.test.mjs`
+- `rule.md` (ngoại lệ routing; file local đang bị Git ignore)
+- `README.md`
+
+Kiểm tra: lint sạch, 175/175 tests pass, build TypeScript strict với env hợp lệ và
+`git diff --check` pass. Test routes dùng streaming SSR đợi đủ tám page/guard; có
+module chậm để xác nhận loading rồi nội dung, module lỗi để xác nhận thông báo an
+toàn/nút reload và không tự thử import lại khi render lại.
+
+Trình duyệt production preview tại localhost:5173: Home/callback tải trực tiếp,
+Knowledge tải động; mô phỏng thiếu file chunk Knowledge trong dist để kiểm tra lỗi,
+khôi phục file rồi bấm reload và tải được trang. Back/Forward giữa Home và Dashboard
+hoạt động. Login/callback production chạy được nhưng request API cross-origin không
+nhận được response tại môi trường này; không kết luận nguyên nhân là CORS.
+
+Với Vite dev/proxy local đã có: operator truy cập được cả năm lazy page, dashboard
+counter, 13 cases và detail/history/evidence, 36 events, Knowledge empty; không gửi
+mutation nghiệp vụ. Reload vẫn qua check-sso rồi về Home theo auth hiện có, kể cả URL
+không tồn tại. 404 được kiểm bằng SSR; chưa xác nhận màn hình 404 khi mở trực tiếp trên
+browser do luồng auth đó. Không mở rộng nhiệm vụ sang sửa auth hoặc BE. Giữ các thay
+đổi chưa commit trước đó; không thêm dependency, commit hoặc push.

@@ -3,18 +3,30 @@ import { normalizeApiError } from "../../../services/apiError.ts";
 import type { ApiError } from "../../../services/apiError.ts";
 import type { EventsService } from "../services/createEventsService.ts";
 import { initialEventsState, eventsReducer } from "./state.ts";
-import type { EventsAction, EventsScope } from "./state.ts";
+import type { EventsAction, EventsScope, EventsState } from "./state.ts";
 import type { EventFilters } from "../schemas.ts";
-import type { readEventQuery } from "../query.ts";
+import type { EventQuery } from "../query.ts";
 
-type Query = ReturnType<typeof readEventQuery>;
+export interface EventsController {
+  getSnapshot(): EventsState;
+  subscribe(listener: () => void): () => void;
+  sync(scope: EventsScope | null, visible: boolean, query: EventQuery): void;
+  stop(): void;
+  refresh(filters?: EventFilters): Promise<void>;
+  openDetail(id: string | null): Promise<void>;
+  selectRoot(): boolean;
+  clearRoot(): void;
+  previousPage(): Promise<void>;
+  nextPage(): Promise<void>;
+}
+
 const scopeId = (scope: EventsScope) =>
   JSON.stringify([scope.subject, scope.workspaceId]);
 
 export function createEventsController(
   service: EventsService,
   revalidateWorkspace: () => Promise<void>,
-) {
+): EventsController {
   let state = initialEventsState();
   let active = false;
   let generation = 0;
@@ -159,7 +171,11 @@ export function createEventsController(
     return loadPage(0, [null]);
   }
 
-  function sync(scope: EventsScope | null, visible: boolean, query: Query) {
+  function sync(
+    scope: EventsScope | null,
+    visible: boolean,
+    query: EventQuery,
+  ) {
     if (!scope) {
       abortAll();
       active = false;
@@ -264,5 +280,3 @@ export function createEventsController(
     nextPage: () => changePage(1),
   };
 }
-
-export type EventsController = ReturnType<typeof createEventsController>;

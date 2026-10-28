@@ -1,11 +1,14 @@
 import { workspaceMutations } from '../../../services/workspaceMutations';
 import { apiClient } from "../../../services/apiClient";
 import { createLinkReviewService } from "./createLinkReviewService";
+import type { LinkReviewService } from "./createLinkReviewService";
 
 const raw = createLinkReviewService(apiClient);
-export const linkReviewService = {
+export const linkReviewService: LinkReviewService = {
   ...raw,
-  reviewLink: (...args: Parameters<typeof raw.reviewLink>) => workspaceMutations.afterMutation(args[0], () => raw.reviewLink(...args)),
-  createManualLink: (...args: Parameters<typeof raw.createManualLink>) => workspaceMutations.afterMutation(args[0], () => raw.createManualLink(...args)),
+  reviewLink: (workspaceId, runId, linkId, body, signal) =>
+    workspaceMutations.afterMutation(workspaceId, () => raw.reviewLink(workspaceId, runId, linkId, body, signal)),
+  createManualLink: (workspaceId, runId, body, signal) =>
+    workspaceMutations.afterMutation(workspaceId, () => raw.createManualLink(workspaceId, runId, body, signal)),
 };
 export const { reviewLink, createManualLink } = linkReviewService;

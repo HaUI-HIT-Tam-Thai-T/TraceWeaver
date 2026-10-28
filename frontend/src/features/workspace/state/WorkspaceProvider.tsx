@@ -1,6 +1,6 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { useAuth } from "../../auth/state/authContext";
+import { useAuth } from "../../auth/hooks/useAuth";
 import { createWorkspaceController } from "./controller";
 import { workspaceService } from "../services/service";
 import {
@@ -17,10 +17,17 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [controller] = useState(() =>
     createWorkspaceController(workspaceService),
   );
-  const snapshot = useSyncExternalStore(
-    controller.subscribe,
-    controller.getSnapshot,
-  );
+  const [snapshot, setSnapshot] = useState(controller.getSnapshot);
+
+  useEffect(() => {
+    function handleChange() {
+      setSnapshot(controller.getSnapshot());
+    }
+    const unsubscribe = controller.subscribe(handleChange);
+    // Catch a change between rendering and registering the listener.
+    handleChange();
+    return unsubscribe;
+  }, [controller]);
   const authenticated = auth.status === "authenticated";
 
   useEffect(() => {

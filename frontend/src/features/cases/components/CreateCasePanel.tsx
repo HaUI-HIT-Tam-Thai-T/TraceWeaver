@@ -1,9 +1,9 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/state/authContext";
-import { useWorkspace } from "../../workspace/state/workspaceContext";
+import { useAuth } from "../../auth/hooks/useAuth";
+import { useWorkspace } from "../../workspace/hooks/useWorkspace";
 import type { EventsScope } from "../../events/state/state";
 import { reconstructionService } from "../../reconstruction/services/service";
 import { casesService } from "../services/service";
@@ -35,10 +35,17 @@ export function CreateCasePanel({
       revalidate: refreshAccess,
     }),
   );
-  const snapshot = useSyncExternalStore(
-    controller.subscribe,
-    controller.getSnapshot,
-  );
+  const [snapshot, setSnapshot] = useState(controller.getSnapshot);
+
+  useEffect(() => {
+    function handleChange() {
+      setSnapshot(controller.getSnapshot());
+    }
+    const unsubscribe = controller.subscribe(handleChange);
+    // Catch a change between rendering and registering the listener.
+    handleChange();
+    return unsubscribe;
+  }, [controller]);
   const {
     register,
     handleSubmit,

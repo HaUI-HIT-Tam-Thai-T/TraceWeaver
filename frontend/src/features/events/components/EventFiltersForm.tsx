@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useWorkspace } from "../../workspace/state/workspaceContext";
-import { useEvents } from "../state/eventsContext";
+import { useWorkspace } from "../../workspace/hooks/useWorkspace";
+import { useEvents } from "../hooks/useEvents";
 import { eventFormSchema, formDefaults, formToFilters } from "../query";
 import type { EventFormValues } from "../query";
 

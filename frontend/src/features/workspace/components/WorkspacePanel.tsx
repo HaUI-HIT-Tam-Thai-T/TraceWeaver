@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ApiError } from "../../../services/apiError";
-import { useAuth } from "../../auth/state/authContext";
-import { useWorkspace } from "../state/workspaceContext";
+import { useAuth } from "../../auth/hooks/useAuth";
+import { useWorkspace } from "../hooks/useWorkspace";
 
 function ErrorMessage({ error }: { error: ApiError }) {
   return (

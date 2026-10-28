@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../../auth/state/authContext";
-import { useCases } from "../state/casesContext";
+import { useAuth } from "../../auth/hooks/useAuth";
+import { useCases } from "../hooks/useCases";
 
 export function CasesFeedback() {
   const { state, refresh } = useCases();

@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { matchPath, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/state/authContext";
-import { useWorkspace } from "../../workspace/state/workspaceContext";
+import { useAuth } from "../../auth/hooks/useAuth";
+import { useWorkspace } from "../../workspace/hooks/useWorkspace";
 import { casesService } from "../services/service";
 import { createCasesController } from "./controller";
 import { CasesContext } from "./casesContext";
@@ -22,10 +22,17 @@ export function CasesProvider({ children }: { children: ReactNode }) {
   const [controller] = useState(() =>
     createCasesController(casesService, refreshAccess, { addEvidence: casesService.addEvidence, getGraph: reconstructionService.getGraph }, { transitionCase: casesService.transitionCase }),
   );
-  const snapshot = useSyncExternalStore(
-    controller.subscribe,
-    controller.getSnapshot,
-  );
+  const [snapshot, setSnapshot] = useState(controller.getSnapshot);
+
+  useEffect(() => {
+    function handleChange() {
+      setSnapshot(controller.getSnapshot());
+    }
+    const unsubscribe = controller.subscribe(handleChange);
+    // Catch a change between rendering and registering the listener.
+    handleChange();
+    return unsubscribe;
+  }, [controller]);
   const location = useLocation();
   const navigate = useNavigate();
   const lastScope = useRef<string | null>(null);

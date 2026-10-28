@@ -1,10 +1,10 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "../../auth/state/authContext";
-import { useEvents } from "../../events/state/eventsContext";
+import { useAuth } from "../../auth/hooks/useAuth";
+import { useEvents } from "../../events/hooks/useEvents";
 import { eventsService } from "../../events/services/service";
-import { useWorkspace } from "../../workspace/state/workspaceContext";
+import { useWorkspace } from "../../workspace/hooks/useWorkspace";
 import { createReconstructionController } from "../state/controller";
 import { reconstructionService } from "../services/service";
 import { initialReconstructionState } from "../state/state";
@@ -50,10 +50,17 @@ function ReconstructionForm({
       revalidate: refreshAccess,
     }),
   );
-  const snapshot = useSyncExternalStore(
-    controller.subscribe,
-    controller.getSnapshot,
-  );
+  const [snapshot, setSnapshot] = useState(controller.getSnapshot);
+
+  useEffect(() => {
+    function handleChange() {
+      setSnapshot(controller.getSnapshot());
+    }
+    const unsubscribe = controller.subscribe(handleChange);
+    // Catch a change between rendering and registering the listener.
+    handleChange();
+    return unsubscribe;
+  }, [controller]);
   const {
     register,
     handleSubmit,

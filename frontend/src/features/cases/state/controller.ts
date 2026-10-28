@@ -21,8 +21,8 @@ const scopeId = (scope: CasesScope) =>
 export function createCasesController(
   service: Pick<CasesService, "listCases" | "getCase">,
   revalidate: () => Promise<void>,
-  evidence?: { addEvidence: CasesService['addEvidence']; getGraph: (wid: string, rid: string, signal?: AbortSignal) => Promise<Graph> },
-  workflow?: { transitionCase: CasesService['transitionCase']; now?: () => number; newKey?: () => string },
+  evidence?: Pick<CasesService, 'addEvidence'> & { getGraph: (wid: string, rid: string, signal?: AbortSignal) => Promise<Graph> },
+  workflow?: Pick<CasesService, 'transitionCase'> & { now?: () => number; newKey?: () => string },
 ) {
   let state = initialCasesState();
   let view: CasesView = { kind: "none" };
