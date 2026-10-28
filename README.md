@@ -15,11 +15,18 @@ backend/
   tests/         # Backend, contract và DB integration
   contracts/     # OpenAPI, JSON Schema và fixtures
   package.json
-frontend/        # Khung giao diện
-ai/              # Khung scorer và training
-simulator/       # Khung sinh dữ liệu giả
+frontend/        # Giao diện, cấu hình và tests riêng
+ai/              # Scorer Python, model có version, features và tests
+simulator/       # Scenarios, fixtures và nguồn dữ liệu giả lập
+docs/            # Mục lục tài liệu, hiện trạng và hướng dẫn tích hợp
+.planning/       # Kế hoạch và trạng thái làm việc local (Git ignore)
+.local/          # Gói bàn giao, báo cáo, công cụ và môi trường local (Git ignore)
 .github/         # Issue/PR templates và CI
 ```
+
+Điểm bắt đầu đọc tài liệu: [docs/README.md](docs/README.md). Source chạy nằm trong `backend/`, `frontend/`, `ai/` và `simulator/`; mỗi thành phần giữ cấu hình/tests của mình. Model AI đang dùng nằm ở `ai/artifacts/sandbox-v2/`.
+
+Gói AI bàn giao gốc được lưu tại `.local/handoffs/ai-be-runtime-v2/`. Báo cáo local nằm trong `.local/reports/`, script kiểm/demo dùng riêng nằm trong `.local/scripts/`, bản nháp release/PR nằm trong `.local/releases/`. Bộ test AI đang chạy và payload để thử bằng Swagger vẫn ở `.local/ai-test/`. `.env`, credentials local, lockfile và Compose giữ ở root theo đường dẫn khởi động hiện tại.
 
 Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, Keycloak local/Swagger PKCE login, JWT/JWKS, batch ingestion, GET /me, sources, knowledge, events, event detail và [run/graph, review/manual links](backend/RECONSTRUCTION.md) với quyền từ DB, snapshot, version và audit. [Case/workflow](backend/CASES.md) đã có 5 API; [dashboard](backend/DASHBOARD.md) có số đếm cùng scope và bộ lọc thời gian cho case drill-down. [Core workflow HTTP](backend/WORKFLOW.md) có ba API dùng app JWT riêng và JWT người dùng được kiểm độc lập; OpenAPI có20 Node operations và1 private Python scorer đã implemented trong source. Model v2 cần opt-in; baseline vẫn rule_only/degraded. Phạm vi triển khai hiện tại là BE.
 
