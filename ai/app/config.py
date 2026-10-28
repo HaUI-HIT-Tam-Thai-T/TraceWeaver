@@ -12,6 +12,7 @@ class Config:
     app_env: str = "development"
     host: str = "127.0.0.1"
     port: int = 8000
+    model_path: str = ""
 
     def __post_init__(self):
         if (not isinstance(self.service_secret, str) or len(self.service_secret) < 32
@@ -32,10 +33,13 @@ def read_config(env=None):
     port = env.get("SCORER_PORT", "8000")
     if not port.isascii() or not port.isdigit():
         raise ValueError("SCORER_PORT must be an integer between 1 and 65535")
+    app_env = env.get("APP_ENV", "development")
+    default_model = "ai/artifacts/model_v1.json" if app_env != "test" else ""
     return Config(
         service_secret=env.get("SCORER_SERVICE_SECRET", ""),
         mode=env.get("SCORER_MODE", "model"),
-        app_env=env.get("APP_ENV", "development"),
+        app_env=app_env,
         host=env.get("SCORER_HOST", "127.0.0.1"),
         port=int(port),
+        model_path=env.get("SCORER_MODEL_PATH", default_model),
     )
