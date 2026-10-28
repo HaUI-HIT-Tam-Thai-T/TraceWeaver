@@ -6,15 +6,23 @@ import { MemoryRouter } from 'react-router-dom'
 import { createServer } from 'vite'
 
 test('auth UI renders loading, session failure, login/logout, and callback feedback', async () => {
-  const server = await createServer({ configFile: false, server: { middlewareMode: true } })
+  const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-auth', server: { middlewareMode: true, hmr: false, ws: false } })
   try {
     const { AuthContext } = await server.ssrLoadModule('/src/features/auth/authContext.ts')
     const { HomePage } = await server.ssrLoadModule('/src/pages/HomePage.tsx')
     const { AuthCallbackPage } = await server.ssrLoadModule('/src/pages/AuthCallbackPage.tsx')
+    const { WorkspaceContext } = await server.ssrLoadModule('/src/features/workspace/workspaceContext.ts')
+    const { initialWorkspaceState } = await server.ssrLoadModule('/src/features/workspace/state.ts')
+    const workspace = {
+      state: initialWorkspaceState(), membership: null,
+      permissions: { canRead: false, canWrite: false, canVerify: false },
+      selectWorkspace: () => false, refreshAccess: async () => {}, loadMoreSources: async () => {},
+    }
     const actions = { signIn: async () => {}, signOut: async () => {}, getAccessToken: async () => '' }
     function render(state, page = HomePage) {
       return renderToString(createElement(AuthContext.Provider, { value: { ...actions, state } },
-        createElement(MemoryRouter, null, createElement(page))))
+        createElement(WorkspaceContext.Provider, { value: workspace },
+          createElement(MemoryRouter, null, createElement(page)))))
     }
     const loading = render({ status: 'initializing' })
     assert.match(loading, /role="status"/)

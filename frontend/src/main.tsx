@@ -6,6 +6,9 @@ import './index.css'
 import App from './App.tsx'
 import { initializeAuth } from './features/auth/auth'
 import { AuthProvider } from './features/auth/AuthProvider'
+import { WorkspaceProvider } from './features/workspace/WorkspaceProvider'
+import { EventsProvider } from './features/events/EventsProvider'
+import { CasesProvider } from './features/cases/CasesProvider'
 
 const root = document.getElementById('root')
 if (!root) throw new Error('Missing root element')
@@ -32,9 +35,11 @@ await initializeAuth()
 createRoot(root).render(
   <StrictMode>
     <AuthProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <WorkspaceProvider>
+        <BrowserRouter>
+          <EventsProvider><CasesProvider><App /></CasesProvider></EventsProvider>
+        </BrowserRouter>
+      </WorkspaceProvider>
     </AuthProvider>
   </StrictMode>,
 )
