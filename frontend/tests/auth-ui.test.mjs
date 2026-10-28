@@ -8,11 +8,11 @@ import { createServer } from 'vite'
 test('auth UI renders loading, session failure, login/logout, and callback feedback', async () => {
   const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-auth', server: { middlewareMode: true, hmr: false, ws: false } })
   try {
-    const { AuthContext } = await server.ssrLoadModule('/src/features/auth/authContext.ts')
+    const { AuthContext } = await server.ssrLoadModule('/src/features/auth/state/authContext.ts')
     const { HomePage } = await server.ssrLoadModule('/src/pages/HomePage.tsx')
     const { AuthCallbackPage } = await server.ssrLoadModule('/src/pages/AuthCallbackPage.tsx')
-    const { WorkspaceContext } = await server.ssrLoadModule('/src/features/workspace/workspaceContext.ts')
-    const { initialWorkspaceState } = await server.ssrLoadModule('/src/features/workspace/state.ts')
+    const { WorkspaceContext } = await server.ssrLoadModule('/src/features/workspace/state/workspaceContext.ts')
+    const { initialWorkspaceState } = await server.ssrLoadModule('/src/features/workspace/state/state.ts')
     const workspace = {
       state: initialWorkspaceState(), membership: null,
       permissions: { canRead: false, canWrite: false, canVerify: false },

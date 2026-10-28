@@ -1,5 +1,5 @@
 import { parseEnv } from '../config/env'
-import { getAccessToken } from '../features/auth/auth'
+import { getAccessToken } from '../features/auth/services/auth'
 import { createApiClient } from './createApiClient'
 
 const env = parseEnv(import.meta.env, import.meta.env.PROD)

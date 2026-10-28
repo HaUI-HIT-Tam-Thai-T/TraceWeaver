@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { setImmediate } from 'node:timers/promises'
-import { createAuthSession } from '../src/features/auth/session.ts'
+import { createAuthSession } from '../src/features/auth/state/session.ts'
 
 const redirects = {
   callbackUri: 'http://localhost:5173/auth/callback',

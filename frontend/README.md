@@ -535,3 +535,350 @@ chưa có tài khoản reviewer; đã kiểm bằng service giả/test. Timeout/
 chỉ mô phỏng, không cố tình gây trên BE thật. Lỗi proxy EACCES ban đầu do sandbox;
 chạy dev server với quyền kết nối được cấp đã tải /me/sources thành công.
 Ảnh kiểm thử cục bộ: node_modules/.tmp/workflow-operator-real.png (không commit).
+
+### Task 11 — Knowledge chỉ đọc
+
+Route lazy `/knowledge`, liên kết từ trang chủ. Chỉ gọi
+`GET /api/v1/workspaces/{wid}/knowledge` khi auth/workspace ready và có role đọc.
+Form React Hook Form + Zod: nhập nháp, bấm Tìm kiếm mới áp dụng q/limit vào URL;
+q tối đa 500 ký tự, giữ literal text, không xử lý wildcard hoặc lọc lại dữ liệu ở FE.
+BE tìm substring không phân biệt hoa/thường trên title/body của latest version.
+Mặc định 50, chọn 25/50/100. Không có API detail riêng hoặc API CRUD knowledge.
+
+Phân trang Trước/Tiếp bằng cursor stack trong memory, không cache payload các trang
+hoặc bịa tổng trang. Đổi q/limit hoặc Làm mới xóa lịch sử cursor và tải trang đầu.
+INVALID_CURSOR/cursor lặp dừng tải và chờ thao tác bắt đầu lại; không tự retry vô hạn.
+Knowledge không có bảo đảm snapshot cố định, bài viết/version có thể đổi giữa các GET.
+
+Validate KnowledgeArticle/KnowledgePage: UUID, đúng workspace, title/body, version >=1,
+subject, source_ref URI, timestamp UTC, duplicate IDs và next_cursor. UI đọc body trong
+`details`, hiển thị version, source_ref, author subject, created_at UTC nguyên gốc.
+Không có nút tạo/sửa/xóa, không có POST/PUT/PATCH/DELETE. Body/source_ref render bằng
+React text; source_ref kể cả URN chỉ là tham chiếu, không mở link URI tùy ý hoặc render HTML.
+
+Controller + reducer thuần, useSyncExternalStore và AbortController/generation:
+response cũ không ghi đè query/scope mới. Auth/logout, mất quyền, đổi user/workspace,
+revalidation và rời route purge payload/cursor và hủy chờ. URL q/limit giữ nguyên khi
+đổi scope; form nháp reset, tải mới trang đầu sau khi scope hợp lệ. 401 yêu cầu đăng nhập;
+403/404 purge và revalidate workspace một lần, latch qua revalidation để tránh loop.
+Mạng/timeout/schema có retry GET, cancellation không hiển thị lỗi hệ thống.
+
+Kiểm tra: toàn bộ 153 tests pass (9 test knowledge mới), lint và TypeScript strict.
+UAT viewer với BE thật: mở /knowledge, list rỗng và tìm kiếm q có dấu thành công;
+nhập nháp không thay URL, submit cập nhật URL rồi GET. BE hiện chưa có bài knowledge,
+nên chưa nghiệm thu nội dung/version/source_ref và nhiều trang với dữ liệu thật.
+Không tạo hoặc ingest bài mẫu. Đã kiểm UI bằng service giả cục bộ: đọc version 3/2,
+source_ref URN/HTTPS, body có HTML được escape, Trước/Tiếp GET đúng trang và nút disabled.
+Ảnh cục bộ trong node_modules/.tmp/knowledge-viewer-real.png và knowledge-content-fixture.png.
+
+Kiến thức rule áp dụng: feature/service và tách UI (3,5); TypeScript strict, Zod,
+RHF (4,11); effect cleanup, AbortController/generation, reducer/external store (6,8);
+Router/lazy/search params (9); Axios/cursor/ApiError (10,12); scope quyền, escape,
+semantic HTML/keyboard (14); node:test/SSR và giữ phạm vi frontend (15–16).
+
+### Task 12 — Dashboard, thời gian và waiting drill-down
+
+Route lazy /dashboard, liên kết từ trang chủ. GET dashboard hiển thị đúng bốn counter
+runs, degraded_runs, unresolved_events, waiting_cases; số 0 là dữ liệu hợp lệ, không
+thay lỗi/loading bằng số 0. unresolved_events là occurrence cộng theo từng run completed,
+không phải event duy nhất toàn hệ thống. Không tự suy run-list/global-unresolved endpoint.
+
+RHF/Zod quản lý form nháp from/to nhập UTC+7; bấm Áp dụng mới chuyển UTC và cập nhật URL.
+Kiểm ngày hợp lệ, from <= to, giữ precision, cho phép một biên hoặc không giới hạn thời gian.
+Cả dashboard và list cases dùng from/to inclusive theo parent run.created_at.
+Validate Dashboard DTO: số nguyên không âm, safe integer, filters echo đúng thời điểm yêu cầu.
+
+Nút Xem waiting cases mở hai query riêng state=new và state=assigned, cùng from/to,
+50/trang. Mỗi danh sách có status/error/cursor Trước/Tiếp riêng, tái sử dụng Cases controller;
+không gửi multi-state, không ghép cursor, không đếm trang đầu làm tổng counter.
+Hai danh sách là live-state, có thể quan sát tại các thời điểm khác nhau. Link detail giữ
+state/from/to; Browser Back trở lại URL dashboard với filter và GET dữ liệu mới.
+
+Bổ sung workspaceMutations (chỉ truyền workspace ID, không lưu payload/token). Service
+production createRun, reviewLink, createManualLink, createCase, addEvidence và transitionCase
+phát thông báo sau mỗi lần thao tác kết thúc, gồm cả lỗi/kết quả chưa rõ. Không đổi body/key,
+không replay POST. Khi dashboard đang mở, thông báo đúng workspace hủy GET cũ, ẩn dữ liệu,
+GET lại counters và reset cả hai drill-down. Khi rời dashboard không tải nền hoặc giữ cache;
+quay lại luôn GET mới. Không triển khai realtime/polling dashboard hoặc đồng bộ tab khác.
+Subscriber lỗi bị gỡ, không được làm đổi kết quả mutation hay kích hoạt retry.
+
+Scope/auth/mất quyền/rời route purge dữ liệu và hủy request; generation ngăn response cũ.
+401 yêu cầu đăng nhập; 403/404 ở counter hoặc waiting list purge dashboard, revalidate một
+lần và latch qua access reload để tránh lặp. Network/timeout/schema có retry GET thủ công.
+
+Kiểm thử tự động: 162 tests pass, gồm 9 test dashboard mới cho DTO, time/precision,
+zero counters, single-state queries/cursor riêng, mutation invalidation, lỗi auth/quyền,
+subscriber lỗi không đổi kết quả POST, stale response và SSR accessibility.
+
+UAT operator trên dataset FE-DEMO-20261027-v1 ngày 27/10/2026:
+- Window 27/10 theo UTC+7 trả runs=12, degraded_runs=4, unresolved_events=9, waiting_cases=5.
+- Waiting có 2 new + 3 assigned. Mở demo 05 từ drill-down giữ from/to và Case.version=2.
+- Start demo 05 thành công, investigating/version=3; reason có prefix FE-UAT Dashboard.
+  Quay lại cùng URL dashboard GET mới: waiting_cases=4, gồm 2 new + 2 assigned;
+  case demo 05 rời waiting. Các counter còn lại giữ 12/4/9.
+- Window 01/12/2026 trả bốn số 0 và cả hai danh sách rỗng.
+Không ingest, sửa grants hoặc tạo case/run để kiểm thử. Không nghiệm thu pagination nhiều
+trang, review/manual link và timeout thật do không tạo thêm tình huống/dataset BE;
+các tình huống đó kiểm bằng service giả. Ảnh: node_modules/.tmp/dashboard-after-mutation.png.
+
+Kiến thức rule: feature/service (3,5); strict TS/Zod/RHF (4,11); reducer, external store,
+cleanup/cancellation/generation và subscription (6,8); Router/lazy/URL filters (9);
+Axios, cursor và refetch sau mutation (10,12); scope/grants, escape/keyboard (14);
+node:test/SSR, giữ thay đổi không liên quan và phạm vi frontend (15–16).
+
+### Task 13 — Kiểm thử tích hợp xuyên module
+
+Nhánh ThienBao/feature/integration-tests. Thêm integration-fixtures.mjs,
+integration.test.mjs và integration-ui.test.mjs. Không thêm dependency hoặc sửa source
+production trong task này. Fixture dùng AuthSession thật với SDK giả, Axios instance và
+adapter giả, các service Zod/controller thật; subscription trong fixture mô phỏng dây nối
+Auth/Workspace/Events/Cases và cleanup tương ứng provider. Vì vậy đây là integration
+service/controller, không thay thế browser E2E toàn bộ React provider tree.
+
+10 test mới kiểm:
+- Auth → /me/sources → event detail/root → create run completed HTTP202/graph → review
+  bằng Link.version → create case → evidence → assign/start/request verification →
+  reviewer fail/close/reopen → dashboard. UI SSR trang detail thật kiểm role controls.
+- Viewer/admin chỉ đọc; operator không verify; reviewer lấy quyền từ /me revalidation.
+- Concurrent Axios services dùng chung SDK refresh; hủy một request không hủy refresh
+  chung. Refresh thất bại không gửi HTTP và purge toàn bộ artifact/attempt đang có.
+- Logout trong POST đang chờ, response muộn không khôi phục dữ liệu; revalidation/đổi
+  subject khi event detail đang chờ không ghi payload của user cũ vào scope mới.
+- VERSION_CONFLICT của link refetch graph, không replay; Case.version conflict giữ
+  thao tác, chỉ gửi sau xác nhận version mới với key mới.
+- Create case timeout đã commit: retry thủ công giữ đúng body/key; evidence timeout chỉ
+  đọc lại detail, không tự gửi POST hoặc tự tăng Case.version.
+- Mất grants khi vẫn còn membership: 403 purge case/graph/dashboard/knowledge, /me lấy
+  scope mới và sources rỗng, không loop; mất membership tiếp theo purge toàn bộ scope.
+
+UAT thật ngày 27/10/2026 (operator):
+1. Chọn root event 85553210-b8ff-4fdc-94b7-54b56fdbfd80 từ dataset FE-DEMO hiện có.
+2. Tạo run 98fbc5d8-20b8-46c8-a32a-ff5854d17b7d với ba nguồn, rule_only/root±5 phút;
+   completed, graph 3 nodes/2 links. Accept một link: Link.version 1→2, graph revision2.
+3. Tạo case d4b425d6-db18-43fe-b09d-b16dcd8dd4da có tiêu đề prefix FE-UAT Integration;
+   GET detail mới; thêm note 16d6533c-f15c-427a-8ffd-de9014c3c33f, Case.version giữ1.
+4. Hai tab giữ version1. Tab đầu assign thành công version2; tab thứ hai submit nháp
+   version1 bị preflight VERSION_CONFLICT, giữ nguyên reason và yêu cầu chủ động dùng
+   version hiện tại. History chỉ có một assign. Case được giữ assigned/version2.
+5. Mở tab thứ hai đã đi qua check-sso thành công và trở về home (giới hạn route callback
+   hiện có); chưa khôi phục deep link tự động. Không sửa auth redirect ở task này.
+
+Giới hạn nghiệm thu: người dùng xác nhận không có tài khoản reviewer, nên reviewer
+fail/close/reopen chỉ kiểm bằng fixture/SSR. Trình duyệt cục bộ bị tắt trong Work settings
+khi tiếp tục phiên, không thể hoàn tất logout/đổi viewer thật trong lượt kiểm này. Các
+lượt task trước đã kiểm viewer chỉ đọc; không gộp kết quả cũ thành UAT mới. Logout,
+refresh token, retry timeout, mất grants và purge xuyên module đã pass mô phỏng; chưa
+cố tình thu hồi grants hoặc gây lỗi hạ tầng trên BE thật. Không thay config/grants BE.
+Một run, một case, một note và một review UAT thật được giữ lại; không tự xóa dữ liệu.
+Chưa có ảnh UAT mới được lưu thành công trước khi browser bị tắt.
+
+Kết quả: npm run lint pass; npm test 172/172 pass, không skip (10 integration mới).
+Build strict với env hợp lệ và git diff --check được chạy khi bàn giao.
+Kiến thức rule: test theo rủi ro (15–16), service boundary/DTO strict (3–5,10), lifecycle,
+shared refresh/cancellation/generation/cleanup (6,8), scope/role/owner và purge (9,14),
+optimistic concurrency, idempotency và phân loại kết quả chưa rõ (12).
+
+
+### Sắp xếp thư mục feature
+
+Đã di chuyển 53 file theo trách nhiệm trong 8 feature; giữ nguyên tên file, exports,
+API, route và logic. components/ chứa UI của feature; services/ chứa API/factory;
+state/ chứa state/reducer/controller/Context/Provider. schemas.ts, query.ts, form.ts,
+workflow.ts và types.ts giữ ở gốc feature khi hiện có. Không thêm Redux store, barrel
+index.ts, dependency hoặc thư mục rỗng. Pages vẫn ở src/pages/, HTTP client và
+workspaceMutations vẫn ở src/services/, tests vẫn ở tests/.
+
+Danh sách file đã di chuyển (đường dẫn tính từ frontend/):
+
+**auth**
+
+- `src/features/auth/AuthStatus.tsx` → `src/features/auth/components/AuthStatus.tsx`
+- `src/features/auth/auth.ts` → `src/features/auth/services/auth.ts`
+- `src/features/auth/AuthProvider.tsx` → `src/features/auth/state/AuthProvider.tsx`
+- `src/features/auth/authContext.ts` → `src/features/auth/state/authContext.ts`
+- `src/features/auth/session.ts` → `src/features/auth/state/session.ts`
+
+**workspace**
+
+- `src/features/workspace/WorkspacePanel.tsx` → `src/features/workspace/components/WorkspacePanel.tsx`
+- `src/features/workspace/createWorkspaceService.ts` → `src/features/workspace/services/createWorkspaceService.ts`
+- `src/features/workspace/service.ts` → `src/features/workspace/services/service.ts`
+- `src/features/workspace/WorkspaceProvider.tsx` → `src/features/workspace/state/WorkspaceProvider.tsx`
+- `src/features/workspace/workspaceContext.ts` → `src/features/workspace/state/workspaceContext.ts`
+- `src/features/workspace/controller.ts` → `src/features/workspace/state/controller.ts`
+- `src/features/workspace/state.ts` → `src/features/workspace/state/state.ts`
+
+**events**
+
+- `src/features/events/EventsExplorer.tsx` → `src/features/events/components/EventsExplorer.tsx`
+- `src/features/events/EventFiltersForm.tsx` → `src/features/events/components/EventFiltersForm.tsx`
+- `src/features/events/createEventsService.ts` → `src/features/events/services/createEventsService.ts`
+- `src/features/events/service.ts` → `src/features/events/services/service.ts`
+- `src/features/events/EventsProvider.tsx` → `src/features/events/state/EventsProvider.tsx`
+- `src/features/events/eventsContext.ts` → `src/features/events/state/eventsContext.ts`
+- `src/features/events/controller.ts` → `src/features/events/state/controller.ts`
+- `src/features/events/state.ts` → `src/features/events/state/state.ts`
+
+**reconstruction**
+
+- `src/features/reconstruction/ReconstructionPanel.tsx` → `src/features/reconstruction/components/ReconstructionPanel.tsx`
+- `src/features/reconstruction/RunResult.tsx` → `src/features/reconstruction/components/RunResult.tsx`
+- `src/features/reconstruction/GraphTable.tsx` → `src/features/reconstruction/components/GraphTable.tsx`
+- `src/features/reconstruction/createReconstructionService.ts` → `src/features/reconstruction/services/createReconstructionService.ts`
+- `src/features/reconstruction/service.ts` → `src/features/reconstruction/services/service.ts`
+- `src/features/reconstruction/controller.ts` → `src/features/reconstruction/state/controller.ts`
+- `src/features/reconstruction/state.ts` → `src/features/reconstruction/state/state.ts`
+
+**link-review**
+
+- `src/features/link-review/LinkReviewPanel.tsx` → `src/features/link-review/components/LinkReviewPanel.tsx`
+- `src/features/link-review/createLinkReviewService.ts` → `src/features/link-review/services/createLinkReviewService.ts`
+- `src/features/link-review/service.ts` → `src/features/link-review/services/service.ts`
+
+**cases**
+
+- `src/features/cases/CasesLayout.tsx` → `src/features/cases/components/CasesLayout.tsx`
+- `src/features/cases/CasesFeedback.tsx` → `src/features/cases/components/CasesFeedback.tsx`
+- `src/features/cases/CaseFiltersForm.tsx` → `src/features/cases/components/CaseFiltersForm.tsx`
+- `src/features/cases/CaseDetailView.tsx` → `src/features/cases/components/CaseDetailView.tsx`
+- `src/features/cases/CreateCasePanel.tsx` → `src/features/cases/components/CreateCasePanel.tsx`
+- `src/features/cases/EvidenceForm.tsx` → `src/features/cases/components/EvidenceForm.tsx`
+- `src/features/cases/WorkflowForm.tsx` → `src/features/cases/components/WorkflowForm.tsx`
+- `src/features/cases/createCasesService.ts` → `src/features/cases/services/createCasesService.ts`
+- `src/features/cases/service.ts` → `src/features/cases/services/service.ts`
+- `src/features/cases/CasesProvider.tsx` → `src/features/cases/state/CasesProvider.tsx`
+- `src/features/cases/casesContext.ts` → `src/features/cases/state/casesContext.ts`
+- `src/features/cases/controller.ts` → `src/features/cases/state/controller.ts`
+- `src/features/cases/createCaseController.ts` → `src/features/cases/state/createCaseController.ts`
+- `src/features/cases/state.ts` → `src/features/cases/state/state.ts`
+
+**knowledge**
+
+- `src/features/knowledge/KnowledgeView.tsx` → `src/features/knowledge/components/KnowledgeView.tsx`
+- `src/features/knowledge/createKnowledgeService.ts` → `src/features/knowledge/services/createKnowledgeService.ts`
+- `src/features/knowledge/service.ts` → `src/features/knowledge/services/service.ts`
+- `src/features/knowledge/controller.ts` → `src/features/knowledge/state/controller.ts`
+
+**dashboard**
+
+- `src/features/dashboard/DashboardView.tsx` → `src/features/dashboard/components/DashboardView.tsx`
+- `src/features/dashboard/WaitingCaseList.tsx` → `src/features/dashboard/components/WaitingCaseList.tsx`
+- `src/features/dashboard/createDashboardService.ts` → `src/features/dashboard/services/createDashboardService.ts`
+- `src/features/dashboard/service.ts` → `src/features/dashboard/services/service.ts`
+- `src/features/dashboard/controller.ts` → `src/features/dashboard/state/controller.ts`
+
+Cập nhật 301 tham chiếu import/module trong source, main.tsx, pages và tests (gồm
+ssrLoadModule). Đối chiếu nội dung 117 file source/tests với HEAD sau chuẩn hóa đường
+dẫn: không có thay đổi ngoài path, không có module reference thiếu hoặc path cũ.
+
+Kiểm tra: lint pass, TypeScript strict/build với env hợp lệ pass, 172/172 tests pass.
+HTTP smoke trên server có sẵn tại localhost:5173: tám URL gồm home/events/cases/detail/
+knowledge/dashboard/callback/not-found và bảy entry/page modules đều 200. Không mở được
+Vite thứ hai vì port 5173 đã được dùng; giữ nguyên tiến trình đang có, không đổi cổng.
+Chưa nghiệm thu lại tương tác UI/login qua browser trong refactor này.
+
+## React cơ bản với TSX
+
+Đã chuyển phần kết nối React với session/controller từ `useSyncExternalStore`
+sang `useState` và `useEffect`. Mỗi component đăng ký listener của controller hiện
+có, đọc lại state ngay sau đăng ký để không bỏ lỡ thay đổi giữa render và effect,
+và gỡ listener khi cleanup. Không tạo hook subscription tổng quát hoặc nguồn state
+nghiệp vụ mới; snapshot trong React chỉ phục vụ render. Các guard theo auth/scope,
+AbortController, generation, polling và khóa mutation của controller được giữ nguyên.
+
+Routes giữ tám đường dẫn và mỗi object chỉ có `path`, `element`. Lazy/Suspense cho
+năm page là ngoại lệ được người dùng yêu cầu riêng, mô tả ở mục Lazy loading bên dưới.
+Không tăng giới hạn cảnh báo, thay cấu hình strict hoặc thêm thư viện để che cảnh báo.
+
+Các file thay đổi trong lượt này:
+
+- `src/features/auth/state/AuthProvider.tsx`
+- `src/features/workspace/state/WorkspaceProvider.tsx`
+- `src/features/events/state/EventsProvider.tsx`
+- `src/features/cases/state/CasesProvider.tsx`
+- `src/features/reconstruction/components/ReconstructionPanel.tsx`
+- `src/features/cases/components/CreateCasePanel.tsx`
+- `src/features/dashboard/components/WaitingCaseList.tsx`
+- `src/pages/DashboardPage.tsx`
+- `src/pages/KnowledgePage.tsx`
+- `src/constants/routes.ts`
+- `tests/routes-ui.test.mjs`
+- `README.md`
+
+Kiến thức sử dụng: function component TSX, props/children, `useState`, `useEffect`
+và cleanup, `useRef`, Context, custom hook đơn giản, React Router và React Hook Form
+hiện có. Reducer/controller thuần JavaScript tiếp tục phục vụ nghiệp vụ và kiểm thử;
+không sử dụng thêm hook React nâng cao hoặc Redux.
+
+Kiểm tra tại bước chuyển React cơ bản trước khi thêm ngoại lệ lazy: lint không có
+cảnh báo, 173/173 tests và build strict pass. Kết quả hiện tại ở mục Lazy loading.
+
+Kiểm tra trên trình duyệt với operator và BE thật: đăng nhập, callback, reload SSO,
+workspace với ba sources; list/detail events, chọn root và form mặc định; revalidate
+quyền xóa root/reconstruction; bốn counter dashboard và hai danh sách waiting new/
+assigned; case list/detail (mở liên kết bằng bàn phím), history/evidence và guard
+reviewer; Knowledge search/empty; logout xóa dữ liệu workspace khỏi UI. Reload qua
+check-sso vẫn quay về trang chủ theo luồng auth hiện có. Proxy cần chạy dev server
+ngoài sandbox vì kết nối API trong sandbox bị EACCES.
+
+Lượt này không gửi mutation nghiệp vụ để tạo run/case hoặc ghi review/evidence/
+transition; các tình huống này được bao phủ bằng test hiện có. Chưa kiểm lại tài
+khoản viewer trên BE thật; không có tài khoản reviewer thật. Các thay đổi chưa commit
+từ những lượt trước được giữ nguyên; không commit/push.
+
+## Lazy loading theo page
+
+Dashboard, Events, Cases, Case Detail và Knowledge dùng `React.lazy` ở cấp module
+với dynamic `import()`. `.then(module => ({ default: module.Page }))` giữ named export
+của page hiện có. Home, callback đăng nhập và 404 vẫn import trực tiếp; không đổi
+đường dẫn, DTO/API hoặc cơ chế quản lý phiên/quyền.
+
+`AppRoutes` bọc `Routes` bằng `Suspense`; các provider vẫn nằm bên ngoài. Khi code
+chưa tải xong, `PageLoading` hiện “Đang tải trang…” với `role="status"`. Đây là loading
+module, độc lập loading API của từng feature. Nếu import thất bại, loader trả về
+`PageLoadError` với thông báo an toàn và nút “Tải lại trang”; không hiện raw error,
+không tự retry, gọi lại POST hoặc thêm class Error Boundary. Kết quả loader được React
+cache; khi đã lỗi, người dùng tải lại toàn trang để bắt đầu lần tải mới. Cơ chế này
+chỉ xử lý lỗi import, không thay thế xử lý lỗi render/API.
+
+Đo bằng `npm run build -- --manifest`: năm page đều có `isDynamicEntry: true` và không
+nằm trong tập dependency tĩnh của entry. Bảng tính JavaScript của entry cộng toàn bộ
+dependency tĩnh dùng chung, không chỉ riêng file entry:
+
+| Chỉ số | Import trực tiếp trước đó | Lazy hiện tại |
+| --- | --- | --- |
+| Entry JavaScript | 596.371 kB | 231.552 kB |
+| Tổng JavaScript ban đầu (gồm shared chunks) | 596.371 kB | 484.832 kB |
+| Tổng gzip của các file ban đầu | 180.479 kB | 155.632 kB |
+
+JavaScript ban đầu giảm 18,7%; gzip giảm 13,8%. Đơn vị kB = 1.000 bytes; gzip dùng
+cùng `node:zlib.gzipSync` trên từng file rồi cộng, không phải số đo băng thông thực tế
+trên browser. CSS và request dữ liệu API không nằm trong bảng. Build không còn cảnh
+báo chunk trên 500 kB; không thay ngưỡng cảnh báo hoặc cấu hình strict.
+
+File đổi trong lượt lazy loading:
+
+- `src/constants/routes.ts`
+- `src/routes/AppRoutes.tsx`
+- `src/routes/PageLoadFeedback.tsx` (mới)
+- `tests/routes-ui.test.mjs`
+- `rule.md` (ngoại lệ routing; file local đang bị Git ignore)
+- `README.md`
+
+Kiểm tra: lint sạch, 175/175 tests pass, build TypeScript strict với env hợp lệ và
+`git diff --check` pass. Test routes dùng streaming SSR đợi đủ tám page/guard; có
+module chậm để xác nhận loading rồi nội dung, module lỗi để xác nhận thông báo an
+toàn/nút reload và không tự thử import lại khi render lại.
+
+Trình duyệt production preview tại localhost:5173: Home/callback tải trực tiếp,
+Knowledge tải động; mô phỏng thiếu file chunk Knowledge trong dist để kiểm tra lỗi,
+khôi phục file rồi bấm reload và tải được trang. Back/Forward giữa Home và Dashboard
+hoạt động. Login/callback production chạy được nhưng request API cross-origin không
+nhận được response tại môi trường này; không kết luận nguyên nhân là CORS.
+
+Với Vite dev/proxy local đã có: operator truy cập được cả năm lazy page, dashboard
+counter, 13 cases và detail/history/evidence, 36 events, Knowledge empty; không gửi
+mutation nghiệp vụ. Reload vẫn qua check-sso rồi về Home theo auth hiện có, kể cả URL
+không tồn tại. 404 được kiểm bằng SSR; chưa xác nhận màn hình 404 khi mở trực tiếp trên
+browser do luồng auth đó. Không mở rộng nhiệm vụ sang sửa auth hoặc BE. Giữ các thay
+đổi chưa commit trước đó; không thêm dependency, commit hoặc push.

@@ -23,7 +23,10 @@ const publicEnvSchema = z.object({
   VITE_KEYCLOAK_CLIENT_ID: z.string().trim().min(1),
 });
 
-export function parseEnv(input: unknown, production: boolean) {
+// Zod supplies the validated output type, including schema transforms.
+export type AppEnv = z.infer<typeof publicEnvSchema>;
+
+export function parseEnv(input: unknown, production: boolean): AppEnv {
   const result = publicEnvSchema.safeParse(input);
   if (!result.success) {
     const fields = [
@@ -41,5 +44,3 @@ export function parseEnv(input: unknown, production: boolean) {
   }
   return result.data;
 }
-
-export type AppEnv = ReturnType<typeof parseEnv>;

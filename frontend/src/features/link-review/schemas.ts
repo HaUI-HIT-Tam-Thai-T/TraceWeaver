@@ -35,6 +35,7 @@ export const reviewFormSchema = reviewCreateSchema.extend({
   link_id: z.uuid("Chọn một link."),
 });
 export type ReviewCreate = z.infer<typeof reviewCreateSchema>;
+export type Review = z.infer<typeof reviewSchema>;
 export type ManualLinkCreate = z.infer<typeof manualLinkCreateSchema>;
 export type ReviewFormValues = z.infer<typeof reviewFormSchema>;
 export function manualLinkIssue(

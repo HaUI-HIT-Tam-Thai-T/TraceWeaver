@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { createCasesController } from '../src/features/cases/controller.ts'
+import { createCasesController } from '../src/features/cases/state/controller.ts'
 import { ApiError } from '../src/services/apiError.ts'
 import { caseDetail, CID, CID2 } from './case-fixtures.mjs'
 import { scope, EID, EID2 } from './event-fixtures.mjs'

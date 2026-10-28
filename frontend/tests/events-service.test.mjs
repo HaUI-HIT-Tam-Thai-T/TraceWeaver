@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { createEventsService } from '../src/features/events/createEventsService.ts'
+import { createEventsService } from '../src/features/events/services/createEventsService.ts'
 import { compareUtc, eventSchema, filtersSchema } from '../src/features/events/schemas.ts'
 import { eventFormSchema, formToFilters, formDefaults, localToUtc, readEventQuery, writeEventQuery } from '../src/features/events/query.ts'
 import { EID, SID, WID, event } from './event-fixtures.mjs'

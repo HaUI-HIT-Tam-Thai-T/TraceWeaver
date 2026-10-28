@@ -8,8 +8,8 @@ import { run, graph } from './reconstruction-fixtures.mjs'
 test('run UI safely renders degraded, failed, uncertain, tracking, errors and graph evidence', async () => {
   const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-reconstruction', server: { middlewareMode: true, hmr: false, ws: false } })
   try {
-    const { RunResult } = await server.ssrLoadModule('/src/features/reconstruction/RunResult.tsx')
-    const { initialReconstructionState } = await server.ssrLoadModule('/src/features/reconstruction/state.ts')
+    const { RunResult } = await server.ssrLoadModule('/src/features/reconstruction/components/RunResult.tsx')
+    const { initialReconstructionState } = await server.ssrLoadModule('/src/features/reconstruction/state/state.ts')
     const render = patch => renderToString(createElement(RunResult, { state: { ...initialReconstructionState(), ...patch }, retry() {}, track() {}, loadGraph() {}, signIn() {} })).replace(/<!--.*?-->/g,'')
     const html = render({ phase:'known', run:run('completed',{ degraded:true,degraded_reason:'ai_unavailable' }), graph:graph(),graphStatus:'ready' })
     assert.match(html,/AI chưa sẵn sàng, kết quả dùng luật/)
