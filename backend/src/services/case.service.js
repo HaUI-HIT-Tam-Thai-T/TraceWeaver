@@ -17,6 +17,7 @@ export function createCaseService(repository, access, cursors) {
       return protect(() => repository.create(subject, workspace, caseInput('CaseCreate', input), idempotencyKey(key)));
     },
     get(subject, workspace, id) { return protect(() => repository.get(subject, workspace, id)); },
+    assignees(subject, workspace, id) { return protect(() => repository.assignees(subject, workspace, id)); },
     evidence(subject, workspace, id, input) {
       return protect(() => repository.evidence(subject, workspace, id, caseInput('EvidenceCreate', input)));
     },

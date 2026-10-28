@@ -49,6 +49,30 @@ test('case APIs: real JWT/JWKS/HTTP/PostgreSQL workflow, evidence protection, cu
     const page = await request('/cases?state=new'); conforms('CasesPage', page.body); assert.equal(page.body.items.length, 1);
     await sim.waitForRequest();
   });
+  await t.test('assignees require caller write scope and active full-source candidates, including group grants', async () => {
+    const path = `/cases/${main.id}/assignees`;
+    let response = await request(path); assert.equal(response.status, 200); conforms('CaseAssignees', response.body);
+    assert.deepEqual(response.body.items.map((m) => m.subject), ['operator', 'other', 'reviewer']);
+    assert.equal((await request(path, { bearer: '' })).status, 401);
+    for (const who of ['viewer', 'admin']) assert.equal((await request(path, { who })).status, 403);
+    assert.equal((await request(path, { who: 'outsider' })).status, 404);
+    assert.equal((await request(path + '?limit=1')).status, 400);
+    assert.equal((await request(`/cases/${randomUUID()}/assignees`)).status, 404);
+    await pool.query("UPDATE core.source_grants SET revoked_at=clock_timestamp() WHERE grantee_subject='other' AND source_id=$1", [f.sources[2]]);
+    assert.deepEqual((await request(path)).body.items.map((m) => m.subject), ['operator', 'reviewer']);
+    const group = randomUUID();
+    await pool.query("INSERT INTO core.groups(id,workspace_id,name) VALUES($1,$2,'Assignees')", [group, workspace]);
+    await pool.query("INSERT INTO core.group_members(workspace_id,group_id,subject) VALUES($1,$2,'other')", [workspace, group]);
+    await pool.query("INSERT INTO core.source_grants(id,workspace_id,source_id,group_id,permission,granted_by) VALUES($1,$2,$3,$4,'read','test')", [randomUUID(), workspace, f.sources[2], group]);
+    assert.deepEqual((await request(path)).body.items.map((m) => m.subject), ['operator', 'other', 'reviewer']);
+    await pool.query("UPDATE core.memberships SET revoked_at=clock_timestamp() WHERE workspace_id=$1 AND subject='other'", [workspace]);
+    assert.deepEqual((await request(path)).body.items.map((m) => m.subject), ['operator', 'reviewer']);
+    await pool.query("UPDATE core.memberships SET revoked_at=NULL WHERE workspace_id=$1 AND subject='other'", [workspace]);
+    await pool.query("UPDATE core.source_grants SET revoked_at=NULL WHERE workspace_id=$1 AND grantee_subject='other'", [workspace]);
+    await pool.query("UPDATE core.source_grants SET revoked_at=clock_timestamp() WHERE grantee_subject='operator' AND source_id=$1", [f.sources[2]]);
+    assert.equal((await request(path)).status, 404);
+    await pool.query("UPDATE core.source_grants SET revoked_at=NULL WHERE workspace_id=$1 AND grantee_subject='operator'", [workspace]);
+  });
   await t.test('live case list filters state/owner and binds signed cursor to caller, filters, limit and current scope', async () => {
     for (let i = 0; i < 3; i++) assert.equal((await request('/cases', { method: 'POST', body: { ...input, title: `Case ${i}` } })).status, 201);
     const first = await request('/cases?limit=1'); conforms('CasesPage', first.body);

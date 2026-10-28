@@ -9,6 +9,7 @@ export function createCaseRouter({ verifyToken, access, cases }) {
   router.post('/workspaces/:wid/cases', auth, controller.create);
   router.get('/workspaces/:wid/cases', auth, controller.list);
   router.get('/workspaces/:wid/cases/:cid', auth, controller.get);
+  router.get('/workspaces/:wid/cases/:cid/assignees', auth, controller.assignees);
   router.post('/workspaces/:wid/cases/:cid/evidence', auth, controller.evidence);
   router.post('/workspaces/:wid/cases/:cid/transitions', auth, controller.transition);
   return router;

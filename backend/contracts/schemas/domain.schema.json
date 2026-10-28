@@ -96,6 +96,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "workspace_name": { "type": "string", "minLength": 1, "maxLength": 200 },
         "workspace_id": {
           "$ref": "#/$defs/Id"
         },
@@ -1699,6 +1700,38 @@
       "required": [
         "items",
         "next_cursor"
+      ]
+    },
+    "CaseAssignees": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "subject": {
+                "$ref": "#/$defs/Subject"
+              },
+              "roles": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "$ref": "#/$defs/Role"
+                }
+              }
+            },
+            "required": [
+              "subject",
+              "roles"
+            ]
+          }
+        }
+      },
+      "required": [
+        "items"
       ]
     }
   }
