@@ -11,3 +11,7 @@
 !ai/artifacts/sandbox-v2/
 !ai/artifacts/sandbox-v2/model_sandbox_v2.json
 !ai/artifacts/sandbox-v2/manifest.json
+!backend/
+!backend/contracts/
+!backend/contracts/schemas/
+!backend/contracts/schemas/domain.schema.json
