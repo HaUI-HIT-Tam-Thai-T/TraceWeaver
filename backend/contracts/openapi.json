@@ -1402,7 +1402,13 @@
         "operationId": "scorePairs",
         "summary": "scorePairs",
         "description": "Internal only, timeout 5s, max100 pairs, no DB writes. Invalid schema ->422 whole batch; model unavailable ->503. Caller enforces exact pair_id set (no missing/extra/duplicate), finite [0,1] scores and feature_schema_version; mismatch/timeout ->degraded rule-only plus audit. Score is not claimed to be calibrated probability.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
+        "servers": [
+          {
+            "url": "http://127.0.0.1:8000",
+            "description": "Private Python scorer; development loopback only. Not served by the Node API."
+          }
+        ],
         "security": [
           {
             "scorerServiceSecret": []

@@ -12,6 +12,7 @@ from starlette.requests import ClientDisconnect
 
 from ai.app.baseline import BaselineScorer, UnavailableScorer
 from ai.app.config import Config
+from ai.app.model_scorer import ModelScorer
 from ai.app.contracts import ContractError, strict_json_loads, validate_request, validate_response
 
 
@@ -26,9 +27,15 @@ class APIError(Exception):
 
 def create_app(config: Config, scorer=None):
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, redirect_slashes=False)
-    engine = scorer if scorer is not None else (
-        BaselineScorer() if config.mode == "baseline" else UnavailableScorer()
-    )
+    if scorer is not None:
+        engine = scorer
+    elif config.mode == "baseline":
+        engine = BaselineScorer()
+    elif config.mode == "model" and config.model_path:
+        model_engine = ModelScorer(config.model_path)
+        engine = model_engine if model_engine.ready else UnavailableScorer()
+    else:
+        engine = UnavailableScorer()
 
     def error_response(request, status, code, message):
         headers = {"WWW-Authenticate": "Bearer"} if status == 401 else None

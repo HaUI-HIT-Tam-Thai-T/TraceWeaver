@@ -8,6 +8,7 @@ import { once } from 'node:events';
 import { createScorer, pairFeatures, annotateRun } from '../../src/core/reconstruction/scorer.js';
 import { sandboxRulePolicy } from '../../src/core/reconstruction/policy.js';
 import { createRuleEngine } from '../../src/core/reconstruction/rules.js';
+import { pythonScorer } from '../support/python-scorer.js';
 
 const id = (n) => `10000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const event = (n, service, action, outcome = 'success') => ({ event_id: id(n), source_id: id(900),
@@ -26,8 +27,8 @@ async function server(t, handler) {
   t.after(() => { instance.closeAllConnections(); instance.close(); });
   return `http://127.0.0.1:${instance.address().port}/internal/v1/score-pairs`;
 }
-function reply(res, request, patch = {}) {
-  res.setHeader('Content-Type', 'application/json'); res.setHeader('X-Scorer-Method', 'rule');
+function reply(res, request, patch = {}, method = 'rule') {
+  res.setHeader('Content-Type', 'application/json'); res.setHeader('X-Scorer-Method', method);
   res.end(JSON.stringify({ model_version: 'baseline-rule-v1', feature_schema_version: '1',
     predictions: request.pairs.map((p) => ({ pair_id: p.pair_id, score: 0.8 })), ...patch }));
 }
@@ -40,6 +41,85 @@ test('outcome policy rejects unknown/mismatch including root; failed provision r
     assert.equal(result.abstentions[0].event_id, id(1));
     assert.equal(result.abstentions[0].reason_code, outcome === 'unknown' ? 'OUTCOME_UNKNOWN' : 'OUTCOME_ACTION_MISMATCH');
   }
+});
+
+const modelVersion = 'logistic-regression-sandbox-features-2-experiment-1';
+test('trained v2 requires explicit opt-in and annotates only pending rule-derived links', async (t) => {
+  const url = await server(t, (req, res, body) => reply(res, body, { model_version: modelVersion }, 'model'));
+  const config = { scorerUrl: url, scorerSecret: 's'.repeat(32) };
+  const disabled = engine(input);
+  assert.equal((await annotateRun(disabled, events, 'hybrid', createScorer(config))).degraded_reason, 'ai_incompatible_model');
+  assert.ok(disabled.links.every((link) => link.score === null));
+  const result = engine(input), before = structuredClone(result.links);
+  const state = await annotateRun(result, events, 'hybrid', createScorer({ ...config, scorerModelVersion: modelVersion }));
+  assert.equal(state.model_version, modelVersion); assert.equal(state.effective_method, 'hybrid');
+  assert.equal(state.degraded, false); assert.equal(state.degraded_reason, null);
+  assert.deepEqual(result.links, before.map((link) => ({ ...link, score: 0.8 })));
+});
+
+test('trained batches map reversed pair IDs and reject changed models/methods without partial scores', async (t) => {
+  for (const scenario of ['success', 'version', 'method', 'missing', 'extra']) {
+    let count = 0;
+    const url = await server(t, (req, res, body) => {
+      assert.ok(body.pairs.length <= 100); count++;
+      const predictions = body.pairs.map((pair) => ({ pair_id: pair.pair_id, score: Number(pair.pair_id) / 500 })).reverse();
+      if (count === 2 && scenario === 'missing') predictions.pop();
+      if (count === 2 && scenario === 'extra') predictions.push({ pair_id: 'unrequested', score: 1 });
+      reply(res, body, { model_version: count === 2 && scenario === 'version' ? 'unreviewed' : modelVersion, predictions },
+        count === 2 && scenario === 'method' ? 'rule' : 'model');
+    });
+    const result = engine(input);
+    result.links = Array.from({ length: 201 }, () => ({ ...result.links[0] }));
+    const state = await annotateRun(result, events, 'hybrid', createScorer({ scorerUrl: url,
+      scorerSecret: 's'.repeat(32), scorerModelVersion: modelVersion }));
+    if (scenario === 'success') {
+      assert.equal(count, 3); assert.equal(state.degraded, false);
+      assert.deepEqual(result.links.map((link) => link.score), Array.from({ length: 201 }, (_, i) => i / 500));
+    } else {
+      assert.equal(count, 2); assert.equal(state.model_version, null); assert.equal(state.effective_method, 'rule_only');
+      assert.ok(result.links.every((link) => link.score === null));
+    }
+  }
+});
+
+test('real trained Python model annotates BE features; stopped scorer falls back and cannot change guard decisions',
+  { skip: !process.env.SCORER_PYTHON }, async (t) => {
+  const python = await pythonScorer(t, { model: true });
+  const scorer = createScorer(python), result = engine(input), before = structuredClone(result.links);
+  const state = await annotateRun(result, events, 'hybrid', scorer);
+  assert.equal(state.model_version, modelVersion); assert.equal(state.effective_method, 'hybrid');
+  assert.equal(state.degraded, false); assert.equal(state.degraded_reason, null);
+  assert.deepEqual(result.links.map(({ score, ...link }) => link), before.map(({ score, ...link }) => link));
+  assert.ok(result.links.every((link) => Number.isFinite(link.score) && link.score >= 0 && link.score <= 1));
+  for (const change of ['unknown', 'conflict', 'ambiguous', 'missing_strong_id']) {
+    const changed = structuredClone(input);
+    if (change === 'unknown') changed.events[0].outcome = 'unknown';
+    if (change === 'conflict') changed.events[1].identifiers[0].value = 'OTHER';
+    if (change === 'ambiguous') changed.events.push({ ...changed.events[1], event_id: id(4) });
+    if (change === 'missing_strong_id') changed.events.forEach((event) => { event.identifiers = [{ namespace: 'user', value: 'same-user' }]; });
+    const guarded = engine(changed);
+    assert.equal(guarded.links.length, 0);
+    assert.equal((await annotateRun(guarded, changed.events, 'hybrid', scorer)).degraded_reason, 'ai_no_eligible_pairs');
+  }
+  await python.stop();
+  const fallback = engine(input), failed = await annotateRun(fallback, events, 'hybrid', scorer);
+  assert.equal(failed.degraded_reason, 'ai_unavailable'); assert.equal(failed.model_version, null);
+  assert.deepEqual(fallback.links, before);
+});
+
+test('trained batches share one total deadline rather than resetting the budget per batch', async (t) => {
+  let count = 0;
+  const url = await server(t, async (req, res, body) => {
+    count++;
+    await new Promise((resolve) => setTimeout(resolve, 90));
+    reply(res, body, { model_version: modelVersion }, 'model');
+  });
+  const result = engine(input);
+  result.links = Array.from({ length: 101 }, () => ({ ...result.links[0] }));
+  const state = await annotateRun(result, events, 'hybrid', createScorer({ scorerUrl: url,
+    scorerSecret: 's'.repeat(32), scorerModelVersion: modelVersion, scorerTimeoutMs: 150 }));
+  assert.equal(count, 2); assert.equal(state.degraded_reason, 'ai_timeout');
+  assert.equal(state.model_version, null); assert.ok(result.links.every((link) => link.score === null));
 });
 test('features preserve microseconds, namespaces, dedup and redact sentinel; Unicode Jaccard is deterministic', () => {
   const a = structuredClone(events[0]), b = structuredClone(events[1]);

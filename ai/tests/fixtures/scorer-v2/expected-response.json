@@ -1,0 +1,98 @@
+{
+  "model_version": "logistic-regression-sandbox-features-2-experiment-1",
+  "feature_schema_version": "1",
+  "predictions": [
+    {
+      "pair_id": "g0118-direct_intake",
+      "score": 0.776939
+    },
+    {
+      "pair_id": "g0118-direct_completed",
+      "score": 0.776461
+    },
+    {
+      "pair_id": "g0118-direct_failed",
+      "score": 0.776461
+    },
+    {
+      "pair_id": "g0118-shared_account_missing_request",
+      "score": 0.776461
+    },
+    {
+      "pair_id": "g0118-shared_job",
+      "score": 0.776461
+    },
+    {
+      "pair_id": "g0118-skew_boundary",
+      "score": 0.777953
+    },
+    {
+      "pair_id": "g0118-same_timestamp",
+      "score": 0.777655
+    },
+    {
+      "pair_id": "g0118-window_boundary",
+      "score": 0.502726
+    },
+    {
+      "pair_id": "g0118-before_skew_boundary",
+      "score": 0.777953
+    },
+    {
+      "pair_id": "g0118-after_window_boundary",
+      "score": 0.502725
+    },
+    {
+      "pair_id": "g0118-skipped_step",
+      "score": 0.004076
+    },
+    {
+      "pair_id": "g0118-reversed_transition",
+      "score": 0.004076
+    },
+    {
+      "pair_id": "g0118-request_conflict_despite_shared_account",
+      "score": 0.005266
+    },
+    {
+      "pair_id": "g0118-account_conflict_despite_shared_request",
+      "score": 0.005266
+    },
+    {
+      "pair_id": "g0118-job_conflict",
+      "score": 0.001051
+    },
+    {
+      "pair_id": "g0118-oracle_confirmed_non_edge",
+      "score": 0.776461
+    },
+    {
+      "pair_id": "g0118-no_ids",
+      "score": 0.408346
+    },
+    {
+      "pair_id": "g0118-user_only",
+      "score": 0.776461
+    },
+    {
+      "pair_id": "g0118-missing_id_one_side",
+      "score": 0.408346
+    },
+    {
+      "pair_id": "g0118-same_value_different_namespace",
+      "score": 0.408346
+    },
+    {
+      "pair_id": "g0118-ambiguous_retry",
+      "score": 0.776461
+    },
+    {
+      "pair_id": "g0118-outcome_mismatch",
+      "score": 0.776461
+    },
+    {
+      "pair_id": "g0118-unknown_outcome",
+      "score": 0.776461
+    }
+  ]
+}

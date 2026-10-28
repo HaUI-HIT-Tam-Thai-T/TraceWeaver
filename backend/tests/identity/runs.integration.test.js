@@ -83,9 +83,10 @@ test('run APIs: real JWT/Postman JWKS, PostgreSQL snapshots, schemas and permiss
     conforms('Run', degraded.body); assert.equal(degraded.body.degraded, true); assert.equal(degraded.body.mode, 'hybrid');
     await sim.waitForRequest();
   });
-  await t.test('real Python scorer: JWT HTTP run, durable scores/audit/replay, review and scorer-down fallback',
+  for (const model of [false, true]) await t.test(`real Python ${model ? 'trained model v2' : 'baseline'}: JWT HTTP run, durable scores/audit/replay, review and scorer-down fallback`,
     { skip: !process.env.SCORER_PYTHON }, async (t) => {
-    const python = await pythonScorer(t);
+    const python = await pythonScorer(t, { model });
+    const expectedModel = model ? 'logistic-regression-sandbox-features-2-experiment-1' : 'baseline-rule-v1';
     const scoredRuns = createRunService(createRunRepository(pool, undefined, createScorer(python)));
     const api = createApp({ checkReadiness: async () => true, access: {}, verifyToken, runs: scoredRuns, reviews }).listen(0, '127.0.0.1');
     await once(api, 'listening'); t.after(() => { api.closeAllConnections(); api.close(); });
@@ -97,17 +98,28 @@ test('run APIs: real JWT/Postman JWKS, PostgreSQL snapshots, schemas and permiss
       return { status: response.status, body: await response.json() };
     };
     const hybrid = { ...input, mode: 'hybrid' };
-    const created = await call('', hybrid, 'python-e2e');
+    const replayKey = model ? 'python-e2e-model' : 'python-e2e-baseline';
+    const created = await call('', hybrid, replayKey);
     assert.equal(created.status, 202); conforms('Run', created.body);
-    assert.equal(created.body.model_version, 'baseline-rule-v1');
-    assert.equal(created.body.degraded_reason, 'ai_baseline_only');
+    assert.equal(created.body.model_version, expectedModel);
+    assert.equal(created.body.degraded_reason, model ? null : 'ai_baseline_only');
+    assert.equal(created.body.degraded, !model);
+    assert.equal(created.body.effective_method, model ? 'hybrid' : 'rule_only');
+    assert.equal(created.body.rule_version, 'sandbox-rules-2');
     const scoredGraph = (await call(`/${created.body.id}/graph`)).body;
     conforms('Graph', scoredGraph); assert.equal(scoredGraph.links.length, 2);
     assert.ok(scoredGraph.links.every((link) => link.method === 'rule' && Number.isFinite(link.score) && link.review_state === 'pending'));
-    assert.deepEqual((await call('', hybrid, 'python-e2e')).body, created.body);
+    assert.deepEqual((await call('', hybrid, replayKey)).body, created.body);
+    if (model) {
+      const oldBaseline = await call('', hybrid, 'python-e2e-baseline');
+      assert.equal(oldBaseline.body.model_version, 'baseline-rule-v1');
+      assert.equal(oldBaseline.body.effective_method, 'rule_only');
+    }
     const { rows: [audit] } = await pool.query('SELECT after_ref FROM core.audit_events WHERE entity_id=$1', [created.body.id]);
-    assert.equal(audit.after_ref.model_version, 'baseline-rule-v1');
+    assert.equal(audit.after_ref.model_version, expectedModel);
     assert.equal(audit.after_ref.feature_version, 'sandbox-observable-features-2');
+    assert.equal(audit.after_ref.effective_method, model ? 'hybrid' : 'rule_only');
+    assert.equal(audit.after_ref.degraded, !model);
     const link = scoredGraph.links[0];
     const review = await call(`/${created.body.id}/links/${link.id}/reviews`, { decision: 'accepted', reason: 'Observed direct edge', expected_version: 1 });
     assert.equal(review.status, 201); conforms('Review', review.body);

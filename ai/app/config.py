@@ -12,6 +12,7 @@ class Config:
     app_env: str = "development"
     host: str = "127.0.0.1"
     port: int = 8000
+    model_path: str = ""
 
     def __post_init__(self):
         if (not isinstance(self.service_secret, str) or len(self.service_secret) < 32
@@ -38,4 +39,5 @@ def read_config(env=None):
         app_env=env.get("APP_ENV", "development"),
         host=env.get("SCORER_HOST", "127.0.0.1"),
         port=int(port),
+        model_path=env.get("SCORER_MODEL_PATH", ""),
     )

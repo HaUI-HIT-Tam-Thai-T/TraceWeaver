@@ -11,6 +11,10 @@ test('scorer config is optional, private, bounded and rejects unsafe destination
   assert.equal(readConfig(valid).scorerUrl, null);
   const enabled = { ...valid, SCORER_URL: 'http://127.0.0.1:8000/internal/v1/score-pairs', SCORER_SERVICE_SECRET: 's'.repeat(32) };
   assert.equal(readConfig(enabled).scorerTimeoutMs, 5000);
+  assert.equal(readConfig(enabled).scorerModelVersion, '');
+  assert.equal(readConfig({ ...enabled, SCORER_MODEL_VERSION: 'logistic-regression-sandbox-features-2-experiment-1' }).scorerModelVersion,
+    'logistic-regression-sandbox-features-2-experiment-1');
+  assert.throws(() => readConfig({ ...enabled, SCORER_MODEL_VERSION: 'unknown' }), /SCORER_MODEL_VERSION/);
   for (const patch of [{ SCORER_SERVICE_SECRET: '' }, { SCORER_SERVICE_SECRET: 's'.repeat(32) + '\n' },
     { SCORER_TIMEOUT_MS: '5001' }, { SCORER_URL: 'http://untrusted.example.test/score' },
     { SCORER_URL: 'https://user:password@example.test/score' }]) {

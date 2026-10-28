@@ -1,0 +1,1381 @@
+{
+  "policy_version": "sandbox-rules-1",
+  "dataset_version": "sandbox-oracle-scenarios-1",
+  "feature_version": "sandbox-observable-features-2",
+  "dataset_checksums": {
+    "train.json": "0cbcb0eaeebb717bb018edd03ba3551c931a08b3d22c688dabd3045a210c4f6d",
+    "validation.json": "98a691e3dd8f5af9ad6b53909bdd449bf2c0fd34a7e9df688f98a251a9758664",
+    "test.json": "d8123545c605120231711ca418351d358db55794bd9f519becf3aaa14aa9b69a",
+    "oracle.json": "e93c1ba83278d4e412de6185da64ea9acfbc9d687338a1eeb9b5795309a1f8b2"
+  },
+  "experiment": "offline_only_not_promoted_to_runtime",
+  "model": {
+    "algorithm": "LogisticRegression",
+    "weights": [
+      -0.4086925356026311,
+      0.39116315281360114,
+      0.0,
+      2.2302661553102783,
+      -2.5317397239359165
+    ],
+    "bias": -1.068008569317225,
+    "scaler_fit_split": "train",
+    "scaler": {
+      "mean": [
+        463.77752976190476,
+        0.9375,
+        1.0,
+        0.875,
+        0.1875
+      ],
+      "std": [
+        1185.4267993086003,
+        0.24206145913796356,
+        1.0,
+        0.33071891388307384,
+        0.3903123748998999
+      ]
+    },
+    "threshold": 0.2,
+    "threshold_selection_split": "validation"
+  },
+  "counts": {
+    "train": {
+      "groups": 84,
+      "supervised": 1344,
+      "unresolved_excluded": 588
+    },
+    "validation": {
+      "groups": 18,
+      "supervised": 288,
+      "unresolved_excluded": 126
+    },
+    "test": {
+      "groups": 18,
+      "supervised": 288,
+      "unresolved_excluded": 126
+    }
+  },
+  "raw_scores": {
+    "model": {
+      "accuracy": 0.8125,
+      "precision": 0.7273,
+      "recall": 1.0,
+      "f1": 0.8421,
+      "tp": 144,
+      "fp": 54,
+      "fn": 0,
+      "tn": 90,
+      "total": 288
+    },
+    "legacy_baseline": {
+      "accuracy": 0.8125,
+      "precision": 0.7778,
+      "recall": 0.875,
+      "f1": 0.8235,
+      "tp": 126,
+      "fp": 36,
+      "fn": 18,
+      "tn": 108,
+      "total": 288
+    },
+    "two_flag_rule": {
+      "accuracy": 0.8125,
+      "precision": 0.7273,
+      "recall": 1.0,
+      "f1": 0.8421,
+      "tp": 144,
+      "fp": 54,
+      "fn": 0,
+      "tn": 90,
+      "total": 288
+    }
+  },
+  "eligible_candidates_only": {
+    "model": {
+      "accuracy": 0.8889,
+      "precision": 0.8889,
+      "recall": 1.0,
+      "f1": 0.9412,
+      "tp": 144,
+      "fp": 18,
+      "fn": 0,
+      "tn": 0,
+      "total": 162
+    },
+    "legacy_baseline": {
+      "accuracy": 0.7778,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "tp": 126,
+      "fp": 18,
+      "fn": 18,
+      "tn": 0,
+      "total": 162
+    },
+    "two_flag_rule": {
+      "accuracy": 0.8889,
+      "precision": 0.8889,
+      "recall": 1.0,
+      "f1": 0.9412,
+      "tp": 144,
+      "fp": 18,
+      "fn": 0,
+      "tn": 0,
+      "total": 162
+    }
+  },
+  "after_offline_policy_filter": {
+    "model": {
+      "accuracy": 0.9375,
+      "precision": 0.8889,
+      "recall": 1.0,
+      "f1": 0.9412,
+      "tp": 144,
+      "fp": 18,
+      "fn": 0,
+      "tn": 126,
+      "total": 288
+    },
+    "legacy_baseline": {
+      "accuracy": 0.875,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "tp": 126,
+      "fp": 18,
+      "fn": 18,
+      "tn": 126,
+      "total": 288
+    },
+    "two_flag_rule": {
+      "accuracy": 0.9375,
+      "precision": 0.8889,
+      "recall": 1.0,
+      "f1": 0.9412,
+      "tp": 144,
+      "fp": 18,
+      "fn": 0,
+      "tn": 126,
+      "total": 288
+    }
+  },
+  "by_category": {
+    "account_conflict_despite_shared_request": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      }
+    },
+    "after_window_boundary": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 18,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 18,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 18,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      }
+    },
+    "before_skew_boundary": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 18,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 18,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      }
+    },
+    "direct_completed": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      }
+    },
+    "direct_failed": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      }
+    },
+    "direct_intake": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      }
+    },
+    "job_conflict": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      }
+    },
+    "oracle_confirmed_non_edge": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 18,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 18,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 18,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 18,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 18,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 18,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      }
+    },
+    "request_conflict_despite_shared_account": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      }
+    },
+    "reversed_transition": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      }
+    },
+    "same_timestamp": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      }
+    },
+    "shared_account_missing_request": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      }
+    },
+    "shared_job": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      }
+    },
+    "skew_boundary": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 18,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 18,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      }
+    },
+    "skipped_step": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 18,
+          "total": 18
+        }
+      }
+    },
+    "window_boundary": {
+      "raw_scores": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      },
+      "after_offline_policy_filter": {
+        "model": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "legacy_baseline": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        },
+        "two_flag_rule": {
+          "accuracy": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 18,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "total": 18
+        }
+      }
+    }
+  },
+  "unresolved_test": {
+    "count": 126,
+    "reasons": {
+      "NO_SHARED_STRONG_ID": 72,
+      "AMBIGUOUS_MATCH": 18,
+      "OUTCOME_ACTION_MISMATCH": 18,
+      "OUTCOME_UNKNOWN": 18
+    },
+    "supervised_metrics": null,
+    "raw_model_scores_by_category": {
+      "ambiguous_retry": {
+        "count": 18,
+        "min": 0.776460502368859,
+        "max": 0.776460502368859,
+        "at_or_above_threshold": 18
+      },
+      "missing_id_one_side": {
+        "count": 18,
+        "min": 0.4083456461772562,
+        "max": 0.4083456461772562,
+        "at_or_above_threshold": 18
+      },
+      "no_ids": {
+        "count": 18,
+        "min": 0.4083456461772562,
+        "max": 0.4083456461772562,
+        "at_or_above_threshold": 18
+      },
+      "outcome_mismatch": {
+        "count": 18,
+        "min": 0.776460502368859,
+        "max": 0.776460502368859,
+        "at_or_above_threshold": 18
+      },
+      "same_value_different_namespace": {
+        "count": 18,
+        "min": 0.4083456461772562,
+        "max": 0.4083456461772562,
+        "at_or_above_threshold": 18
+      },
+      "unknown_outcome": {
+        "count": 18,
+        "min": 0.776460502368859,
+        "max": 0.776460502368859,
+        "at_or_above_threshold": 18
+      },
+      "user_only": {
+        "count": 18,
+        "min": 0.776460502368859,
+        "max": 0.776460502368859,
+        "at_or_above_threshold": 18
+      }
+    }
+  },
+  "feature_vectors_with_conflicting_oracle_labels": 1,
+  "limitations": [
+    "Synthetic scenario suite repeated across disjoint groups; not real-world generalization evidence.",
+    "Oracle-confirmed non-edge is a controlled feature-collision test, not a newly approved business rule.",
+    "BE confirmed that unknown/mismatched outcomes remain unresolved; backend implementation must be verified.",
+    "shared_id_count still counts all matching namespaces; strong-ID evidence stays outside model input.",
+    "Offline policy filtering has event/context evidence unavailable to the five-feature runtime scorer.",
+    "BE owns unresolved/reasons; schema 1 keeps all five features and all-ID shared count."
+  ]
+}
