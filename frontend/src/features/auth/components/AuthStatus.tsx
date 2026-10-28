@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { Button } from "../../../components/ui/Button";
+import { Badge } from "../../../components/ui/Badge";
+import { LoadingState } from "../../../components/ui/LoadingState";
+import { ErrorState } from "../../../components/ui/ErrorState";
 import { useAuth } from "../hooks/useAuth";
 
 export function AuthStatus() {
@@ -14,36 +18,38 @@ export function AuthStatus() {
     }
   }
 
-  const buttonClass =
-    "mt-4 rounded border px-4 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50";
   if (state.status === "initializing")
-    return <p role="status">Đang kiểm tra phiên đăng nhập…</p>;
+    return <LoadingState message="Đang kiểm tra phiên đăng nhập…" />;
   if (state.status === "error") {
     return (
-      <section aria-label="Trạng thái đăng nhập">
-        <p role="alert">{state.message}</p>
-        <button
-          className={buttonClass}
+      <section className="ui-panel space-y-4" aria-label="Trạng thái đăng nhập">
+        <ErrorState message={state.message} />
+        <Button
           type="button"
           onClick={() => window.location.reload()}
         >
           Tải lại trang
-        </button>
+        </Button>
       </section>
     );
   }
   const authenticated = state.status === "authenticated";
   return (
-    <section aria-label="Trạng thái đăng nhập">
-      <p role="status">
+    <section className="ui-panel space-y-4" aria-label="Trạng thái đăng nhập">
+      <div>
+        <h2 className="type-h2 mb-3">Phiên đăng nhập</h2>
+        <Badge tone={authenticated ? "success" : "neutral"}>
+          {authenticated ? "Đã xác thực" : "Chưa xác thực"}
+        </Badge>
+      </div>
+      <p role="status" className="type-body-sm text-muted">
         {authenticated
           ? "Đã đăng nhập."
           : (state.message ?? "Bạn chưa đăng nhập.")}
       </p>
-      <button
-        className={buttonClass}
+      <Button
         type="button"
-        disabled={busy}
+        loading={busy}
         onClick={() => {
           void handleAction(authenticated ? signOut : signIn);
         }}
@@ -53,7 +59,7 @@ export function AuthStatus() {
           : authenticated
             ? "Đăng xuất"
             : "Đăng nhập"}
-      </button>
+      </Button>
     </section>
   );
 }

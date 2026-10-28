@@ -882,3 +882,153 @@ mutation nghiệp vụ. Reload vẫn qua check-sso rồi về Home theo auth hi�
 không tồn tại. 404 được kiểm bằng SSR; chưa xác nhận màn hình 404 khi mở trực tiếp trên
 browser do luồng auth đó. Không mở rộng nhiệm vụ sang sửa auth hoặc BE. Giữ các thay
 đổi chưa commit trước đó; không thêm dependency, commit hoặc push.
+
+## UI Foundation — xám đậm và xanh
+
+Theme ở `src/index.css` dùng Tailwind v4 `@theme`: canvas #181B20, panel #25292E,
+control #343E4D, line #414852, primary #0066CC (hover #0057AD), focus/link #66B3FF,
+foreground #F4F6F8, muted #B5BDC8, success #73D6A2, warning #F2C166, danger #FF9292.
+Font Segoe UI/Roboto/system, spacing theo bước 4px, control tối thiểu 40px, bo 6px.
+Chỉ dùng token và component chung thay vì chép màu vào từng feature.
+
+Component tại `src/components/ui/`, import trực tiếp từng file. Sau chuyển đổi shadcn/ui,
+các wrapper này dùng primitive và dependency mô tả bên dưới:
+
+- `Button`: variant primary/secondary/ghost/danger; mặc định type=button. Form phải đặt
+  type=submit rõ ràng. loading khóa button và đặt aria-busy; caller cung cấp nhãn đang xử lý.
+- `Input`, `Select`: native props, label/aria-describedby/aria-invalid và ref của register()
+  được chuyển tới DOM. React 19 nhận ref qua props, không cần forwardRef.
+- `Badge`: tone neutral/info/success/warning/danger; luôn cung cấp nội dung trạng thái.
+- `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell`: composition
+  HTML semantic, caption bắt buộc, vùng cuộn ngang focus được. Không có sorting/cursor nội bộ.
+- `LoadingState`, `EmptyState`, `ErrorState`: nội dung an toàn do caller cung cấp;
+  ErrorState có requestId/action tùy chọn, không tự xử lý lỗi hoặc retry request.
+
+Ví dụ dùng trong form React Hook Form hiện có (giả định register/errors được lấy từ useForm):
+
+```tsx
+import { Input } from './components/ui/Input';
+import { Button } from './components/ui/Button';
+
+// Bên trong form đã có onSubmit:
+<label htmlFor="query">Tìm kiếm</label>
+<Input id="query" {...register('q')} aria-invalid={!!errors.q}
+  aria-describedby={errors.q ? 'query-error' : undefined} />
+{errors.q && <p id="query-error" role="alert">{errors.q.message}</p>}
+<Button type="submit" loading={isSubmitting}>Tìm kiếm</Button>
+```
+
+Đã tích hợp ở HomePage, AuthStatus, WorkspacePanel và PageLoadFeedback. Sources hiển thị
+bảng với ID xuống dòng; vai trò dùng badge, quyền và API vẫn do module hiện có quản lý.
+Input được kiểm tra bằng fixture SSR, chưa thay form nghiệp vụ. Các trang nghiệp vụ hiện
+nhận font/nền chung; thiết kế lại từng trang, sidebar/header và theme Keycloak ngoài phạm vi.
+Không thêm dữ liệu mẫu hoặc route xem mẫu vào ứng dụng.
+
+Kiểm thử: `tests/ui-foundation.test.mjs` kiểm native props/ref, variants, disabled/loading,
+HTML semantic, escape và feedback; tests auth/workspace/routes kiểm tích hợp các trạng thái.
+SSR không thay kiểm tra bàn phím, tương phản hoặc layout thực tế trong trình duyệt.
+
+Kết quả kiểm tra UI Foundation (28/10/2026): lint, 176/176 tests và build strict pass;
+git diff --check không có lỗi whitespace. Browser: desktop/mobile 390px, login operator,
+callback, logout, workspace thật với 3 sources, picker và focus bằng bàn phím đã kiểm.
+Mobile: viewport 390px, document 375px (không tràn ngang); bảng rộng 576px trong vùng
+292px, ArrowRight thay đổi scrollLeft. Các trạng thái rỗng/lỗi auth và quyền được kiểm bằng
+SSR; lỗi proxy thực tế cũng hiển thị thông báo an toàn. Chưa kiểm lại toàn bộ vai trò và
+mutation nghiệp vụ trong lượt UI này. Tương phản: white/primary 5.57:1,
+foreground/panel 13.51:1, muted/panel 7.72:1, focus/panel 6.59:1.
+
+
+### Component từ shadcn/ui
+
+Bộ UI hiện dùng source thực từ registry chính thức `new-york-v4`:
+https://ui.shadcn.com/r/styles/new-york-v4/{name}.json
+với button, input, native-select, badge, table, alert, empty, spinner.
+Hướng dẫn cài thủ công: https://ui.shadcn.com/docs/installation/manual
+
+- `src/components/ui/primitives/`: source shadcn có data-slot, cn và các variant chuẩn.
+- `src/components/ui/`: wrapper giữ API primary/danger, loading, tone, caption hiện có;
+  LoadingState dùng Spinner, EmptyState dùng Empty, ErrorState dùng Alert.
+- `components.json`: cấu hình shadcn, alias `ui` trỏ vào primitives. Alias @ được khai báo
+  trong TypeScript/Vite; import nội bộ primitive dùng relative để SSR tests chạy độc lập.
+- `src/lib/utils.ts`: cn kết hợp clsx và tailwind-merge, giải quyết class Tailwind xung đột.
+- Dependency mới: @radix-ui/react-slot, class-variance-authority, clsx, tailwind-merge,
+  lucide-react. Không cài package bao toàn bộ Radix. Lockfile đi kèm.
+
+Tùy biến source: đường dẫn import; Slot từ gói Radix riêng; chỉ export component để
+Fast Refresh không cảnh báo; Empty dùng kiểu div khớp DOM; Spinner tôn trọng reduced motion;
+Native Select wrapper full width; Table nhận containerProps cho vùng cuộn focus bằng bàn phím.
+Các surface bg-muted của source được ánh xạ sang secondary vì token muted hiện dùng cho chữ.
+Không dùng CLI init ghi đè CSS; theme semantic shadcn ánh xạ về palette TraceWeaver hiện có.
+
+NativeSelect giữ select/option native, onChange/ref và giá trị hiện có thay vì đổi sang Select
+popup với API khác. Badge wrapper dùng ghost, border-0 và bg-transparent theo yêu cầu.
+VariantProps/ComponentProps/ClassValue là kiểu có sẵn của thư viện dùng ngay tại điểm tích hợp;
+không tự xây mapped/conditional types. asChild trong source được thư viện Radix quản lý;
+wrapper nghiệp vụ chỉ dùng button/span thông thường.
+
+Khi thêm primitive sau này: chạy `npx shadcn@latest add <name>` trong frontend, chỉ thêm
+component đang cần; kiểm diff trước khi ghi đè primitive đã tùy biến, giữ wrapper/theme.
+
+Kiểm tra sau chuyển shadcn: lint sạch, 176/176 tests pass, build strict và diff --check pass.
+Preview component độc lập đã kiểm nhập Input/chọn NativeSelect; 5 Badge đều có background
+transparent và border 0px, Input có nền #343E4D. Preview là build artifact kiểm thử, không
+thêm route vào source. Chưa nghiệm thu lại luồng API thật sau chuyển đổi; cổng 5173 đang
+có dev server nên không dừng tiến trình đó. Khởi động lại dev server sau cập nhật dependency
+và alias nếu phiên đang chạy chưa nhận cấu hình mới.
+
+### Typography của TraceWeaver
+
+Đây là quy ước typography riêng, tương thích theme shadcn/ui; không phải component
+Typography được cài từ registry. Không thêm package hoặc component bọc. Class được định nghĩa
+trong `src/index.css` ở layer components, dùng token rem; font Segoe UI/Roboto/sans-serif.
+
+| Class | Size / line-height (px tại root 16px) | Weight | Dùng cho |
+| --- | --- | --- | --- |
+| type-h1 | 28/36 mobile; 32/40 từ 640px | 600 | Tiêu đề trang |
+| type-h2 | 24/32 | 600 | Khu vực chính |
+| type-h3 | 20/28 | 600 | Nhóm nội dung |
+| type-h4 | 18/24 | 600 | Nhóm nhỏ |
+| type-body | 16/24 | 400 | Nội dung |
+| type-body-sm | 14/20 | 400 | Nội dung phụ/bảng |
+| type-label | 14/20 | 500 | Nhãn input/link điều hướng |
+| type-caption | 12/16 | 400 | Metadata/chú thích |
+| type-code | 13/20, Consolas/Courier New/monospace | 400 | UUID/mã |
+
+```tsx
+<h1 className="type-h1">Sự kiện</h1>
+<p className="type-body mt-3">Nội dung chính của trang.</p>
+<label htmlFor="search" className="type-label block">Tìm kiếm</label>
+<p className="type-caption mt-2 text-muted">Thông tin bổ sung.</p>
+<code className="type-code break-all">10000000-0000-4000-8000-000000000015</code>
+```
+
+Class không đặt margin, màu hoặc heading level; chọn thẻ theo cấu trúc nội dung.
+Ví dụ h2 trong thẻ điều hướng có thể dùng type-h3 để gọn hơn nhưng vẫn là h2 trong cây HTML.
+Không nhảy cấp heading chỉ vì muốn chữ nhỏ, không dùng code cho toàn bộ văn bản thông thường.
+Màu dùng text-foreground/text-muted hoặc token trạng thái; layout tự quản lý spacing.
+Không gán style lên mọi h1/p, không bọc app bằng Typeset; không thêm class Typography React.
+
+Tokens text-xs/sm/base/lg/xl/2xl có line-height rõ để shadcn dùng cùng thang chữ.
+Với wrapper shadcn, dùng utility text/leading/font tương ứng token vì utility của primitive
+có thể ghi đè class ở layer components; cn giải quyết utility xung đột. Không ghép thêm
+utility cỡ chữ cạnh type-* khi không có chủ đích ghi đè. Input/Select vẫn 16px, Button/Badge
+và bảng giữ typography theo primitive và token chung. Thông báo lỗi không line-clamp.
+
+Đã áp dụng: Home, AuthStatus, WorkspacePanel, AuthCallbackPage, PageLoadFeedback,
+LoadingState, EmptyState, ErrorState. Các trang nghiệp vụ chưa thiết kế lại chữ trong lượt này.
+
+Kiểm tra typography (28/10/2026): lint sạch, 176/176 tests pass, build strict pass.
+Preview cô lập dùng component thật với Context giả (không gọi API): 9 cấp chữ có computed
+font-size/line-height/weight đúng bảng; H1 desktop 32/40px, mobile 390px là 28/36px.
+Mobile document width 375px trong viewport 390px, không tràn ngang. Kiểm text scaling 200%
+bằng root font-size 32px: H1 mobile 56/72px, bảng cuộn riêng (1152px trong vùng 212px),
+message dài có clientHeight=scrollHeight nên không bị cắt. Chưa xác minh browser zoom 200%
+thật vì phím zoom không làm đổi mức zoom trong công cụ. Chưa chạy luồng API/login thật
+trong lượt typography; preview không thêm route hoặc fixture vào source ứng dụng.
+
+File sửa riêng cho typography: src/index.css, src/pages/HomePage.tsx,
+src/features/auth/components/AuthStatus.tsx, src/features/workspace/components/WorkspacePanel.tsx,
+src/pages/AuthCallbackPage.tsx, src/routes/PageLoadFeedback.tsx,
+src/components/ui/LoadingState.tsx, src/components/ui/EmptyState.tsx,
+src/components/ui/ErrorState.tsx, tests/auth-ui.test.mjs, tests/workspace-ui.test.mjs,
+tests/ui-foundation.test.mjs và README.md. Không sửa primitive shadcn hoặc dependency trong lượt này.

@@ -7,12 +7,12 @@ export function AuthCallbackPage() {
   if (state.status === "authenticated") return <Navigate to="/" replace />;
   return (
     <>
-      <h1 className="mb-4 text-2xl font-bold">Đăng nhập</h1>
+      <h1 className="type-h1 mb-4">Đăng nhập</h1>
       {state.status === "unauthenticated" && (
-        <p>Đăng nhập chưa hoàn tất hoặc đã bị hủy.</p>
+        <p className="type-body mb-4">Đăng nhập chưa hoàn tất hoặc đã bị hủy.</p>
       )}
       <AuthStatus />
-      <Link className="mt-4 block underline" to="/">
+      <Link className="type-label mt-4 block underline" to="/">
         Về trang chủ
       </Link>
     </>

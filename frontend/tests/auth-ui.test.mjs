@@ -31,6 +31,8 @@ test('auth UI renders loading, session failure, login/logout, and callback feedb
     const signedOut = render({ status: 'unauthenticated', message: 'Phiên đã hết hạn.' })
     assert.match(signedOut, /Phiên đã hết hạn/)
     assert.match(signedOut, /Đăng nhập/)
+    assert.match(signedOut, /<h1[^>]*class="type-h1"[^>]*>TraceWeaver<\/h1>/)
+    assert.match(signedOut, /<h2[^>]*>Phiên đăng nhập<\/h2>/)
     assert.doesNotMatch(signedOut, /Đăng xuất/)
     const signedIn = render({ status: 'authenticated' })
     assert.match(signedIn, /Đã đăng nhập/)
@@ -41,6 +43,7 @@ test('auth UI renders loading, session failure, login/logout, and callback feedb
     const callback = render({ status: 'unauthenticated' }, AuthCallbackPage)
     assert.match(callback, /Đăng nhập chưa hoàn tất hoặc đã bị hủy/)
     assert.match(callback, /Về trang chủ/)
+    assert.match(callback, /<h1[^>]*>Đăng nhập<\/h1>/)
   } finally {
     await server.close()
   }

@@ -34,7 +34,8 @@ test('workspace UI renders access states, labeled picker, current roles, paginat
     assert.match(unselected, /Chọn một workspace/)
     assert.match(unselected, new RegExp(id))
     const empty = render({ ...ready, sources: { ...initial.sources, status: 'ready' } })
-    assert.match(empty, /Vai trò: admin/)
+    assert.match(empty, /Vai trò:/)
+    assert.match(empty, /data-slot="badge"[^>]*>admin<\/span>/)
     assert.match(empty, /ghi không/)
     assert.match(empty, /Chưa có nguồn nào/)
     const populated = render({ ...ready, sources: {
@@ -42,6 +43,11 @@ test('workspace UI renders access states, labeled picker, current roles, paginat
       nextCursor: 'opaque', error: null,
     } })
     assert.match(populated, /Tải thêm nguồn/)
+    assert.match(populated, /<h2[^>]*id="workspace-title"[^>]*>Workspace<\/h2>/)
+    assert.match(populated, /<h3[^>]*>Nguồn được phép đọc<\/h3>/)
+    assert.match(populated, /<code[^>]*>source-a<\/code>/)
+    assert.match(populated, /<caption[^>]*>Danh sách nguồn được phép đọc<\/caption>/)
+    assert.match(populated, /<th[^>]*scope="col"[^>]*>Service<\/th>/)
     assert.match(populated, /&lt;script&gt;/)
     assert.doesNotMatch(populated, /<script>/)
     const failure = new ApiError({ kind: 'http', status: 403, code: 'FORBIDDEN', message: 'Không có quyền.', requestId: 'request-demo' })

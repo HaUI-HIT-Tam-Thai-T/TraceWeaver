@@ -146,7 +146,7 @@ test('failed route import renders a safe reload action instead of raw module err
       const html = await renderStream(element).completed
       assert.match(html, /role="alert"/)
       assert.match(html, /Không tải được trang/)
-      assert.match(html, /<button type="button">Tải lại trang<\/button>/)
+      assert.match(html, /<button[^>]*type="button"[^>]*>Tải lại trang<\/button>/)
       assert.doesNotMatch(html, /Simulated private chunk failure|stack|Authorization/)
     }
     assert.equal(attempts, 1, 'Rendering the failure again must not retry the module automatically')

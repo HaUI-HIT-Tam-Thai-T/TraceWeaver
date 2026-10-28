@@ -19,6 +19,7 @@ export default defineConfig(({ mode, command, isPreview }) => {
 
   return {
     envDir,
+    resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
     plugins: [react(), tailwindcss()],
     server: {
       host: 'localhost',
