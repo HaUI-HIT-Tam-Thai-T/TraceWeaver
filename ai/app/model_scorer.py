@@ -22,6 +22,7 @@ FEATURE_NAMES = (
     "conflicting_id",
 )
 MODEL_ALGORITHM = "LogisticRegression (Pure Python SGD with L2)"
+SUPPORTED_ALGORITHMS = (MODEL_ALGORITHM, "LogisticRegression")
 
 
 def sigmoid(z: float) -> float:
@@ -81,7 +82,7 @@ class ModelScorer:
                 raise ValueError("model version is missing")
             if model_data.get("feature_schema_version") != FEATURE_SCHEMA_VERSION:
                 raise ValueError("unsupported feature schema version")
-            if model_data.get("algorithm") != MODEL_ALGORITHM:
+            if model_data.get("algorithm") not in SUPPORTED_ALGORITHMS:
                 raise ValueError("unsupported model algorithm")
             if model_data.get("feature_names") != list(FEATURE_NAMES):
                 raise ValueError("model feature names do not match the scorer")

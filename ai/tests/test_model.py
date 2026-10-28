@@ -130,6 +130,7 @@ class ModelScorerTests(unittest.TestCase):
                 "feature_names": list(reversed(source_model["feature_names"])),
             },
             "unsupported schema": {**source_model, "feature_schema_version": "2"},
+            "unsupported algorithm": {**source_model, "algorithm": "UnknownModel"},
         }
 
         with tempfile.TemporaryDirectory() as tmp_dir:
