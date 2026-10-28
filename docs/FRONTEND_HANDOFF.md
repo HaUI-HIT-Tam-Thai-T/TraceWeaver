@@ -1,5 +1,7 @@
 # Bàn giao Frontend — TraceWeaver
 
+> Bổ sung 29/10/2026: [Knowledge, tên workspace/nguồn và danh sách người nhận hồ sơ](FRONTEND_READABLE_DATA_HANDOFF.md). Xem trạng thái rollout trong bản bổ sung trước khi dùng API mới.
+
 Cập nhật 27/10/2026, theo source và API Oracle tại commit `116e156`. FE dùng **React/Vite**, local **http://localhost:5173**, production dự kiến **https://traceweaver.quizlearn.tech**. Trạng thái cấu hình đang chạy và các bước còn thiếu được ghi ở mục 2.
 
 Đọc tài liệu này để triển khai luồng; tra từng endpoint, field, enum và ví dụ JSON tại [API reference](FRONTEND_API_REFERENCE.md). [OpenAPI](../backend/contracts/openapi.json) và [JSON Schema](../backend/contracts/schemas/domain.schema.json) là hợp đồng chuẩn. Ví dụ trong tài liệu là dữ liệu minh họa, không phải ID/token/response production để sao chép nguyên vào request.
