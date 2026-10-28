@@ -1,6 +1,6 @@
 # AI integration — 28/10/2026
 
-Runtime baseline đã được nhập từ nhánh `origin/xkhuong/feat/ai-scorer`. Xem [RUN](RUN.md) để chạy Python service và [tích hợp BE](../backend/SCORER.md). Đây là heuristic baseline, chưa có model học máy. Nội dung handoff/scaffold bên dưới là lịch sử trước BE-27.
+BE-34 đã nhập loader và model thử nghiệm từ `AI_BE_RUNTIME_V2`, có checksum, 23 mẫu score và 42 feature fixture đối chiếu. Model chỉ chạy khi cấu hình tường minh; baseline vẫn được hỗ trợ. Xem [tích hợp BE](../backend/SCORER.md) và [nguồn gốc/giới hạn model](artifacts/sandbox-v2/README.md). [RUN](RUN.md) mô tả cách chạy baseline. Nội dung handoff/scaffold bên dưới là lịch sử trước BE-27.
 
 # AI scorer
 

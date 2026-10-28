@@ -1,5 +1,7 @@
 # Chạy bản AI baseline đầu tiên
 
+BE-34 đã thêm model sandbox v2 theo cấu hình opt-in. Xem [hướng dẫn chạy model và tích hợp BE](../backend/SCORER.md#experimental-trained-v2); các lệnh dưới đây dành cho baseline. Không dùng model sandbox để tự nối cạnh hoặc thay quyết định review.
+
 Bản này giúp thử luồng gửi feature → nhận điểm qua HTTP. Baseline dùng các luật
 được viết rõ trong code; chưa có bước model học từ dữ liệu. Nó không tự gán nhãn
 cho 24 ví dụ và không quyết định thay người review.

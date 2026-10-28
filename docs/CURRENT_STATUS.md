@@ -1,6 +1,12 @@
 # Hiện trạng TraceWeaver
 
-## BE-27 — 28/10/2026: baseline scorer integration
+## BE-34 — 28/10/2026: trained model v2 opt-in
+
+AI_BE_RUNTIME_V2 has been verified and imported: loader plus checksum-verified experimental JSON artifact, 23 HTTP sample pairs and 42 independent feature fixtures. The supplied launcher and Node probe pass; the real Node extractor passes 42/42. Explicit SCORER_MODEL_VERSION enables the exact trained version; baseline remains supported. Model success reports hybrid/non-degraded, annotating only existing pending rule-derived links. sandbox-rules-2 keeps ACL/outcome/strong-ID/ambiguity/cardinality/cycle guards. Batches <=100 share one <=5s deadline; failures discard every score. See [Scorer guide](../backend/SCORER.md) and [artifact provenance](../ai/artifacts/sandbox-v2/README.md).
+
+Verified: 129 Node unit/HTTP/contracts, 31 Python, 50 PostgreSQL, 47 native identity/API tests pass, zero skipped. The JWT/API→Python-model→PostgreSQL path verifies scores/audit/replay/review and stopped-scorer fallback; old baseline replay stays immutable after model selection. OpenAPI has 21 source-implemented operations (20 Node + 1 private Python). No dependency install, migration, training, image rebuild/deployment or secret change. API container retains its old image. Synthetic precision 0.7273 remains below the >=95% target; no production quality or recall gain is claimed. Earlier notes below are historical where superseded.
+
+## Historical BE-27 — 28/10/2026: baseline scorer integration
 
 AI baseline runtime imported from origin/xkhuong/feat/ai-scorer; Node adapter tested against real Python HTTP. No trained model exists. Only reviewed baseline is enabled: scores annotate guard-approved pending links; effective_method remains rule_only with ai_baseline_only. sandbox-rules-2 applies outcome guards; optional Graph.abstentions is persisted with audit. Batch <=100, total <=5s; failures discard all scores. Runtime features are independently versioned; legacy bootstrap helpers are not trained-model parity evidence. See [Scorer guide](../backend/SCORER.md).
 
@@ -11,12 +17,12 @@ Cập nhật phản hồi AI 28/10/2026. Phạm vi checkout hiện tại là bac
 
 | Thành phần | Đã có | Còn thiếu |
 |---|---|---|
-| API | 20/21 operations: identity/workspace reads, ingest/events, run/graph, reviews/manual links, cases/dashboard, core workflow | Scorer HTTP adapter |
+| API | 20 Node public/core operations +1 private Python scorer; HTTP adapter/model opt-in verified | Deployment of current source |
 | Identity | Keycloak local PKCE/refresh; user/ingest/core token isolation; current DB roles/grants | Production SSO/session revocation; FE login UI |
 | Data | 7 migrations; immutable events/run snapshots; provenance/dedup; exact time filters; transactional audit | Raw simulator parsers/polling; representative dataset; backup/restore |
-| Reconstruction | Versioned rule policy; ambiguity/conflict/cycle guards; review và case lifecycle | Feature extractor/model/evaluator; hybrid hiện degraded về rule_only |
+| Reconstruction | Versioned guards/review/cases; feature v2 parity; trained opt-in scores with durable audit | Representative quality/recall and performance evaluation |
 | Frontend integration | Exact-origin API/health CORS; local public PKCE client có callback | Frontend runtime/screens/E2E |
-| AI/simulator | Contracts và handoff | Runtime tích hợp, generator/data manifest/splits/model metrics |
+| AI/simulator | Baseline + experimental model runtime, supplied synthetic manifests/metrics | Representative generator/data, independent quality reproduction |
 
 ## Kiểm chứng
 

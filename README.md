@@ -1,6 +1,6 @@
 # TraceWeaver
 
-BE-27 (28/10): đã nối HTTP scorer baseline, outcome guard và Graph abstentions; 82 BE/contract + 28 AI tests pass. Chưa có trained model; baseline vẫn rule_only/degraded. BE-33 đã khởi động DB và kiểm thêm 50 DB + 46 identity/API tests pass, gồm JWT/API → Python scorer → PostgreSQL → review và fallback. Container API vẫn là image cũ; source mới đã kiểm bằng API riêng trong test. Xem [scorer integration](backend/SCORER.md). Nội dung cũ bên dưới chỉ áp dụng khi không bị cập nhật này thay thế.
+BE-34 (28/10): đã tích hợp model thử nghiệm từ AI_BE_RUNTIME_V2 theo cấu hình opt-in; extractor Node pass 42/42 fixture, 23 cặp HTTP khớp mẫu. Kiểm tra 129 BE/contract + 31 Python + 50 DB + 47 identity/API pass, không skip; có JWT/API→model→PostgreSQL, audit/replay/review/fallback. Model chỉ chấm các cạnh pending đã qua guard; chất lượng synthetic chưa đạt mục tiêu precision. Container API vẫn dùng image cũ. Xem [cấu hình scorer](backend/SCORER.md). Các ghi chú cũ bên dưới chỉ áp dụng khi không bị cập nhật này thay thế.
 
 Base dự án tái dựng hành trình yêu cầu cấp môi trường thực hành từ dấu vết của ba dịch vụ intake, account và provision, định hướng DX-Lab HaUI 2026.
 
@@ -21,7 +21,7 @@ simulator/       # Khung sinh dữ liệu giả
 .github/         # Issue/PR templates và CI
 ```
 
-Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, Keycloak local/Swagger PKCE login, JWT/JWKS, batch ingestion, GET /me, sources, knowledge, events, event detail và [run/graph, review/manual links](backend/RECONSTRUCTION.md) với quyền từ DB, snapshot, version và audit. [Case/workflow](backend/CASES.md) đã có 5 API; [dashboard](backend/DASHBOARD.md) có số đếm cùng scope và bộ lọc thời gian cho case drill-down. [Core workflow HTTP](backend/WORKFLOW.md) có ba API dùng app JWT riêng và JWT người dùng được kiểm độc lập; OpenAPI phân biệt20 implemented/1 planned (scorer). Hybrid hiện degraded về rule_only vì chưa có scorer. Phạm vi triển khai hiện tại là BE.
+Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, Keycloak local/Swagger PKCE login, JWT/JWKS, batch ingestion, GET /me, sources, knowledge, events, event detail và [run/graph, review/manual links](backend/RECONSTRUCTION.md) với quyền từ DB, snapshot, version và audit. [Case/workflow](backend/CASES.md) đã có 5 API; [dashboard](backend/DASHBOARD.md) có số đếm cùng scope và bộ lọc thời gian cho case drill-down. [Core workflow HTTP](backend/WORKFLOW.md) có ba API dùng app JWT riêng và JWT người dùng được kiểm độc lập; OpenAPI có20 Node operations và1 private Python scorer đã implemented trong source. Model v2 cần opt-in; baseline vẫn rule_only/degraded. Phạm vi triển khai hiện tại là BE.
 
 Chạy API bằng Docker sau bước [chuẩn bị Keycloak/demo](backend/KEYCLOAK.md): `docker compose up -d --build --wait api`. Mặc định API tại `http://localhost:8080`; đăng nhập Swagger bằng **Authorize → keycloakLogin**. Máy hiện tại đã chuẩn bị xong; mật khẩu nằm trong `demo-credentials.local.json` bị Git ignore. Chi tiết tại [Docker API](backend/DOCKER.md).
 
