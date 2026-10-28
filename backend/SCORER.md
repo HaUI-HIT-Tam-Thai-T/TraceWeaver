@@ -36,3 +36,17 @@ npm.cmd run test:db
 ```
 
 SCORER_PYTHON enables the Node-to-Python real HTTP integration test; without it that test is explicitly skipped. Other HTTP failure fixtures run normally. PostgreSQL test covers persistence/audit/idempotent replay/abstention and requires the local DB. See CURRENT_STATUS for actual results and environment blockers.
+
+## BE-33 verification — 28/10/2026
+
+Docker/PostgreSQL recovered using existing images/volume. `npm run test:db`: 50/50 pass. With SCORER_PYTHON set, `npm run test:identity:native`: 46/46 pass, none skipped. New identity run integration starts a real Python baseline and separate current-source API; verifies JWT request, run/graph schemas, stored scores/audit, replay, review and scorer-unavailable fallback. Native JWKS fixture signs real JWTs; this is not a live Keycloak/browser login test.
+
+The Docker API image was not rebuilt and retains its previous source. Only PostgreSQL needed starting; app data/credentials were preserved. Tests keep their isolated `traceweaver_test_*` databases per existing policy and close temporary Python/API/JWKS processes. PostgreSQL is left healthy/running. No trained model artifact is supplied in the integrated AI source.
+
+To rerun full HTTP integration:
+
+```powershell
+$env:SCORER_PYTHON = (Resolve-Path .local/ai-venv/Scripts/python.exe).Path
+npm.cmd run test:db
+npm.cmd run test:identity:native
+```

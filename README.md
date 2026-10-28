@@ -1,6 +1,6 @@
 # TraceWeaver
 
-BE-27 (28/10): đã nối HTTP scorer baseline, outcome guard và Graph abstentions; 82 BE/contract + 28 AI tests pass. Chưa có trained model; baseline vẫn rule_only/degraded. Kiểm DB lần này bị chặn do PostgreSQL/Docker chưa chạy. Xem [scorer integration](backend/SCORER.md). Nội dung cũ bên dưới chỉ áp dụng khi không bị cập nhật này thay thế.
+BE-27 (28/10): đã nối HTTP scorer baseline, outcome guard và Graph abstentions; 82 BE/contract + 28 AI tests pass. Chưa có trained model; baseline vẫn rule_only/degraded. BE-33 đã khởi động DB và kiểm thêm 50 DB + 46 identity/API tests pass, gồm JWT/API → Python scorer → PostgreSQL → review và fallback. Container API vẫn là image cũ; source mới đã kiểm bằng API riêng trong test. Xem [scorer integration](backend/SCORER.md). Nội dung cũ bên dưới chỉ áp dụng khi không bị cập nhật này thay thế.
 
 Base dự án tái dựng hành trình yêu cầu cấp môi trường thực hành từ dấu vết của ba dịch vụ intake, account và provision, định hướng DX-Lab HaUI 2026.
 
