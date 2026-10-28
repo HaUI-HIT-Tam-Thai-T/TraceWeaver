@@ -107,7 +107,7 @@ test('run APIs: real JWT/Postman JWKS, PostgreSQL snapshots, schemas and permiss
     assert.deepEqual((await call('', hybrid, 'python-e2e')).body, created.body);
     const { rows: [audit] } = await pool.query('SELECT after_ref FROM core.audit_events WHERE entity_id=$1', [created.body.id]);
     assert.equal(audit.after_ref.model_version, 'baseline-rule-v1');
-    assert.equal(audit.after_ref.feature_version, 'runtime-jaccard-1');
+    assert.equal(audit.after_ref.feature_version, 'sandbox-observable-features-2');
     const link = scoredGraph.links[0];
     const review = await call(`/${created.body.id}/links/${link.id}/reviews`, { decision: 'accepted', reason: 'Observed direct edge', expected_version: 1 });
     assert.equal(review.status, 201); conforms('Review', review.body);

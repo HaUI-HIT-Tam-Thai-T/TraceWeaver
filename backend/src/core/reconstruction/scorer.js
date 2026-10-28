@@ -3,23 +3,11 @@
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import schema from '../../../contracts/schemas/domain.schema.json' with { type: 'json' };
+import { pairFeatures } from './features.js';
+export { FEATURE_VERSION, pairFeatures, extractPairFeatures } from './features.js';
 
 const ajv = new Ajv2020({ strict: true }); addFormats(ajv); ajv.addSchema(schema);
 const valid = ajv.getSchema(`${schema.$id}#/$defs/ScoreResponse`);
-export const FEATURE_VERSION = 'runtime-jaccard-1';
-const tokens = (s) => new Set((s.replaceAll('[REDACTED]', '').normalize('NFKC').toLowerCase().match(/[\p{L}\p{N}_]+/gu) ?? []));
-function micros(s) {
-  return BigInt(Date.parse(`${s.slice(0, 19)}Z`)) * 1000n + BigInt((s.includes('.') ? s.slice(20, -1) : '').padEnd(6, '0').slice(0, 6));
-}
-export function pairFeatures(a, b) {
-  const ids = (e) => new Set(e.identifiers.filter((i) => !i.value.includes('[REDACTED]')).map((i) => JSON.stringify([i.namespace, i.value])));
-  const left = ids(a), right = ids(b), x = tokens(a.message), y = tokens(b.message);
-  const intersection = [...x].filter((s) => y.has(s)).length;
-  return { delta_seconds: Number(micros(b.occurred_at) - micros(a.occurred_at)) / 1e6,
-    shared_id_count: [...left].filter((s) => right.has(s)).length,
-    text_similarity: x.size && y.size ? intersection / (x.size + y.size - intersection) : 0,
-    transition_allowed: true, conflicting_id: false };
-}
 
 // Receives only already scoped, guard-approved links. Never breaks ambiguity with scores.
 export function createScorer({ scorerUrl, scorerSecret, scorerTimeoutMs = 5000 } = {}) {
