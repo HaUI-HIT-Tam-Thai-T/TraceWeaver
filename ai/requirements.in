@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: 2026 TraceWeaver contributors
+# SPDX-License-Identifier: Apache-2.0
+# Direct dependencies. requirements.txt also pins transitive packages.
+fastapi==0.159.1
+jsonschema==4.26.0
+uvicorn==0.54.0
