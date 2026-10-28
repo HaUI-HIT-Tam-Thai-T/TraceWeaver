@@ -1,5 +1,7 @@
 # TraceWeaver
 
+BE-38 (29/10/2026): đã deploy BE + model AI v2 lên Oracle tại https://api.quizlearn.tech/docs/, runtime release `oracle-4e2805e`. API gọi scorer bằng TLS nội bộ, AI không publish cổng Internet. Pass 23 mẫu scorer qua TLS, 20 kiểm tra hybrid/PKCE/audit/replay/dữ liệu và 49 kiểm tra live hiện có. Hashes của 72 events, 25 runs và 25 cases cũ giữ nguyên; test thêm đúng một run hybrid, không thêm event/case. PostgreSQL/Keycloak và các ứng dụng khác giữ nguyên. Xem [hướng dẫn deploy](deploy/oracle/README.md). Các ghi chú container cũ bên dưới mô tả lịch sử hoặc container local8080, không phải deployment Oracle mới.
+
 BE-34 (28/10): đã tích hợp model thử nghiệm từ AI_BE_RUNTIME_V2 theo cấu hình opt-in; extractor Node pass 42/42 fixture, 23 cặp HTTP khớp mẫu. Kiểm tra 129 BE/contract + 31 Python + 50 DB + 47 identity/API pass, không skip; có JWT/API→model→PostgreSQL, audit/replay/review/fallback. Model chỉ chấm các cạnh pending đã qua guard; chất lượng synthetic chưa đạt mục tiêu precision. Container API vẫn dùng image cũ. Xem [cấu hình scorer](backend/SCORER.md). Các ghi chú cũ bên dưới chỉ áp dụng khi không bị cập nhật này thay thế.
 
 Base dự án tái dựng hành trình yêu cầu cấp môi trường thực hành từ dấu vết của ba dịch vụ intake, account và provision, định hướng DX-Lab HaUI 2026.
