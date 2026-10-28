@@ -62,8 +62,8 @@ SCORER_PYTHON enables real Python baseline and trained-model HTTP integration te
 When the original incoming folder is present, its own checks also work:
 
 ```powershell
-.local/ai-venv/Scripts/python.exe -B .local/handoffs/ai-be-runtime-v2/run_scorer.py --check --report .local/reports/ai-runtime-v2/verification.json
-node .local/handoffs/ai-be-runtime-v2/features/check_features.cjs backend/src/core/reconstruction/features.js
+.local/ai-venv/Scripts/python.exe -B ai/handoffs/AI_BE_RUNTIME_V2/run_scorer.py --check --report .local/reports/ai-runtime-v2/verification.json
+node ai/handoffs/AI_BE_RUNTIME_V2/features/check_features.cjs backend/src/core/reconstruction/features.js
 ```
 
 ## Historical BE-33 verification — 28/10/2026

@@ -1,0 +1,235 @@
+{
+  "schema_version": "1",
+  "pairs": [
+    {
+      "pair_id": "g0118-direct_intake",
+      "features": {
+        "delta_seconds": 12.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-direct_completed",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-direct_failed",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-shared_account_missing_request",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-shared_job",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-skew_boundary",
+      "features": {
+        "delta_seconds": -5.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-same_timestamp",
+      "features": {
+        "delta_seconds": 0.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-window_boundary",
+      "features": {
+        "delta_seconds": 3600.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-before_skew_boundary",
+      "features": {
+        "delta_seconds": -5.001,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-after_window_boundary",
+      "features": {
+        "delta_seconds": 3600.001,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-skipped_step",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": false,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-reversed_transition",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": false,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-request_conflict_despite_shared_account",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": true
+      }
+    },
+    {
+      "pair_id": "g0118-account_conflict_despite_shared_request",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": true
+      }
+    },
+    {
+      "pair_id": "g0118-job_conflict",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 0,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": true
+      }
+    },
+    {
+      "pair_id": "g0118-oracle_confirmed_non_edge",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-no_ids",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 0,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-user_only",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-missing_id_one_side",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 0,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-same_value_different_namespace",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 0,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-ambiguous_retry",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-outcome_mismatch",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "pair_id": "g0118-unknown_outcome",
+      "features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    }
+  ]
+}

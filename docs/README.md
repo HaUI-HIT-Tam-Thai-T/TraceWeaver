@@ -25,7 +25,7 @@ OpenAPI/JSON Schema là hợp đồng chung; không tạo DTO riêng khác schem
 - `docs/`: tài liệu dùng chung và bàn giao giữa các thành phần.
 - `backend/*.md`, `ai/*.md`, `frontend/README.md`: hướng dẫn gắn với source của từng thành phần.
 - `.planning/`: kế hoạch, quyết định và trạng thái làm việc local.
-- `.local/handoffs/`: gói nhận từ bên ngoài, giữ nguyên nội dung/checksum.
+- `ai/handoffs/`: gói bàn giao AI được quản lý trong Git, giữ nguyên nội dung/checksum.
 - `.local/reports/`: kết quả kiểm tra và bản ghi thao tác local.
 - `.local/scripts/`: script vận hành/demo dùng riêng trên máy.
 - `.local/releases/`: bản nháp PR và release.

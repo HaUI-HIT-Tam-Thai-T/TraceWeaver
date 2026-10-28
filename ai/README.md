@@ -1,5 +1,21 @@
 # AI integration — 28/10/2026
 
+## Cấu trúc thư mục
+
+```text
+ai/
+  app/                         # Service scorer đang tích hợp
+  artifacts/                   # Model và manifest có version
+  features/                    # Feature extraction
+  training/                    # Chuẩn bị dữ liệu và training
+  scripts/                     # Công cụ AI
+  tests/                       # Kiểm thử và fixture
+  handoffs/
+    AI_BE_RUNTIME_V2/          # Gói bàn giao gốc, được quản lý trong Git
+```
+
+Gói đầy đủ nằm tại [handoffs/AI_BE_RUNTIME_V2](handoffs/AI_BE_RUNTIME_V2/README.md). Các lần sửa runtime thực hiện ở `app/`, `features/`, `artifacts/` và `tests/`; giữ snapshot bàn giao nguyên vẹn để đối chiếu checksum.
+
 BE-34 đã nhập loader và model thử nghiệm từ `AI_BE_RUNTIME_V2`, có checksum, 23 mẫu score và 42 feature fixture đối chiếu. Model chỉ chạy khi cấu hình tường minh; baseline vẫn được hỗ trợ. Xem [tích hợp BE](../backend/SCORER.md) và [nguồn gốc/giới hạn model](artifacts/sandbox-v2/README.md). [RUN](RUN.md) mô tả cách chạy baseline. Nội dung handoff/scaffold bên dưới là lịch sử trước BE-27.
 
 # AI scorer
