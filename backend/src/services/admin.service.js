@@ -34,10 +34,11 @@ export function createAdminService(repo, provider, secret) {
       if (typeof key !== 'string' || !/^[\x21-\x7e]{1,200}$/.test(key)) throw new ApiError(400, 'IDEMPOTENCY_REQUIRED', 'Idempotency-Key required');
       const { expected_version, ...body } = input;
       const hash = createHmac('sha256', secret).update(canonical(body)).digest('hex');
-      const operation = await repo.reserve(actor, wid, digest(key), hash, input);
+      const operation = await repo.reserve(actor, wid, digest(key), hash, input, { allowCreate: Boolean(provider) });
       if (operation.state === 'completed') return operation;
+      const configuredProvider = identityProvider();
       try {
-        const account = await identityProvider().create(input.username, input.temporary_password, operation.marker);
+        const account = await configuredProvider.create(input.username, input.temporary_password, operation.marker);
         return await repo.finish(actor, wid, digest(key), account, input);
       } catch (e) {
         if (e instanceof ApiError && e.status < 500) throw e;

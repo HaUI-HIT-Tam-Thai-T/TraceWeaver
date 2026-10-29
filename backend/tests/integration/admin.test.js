@@ -66,6 +66,17 @@ test('workspace admin scope, CAS, last admin, membership and read grants are tra
   assert.equal(demotions.filter(x => x.status === 'fulfilled').length, 1);
   assert.equal((await pool.query("SELECT count(*)::int n FROM core.memberships m JOIN core.membership_roles r USING(workspace_id,subject) WHERE m.workspace_id=$1 AND m.revoked_at IS NULL AND r.role_key='admin'", [wid])).rows[0].n, 1);
 });
+test('disabled account provider fails before reserving a new provisioning operation', async t => {
+  const { pool, workspace: wid } = await caseFixture(t);
+  const repo = createAdminRepository(pool), service = createAdminService(repo, null, 'test-server-secret');
+  const input = { username: 'new.person', temporary_password: 'synthetic-password-123', roles: ['viewer'], expected_version: 1 };
+  await assert.rejects(service.account('admin', wid, input, 'disabled-key'), e => e.status === 503 && e.code === 'ACCOUNT_PROVIDER_DISABLED');
+  await assert.rejects(service.operation('admin', wid, 'disabled-key'), e => e.status === 404);
+  assert.equal((await pool.query('SELECT count(*)::int n FROM core.account_provisionings')).rows[0].n, 0);
+  assert.equal((await pool.query("SELECT count(*)::int n FROM core.audit_events WHERE action LIKE 'admin.%'")).rows[0].n, 0);
+  assert.equal((await repo.list('admin', wid, 50)).version, 1);
+});
+
 test('account provisioning recovers same owned operation after DB/audit failure without password persistence', async t => {
   const { pool, workspace: wid } = await caseFixture(t);
   const repo = createAdminRepository(pool), accounts = new Map(); let creations = 0;
@@ -79,6 +90,9 @@ test('account provisioning recovers same owned operation after DB/audit failure 
   assert.equal(pending.state, 'pending'); assert.ok(!JSON.stringify(pending).includes(input.temporary_password));
   assert.equal((await service.operation('admin', wid, 'stable-key')).state, 'pending');
   assert.equal((await service.operation('admin', wid, 'stable-key')).marker, undefined);
+  const disabled = createAdminService(repo, null, 'test-server-secret');
+  await assert.rejects(disabled.account('admin', wid, input, 'stable-key'), e => e.code === 'ACCOUNT_PROVIDER_DISABLED');
+  assert.equal((await disabled.operation('admin', wid, 'stable-key')).state, 'pending');
   await assert.rejects(service.operation('operator', wid, 'stable-key'), e => e.status === 403);
   fail = false;
   await pool.query(`CREATE FUNCTION core.fail_admin_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.action='admin.account_linked' THEN RAISE EXCEPTION 'test audit failure'; END IF; RETURN NEW; END $$;
@@ -93,6 +107,9 @@ test('account provisioning recovers same owned operation after DB/audit failure 
   const done = await service.account('admin', wid, input, 'stable-key');
   assert.equal(done.state, 'completed'); assert.equal(creations, 1);
   assert.deepEqual(await service.account('admin', wid, input, 'stable-key'), done);
+  assert.deepEqual(await disabled.account('admin', wid, input, 'stable-key'), done);
+  assert.equal((await disabled.operation('admin', wid, 'stable-key')).state, 'completed');
+  await assert.rejects(disabled.account('admin', wid, { ...input, roles: ['admin'] }, 'stable-key'), e => e.code === 'IDEMPOTENCY_CONFLICT');
   await assert.rejects(service.account('admin', wid, { ...input, roles: ['admin'] }, 'stable-key'), e => e.code === 'IDEMPOTENCY_CONFLICT');
   const audit = (await pool.query('SELECT after_ref FROM core.audit_events')).rows;
   assert.ok(!JSON.stringify(audit).includes(input.temporary_password));

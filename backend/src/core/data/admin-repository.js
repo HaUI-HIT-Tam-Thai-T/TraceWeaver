@@ -99,7 +99,7 @@ export function createAdminRepository(pool, { protectedSubjects = [] } = {}) {
         return { subject, source_id: sid, enabled: input.enabled, version: await bump(c, wid) };
       });
     },
-    reserve(actor, wid, key, hash, input) {
+    reserve(actor, wid, key, hash, input, { allowCreate = true } = {}) {
       return withTransaction(pool, async c => {
         await locked(c, actor, wid);
         const { rows: [old] } = await c.query('SELECT request_hash,document FROM core.account_provisionings WHERE workspace_id=$1 AND actor_subject=$2 AND key_hash=$3', [wid, actor, key]);
@@ -107,6 +107,7 @@ export function createAdminRepository(pool, { protectedSubjects = [] } = {}) {
           if (old.request_hash !== hash) error(409, 'IDEMPOTENCY_CONFLICT', 'Key already used with different account input');
           return old.document;
         }
+        if (!allowCreate) error(503, 'ACCOUNT_PROVIDER_DISABLED', 'Account administration is not configured');
         const version = (await c.query('SELECT version FROM core.workspace_admin_versions WHERE workspace_id=$1', [wid])).rows[0].version;
         if (version !== input.expected_version) error(409, 'VERSION_CONFLICT', 'Workspace administration changed');
         const document = { state: 'pending', username: input.username, marker: randomUUID() };
