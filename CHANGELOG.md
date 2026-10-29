@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — Oracle sandbox rollout (BE-46)
+
+- Push Phuoc/feat/be-sandbox-verification and deploy API source60919cd as be-60919cd on Oracle. Apply migrations008–010, runtime grants and server-local collector configuration; create a separate sandbox workspace using existing operator/reviewer/admin/viewer/ingest identities without password changes.
+- Pass36 live HTTPS/Keycloak PKCE checks: combined failures, independent repairs/retries, real log ingestion, hybrid run, failed then passing immutable proof, closure guard and viewer denial. Preserve the first trial case after fixing a script status expectation. Hashes of all old events/runs/cases/memberships/roles/grants/sources unchanged; all services healthy. No FE/browser E2E claim.
+
 ## Unreleased — Sandbox ID validation and CLI guidance (BE-44)
 
 - Reject new sandbox request IDs whose request/account/image identifiers would change under ingestion redaction, before state or outbox writes. Apply validation at HTTP and repository boundaries, preserve redaction and existing data, and return a non-echoing 400 INVALID_INPUT.

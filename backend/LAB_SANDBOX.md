@@ -6,6 +6,26 @@ independent of Keycloak login accounts. `passed` means a current attempt satisfi
 and its simulated environment matches the request and allocated RAM.
 Do not describe this evidence as verification of an external production environment.
 
+## Oracle demo deployment — 29/10/2026
+
+BE runtime source60919cd is deployed at https://api.quizlearn.tech (image `traceweaver-api:be-60919cd`).
+Migrations008–010 and runtime table grants applied; collector enabled using the existing ingest service
+account without exposing its credentials. Dedicated workspace: `10000000-0000-4000-8000-000000000016`,
+name `TraceWeaver Sandbox — Mô phỏng kiểm chứng`. Existing operator, reviewer, workspace-admin and viewer
+accounts have separate roles/source grants in this workspace; old workspace grants remain unchanged.
+
+Live HTTPS/Keycloak Code+PKCE verification passed36 checks. Request `LAB-LIVE-20261029-155343`
+had four attempts: insufficient RAM -> unavailable image -> disabled account -> passed, with ingested logs
+and immutable reviewer proof before closure. Case: `f10e80e1-7972-4b4f-856b-155c6d9f4ced`.
+The run used the real hybrid scorer without degraded fallback; this is not a model-quality benchmark.
+One earlier trial case remains investigating after the verification script initially expected200 instead
+of the correct201 review response; it was preserved rather than deleted.
+
+Server-only evidence/configuration lives under `.local/oracle/`: `be45-live-verification.json`,
+`be45-before.json`, `be45-after.json`, and the previous release/image records for rollback. Hashes of old
+events/runs/cases/memberships/roles/grants/sources matched before/after. DB/Keycloak/scorer/other apps
+were not restarted. FE sandbox controls and browser E2E remain separate work; these checks used HTTPS API.
+
 ## Setup
 
 Apply migrations 008–010 using the existing migration command and database owner.
