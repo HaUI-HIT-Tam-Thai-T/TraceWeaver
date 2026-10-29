@@ -20,6 +20,8 @@ import { createTokenVerifier } from '../../src/core/identity/token-verifier.js';
 import { createIngestionRepository } from '../../src/core/data/ingestion-repository.js';
 import { createIngestionService } from '../../src/services/ingestion.service.js';
 import { identitySimulation } from '../support/oidc-simulation.js';
+import { pythonScorer } from '../support/python-scorer.js';
+import { createScorer } from '../../src/core/reconstruction/scorer.js';
 
 test('run APIs: real JWT/Postman JWKS, PostgreSQL snapshots, schemas and permissions', async (t) => {
   const config = readConfig(), admin = createDatabase(config); t.after(() => admin.end());
@@ -80,6 +82,56 @@ test('run APIs: real JWT/Postman JWKS, PostgreSQL snapshots, schemas and permiss
     const degraded = await request('', { method: 'POST', body: { ...input, mode: 'hybrid' } });
     conforms('Run', degraded.body); assert.equal(degraded.body.degraded, true); assert.equal(degraded.body.mode, 'hybrid');
     await sim.waitForRequest();
+  });
+  for (const model of [false, true]) await t.test(`real Python ${model ? 'trained model v2' : 'baseline'}: JWT HTTP run, durable scores/audit/replay, review and scorer-down fallback`,
+    { skip: !process.env.SCORER_PYTHON }, async (t) => {
+    const python = await pythonScorer(t, { model });
+    const expectedModel = model ? 'logistic-regression-sandbox-features-2-experiment-1' : 'baseline-rule-v1';
+    const scoredRuns = createRunService(createRunRepository(pool, undefined, createScorer(python)));
+    const api = createApp({ checkReadiness: async () => true, access: {}, verifyToken, runs: scoredRuns, reviews }).listen(0, '127.0.0.1');
+    await once(api, 'listening'); t.after(() => { api.closeAllConnections(); api.close(); });
+    const origin = `http://127.0.0.1:${api.address().port}/api/v1/workspaces/${workspace}/runs`;
+    const call = async (path, body, key) => {
+      const response = await fetch(origin + path, { method: body ? 'POST' : 'GET',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...(key ? { 'Idempotency-Key': key } : {}) },
+        ...(body ? { body: JSON.stringify(body) } : {}) });
+      return { status: response.status, body: await response.json() };
+    };
+    const hybrid = { ...input, mode: 'hybrid' };
+    const replayKey = model ? 'python-e2e-model' : 'python-e2e-baseline';
+    const created = await call('', hybrid, replayKey);
+    assert.equal(created.status, 202); conforms('Run', created.body);
+    assert.equal(created.body.model_version, expectedModel);
+    assert.equal(created.body.degraded_reason, model ? null : 'ai_baseline_only');
+    assert.equal(created.body.degraded, !model);
+    assert.equal(created.body.effective_method, model ? 'hybrid' : 'rule_only');
+    assert.equal(created.body.rule_version, 'sandbox-rules-2');
+    const scoredGraph = (await call(`/${created.body.id}/graph`)).body;
+    conforms('Graph', scoredGraph); assert.equal(scoredGraph.links.length, 2);
+    assert.ok(scoredGraph.links.every((link) => link.method === 'rule' && Number.isFinite(link.score) && link.review_state === 'pending'));
+    assert.deepEqual((await call('', hybrid, replayKey)).body, created.body);
+    if (model) {
+      const oldBaseline = await call('', hybrid, 'python-e2e-baseline');
+      assert.equal(oldBaseline.body.model_version, 'baseline-rule-v1');
+      assert.equal(oldBaseline.body.effective_method, 'rule_only');
+    }
+    const { rows: [audit] } = await pool.query('SELECT after_ref FROM core.audit_events WHERE entity_id=$1', [created.body.id]);
+    assert.equal(audit.after_ref.model_version, expectedModel);
+    assert.equal(audit.after_ref.feature_version, 'sandbox-observable-features-2');
+    assert.equal(audit.after_ref.effective_method, model ? 'hybrid' : 'rule_only');
+    assert.equal(audit.after_ref.degraded, !model);
+    const link = scoredGraph.links[0];
+    const review = await call(`/${created.body.id}/links/${link.id}/reviews`, { decision: 'accepted', reason: 'Observed direct edge', expected_version: 1 });
+    assert.equal(review.status, 201); conforms('Review', review.body);
+    const reviewed = (await call(`/${created.body.id}/graph`)).body;
+    assert.equal(reviewed.links.find((item) => item.id === link.id).review_state, 'accepted');
+    await python.stop();
+    const fallback = await call('', hybrid);
+    assert.equal(fallback.status, 202); conforms('Run', fallback.body);
+    assert.equal(fallback.body.degraded_reason, 'ai_unavailable'); assert.equal(fallback.body.model_version, null);
+    const fallbackGraph = (await call(`/${fallback.body.id}/graph`)).body;
+    assert.ok(fallbackGraph.links.every((item) => item.score === null && item.method === 'rule'));
+    assert.deepEqual((await call(`/${created.body.id}`)).body, created.body);
   });
   await t.test('JWT clients/subjects and DB roles are enforced; actor headers do not authorize', async () => {
     for (const bearer of [null, 'bad', await sim.token({ azp: 'traceweaver-ingest' })]) {

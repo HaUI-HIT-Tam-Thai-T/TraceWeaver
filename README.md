@@ -1,5 +1,9 @@
 # TraceWeaver
 
+BE-38 (29/10/2026): đã deploy BE + model AI v2 lên Oracle tại https://api.quizlearn.tech/docs/, runtime release `oracle-4e2805e`. API gọi scorer bằng TLS nội bộ, AI không publish cổng Internet. Pass 23 mẫu scorer qua TLS, 20 kiểm tra hybrid/PKCE/audit/replay/dữ liệu và 49 kiểm tra live hiện có. Hashes của 72 events, 25 runs và 25 cases cũ giữ nguyên; test thêm đúng một run hybrid, không thêm event/case. PostgreSQL/Keycloak và các ứng dụng khác giữ nguyên. Xem [hướng dẫn deploy](deploy/oracle/README.md). Các ghi chú container cũ bên dưới mô tả lịch sử hoặc container local8080, không phải deployment Oracle mới.
+
+BE-34 (28/10): đã tích hợp model thử nghiệm từ AI_BE_RUNTIME_V2 theo cấu hình opt-in; extractor Node pass 42/42 fixture, 23 cặp HTTP khớp mẫu. Kiểm tra 129 BE/contract + 31 Python + 50 DB + 47 identity/API pass, không skip; có JWT/API→model→PostgreSQL, audit/replay/review/fallback. Model chỉ chấm các cạnh pending đã qua guard; chất lượng synthetic chưa đạt mục tiêu precision. Container API vẫn dùng image cũ. Xem [cấu hình scorer](backend/SCORER.md). Các ghi chú cũ bên dưới chỉ áp dụng khi không bị cập nhật này thay thế.
+
 Base dự án tái dựng hành trình yêu cầu cấp môi trường thực hành từ dấu vết của ba dịch vụ intake, account và provision, định hướng DX-Lab HaUI 2026.
 
 Hiện trạng nhánh phát triển, kết quả kiểm và giới hạn deployment được giữ tại [CURRENT_STATUS](docs/CURRENT_STATUS.md). Sau sửa audit:73 unit/HTTP/contract,49 DB,45 identity-native pass; npm audit0. Source sửa không tự cập nhật container đang chạy.
@@ -13,13 +17,20 @@ backend/
   tests/         # Backend, contract và DB integration
   contracts/     # OpenAPI, JSON Schema và fixtures
   package.json
-frontend/        # Khung giao diện
-ai/              # Khung scorer và training
-simulator/       # Khung sinh dữ liệu giả
+frontend/        # Giao diện, cấu hình và tests riêng
+ai/              # Scorer Python, model có version, features và tests
+simulator/       # Scenarios, fixtures và nguồn dữ liệu giả lập
+docs/            # Mục lục tài liệu, hiện trạng và hướng dẫn tích hợp
+.planning/       # Kế hoạch và trạng thái làm việc local (Git ignore)
+.local/          # Gói bàn giao, báo cáo, công cụ và môi trường local (Git ignore)
 .github/         # Issue/PR templates và CI
 ```
 
-Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, Keycloak local/Swagger PKCE login, JWT/JWKS, batch ingestion, GET /me, sources, knowledge, events, event detail và [run/graph, review/manual links](backend/RECONSTRUCTION.md) với quyền từ DB, snapshot, version và audit. [Case/workflow](backend/CASES.md) đã có 5 API; [dashboard](backend/DASHBOARD.md) có số đếm cùng scope và bộ lọc thời gian cho case drill-down. [Core workflow HTTP](backend/WORKFLOW.md) có ba API dùng app JWT riêng và JWT người dùng được kiểm độc lập; OpenAPI phân biệt20 implemented/1 planned (scorer). Hybrid hiện degraded về rule_only vì chưa có scorer. Phạm vi triển khai hiện tại là BE.
+Điểm bắt đầu đọc tài liệu: [docs/README.md](docs/README.md). Source chạy nằm trong `backend/`, `frontend/`, `ai/` và `simulator/`; mỗi thành phần giữ cấu hình/tests của mình. Model AI đang dùng nằm ở `ai/artifacts/sandbox-v2/`.
+
+Gói AI bàn giao gốc được lưu tại `ai/handoffs/AI_BE_RUNTIME_V2/`. Báo cáo local nằm trong `.local/reports/`, script kiểm/demo dùng riêng nằm trong `.local/scripts/`, bản nháp release/PR nằm trong `.local/releases/`. Bộ test AI đang chạy và payload để thử bằng Swagger vẫn ở `.local/ai-test/`. `.env`, credentials local, lockfile và Compose giữ ở root theo đường dẫn khởi động hiện tại.
+
+Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có foundation, Keycloak local/Swagger PKCE login, JWT/JWKS, batch ingestion, GET /me, sources, knowledge, events, event detail và [run/graph, review/manual links](backend/RECONSTRUCTION.md) với quyền từ DB, snapshot, version và audit. [Case/workflow](backend/CASES.md) đã có 5 API; [dashboard](backend/DASHBOARD.md) có số đếm cùng scope và bộ lọc thời gian cho case drill-down. [Core workflow HTTP](backend/WORKFLOW.md) có ba API dùng app JWT riêng và JWT người dùng được kiểm độc lập; OpenAPI có20 Node operations và1 private Python scorer đã implemented trong source. Model v2 cần opt-in; baseline vẫn rule_only/degraded. Phạm vi triển khai hiện tại là BE.
 
 Chạy API bằng Docker sau bước [chuẩn bị Keycloak/demo](backend/KEYCLOAK.md): `docker compose up -d --build --wait api`. Mặc định API tại `http://localhost:8080`; đăng nhập Swagger bằng **Authorize → keycloakLogin**. Máy hiện tại đã chuẩn bị xong; mật khẩu nằm trong `demo-credentials.local.json` bị Git ignore. Chi tiết tại [Docker API](backend/DOCKER.md).
 

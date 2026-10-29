@@ -1,0 +1,17 @@
+**
+!LICENSE
+!NOTICE
+!ai/
+!ai/requirements.txt
+!ai/DEPENDENCIES.md
+!ai/THIRD_PARTY_NOTICES.txt
+!ai/app/
+!ai/app/*.py
+!ai/artifacts/
+!ai/artifacts/sandbox-v2/
+!ai/artifacts/sandbox-v2/model_sandbox_v2.json
+!ai/artifacts/sandbox-v2/manifest.json
+!backend/
+!backend/contracts/
+!backend/contracts/schemas/
+!backend/contracts/schemas/domain.schema.json

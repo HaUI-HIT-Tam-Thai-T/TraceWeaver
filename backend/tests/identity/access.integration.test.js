@@ -81,7 +81,7 @@ test('authenticated read APIs enforce current PostgreSQL membership and source s
   await t.test('/me uses database roles/groups, ignoring token and actor-header privilege claims', async () => {
     const { res, body } = await api('/me');
     assert.equal(res.status, 200); conforms('Me', body);
-    assert.deepEqual(body, { subject: 'alice', memberships: [{ workspace_id: a, roles: ['viewer'], group_ids: [group] }] });
+    assert.deepEqual(body, { subject: 'alice', memberships: [{ workspace_id: a, workspace_name: 'Workspace A', roles: ['viewer'], group_ids: [group] }] });
   });
   await t.test('sources only include direct/group read grants, with bound keyset cursor', async () => {
     const first = await api(`/workspaces/${a}/sources?limit=1`);

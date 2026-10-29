@@ -1,8 +1,25 @@
 # Tích hợp backend, frontend và AI
 
+BE-38 (29/10/2026): đã deploy BE + model AI v2 lên Oracle tại https://api.quizlearn.tech/docs/, runtime release `oracle-4e2805e`. API gọi scorer bằng TLS nội bộ, AI không publish cổng Internet. Pass 23 mẫu scorer qua TLS, 20 kiểm tra hybrid/PKCE/audit/replay/dữ liệu và 49 kiểm tra live hiện có. Hashes của 72 events, 25 runs và 25 cases cũ giữ nguyên; test thêm đúng một run hybrid, không thêm event/case. PostgreSQL/Keycloak và các ứng dụng khác giữ nguyên. Xem [hướng dẫn deploy](../deploy/oracle/README.md). Các ghi chú container cũ bên dưới mô tả lịch sử hoặc container local8080, không phải deployment Oracle mới.
+
+## BE-34 — 28/10/2026: trained model v2 opt-in
+
+AI_BE_RUNTIME_V2 has been verified and imported: loader plus checksum-verified experimental JSON artifact, 23 HTTP sample pairs and 42 independent feature fixtures. The supplied launcher and Node probe pass; the real Node extractor passes 42/42. Explicit SCORER_MODEL_VERSION enables the exact trained version; baseline remains supported. Model success reports hybrid/non-degraded, annotating only existing pending rule-derived links. sandbox-rules-2 keeps ACL/outcome/strong-ID/ambiguity/cardinality/cycle guards. Batches <=100 share one <=5s deadline; failures discard every score. See [Scorer guide](../backend/SCORER.md) and [artifact provenance](../ai/artifacts/sandbox-v2/README.md).
+
+Verified: 129 Node unit/HTTP/contracts, 31 Python, 50 PostgreSQL, 47 native identity/API tests pass, zero skipped. The JWT/API→Python-model→PostgreSQL path verifies scores/audit/replay/review and stopped-scorer fallback; old baseline replay stays immutable after model selection. OpenAPI has 21 source-implemented operations (20 Node + 1 private Python). No dependency install, migration, training, image rebuild/deployment or secret change. API container retains its old image. Synthetic precision 0.7273 remains below the >=95% target; no production quality or recall gain is claimed. Earlier notes below are historical where superseded.
+
+## Historical BE-27 — 28/10/2026: baseline scorer integration
+
+AI baseline runtime imported from origin/xkhuong/feat/ai-scorer; Node adapter tested against real Python HTTP. No trained model exists. Only reviewed baseline is enabled: scores annotate guard-approved pending links; effective_method remains rule_only with ai_baseline_only. sandbox-rules-2 applies outcome guards; optional Graph.abstentions is persisted with audit. Batch <=100, total <=5s; failures discard all scores. Runtime features are independently versioned; legacy bootstrap helpers are not trained-model parity evidence. See [Scorer guide](../backend/SCORER.md).
+
+BE-33 follow-up verified on 28/10/2026: Docker/PostgreSQL restored using existing images and volume. All 50 DB and 46 native identity/API tests pass, zero skipped, with SCORER_PYTHON enabled. The new JWT HTTP → Python baseline → PostgreSQL test proves durable scores/audit/replay, graph/review and fallback after the scorer process is stopped. Prior 82 unit/HTTP/contract and 28 Python results remain at BE-27; no model/dependency/runtime changes in this follow-up. The earlier DB connection blocker is resolved. API container still uses its previous image; tests start a separate API from current source. No production/live-Keycloak/UI E2E or trained-model readiness is claimed. Earlier status below is historical where superseded.
+
+
 Hợp đồng dùng chung: [OpenAPI](../backend/contracts/openapi.json), [JSON Schema](../backend/contracts/schemas/domain.schema.json) và [fixtures](../backend/contracts/fixtures/valid.json). Fixtures là dữ liệu kiểm schema, không phải response lấy từ runtime. Thay DTO/enum/status phải cập nhật contract, consumer và tests cùng thay đổi. Xem [hiện trạng](CURRENT_STATUS.md) để phân biệt phần đã có và còn thiếu.
 
 ## Frontend và Identity
+
+Bàn giao cụ thể cho React/Vite local5173 và domain `traceweaver.quizlearn.tech`: [Frontend handoff](FRONTEND_HANDOFF.md), [API reference](FRONTEND_API_REFERENCE.md). Tài liệu này ghi rõ API Oracle, proxy local, cấu hình origin/callback còn cần đăng ký và giới hạn hiện có; không đưa credentials vào source FE.
 
 1. Cài backend theo [INSTALL](../INSTALL.md), cấu hình local Identity theo [Keycloak](../backend/KEYCLOAK.md). Mỗi máy giữ `.env` và credentials riêng.
 2. Login Authorization Code + S256 PKCE với public client; không đưa client secret vào browser. Lấy workspace/roles từ `/api/v1/me`, rồi gọi sources/knowledge bằng user token. Đăng nhập thành công không tự tạo membership hoặc source grant.
@@ -24,7 +41,7 @@ Không giữ token/payload nhạy cảm trong localStorage. Core, FE và AI khô
 
 ## Scorer và dữ liệu
 
-Đọc [handoff AI](BACKEND_HANDOFF.md) và [phản hồi backend](BACKEND_HANDOFF_RESPONSE.md) trước tích hợp. Policy hiện dùng `intake/request.accepted → account/account.created → provision/provision.completed|provision.failed`; default policy không có skip Intake→Provision. Label1 là **cạnh trực tiếp có hướng**. Outcome/retry/account replacement, text similarity extractor và model thresholds còn cần chốt.
+Đọc [handoff AI](BACKEND_HANDOFF.md) và [phản hồi backend ngày 28/10](BACKEND_HANDOFF_RESPONSE.md#phản-hồi-ai_be_confirmation--28102026) trước tích hợp. Policy hiện dùng `intake/request.accepted → account/account.created → provision/provision.completed|provision.failed`; default policy không có skip Intake→Provision. Label1 là **cạnh trực tiếp có hướng**. Phía BE chọn giữ schema1/5 feature, BE quản lý unresolved và AI chỉ xếp hạng/đề xuất; unknown/mâu thuẫn outcome phải review. Outcome guard, lưu reason và alias mapper/extractor chưa có runtime; text similarity/fixture tương đương và version policy khi thực thi guard còn phải đồng bộ với AI. Không dùng score để phá ambiguity hoặc ngưỡng synthetic0.20 để tự nối. Cardinality hiện theo từng transition ID, hai outcome provision là hai transition riêng; xem phản hồi để biết giới hạn.
 
 Scorer contract hiện nhận numeric features, tối đa100 cặp:
 

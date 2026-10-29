@@ -4,9 +4,66 @@
   "info": {
     "title": "TraceWeaver API",
     "version": "0.1.0",
-    "description": "Public/core/scorer interfaces. Six operations are implemented: getMe, listSources, listKnowledge, ingestEvents, listEvents and getEvent, with JWT verification and PostgreSQL authorization. The other 15 operations remain planned. Health routes are in health.openapi.json."
+    "description": "Public/core/scorer interfaces. 22 operations implemented in source, including case-scoped assignee discovery. Health routes are in health.openapi.json."
   },
   "paths": {
+    "/api/v1/workspaces/{wid}/cases/{cid}/assignees": {
+      "get": {
+        "operationId": "listCaseAssignees",
+        "summary": "List eligible case assignees",
+        "description": "Operator/reviewer with read grants for every run source. Returns active operator/reviewer members with full run source read scope, including group grants. Current eligibility only; transitions still enforce state, version and permissions. No identity display names are stored.",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/domain.schema.json#/$defs/CaseAssignees"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/wid"
+          },
+          {
+            "$ref": "#/components/parameters/cid"
+          }
+        ]
+      }
+    },
     "/api/v1/me": {
       "get": {
         "operationId": "getMe",
@@ -1402,7 +1459,13 @@
         "operationId": "scorePairs",
         "summary": "scorePairs",
         "description": "Internal only, timeout 5s, max100 pairs, no DB writes. Invalid schema ->422 whole batch; model unavailable ->503. Caller enforces exact pair_id set (no missing/extra/duplicate), finite [0,1] scores and feature_schema_version; mismatch/timeout ->degraded rule-only plus audit. Score is not claimed to be calibrated probability.",
-        "x-implementation-status": "planned",
+        "x-implementation-status": "implemented",
+        "servers": [
+          {
+            "url": "http://127.0.0.1:8000",
+            "description": "Private Python scorer; development loopback only. Not served by the Node API."
+          }
+        ],
         "security": [
           {
             "scorerServiceSecret": []

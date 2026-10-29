@@ -25,6 +25,10 @@ export function createCaseController(cases) {
       const workspace = scope(req);
       res.json(await cases.get(req.identity.subject, workspace, workspaceId(req.params.cid)));
     },
+    async assignees(req, res) {
+      const workspace = scope(req);
+      res.json(await cases.assignees(req.identity.subject, workspace, workspaceId(req.params.cid)));
+    },
     async evidence(req, res) {
       const workspace = scope(req);
       res.status(201).json(await cases.evidence(req.identity.subject, workspace, workspaceId(req.params.cid), req.body));

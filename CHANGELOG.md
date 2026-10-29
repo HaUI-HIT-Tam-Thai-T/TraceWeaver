@@ -1,5 +1,31 @@
 # Changelog
 
+## Unreleased — Realistic deployed lab demo
+
+- Append LAB-DEMO-20261028-v2 to the existing Oracle demo workspace: 36 Vietnamese operational events, 12 runs and 12 cases with readable request codes, synthetic student accounts, courses, resource sizes, varied timings and three specific provisioning failures. Preserve missing-evidence and missing-correlation scenarios and mark every message/case as demo.
+- Reuse the transactional seed runner and current authorization/workflow repositories. Rerun inserts zero artifacts; hashes of the previous 36 events and their runs/cases are unchanged. Verify 278 HTTPS assertions with operator/viewer, including search `[Demo]`, pagination, event details, case history and graphs. Local suite:129 pass,2 optional Python tests skipped; base checks pass. No frontend changes, dependencies, schema/ACL changes, API rebuild or remote Git push.
+
+## Unreleased — AI MVP confirmation response
+
+- Answer all five questions from AI_BE_CONFIRMATION: retain scorer schema1 and all-namespace shared_id_count; BE owns unresolved/strong-ID guards; AI ranks/proposes only; unknown/conflicting outcomes require review; retry ambiguity stays unresolved with cardinality per transition ID.
+- Distinguish intended BE integration choices from current runtime: outcome guard, persisted/exposed abstention reasons, namespace alias mapper, feature extractor and scorer adapter remain unimplemented. Record policy versioning and separate provision-outcome transition caveats. Align existing AI/integration/status documentation without changing runtime, contracts, deployment or data.
+- Verify18 existing reconstruction/contract tests, base checks and29 local Markdown links/anchors. No claim of AI artifact evaluation, bilateral approval, scorer integration or deployed compliance.
+
+## Unreleased — Frontend demo dataset
+
+- Add explicit-target, dry-run-first frontend seed using existing ingestion/run/case repositories in one transaction. Label 36 synthetic events, 12 runs and 12 cases with FE-DEMO; cover four workflow states, missing identifiers, retry, provision failure and hybrid degradation. Reruns preserve user edits and add no duplicate artifacts.
+- Apply to the user-selected Oracle demo workspace; verify 148 HTTPS/PKCE assertions for operator/viewer, events/cursors, graph evidence, case filters/history and dashboard. Second seed inserts zero events/runs/cases. Fixture normalization/rule test and base checks pass. Preserve accounts, ACLs, schema, runtime and existing records; no reviewer provisioning or frontend E2E claim.
+
+## Unreleased — Local frontend login callback
+
+- Register the exact localhost:5173 callback, Web Origin and logout redirect on Oracle's live `traceweaver-web` Keycloak client. Verify local and Swagger login forms200, token preflight200, logout302, rejection of unregistered redirects and API health200. Record pending realm-import synchronization and frontend end-to-end verification in the handoff; API CORS and runtime source remain unchanged.
+
+## Unreleased — Frontend API handoff
+
+- Add Vietnamese React/Vite handoff for localhost:5173 and traceweaver.quizlearn.tech: PKCE/session startup, API proxy, workspace/source permissions, graph review, case workflow, pagination, concurrency, retries and UI error handling.
+- Document all21 contract operations plus2 health routes and49 DTOs with field constraints and examples. Distinguish16 browser operations, server-only ingest/core and planned scorer. Explicitly record pending frontend origin/callback registration, reviewer provisioning and demo data; no deployment configuration changed in this documentation task.
+- Verify60 JSON examples against the existing schema,440 local links/anchors, operation/schema coverage,5 contract tests, base checks and license inventory98packages. React/Vite snippets are integration examples, not a built or end-to-end-tested frontend. No runtime, dependency, schema, credential or database changes.
+
 ## Unreleased — Documentation cleanup
 
 - Consolidate integration/data handoff guidance into docs/INTEGRATION.md and license maintenance into CONTRIBUTING.md. Keep runtime/API/install/security/license documentation; remove duplicate preparation/progress checklists from public docs. Council evidence remains local.

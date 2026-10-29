@@ -11,6 +11,7 @@ import { createWorkflowEngine } from '../workflow/engine.js';
 import { caseDefinition } from '../workflow/definitions.js';
 import { ApiError } from '../identity/api-error.js';
 import { artifactTimeScope, artifactTimeValues } from './artifact-time.js';
+import { visibleSource } from '../identity/access-repository.js';
 
 const notFound = () => new ApiError(404, 'NOT_FOUND', 'Resource not found');
 const projection = `SELECT c.*,h.to_state,h.owner_subject,h.version,h.occurred_at AS updated_at
@@ -75,6 +76,26 @@ export function createCaseRepository(pool) {
     return { row, run, engine: createWorkflowEngine(instance.definition) };
   }
   return {
+    async assignees(subject, workspace, id) {
+      const initial = await lookup(pool, workspace, id);
+      const { rows: scope } = await pool.query('SELECT source_id::text FROM core.run_sources WHERE workspace_id=$1 AND run_id=$2', [workspace, initial.run_id]);
+      await authorize(pool, subject, workspace, scope.map((row) => row.source_id), true);
+      // Caller and candidates are checked together against current grants in one statement.
+      const { rows: [row] } = await pool.query(`SELECT ARRAY(
+        SELECT jsonb_build_object('subject',m.subject,'roles',ARRAY(
+          SELECT mr.role_key FROM core.membership_roles mr WHERE mr.workspace_id=m.workspace_id AND mr.subject=m.subject ORDER BY mr.role_key))
+        FROM core.memberships m WHERE m.workspace_id=r.workspace_id AND m.revoked_at IS NULL
+        AND EXISTS(SELECT 1 FROM core.membership_roles mr WHERE mr.workspace_id=m.workspace_id AND mr.subject=m.subject AND mr.role_key IN ('operator','reviewer'))
+        AND NOT EXISTS(SELECT 1 FROM core.run_sources rs WHERE rs.workspace_id=r.workspace_id AND rs.run_id=r.id
+          AND NOT EXISTS(SELECT 1 FROM core.sources s WHERE s.workspace_id=rs.workspace_id AND s.id=rs.source_id
+            AND ${visibleSource.replaceAll('$1', 'm.subject')})) ORDER BY m.subject) AS items
+        FROM core.reconstruction_runs r JOIN core.cases c ON c.workspace_id=r.workspace_id AND c.run_id=r.id
+        WHERE c.workspace_id=$2 AND c.id=$3 AND ${artifactScope}
+        AND EXISTS(SELECT 1 FROM core.membership_roles mr WHERE mr.workspace_id=r.workspace_id AND mr.subject=$1 AND mr.role_key IN ('operator','reviewer'))`,
+      [subject, workspace, id]);
+      if (!row) throw notFound();
+      return { items: row.items };
+    },
     create(subject, workspace, input, key) {
       return withTransaction(pool, async (client) => {
         const retry = await idempotency(client, subject, workspace, 'cases', input, key);

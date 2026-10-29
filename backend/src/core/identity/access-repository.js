@@ -13,11 +13,11 @@ export const visibleSource = `EXISTS (SELECT 1 FROM core.source_grants g
 export function createAccessRepository(pool) {
   return {
     async memberships(subject, workspace = null) {
-      const { rows } = await pool.query(`SELECT m.workspace_id,
+      const { rows } = await pool.query(`SELECT m.workspace_id,w.name AS workspace_name,
         ARRAY(SELECT r.role_key FROM core.membership_roles r WHERE r.workspace_id=m.workspace_id AND r.subject=m.subject ORDER BY r.role_key) AS roles,
         ARRAY(SELECT gm.group_id::text FROM core.group_members gm WHERE gm.workspace_id=m.workspace_id AND gm.subject=m.subject ORDER BY gm.group_id) AS group_ids,
         ARRAY(SELECT s.id::text FROM core.sources s WHERE s.workspace_id=m.workspace_id AND ${visibleSource} ORDER BY s.id) AS source_ids
-        FROM core.memberships m WHERE m.subject=$1 AND m.revoked_at IS NULL
+        FROM core.memberships m JOIN core.workspaces w ON w.id=m.workspace_id WHERE m.subject=$1 AND m.revoked_at IS NULL
         AND ($2::uuid IS NULL OR m.workspace_id=$2) ORDER BY m.workspace_id`, [subject, workspace]);
       return rows;
     },

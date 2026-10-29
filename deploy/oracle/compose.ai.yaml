@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: 2026 TraceWeaver contributors
+# SPDX-License-Identifier: Apache-2.0
+# Overlay for the existing private .local/oracle/compose.yaml deployment.
+services:
+  api:
+    image: traceweaver-api:${TRACEWEAVER_RELEASE:?Set the release commit}
+    environment:
+      SCORER_URL: https://scorer:8443/internal/v1/score-pairs
+      SCORER_SERVICE_SECRET: ${SCORER_SERVICE_SECRET:?Set private scorer credential}
+      SCORER_MODEL_VERSION: logistic-regression-sandbox-features-2-experiment-1
+      SCORER_TIMEOUT_MS: '5000'
+      NODE_EXTRA_CA_CERTS: /run/scorer-ca/server.crt
+    volumes:
+      - ./scorer-ca:/run/scorer-ca:ro,Z
+    depends_on:
+      scorer: {condition: service_healthy}
+  migrate:
+    image: traceweaver-api:${TRACEWEAVER_RELEASE:?Set the release commit}
+  scorer:
+    image: traceweaver-scorer:${TRACEWEAVER_RELEASE:?Set the release commit}
+    build:
+      context: ../..
+      dockerfile: ai/Dockerfile
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: ['/tmp:size=16m,mode=1777']
+    environment:
+      APP_ENV: production
+      SCORER_MODE: model
+      SCORER_SERVICE_SECRET: ${SCORER_SERVICE_SECRET:?Set private scorer credential}
+      SCORER_MODEL_PATH: /app/ai/artifacts/sandbox-v2/model_sandbox_v2.json
+    volumes:
+      - ./scorer-tls:/run/scorer-tls:ro,Z
+    mem_limit: 384m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: '3'}
+    restart: unless-stopped

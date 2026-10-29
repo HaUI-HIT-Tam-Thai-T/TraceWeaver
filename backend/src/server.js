@@ -14,6 +14,8 @@ import { createIngestionService } from './services/ingestion.service.js';
 import { createEventRepository } from './core/data/event-repository.js';
 import { createEventService } from './services/event.service.js';
 import { createEventCursorCodec } from './core/identity/event-cursor.js';
+import { createScorer } from './core/reconstruction/scorer.js';
+import { sandboxRulePolicy } from './core/reconstruction/policy.js';
 import { createRunRepository } from './core/data/run-repository.js';
 import { createRunService } from './services/run.service.js';
 import { createReviewRepository } from './core/data/review-repository.js';
@@ -41,7 +43,7 @@ try {
     access: createAccessService(createAccessRepository(database), createCursorCodec(config.cursorSecret)),
     ingestion: createIngestionService(createIngestionRepository(database)),
     events: createEventService(createEventRepository(database), createAccessRepository(database), createEventCursorCodec(config.cursorSecret)),
-    runs: createRunService(createRunRepository(database)),
+    runs: createRunService(createRunRepository(database, sandboxRulePolicy(), createScorer(config))),
     reviews: createReviewService(createReviewRepository(database)),
     cases: createCaseService(createCaseRepository(database), createAccessRepository(database), createCursorCodec(config.cursorSecret)),
     dashboard: createDashboardService(createDashboardRepository(database)),

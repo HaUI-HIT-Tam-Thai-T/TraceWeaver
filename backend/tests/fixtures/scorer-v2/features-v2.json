@@ -1,0 +1,1990 @@
+{
+  "fixture_version": "sandbox-feature-conformance-2",
+  "policy_version": "sandbox-rules-1",
+  "feature_version": "sandbox-observable-features-2",
+  "feature_schema_version": "1",
+  "numeric_tolerance": {
+    "delta_seconds": 1e-09,
+    "text_similarity": 1e-12
+  },
+  "cases": [
+    {
+      "id": "request_and_user_count_as_two",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "duplicate_ids_count_once",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          },
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "same_value_in_two_namespaces_counts_twice",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "X"
+          },
+          {
+            "namespace": "account",
+            "value": "X"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "X"
+          },
+          {
+            "namespace": "account",
+            "value": "X"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "user_only_is_still_counted",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "namespace_collision_is_not_shared",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "X"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "account",
+            "value": "X"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 0,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "identifier_value_is_case_sensitive",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "r1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": true
+      }
+    },
+    {
+      "id": "identifier_namespace_is_case_sensitive",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "Request",
+            "value": "R1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 0,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "alias_mapping_is_upstream",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request_id",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "missing_ids_on_both_sides",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 0,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "request_conflict_despite_shared_user",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R2"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": true
+      }
+    },
+    {
+      "id": "account_conflict_despite_shared_request",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          },
+          {
+            "namespace": "account",
+            "value": "A1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          },
+          {
+            "namespace": "account",
+            "value": "A2"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": true
+      }
+    },
+    {
+      "id": "job_conflict_despite_shared_request",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          },
+          {
+            "namespace": "job",
+            "value": "J1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          },
+          {
+            "namespace": "job",
+            "value": "J2"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": true
+      }
+    },
+    {
+      "id": "redacted_ids_are_not_shared",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "[REDACTED]"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "[REDACTED]"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 0,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "redacted_vs_visible_is_not_conflict",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "[REDACTED]"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 0,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "partially_redacted_id_is_excluded",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "prefix-[REDACTED]-suffix"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "prefix-[REDACTED]-suffix"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 0,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "redaction_preserves_shared_account",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "[REDACTED]"
+          },
+          {
+            "namespace": "account",
+            "value": "A1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "account",
+            "value": "A1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "redaction_does_not_hide_real_conflict",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          },
+          {
+            "namespace": "job",
+            "value": "[REDACTED]"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R2"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          },
+          {
+            "namespace": "job",
+            "value": "[REDACTED]"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 1,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": true
+      }
+    },
+    {
+      "id": "redacted_user_is_also_excluded",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "user",
+            "value": "[REDACTED]"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "user",
+            "value": "[REDACTED]"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 0,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "skew_boundary",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T09:59:55Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": -5.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "one_microsecond_outside_skew",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T09:59:54.999999Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": -5.000001,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "same_timestamp",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 0.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "one_microsecond_delta",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:00.000001Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 1e-06,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "window_boundary",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T11:00:00Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 3600.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "one_microsecond_outside_window",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T11:00:00.000001Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 3600.000001,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "empty_text",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "empty_vs_nonempty_text",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "word_set_ignores_duplicates",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "account account lab",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "account lab",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "fractional_jaccard",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "one two three",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "two three",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.6666666666666666,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "nfkc_width_and_digit",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "ＬＡＢ ①",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab 1",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "unicode_casefold_expansion",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Straße",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "STRASSE",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "vietnamese_composed_and_decomposed",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "TẠO",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "tạo",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "underscore_is_a_word_character",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "request_id",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "request id",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "redacted_text_only",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "[REDACTED]",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "[REDACTED]",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "redacted_text_preserves_visible_words",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab [REDACTED] ready",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab done",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.3333333333333333,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "redacted_text_separates_words",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab[REDACTED]ready",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 1.0,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "account_to_provision_completed",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "provision",
+        "action": "provision.completed",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "account_to_provision_failed",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "provision",
+        "action": "provision.failed",
+        "outcome": "failed",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "skipped_transition",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "provision",
+        "action": "provision.completed",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": false,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "reversed_transition",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": false,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "legacy_action_is_not_aliased",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.received",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": false,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "outcome_guard_is_separate_from_features",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "failed",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    },
+    {
+      "id": "unknown_outcome_does_not_change_numeric_features",
+      "from_event": {
+        "source_event_id": "synthetic-a",
+        "occurred_at": "2026-10-28T10:00:00Z",
+        "service": "intake",
+        "action": "request.accepted",
+        "outcome": "unknown",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "Create lab account",
+        "payload": {}
+      },
+      "to_event": {
+        "source_event_id": "synthetic-b",
+        "occurred_at": "2026-10-28T10:00:20Z",
+        "service": "account",
+        "action": "account.created",
+        "outcome": "success",
+        "identifiers": [
+          {
+            "namespace": "request",
+            "value": "R1"
+          },
+          {
+            "namespace": "user",
+            "value": "U1"
+          }
+        ],
+        "message": "lab account ready",
+        "payload": {}
+      },
+      "expected_features": {
+        "delta_seconds": 20.0,
+        "shared_id_count": 2,
+        "text_similarity": 0.5,
+        "transition_allowed": true,
+        "conflicting_id": false
+      }
+    }
+  ]
+}

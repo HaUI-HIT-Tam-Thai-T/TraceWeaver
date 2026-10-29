@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 TraceWeaver contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { annotateRun, createScorer, FEATURE_VERSION } from '../reconstruction/scorer.js';
 import { randomUUID } from 'node:crypto';
 import { withTransaction } from './database.js';
 import { eventDto } from './event-repository.js';
@@ -36,7 +37,7 @@ export const artifactScope = `${reader} AND NOT EXISTS (
   SELECT 1 FROM core.run_sources rs WHERE rs.workspace_id=r.workspace_id AND rs.run_id=r.id
   AND NOT EXISTS (SELECT 1 FROM core.sources s WHERE s.workspace_id=rs.workspace_id AND s.id=rs.source_id AND ${visibleSource}))`;
 
-export function createRunRepository(pool, configuration = sandboxRulePolicy()) {
+export function createRunRepository(pool, configuration = sandboxRulePolicy(), scorer = createScorer()) {
   const policy = compileRulePolicy(configuration), reconstruct = createRuleEngine(policy);
   async function read(client, subject, workspace, id, graph) {
     const { rows: [row] } = await client.query(`SELECT r.document,r.graph_metadata,
@@ -81,11 +82,10 @@ export function createRunRepository(pool, configuration = sandboxRulePolicy()) {
         const events = rows.map(eventDto), created_at = new Date().toISOString();
         const result = reconstruct({ ...input, events }), id = randomUUID(), input_snapshot_id = randomUUID();
         const document = { id, status: 'completed', mode: input.mode, root_event_id: input.root_event_id,
-          input_snapshot_id, rule_version: policy.version, model_version: null, created_at, completed_at: new Date().toISOString(),
-          degraded: input.mode === 'hybrid', degraded_reason: input.mode === 'hybrid' ? 'ai_unavailable' : null,
-          effective_method: 'rule_only', error: null };
+          input_snapshot_id, rule_version: policy.version, created_at,
+          ...await annotateRun(result, events, input.mode, scorer), completed_at: new Date().toISOString(), error: null };
         const connected = new Set(result.event_ids);
-        const metadata = { unresolved_event_ids: result.unresolved_event_ids,
+        const metadata = { abstentions: result.abstentions, unresolved_event_ids: result.unresolved_event_ids,
           missing_expected_steps: missingSteps(events.filter((event) => connected.has(event.event_id))), version: 1 };
         // Recheck current grants before committing after bounded CPU work.
         await authorize(client, subject, workspace, input.source_ids, true);
@@ -101,7 +101,9 @@ export function createRunRepository(pool, configuration = sandboxRulePolicy()) {
           FROM jsonb_array_elements($3::jsonb) link`, [workspace, id, JSON.stringify(links)]);
         await client.query(`INSERT INTO core.audit_events(id,workspace_id,actor_subject,action,entity_type,entity_id,after_ref)
           VALUES ($1,$2,$3,'reconstruction.created','reconstruction_run',$4,$5)`, [randomUUID(), workspace, subject, id,
-          { input_snapshot_id, event_count: events.length, rule_version: policy.version, effective_method: 'rule_only', degraded: document.degraded }]);
+          { input_snapshot_id, event_count: events.length, rule_version: policy.version, effective_method: document.effective_method, degraded: document.degraded,
+            degraded_reason: document.degraded_reason, model_version: document.model_version, feature_version: FEATURE_VERSION,
+            abstentions: result.abstentions, rejected_counts: result.rejected_counts }]);
         if (keyHash) await client.query(`INSERT INTO core.run_idempotency(workspace_id,actor_subject,route,key_hash,request_hash,run_id,response,expires_at)
           VALUES ($1,$2,'runs',$3,$4,$5,$6,clock_timestamp()+interval '24 hours')`, [workspace, subject, keyHash, requestHash, id, document]);
         return document;

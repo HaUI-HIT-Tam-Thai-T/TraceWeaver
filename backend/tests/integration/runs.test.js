@@ -93,6 +93,30 @@ test('durable reconstruction: snapshot, idempotency, whole-artifact ACL and atom
     await assert.rejects(repository.create('admin', workspace, input), { status: 403 });
     await assert.rejects(repository.create('writer', workspace, input), { status: 403 });
   });
+  await t.test('scorer metadata, pending scores and abstentions persist with atomic audit and replay', async () => {
+    let calls = 0;
+    const scoredRepository = createRunRepository(pool, undefined, async (links) => {
+      calls++;
+      return { version: 'baseline-rule-v1', method: 'rule', scores: new Map(links.map((link, index) => [index, 0.75])) };
+    });
+    const hybrid = { ...input, mode: 'hybrid' };
+    const scored = await scoredRepository.create('operator', workspace, hybrid, 'scorer-once');
+    assert.equal(scored.degraded_reason, 'ai_baseline_only'); assert.equal(scored.model_version, 'baseline-rule-v1');
+    assert.equal(scored.effective_method, 'rule_only');
+    const graph = await scoredRepository.get('viewer', workspace, scored.id, true);
+    assert.ok(graph.links.length > 0);
+    assert.ok(graph.links.every((link) => link.score === 0.75 && link.method === 'rule' && link.review_state === 'pending'));
+    assert.deepEqual(await scoredRepository.create('operator', workspace, hybrid, 'scorer-once'), scored);
+    assert.equal(calls, 1);
+    const { rows: [audit] } = await pool.query('SELECT after_ref FROM core.audit_events WHERE entity_id=$1', [scored.id]);
+    assert.equal(audit.after_ref.model_version, 'baseline-rule-v1');
+    assert.equal(audit.after_ref.degraded_reason, 'ai_baseline_only');
+    await ingest(1, { outcome: 'unknown' });
+    const guarded = await repository.create('operator', workspace, input);
+    const guardedGraph = await repository.get('viewer', workspace, guarded.id, true);
+    assert.ok(guardedGraph.abstentions.some((item) => item.reason_code === 'OUTCOME_UNKNOWN'));
+    assert.equal(guarded.rule_version, 'sandbox-rules-2');
+  });
   await t.test('revoking even an empty source denies the entire old artifact/replay; grants, groups and membership are current', async () => {
     await pool.query('UPDATE core.source_grants SET revoked_at=clock_timestamp() WHERE group_id=$1 AND source_id=$2', [group, sources[3]]);
     for (const graph of [false, true]) await assert.rejects(repository.get('operator', workspace, run.id, graph), { status: 404 });
