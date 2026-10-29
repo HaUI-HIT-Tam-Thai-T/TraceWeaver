@@ -49,7 +49,7 @@ export function KnowledgeSearchForm({
           {...register("q")}
           maxLength={500}
           aria-invalid={!!errors.q}
-          aria-describedby="knowledge-search-help knowledge-q-error"
+          aria-describedby={errors.q ? "knowledge-search-help knowledge-q-error" : "knowledge-search-help"}
         />
         {errors.q && (
           <Alert
@@ -75,10 +75,10 @@ export function KnowledgeSearchForm({
       <Button variant="primary" type="submit">
         Tìm kiếm
       </Button>
-      {/* <p id="knowledge-search-help" className="type-caption text-muted">
+      <p id="knowledge-search-help" className="type-caption text-muted">
         Bấm Tìm kiếm để áp dụng. Tìm chuỗi con, không phân biệt hoa/thường, trên
         phiên bản mới nhất.
-      </p> */}
+      </p>
     </form>
   );
 }
@@ -158,6 +158,7 @@ export function KnowledgeResults({
                 {item.body}
               </div>
 
+              <p className="break-all">Nguồn tham khảo: {safeSource(item.source_ref) ? <a className="underline hover:text-primary" href={item.source_ref} target="_blank" rel="noopener noreferrer">{item.source_ref}</a> : item.source_ref}</p>
               <TechnicalDetails title="Phiên bản và thông tin bài viết">
                 <p>
                   ID: {item.id} · Version: {item.version}

@@ -35,7 +35,7 @@ export function outcomeLabel(outcome: Event["outcome"]): string {
 
 export function sourceLabel(event: Event, sources: Source[]): string {
   const source = sources.find((source) => source.id === event.source_id);
-  return source ? sourceName(source.name) : `Chưa tải tên nguồn (${event.service})`;
+  return source ? sourceName(source.name) : 'Nguồn không khả dụng';
 }
 
 export function sourceName(name: string): string {

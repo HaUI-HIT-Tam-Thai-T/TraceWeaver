@@ -23,7 +23,7 @@ test('case pages render filters, owner null, exact history/evidence DTO, precisi
         createElement(WorkspaceContext.Provider,{value:{state:{status:'ready',selectedWorkspaceId:WID,sources:{status:'ready',items:[],nextCursor:null}},membership:{workspace_id:WID,roles:['viewer']},permissions:{canRead:true,canWrite:false},refreshAccess:async()=>{}}},
           createElement(CasesContext.Provider,{value:{state,setFilters:noop,refresh:noop,previousPage:noop,nextPage:noop}},createElement(CasesPage)))))).replace(/<!--.*?-->/g,'')
     const html=render({...initial,list:{status:'ready',items:[caseItem()],error:null},nextCursor:'next'})
-    for(const text of ['run.created_at','Người xử lý','Tìm kiếm','Trước','Tiếp','live-state','Chưa được gán'])assert.ok(html.includes(text))
+    for(const text of ['ngày tạo lần tái dựng','Người xử lý','Tìm kiếm','Trước','Tiếp','trạng thái hiện tại','Chưa được gán'])assert.ok(html.includes(text))
     assert.match(html,new RegExp(`/cases/${CID}`));assert.doesNotMatch(html,/<script>/)
     assert.match(render({...initial,list:{status:'ready',items:[],error:null}}),/Chưa có hồ sơ/)
     assert.match(render(initial,false),/Đăng nhập để xem/)

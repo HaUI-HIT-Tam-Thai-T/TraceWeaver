@@ -34,6 +34,7 @@ export function DashboardTimeForm({
       className="filter-grid"
       onSubmit={handleSubmit((values) => apply(toDashboardFilters(values)))}
     >
+      <p className="filter-wide type-caption text-muted">Lọc theo ngày tạo lần tái dựng, múi giờ UTC+7.</p>
       <div className="filter-field">
         <label className="type-label block" htmlFor="dashboard-from">
           Tái dựng tạo từ
@@ -86,6 +87,7 @@ export function DashboardCounters({
   return (
     <SectionReveal>
       <section aria-label="Bốn counter dashboard" className="my-4 space-y-3">
+        <p className="type-caption text-muted">Hồ sơ chờ xử lý gồm Mới và Đã phân công. Lượt sự kiện chưa liên kết được đếm theo từng lần tái dựng hoàn tất; cùng một sự kiện có thể được tính trong nhiều lần. Bộ lọc thời gian áp dụng ngày tạo lần tái dựng.</p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { label: "Lần tái dựng được phép xem", value: data.runs },

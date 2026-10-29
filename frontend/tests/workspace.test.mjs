@@ -83,14 +83,38 @@ test('empty sources and multiple cursor pages are handled without inventing tota
   await controller.start()
   await settle()
   assert.equal(controller.getSnapshot().sources.status, 'ready')
-  assert.equal(controller.getSnapshot().sources.items.length, 0)
-  await controller.loadMoreSources()
+  assert.equal(calls.length, 2)
   assert.equal(calls[1].cursor, 'opaque +/=')
   assert.equal(controller.getSnapshot().sources.items.length, 1)
   assert.equal(controller.getSnapshot().sources.nextCursor, null)
   await controller.loadMoreSources()
   assert.equal(calls.length, 2)
 })
+
+test('automatic source pagination stops on repeated cursor and purges partial names', async () => {
+  let calls = 0;
+  const { controller } = fixture({ async listSources() { calls++; return page(A, 'repeated'); } });
+  await controller.start(); await settle();
+  assert.equal(calls, 2);
+  assert.equal(controller.getSnapshot().sources.error.code, 'INVALID_API_RESPONSE');
+  assert.deepEqual(controller.getSnapshot().sources.items, []);
+});
+
+test('switching workspace while later source page is pending aborts and discards all old names', async () => {
+  const pending = deferred(); let laterSignal;
+  const { controller } = fixture({
+    async getMe() { return me([membership(), membership(B)]); },
+    async listSources(id, options) {
+      if (id === B) return page(B);
+      if (!options.cursor) return page(A, 'next');
+      laterSignal = options.signal; return pending.promise;
+    },
+  });
+  await controller.start(); controller.selectWorkspace(A); await settle();
+  controller.selectWorkspace(B); assert.equal(laterSignal.aborted, true);
+  pending.resolve(page(A)); await settle();
+  assert.deepEqual(controller.getSnapshot().sources.items, [source(B)]);
+});
 
 test('workspace switch clears the old page immediately and ignores old responses even without abort support', async () => {
   const oldPage = deferred()

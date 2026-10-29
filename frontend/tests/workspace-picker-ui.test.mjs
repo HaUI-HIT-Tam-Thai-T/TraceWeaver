@@ -20,9 +20,12 @@ test('workspace picker exposes a short label, complete accessible UUID and safe 
     assert.match(html, /aria-haspopup="dialog"/);
     assert.match(html, /aria-expanded="false"/);
     assert.match(html, /Workspace · 10000000…0001/);
-    assert.match(html, new RegExp(`title="${id}"`));
+    assert.match(html, new RegExp(`title="[^" ]*[^"<>]*${id}"`));
     assert.match(html, /aria-describedby="workspace-picker-current"/);
     assert.doesNotMatch(html, /data-slot="popover-content"/);
+    const named = render({ workspaceNames: { [id]: "Nhóm điều tra" } });
+    assert.match(named, /Nhóm điều tra/);
+    assert.match(named, new RegExp(id));
     const loading = render({ workspaceIds: [], selectedId: null, disabled: true, initializing: true });
     assert.match(loading, /disabled=""/);
     assert.match(loading, /Đang kiểm tra workspace/);

@@ -5,12 +5,12 @@ import { Outlet } from 'react-router-dom';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useWorkspace } from '../../features/workspace/hooks/useWorkspace';
 import { Button } from '../ui/Button';
-import { LoadingState } from '../ui/LoadingState';
+import { Loader } from '../ui/Loader';
 import { EmptyState } from '../ui/EmptyState';
 import { ErrorState } from '../ui/ErrorState';
 
 export function WorkspaceAccessState({ children }: { children?: ReactNode }) {
-  const { state: auth, signIn } = useAuth();
+  const { signIn } = useAuth();
   const { state, membership, permissions, refreshAccess } = useWorkspace();
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -22,16 +22,7 @@ export function WorkspaceAccessState({ children }: { children?: ReactNode }) {
     finally { setBusy(false); }
   }
   const loginButton = <Button loading={busy} onClick={() => { void login(); }}>{busy ? 'Đang chuyển hướng…' : 'Đăng nhập lại'}</Button>;
-  if (auth.status === 'initializing') return <AccessFeedback title="Đang kiểm tra đăng nhập"><LoadingState message="Đang kiểm tra phiên đăng nhập…" /></AccessFeedback>;
-  if (auth.status === 'error') return <AccessFeedback title="Không thể xác minh phiên đăng nhập"><ErrorState message={auth.message}
-    action={auth.reason === 'initialization'
-      ? <Button onClick={() => window.location.reload()}>Tải lại trang</Button> : loginButton} /></AccessFeedback>;
-  if (auth.status !== 'authenticated') return <AccessFeedback title="Đăng nhập để tiếp tục">
-    <EmptyState title="Vui lòng đăng nhập để tiếp tục." description={auth.message}
-      action={<Button loading={busy} onClick={() => { void login(); }}>Đăng nhập</Button>} />
-    {actionError && <ErrorState message={actionError} />}
-  </AccessFeedback>;
-  if (state.status === 'idle' || state.status === 'loading') return <AccessFeedback title="Đang xác minh quyền truy cập"><LoadingState message="Đang kiểm tra workspace và quyền truy cập…" /></AccessFeedback>;
+  if (state.status === 'idle' || state.status === 'loading') return <AccessFeedback title="Đang xác minh quyền truy cập"><Loader message="Đang kiểm tra workspace và quyền truy cập…" /></AccessFeedback>;
   if (state.status === 'error' || state.status === 'reauth') return <AccessFeedback title={state.status === 'reauth' ? 'Cần đăng nhập lại' : 'Chưa xác minh được quyền truy cập'}>
     <ErrorState message={state.error?.message ?? 'Không thể xác minh quyền truy cập.'} requestId={state.error?.requestId}
       action={state.status === 'reauth' ? loginButton : <Button onClick={() => { void refreshAccess(); }}>Thử lại</Button>} />

@@ -6,10 +6,11 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "../components/ui/primitives/breadcrumb";
+import { CaseRunPanel } from '../features/cases/components/CaseRunPanel';
 import { Button } from "../components/ui/Button";
 import { LoadingState } from "../components/ui/LoadingState";
 import { WorkflowForm } from "../features/cases/components/WorkflowForm";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { useCases } from "../features/cases/hooks/useCases";
 import { CasesLayout } from "../features/cases/components/CasesLayout";
 import { CasesFeedback } from "../features/cases/components/CasesFeedback";
@@ -20,6 +21,7 @@ import { useWorkspace } from "../features/workspace/hooks/useWorkspace";
 export function CaseDetailPage() {
   const {
     state,
+    loadCaseRun, loadCaseAssignees, reviewCaseLink, createCaseManualLink,
     refresh,
     loadEvidenceSnapshot,
     submitEvidence,
@@ -28,12 +30,14 @@ export function CaseDetailPage() {
     retryTransition,
     beginNewTransition,
   } = useCases();
-  const { permissions } = useWorkspace();
+  const { permissions, state: workspace } = useWorkspace();
+  const [params, setParams] = useSearchParams();
+  const selectedTab = ["evidence", "reconstruction"].includes(params.get("tab") ?? "") ? params.get("tab") ?? "history" : "history";
   const { caseId } = useParams();
   const location = useLocation();
   const workflowBusy = ["validating", "sending"].includes(
     state.workflow.status,
-  );
+  ) || state.linkMutation.status === 'sending' || state.snapshot.status === 'loading' || state.caseRun.status === 'loading';
   const showTools = permissions.canWrite && state.scope?.canWrite === true;
   const matches = state.detail.id === caseId;
   return (
@@ -79,6 +83,10 @@ export function CaseDetailPage() {
             <CaseDetailView
               key={state.detail.data.case.id + state.detail.data.case.run_id}
               detail={state.detail.data}
+              selectedTab={selectedTab}
+              onTabChange={tab => { setParams(previous => { const next = new URLSearchParams(previous); if (tab === 'history') next.delete('tab'); else next.set('tab', tab); return next; }); }}
+              snapshot={state.snapshot} loadSnapshot={loadEvidenceSnapshot} sources={workspace.sources.items}
+              runPanel={<CaseRunPanel state={state} active={selectedTab === 'reconstruction'} load={loadCaseRun} actions={{ reviewLink: reviewCaseLink, createManualLink: createCaseManualLink, probeClosedCase: refresh }} />}
             />
           )}
         </div>
@@ -121,6 +129,8 @@ export function CaseDetailPage() {
                     state.evidenceMutation.status !== "sending"
                   }
                   workflow={state.workflow}
+                  assignees={state.assignees}
+                  loadAssignees={loadCaseAssignees}
                   graph={state.workflowGraph}
                   submit={submitTransition}
                   retry={retryTransition}

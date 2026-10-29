@@ -97,7 +97,7 @@ test('events UI renders filters, outcomes, precision, provenance, escaped payloa
     assert.match(mixed, /Cấp môi trường thất bại/)
     assert.match(mixed, /Thất bại/)
     assert.match(mixed, /Không đủ tài nguyên để cấp môi trường/)
-    assert.match(mixed, /Chưa tải tên nguồn/)
+    assert.match(mixed, /Nguồn không khả dụng/)
     assert.match(mixed, /Hoạt động: new.action/)
     assert.match(mixed, /Log không có thông điệp/)
     assert.match(mixed, /Chưa xác định/)

@@ -110,6 +110,14 @@ export const graphSchema = z
         label: z.literal("chưa có bằng chứng"),
       }),
     ),
+    abstentions: z.array(z.strictObject({
+      reason_code: z.string(),
+      event_id: id.optional(),
+      transition_id: z.string().optional(),
+      from_event_id: id.optional(),
+      to_event_id: id.optional(),
+    }).refine(value => value.event_id !== undefined ||
+      (value.transition_id !== undefined && value.from_event_id !== undefined && value.to_event_id !== undefined))).default([]),
     version: z.number().int().min(1),
   })
   .refine((graph) => {

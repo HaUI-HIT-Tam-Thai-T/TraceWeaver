@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "../../../components/ui/Button";
 import { Badge } from "../../../components/ui/Badge";
-import { LoadingState } from "../../../components/ui/LoadingState";
+import { Loader } from "../../../components/ui/Loader";
 import { ErrorState } from "../../../components/ui/ErrorState";
 import { useAuth } from "../hooks/useAuth";
 
@@ -19,7 +19,7 @@ export function AuthStatus() {
   }
 
   if (state.status === "initializing")
-    return <LoadingState message="Đang kiểm tra phiên đăng nhập…" />;
+    return <Loader message="Đang kiểm tra phiên đăng nhập…" />;
   if (state.status === "error") {
     return (
       <section className="ui-panel space-y-4" aria-label="Trạng thái đăng nhập">

@@ -8,9 +8,10 @@ import { createServer } from 'vite';
 test('AppShell keeps one main, active cases navigation and safe access states without fetching', async () => {
   const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-app-shell', server: { middlewareMode: true, hmr: false, ws: false } });
   try {
-    const [{ AppLayout }, { WorkspaceAccessState }, { AuthContext }, { WorkspaceContext }, { initialWorkspaceState, activeMembership, workspacePermissions }] = await Promise.all([
+    const [{ AppLayout }, { WorkspaceAccessState }, { ProtectedRoute }, { AuthContext }, { WorkspaceContext }, { initialWorkspaceState, activeMembership, workspacePermissions }] = await Promise.all([
       server.ssrLoadModule('/src/components/layout/AppLayout.tsx'),
       server.ssrLoadModule('/src/components/layout/WorkspaceAccessState.tsx'),
+      server.ssrLoadModule('/src/routes/ProtectedRoute.tsx'),
       server.ssrLoadModule('/src/features/auth/state/authContext.ts'),
       server.ssrLoadModule('/src/features/workspace/state/workspaceContext.ts'),
       server.ssrLoadModule('/src/features/workspace/state/state.ts'),
@@ -27,7 +28,8 @@ test('AppShell keeps one main, active cases navigation and safe access states wi
         h(AuthContext.Provider, { value: { state: auth, signIn: action, signOut: action } },
           h(WorkspaceContext.Provider, { value: { state, membership, permissions: workspacePermissions(membership), selectWorkspace: action, refreshAccess: action } },
             h(Routes, null, h(Route, { element: h(AppLayout) },
-              h(Route, { element: h(WorkspaceAccessState) }, h(Route, { path: '/cases/:caseId', element: h('h1', null, 'Protected payload') }))))))));
+              h(Route, { element: h(ProtectedRoute) },
+                h(Route, { element: h(WorkspaceAccessState) }, h(Route, { path: '/cases/:caseId', element: h('h1', null, 'Protected payload') })))))))));
     }
     const allowed = render(ready);
     assert.equal((allowed.match(/<main\b/g) ?? []).length, 1);

@@ -4,7 +4,12 @@ import type { CasesState } from "./state";
 import type { CaseFilters } from "../schemas";
 import type { EvidenceCreate } from '../schemas';
 
+import type { ReviewCreate, ManualLinkCreate } from '../../link-review/schemas';
 export type CasesContextValue = {
+  loadCaseAssignees: () => Promise<void>;
+  loadCaseRun: (force?: boolean) => Promise<void>;
+  reviewCaseLink: (id: string, body: ReviewCreate) => Promise<void>;
+  createCaseManualLink: (body: ManualLinkCreate) => Promise<void>;
   state: CasesState;
   setFilters: (filters: CaseFilters) => void;
   refresh: () => void;

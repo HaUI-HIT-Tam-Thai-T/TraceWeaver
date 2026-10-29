@@ -7,9 +7,9 @@ export type CaseAction = z.infer<typeof caseActionSchema>
 export const transitionSchema = z.strictObject({
   action: caseActionSchema, expected_version: z.number().int().min(1),
   reason: z.string().trim().min(1, 'Nhập lý do có nội dung.').max(1000, 'Lý do tối đa 1.000 ký tự.'),
-  owner_id: z.string().trim().min(1).max(255).optional(),
+  owner_id: z.string().min(1).max(255).optional(),
 }).superRefine((value, ctx) => {
-  if (value.action === 'assign' && !value.owner_id) ctx.addIssue({ code: 'custom', path: ['owner_id'], message: 'Nhập owner subject hoặc chọn Giao cho tôi.' })
+  if (value.action === 'assign' && !value.owner_id) ctx.addIssue({ code: 'custom', path: ['owner_id'], message: 'Chọn người xử lý hoặc Giao cho tôi từ danh sách đủ điều kiện.' })
   if (value.action !== 'assign' && value.owner_id !== undefined) ctx.addIssue({ code: 'custom', path: ['owner_id'], message: 'Chỉ assign được gửi owner_id.' })
 })
 export type CaseTransition = z.infer<typeof transitionSchema>

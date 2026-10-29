@@ -1,6 +1,6 @@
 import { TechnicalDetails } from "../../../components/ui/TechnicalDetails";
 import type { Graph } from "../schemas";
-import { orderedSteps, graphStepLabels, reviewLabel, scoreExplanation, evidenceLabel } from "../presentation";
+import { abstentionLabel, orderedSteps, graphStepLabels, reviewLabel, scoreExplanation, evidenceLabel } from "../presentation";
 import { actionLabel, eventDescription, eventTimeLabel, sourceName } from "../../events/presentation";
 
 export function GraphTable({ graph, rootId }: { graph: Graph; rootId?: string }) {
@@ -34,6 +34,14 @@ export function GraphTable({ graph, rootId }: { graph: Graph; rootId?: string })
     {graph.links.length === 0 && <p>Chưa xác định được liên kết; điều này không khẳng định hệ thống thiếu log.</p>}
     <h4 className="type-h4">Sự kiện chưa liên kết với điểm bắt đầu</h4>
     {graph.unresolved_event_ids.length === 0 ? <p>Không có sự kiện chưa liên kết trong kết quả này.</p> : <ul>{graph.unresolved_event_ids.map(id => <li key={id}>{stepLabel(id)}</li>)}</ul>}
+    {(graph.abstentions ?? []).length > 0 && <section aria-label="Lý do chưa kết luận liên kết" className="space-y-3">
+      <h4 className="type-h4">Lý do chưa kết luận liên kết</h4>
+      <ul className="space-y-3">{graph.abstentions.map((item, index) => <li key={index}>
+        <p>{abstentionLabel(item.reason_code)}</p>
+        <p>{item.event_id ? stepLabel(item.event_id) : [item.from_event_id, item.to_event_id].map(id => id ? stepLabel(id) : 'Chưa xác định sự kiện').join(' → ')}</p>
+        <TechnicalDetails headingLevel={5} title="Mã lý do và tham chiếu gốc"><pre>{JSON.stringify(item, null, 2)}</pre></TechnicalDetails>
+      </li>)}</ul>
+    </section>}
     <h4 className="type-h4">Bước còn thiếu bằng chứng log</h4>
     <p className="type-body-sm text-muted">Thiếu bằng chứng trong phạm vi nguồn và thời gian đã chọn không có nghĩa bước đó chắc chắn chưa diễn ra.</p>
     <ul>{graph.missing_expected_steps.map((step, index) => <li key={`${step.step}:${index}`}>{sourceName(step.step)} — {step.label}<TechnicalDetails headingLevel={5} title="Phiên bản quy trình">{step.process_template_version}</TechnicalDetails></li>)}</ul>

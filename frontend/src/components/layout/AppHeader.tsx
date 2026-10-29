@@ -5,6 +5,7 @@ import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useWorkspace } from '../../features/workspace/hooks/useWorkspace';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
+import { roleLabel } from '../../features/workspace/presentation';
 import { WorkspacePicker } from '../../features/workspace/components/WorkspacePicker';
 import { SheetTrigger } from '../ui/primitives/sheet';
 
@@ -40,6 +41,7 @@ export function AppHeader() {
           <label htmlFor="workspace-picker" className="type-caption mb-1 block text-chrome-muted lg:sr-only">Chọn workspace</label>
           <WorkspacePicker key={ready ? state.me?.subject : 'unavailable'}
             workspaceIds={memberships.map(item => item.workspace_id)}
+            workspaceNames={Object.fromEntries(memberships.map(item => [item.workspace_id, item.workspace_name]))}
             selectedId={ready ? state.selectedWorkspaceId : null}
             disabled={!ready || !memberships.length || busy}
             initializing={authenticated && (state.status === 'loading' || state.status === 'idle')}
@@ -48,7 +50,7 @@ export function AppHeader() {
       </div>
       <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2 lg:px-6">
         {ready && membership && <div aria-label="Vai trò workspace" className="hidden flex-wrap gap-1 lg:flex">
-          {membership.roles.map(role => <Badge key={role} tone="info" className="text-chrome-muted">{role}</Badge>)}
+          {membership.roles.map(role => <Badge key={role} tone="info" className="text-chrome-muted">{roleLabel(role)}</Badge>)}
         </div>}
         {!authenticated && <Button variant="secondary" loading={busy} disabled={auth.status === 'initializing'}
           className="border-white/30 bg-white text-chrome hover:bg-chrome-active hover:text-white focus-visible:ring-white/60"

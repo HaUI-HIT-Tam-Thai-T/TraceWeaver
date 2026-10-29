@@ -10,6 +10,7 @@ import { initialCasesState } from "./state";
 import { readCaseQuery, writeCaseQuery } from "../query";
 import { reconstructionService } from '../../reconstruction/services/service';
 
+import { linkReviewService } from '../../link-review/services/service';
 const hiddenState = initialCasesState();
 export function CasesProvider({ children }: { children: ReactNode }) {
   const { state: auth } = useAuth();
@@ -20,7 +21,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     refreshAccess,
   } = useWorkspace();
   const [controller] = useState(() =>
-    createCasesController(casesService, refreshAccess, { addEvidence: casesService.addEvidence, getGraph: reconstructionService.getGraph }, { transitionCase: casesService.transitionCase }),
+    createCasesController(casesService, refreshAccess, { addEvidence: casesService.addEvidence, getGraph: reconstructionService.getGraph }, { transitionCase: casesService.transitionCase, listAssignees: casesService.listAssignees }, { getRun: reconstructionService.getRun, reviewLink: linkReviewService.reviewLink, createManualLink: linkReviewService.createManualLink }),
   );
   const [snapshot, setSnapshot] = useState(controller.getSnapshot);
 
@@ -118,6 +119,10 @@ export function CasesProvider({ children }: { children: ReactNode }) {
         nextPage() {
           void controller.nextPage();
         },
+        loadCaseRun: controller.loadCaseRun,
+        loadCaseAssignees: controller.loadCaseAssignees,
+        reviewCaseLink: controller.reviewCaseLink,
+        createCaseManualLink: controller.createCaseManualLink,
         loadEvidenceSnapshot: controller.loadEvidenceSnapshot,
         submitEvidence: controller.submitEvidence,
         beginNewEvidence: controller.beginNewEvidence,

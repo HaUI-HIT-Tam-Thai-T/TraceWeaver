@@ -13,7 +13,7 @@ test('event presentation preserves identity boundaries, unknown outcomes and ori
     assert.equal(requestLabel({ ...original, identifiers: [{ namespace: 'account', value: 'REQ-02' }] }), 'Chưa xác định')
     assert.equal(requestLabel({ ...original, identifiers: [{ namespace: 'request', value: 'REQ-01' }, { namespace: 'request', value: 'REQ-01' }, { namespace: 'request', value: 'REQ-02' }] }), 'Nhiều mã yêu cầu: REQ-01, REQ-02')
     assert.equal(sourceLabel(original, [{ id: SID, name: 'Dịch vụ tiếp nhận' }]), 'Dịch vụ tiếp nhận')
-    assert.equal(sourceLabel(original, [{ id: 'other', name: 'Nguồn khác' }]), 'Chưa tải tên nguồn (intake)')
+    assert.equal(sourceLabel(original, [{ id: 'other', name: 'Nguồn khác' }]), 'Nguồn không khả dụng')
     assert.equal(actionLabel('account.created'), 'Đã tạo tài khoản')
     assert.equal(actionLabel('provision.completed'), 'Đã cấp môi trường')
     assert.equal(actionLabel('provision.failed'), 'Cấp môi trường thất bại')

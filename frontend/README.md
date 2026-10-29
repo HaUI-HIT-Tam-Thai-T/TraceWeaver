@@ -14,11 +14,12 @@ Chưa triển khai reconstruction, dashboard hoặc các thao tác case.
   kiểm TLS, bỏ Origin ở chặng server tới server. OAuth dùng issuer HTTPS thật;
   không proxy `/identity`, `/core` hoặc service secrets. Proxy không chạy trong production build.
 - React Router: BrowserRouter, cấu hình trong `src/constants/routes.ts`.
-  `/` hiển thị trạng thái phiên; callback thành công về `/` bằng replace;
-  `*` hiển thị trang không tìm thấy. SDK xử lý code/state trước khi mount Router.
+  `/` chuyển về Dashboard qua ProtectedRoute; callback thành công về `/dashboard` bằng replace;
+  `*` hiển thị trang không tìm thấy. Route được chặn trong lúc SDK xử lý code/state.
 - Keycloak JS 26.2.4 (Apache-2.0, không phụ thuộc React): một instance, init một lần,
-  Code flow + PKCE S256, response query, check-sso và tắt session-status iframe.
-  Context + useSyncExternalStore theo dõi phiên, không sao chép token vào React state/Redux.
+  Code flow + PKCE S256, response query và tắt session-status iframe.
+  Khởi động tự chuyển đến Keycloak nếu chưa xác thực; không cần bấm Đăng nhập trên FE.
+  Context + useState/useEffect theo dõi phiên, không sao chép token vào React state/Redux.
 - TypeScript: `strict: true` cho app và Vite config; entrypoint kiểm tra DOM root thay assertion.
 
 ## Chạy local
@@ -38,10 +39,9 @@ Sau khi sửa env, khởi động lại Vite.
 
 Kiểm tra bằng trình duyệt:
 
-1. Mở `http://localhost:5173/`: kiểm phiên SSO qua Keycloak. Nếu chưa có phiên,
-   redirect kiểm tra với prompt=none rồi trở lại FE, hiện nút đăng nhập.
-2. Bấm đăng nhập và đăng nhập trên Keycloak; callback thành công chuyển về trang chủ.
-3. Reload để kiểm lại SSO; bấm đăng xuất để kết thúc phiên và quay về origin ứng dụng.
+1. Mở `http://localhost:5173/`: tự chuyển thẳng đến Keycloak, hiện form đăng nhập nếu chưa có phiên SSO.
+2. Đăng nhập trên Keycloak; callback thành công chuyển về Dashboard. Có phiên SSO còn hiệu lực thì tự vào ứng dụng.
+3. Reload để xác thực lại qua Keycloak; bấm đăng xuất để kết thúc phiên, quay về origin rồi tự mở form Keycloak.
 4. Hủy login/callback lỗi phải hiện thông báo an toàn; lỗi init dùng tải lại trang, không init lại SDK.
 5. Mở `/khong-ton-tai` khi phiên đã khởi tạo để kiểm tra trang không tìm thấy.
 

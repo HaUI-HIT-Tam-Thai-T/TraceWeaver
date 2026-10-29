@@ -43,9 +43,9 @@ test('events lazily load exact case run graph, reject IDs outside snapshot and n
   await x.controller.loadEvidenceSnapshot();assert.equal(x.graphs(),1)
   const y=await setup({getGraph:async()=>({...graph(),run_id:CID2})});await y.controller.loadEvidenceSnapshot();assert.equal(y.controller.getSnapshot().snapshot.status,'error')
 })
-test('snapshot network error allows note; closed case and readonly scope cannot post or load picker',async()=>{
+test('snapshot network error allows note; closed case and readonly scope can read snapshot but cannot post',async()=>{
   const x=await setup({getGraph:async()=>{throw fail('HTTP_503',503)}});await x.controller.loadEvidenceSnapshot();await x.controller.submitEvidence(note());assert.equal(x.calls.length,1)
-  const y=await setup();y.controller.sync({...y.access,canWrite:false},y.view);await tick();await y.controller.submitEvidence(note());await y.controller.loadEvidenceSnapshot();assert.equal(y.calls.length,0);assert.equal(y.graphs(),0)
+  const y=await setup();y.controller.sync({...y.access,canWrite:false},y.view);await tick();await y.controller.submitEvidence(note());await y.controller.loadEvidenceSnapshot();assert.equal(y.calls.length,0);assert.equal(y.graphs(),1)
   const z=await setup();const closed=caseDetail();closed.case.state='closed';z.setDetail(closed);await z.controller.refresh();await z.controller.submitEvidence(note());assert.equal(z.calls.length,0)
 })
 test('double submit and manual refresh cannot overlap mutation',async()=>{

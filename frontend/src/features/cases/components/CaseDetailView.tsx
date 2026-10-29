@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from 'react';
+import type { CaseEvidenceSnapshot } from '../state/state';
+import type { Source } from '../../workspace/schemas';
+import { EvidenceEvents } from './EvidenceEvents';
 import type { CaseDetail } from "../schemas";
 import { caseStateLabel, caseActionLabel, nextCaseStep } from "../presentation";
 import { eventTimeLabel } from "../../events/presentation";
@@ -10,9 +14,19 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "..
 export function CaseTime({ value }: { value: string }) {
   return <time dateTime={value} title={`UTC gốc: ${value}`}>{eventTimeLabel(value)} (UTC+7)</time>;
 }
-export function CaseDetailView({ detail }: { detail: CaseDetail }) {
+export function CaseDetailView({ detail, selectedTab, onTabChange, runPanel, snapshot, loadSnapshot, sources = [] }: {
+  detail: CaseDetail; selectedTab?: string; onTabChange?: (tab: string) => void;
+  runPanel?: ReactNode; snapshot?: CaseEvidenceSnapshot; loadSnapshot?: () => Promise<void>; sources?: Source[];
+}) {
   const item = detail.case;
-  const [tab, setTab] = useState('history');
+  const [localTab, setLocalTab] = useState('history');
+  const tab = selectedTab ?? localTab;
+  function setTab(value: string) { setLocalTab(value); onTabChange?.(value); }
+  const snapshotStatus = snapshot?.status;
+  const needsEvents = detail.evidence.some(item => item.event_ids.length > 0);
+  useEffect(() => {
+    if (tab === 'evidence' && needsEvents && snapshotStatus === 'idle' && loadSnapshot) void loadSnapshot();
+  }, [tab, needsEvents, snapshotStatus, loadSnapshot]);
   const [opened, setOpened] = useState<string[]>([]);
   const pendingFocus = useRef<string | null>(null);
   useEffect(() => {
@@ -40,7 +54,7 @@ export function CaseDetailView({ detail }: { detail: CaseDetail }) {
       </TechnicalDetails>
     </section>
     <Tabs value={tab} onValueChange={setTab} className="content-panel">
-      <TabsList aria-label="Thông tin hồ sơ"><TabsTrigger value="history">Lịch sử</TabsTrigger><TabsTrigger value="evidence">Bằng chứng ({detail.evidence.length})</TabsTrigger></TabsList>
+      <TabsList aria-label="Thông tin hồ sơ" className="grid w-full grid-cols-1 gap-1 group-data-[orientation=horizontal]/tabs:h-auto sm:grid-cols-3"><TabsTrigger className="h-auto whitespace-normal" value="history">Lịch sử</TabsTrigger><TabsTrigger className="h-auto whitespace-normal" value="evidence">Bằng chứng ({detail.evidence.length})</TabsTrigger>{runPanel && <TabsTrigger className="h-auto whitespace-normal" value="reconstruction">Kết quả tái dựng</TabsTrigger>}</TabsList>
       <TabsContent value="history" forceMount>
         <section aria-label="Lịch sử workflow" className="pt-4">
           <h3 className="type-h3 mb-5">Lịch sử xử lý</h3>
@@ -58,11 +72,14 @@ export function CaseDetailView({ detail }: { detail: CaseDetail }) {
       <TabsContent value="evidence" forceMount>
         <section aria-label="Evidence của case" className="space-y-4 pt-4">
           <h3 className="type-h3">Bằng chứng đã lưu</h3>
+          {snapshot?.error && <p role="alert">{snapshot.error.message}</p>}
+          {needsEvents && loadSnapshot && <Button variant="secondary" disabled={snapshotStatus === 'loading'} onClick={() => { void loadSnapshot(); }}>Xem log trong ảnh chụp dữ liệu</Button>}
           {detail.evidence.length === 0 ? <p>Chưa có bằng chứng.</p> : <Accordion type="multiple" value={opened} onValueChange={setOpened}>
             {detail.evidence.map((entry, index) => <AccordionItem key={entry.id} value={entry.id}>
               <AccordionTrigger headingLevel={4} className="hover:bg-transparent hover:font-bold hover:text-primary" id={`evidence-${entry.id}`}>Bằng chứng {index + 1} · {entry.kind === 'note' ? 'Ghi chú xử lý' : `${entry.event_ids.length} sự kiện trong ảnh chụp dữ liệu`} · {eventTimeLabel(entry.created_at)}</AccordionTrigger>
               <AccordionContent forceMount className="space-y-3">
                 <p className="whitespace-pre-wrap break-words">{entry.note || 'Không có ghi chú kèm theo.'}</p><p>Người thêm: {entry.creator_subject}</p>
+                {entry.event_ids.length > 0 && snapshot && <EvidenceEvents ids={entry.event_ids} snapshot={snapshot} sources={sources} />}
                 <TechnicalDetails headingLevel={5} title="Tham chiếu sự kiện và dữ liệu gốc"><p>Evidence: {entry.id}; Case: {entry.case_id}; Kind: {entry.kind}</p><p>Event IDs: {entry.event_ids.join(', ') || 'Không có event tham chiếu'}</p><CaseTime value={entry.created_at} /><p>UTC gốc: {entry.created_at}</p></TechnicalDetails>
               </AccordionContent>
             </AccordionItem>)}
@@ -70,6 +87,7 @@ export function CaseDetailView({ detail }: { detail: CaseDetail }) {
           <p className="type-caption text-muted">Bằng chứng đã lưu được giữ trong lịch sử. Thêm hoặc đọc bằng chứng không tự thay đổi phiên bản trạng thái hồ sơ.</p>
         </section>
       </TabsContent>
+      {runPanel && <TabsContent value="reconstruction" forceMount>{runPanel}</TabsContent>}
     </Tabs>
   </div>;
 }

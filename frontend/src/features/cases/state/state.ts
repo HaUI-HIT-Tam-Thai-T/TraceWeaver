@@ -1,5 +1,8 @@
 import type { ApiError } from "../../../services/apiError.ts";
-import type { Case, CaseDetail, CaseFilters } from "../schemas.ts";
+import type { Case, CaseDetail, CaseFilters, CaseAssignees } from "../schemas.ts";
+import type { Graph, Run } from '../../reconstruction/schemas.ts';
+import type { LinkMutation } from '../../link-review/types.ts';
+import { initialLinkMutation } from '../../link-review/types.ts';
 import type { Event } from '../../events/schemas.ts';
 import type { CaseTransition } from '../workflow.ts';
 
@@ -14,6 +17,7 @@ export type CaseEvidenceSnapshot = {
   status: 'idle' | 'loading' | 'ready' | 'error';
   runId: string | null;
   events: Event[];
+  graph?: Graph;
   error: ApiError | null;
 };
 export type CaseEvidenceMutation = {
@@ -35,6 +39,7 @@ export type CaseWorkflowGraph = {
 };
 
 export type CasesState = {
+  assignees: { status: 'idle' | 'loading' | 'ready' | 'error'; items: CaseAssignees['items']; error: ApiError | null };
   scope: CasesScope | null;
   status: "idle" | "active" | "invalid" | "blocked" | "reauth";
   filters: CaseFilters;
@@ -53,6 +58,8 @@ export type CasesState = {
   index: number;
   nextCursor: string | null;
   error: ApiError | null;
+  caseRun: { status: 'idle' | 'loading' | 'ready' | 'error'; run: Run | null; error: ApiError | null };
+  linkMutation: LinkMutation;
   snapshot: CaseEvidenceSnapshot;
   evidenceMutation: CaseEvidenceMutation;
   workflow: CaseWorkflow;
@@ -67,6 +74,7 @@ export function initialCasesState(
   filters: CaseFilters = { limit: 50 },
 ): CasesState {
   return {
+    assignees: { status: 'idle', items: [], error: null },
     scope,
     status: scope ? "active" : "idle",
     filters,
@@ -76,6 +84,8 @@ export function initialCasesState(
     index: 0,
     nextCursor: null,
     error: null,
+    caseRun: { status: 'idle', run: null, error: null },
+    linkMutation: initialLinkMutation(),
     snapshot: initialEvidenceSnapshot(),
     evidenceMutation: initialEvidenceMutation(),
     workflow: initialWorkflow(),

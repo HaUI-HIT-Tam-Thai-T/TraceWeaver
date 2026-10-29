@@ -12,6 +12,10 @@ import type { EvidenceCreate } from '../schemas.ts';
 import type { Graph } from '../../reconstruction/schemas.ts';
 import type { CasesScope, CasesState } from "./state.ts";
 
+import type { ReconstructionService } from '../../reconstruction/services/createReconstructionService.ts';
+import type { LinkReviewService } from '../../link-review/services/createLinkReviewService.ts';
+import { manualLinkCreateSchema, manualLinkIssue, reviewCreateSchema } from '../../link-review/schemas.ts';
+import type { ReviewCreate, ManualLinkCreate } from '../../link-review/schemas.ts';
 export type CasesView =
   | { kind: "none" }
   | { kind: "list"; search: string }
@@ -22,7 +26,8 @@ export function createCasesController(
   service: Pick<CasesService, "listCases" | "getCase">,
   revalidate: () => Promise<void>,
   evidence?: Pick<CasesService, 'addEvidence'> & { getGraph: (wid: string, rid: string, signal?: AbortSignal) => Promise<Graph> },
-  workflow?: Pick<CasesService, 'transitionCase'> & { now?: () => number; newKey?: () => string },
+  workflow?: Pick<CasesService, 'transitionCase'> & { listAssignees?: CasesService['listAssignees']; now?: () => number; newKey?: () => string },
+  savedRun?: Pick<ReconstructionService, 'getRun'> & Pick<LinkReviewService, 'reviewLink' | 'createManualLink'>,
 ) {
   let state = initialCasesState();
   let view: CasesView = { kind: "none" };
@@ -31,6 +36,7 @@ export function createCasesController(
   let busy = false;
   let snapshotRequest: AbortController | null = null;
   let snapshotSequence = 0;
+  let assigneesRequest: AbortController | null = null;
   let blocked: { key: string; error: ApiError } | null = null;
   const listeners = new Set<() => void>();
   function reset(next: CasesState) {
@@ -45,6 +51,7 @@ export function createCasesController(
     generation++;
     request?.abort();
     snapshotRequest?.abort();
+    assigneesRequest?.abort();
     snapshotSequence++;
     busy = false;
   }
@@ -123,8 +130,10 @@ export function createCasesController(
         );
         if (current()) {
           const runChanged = previousDetail !== null && previousDetail.case.run_id !== detail.case.run_id;
+          if (runChanged || detail.case.state !== 'new') assigneesRequest?.abort();
           if (runChanged) { snapshotRequest?.abort(); snapshotSequence++; }
           update({
+            ...(runChanged || detail.case.state !== 'new' ? { assignees: initialCasesState().assignees } : {}),
             detail: {
               status: "ready",
               id: currentView.caseId,
@@ -132,7 +141,8 @@ export function createCasesController(
               error: null,
             },
             ...(state.workflow.status === 'success' && state.workflow.attempt?.body.action === 'reopen' && detail.case.state !== 'closed' && state.evidenceMutation.status === 'locked' ? { evidenceMutation: initialEvidenceMutation() } : {}),
-            ...(runChanged ? { snapshot: initialEvidenceSnapshot(), evidenceMutation: initialEvidenceMutation(), workflow: initialCasesState().workflow, workflowGraph: initialCasesState().workflowGraph } : {}),
+            ...(state.linkMutation.status === 'locked' && detail.case.state !== 'closed' ? { linkMutation: initialCasesState().linkMutation } : {}),
+            ...(runChanged ? { caseRun: initialCasesState().caseRun, linkMutation: initialCasesState().linkMutation, snapshot: initialEvidenceSnapshot(), evidenceMutation: initialEvidenceMutation(), workflow: initialCasesState().workflow, workflowGraph: initialCasesState().workflowGraph } : {}),
           });
         }
       }
@@ -242,35 +252,43 @@ export function createCasesController(
         : state.history;
     return load(index, history);
   }
+  function readable() {
+    return state.status === 'active' && state.scope !== null && view.kind === 'detail' &&
+      state.detail.status === 'ready' && state.detail.id === view.caseId && state.detail.data !== null;
+  }
+  function acceptGraph(graph: Graph) {
+    update({ snapshot: { status: 'ready', runId: graph.run_id, events: graph.nodes, graph, error: null },
+      workflowGraph: { status: 'ready', runId: graph.run_id, pendingCount: graph.links.filter(link => link.review_state === 'pending').length, error: null } });
+  }
   function editable() {
     return state.status === 'active' && state.scope?.canWrite === true && view.kind === 'detail' &&
       state.detail.status === 'ready' && state.detail.id === view.caseId && state.detail.data !== null &&
       state.detail.data.case.state !== 'closed';
   }
-  async function loadEvidenceSnapshot(): Promise<void> {
-    if (!evidence || busy || !editable() || !state.scope || !state.detail.data || state.snapshot.status === 'loading') return;
+  async function loadEvidenceSnapshot(force = false): Promise<void> {
+    if (!evidence || busy || state.caseRun.status === 'loading' || !readable() || !state.scope || !state.detail.data || state.snapshot.status === 'loading') return;
     const wid = state.scope.workspaceId;
     const rid = state.detail.data.case.run_id;
     const cid = state.detail.data.case.id;
-    if (state.snapshot.status === 'ready' && state.snapshot.runId === rid) return;
+    if (!force && state.snapshot.status === 'ready' && state.snapshot.runId === rid) return;
     snapshotRequest?.abort();
     const controller = new AbortController();
     snapshotRequest = controller;
     const version = generation;
     const sequence = ++snapshotSequence;
     const current = () => version === generation && sequence === snapshotSequence && !controller.signal.aborted;
-    update({ snapshot: { status: 'loading', runId: rid, events: [], error: null } });
+    update({ snapshot: { status: 'loading', runId: rid, events: [], error: null }, workflowGraph: { status: 'loading', runId: rid, pendingCount: null, error: null } });
     try {
       const graph = await evidence.getGraph(wid, rid, controller.signal);
       if (!current()) return;
-      if (graph.run_id !== rid || state.detail.id !== cid) throw new SafeApiError({ kind: 'client', code: 'INVALID_API_RESPONSE', message: 'Snapshot không đúng run của case.' });
-      update({ snapshot: { status: 'ready', runId: rid, events: graph.nodes, error: null } });
+      if (graph.run_id !== rid || state.detail.id !== cid || (state.caseRun.run?.id === rid && !graph.nodes.some(node => node.event_id === state.caseRun.run?.root_event_id))) throw new SafeApiError({ kind: 'client', code: 'INVALID_API_RESPONSE', message: 'Snapshot không đúng run của case.' });
+      acceptGraph(graph);
     } catch (error: unknown) {
       if (!current()) return;
       if (axios.isCancel(error)) { update({ snapshot: initialEvidenceSnapshot() }); return; }
       const safe = normalizeApiError(error);
       if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) deny(safe);
-      else update({ snapshot: { status: 'error', runId: rid, events: [], error: safe } });
+      else update({ snapshot: { status: 'error', runId: rid, events: [], error: safe }, workflowGraph: { status: 'error', runId: rid, pendingCount: null, error: safe } });
     }
   }
   async function submitEvidence(input: EvidenceCreate): Promise<void> {
@@ -312,8 +330,26 @@ export function createCasesController(
   function beginNewEvidence() {
     if (!busy && editable() && state.evidenceMutation.status === 'uncertain') update({ evidenceMutation: initialEvidenceMutation() });
   }
+  async function loadCaseAssignees(): Promise<void> {
+    if (!workflow?.listAssignees || busy || !readable() || !state.scope?.canWrite || state.detail.data?.case.state !== 'new' || state.assignees.status === 'loading') return;
+    const scope = state.scope, cid = state.detail.data.case.id;
+    const controller = new AbortController();
+    assigneesRequest?.abort(); assigneesRequest = controller;
+    const version = generation;
+    const current = () => version === generation && assigneesRequest === controller && !controller.signal.aborted;
+    update({ assignees: { status: 'loading', items: [], error: null } });
+    try {
+      const result = await workflow.listAssignees(scope.workspaceId, cid, controller.signal);
+      if (current()) update({ assignees: { status: 'ready', items: result.items, error: null } });
+    } catch (error: unknown) {
+      if (!current()) return;
+      const safe = normalizeApiError(error);
+      if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) deny(safe);
+      else update({ assignees: { status: 'error', items: [], error: safe } });
+    }
+  }
   async function executeTransition(input: CaseTransition, replay: boolean): Promise<void> {
-    if (!workflow || busy || state.status !== 'active' || !state.scope?.canWrite || view.kind !== 'detail' || state.detail.status !== 'ready' || !state.detail.data || state.evidenceMutation.status === 'uncertain') return;
+    if (!workflow || busy || state.snapshot.status === 'loading' || state.caseRun.status === 'loading' || state.status !== 'active' || !state.scope?.canWrite || view.kind !== 'detail' || state.detail.status !== 'ready' || !state.detail.data || state.evidenceMutation.status === 'uncertain') return;
     const retained = state.workflow.attempt;
     if ((!replay && retained) || (replay && (state.workflow.status !== 'uncertain' || !retained))) return;
     const parsed = transitionSchema.safeParse(replay && retained ? retained.body : input);
@@ -331,6 +367,8 @@ export function createCasesController(
     const version = generation;
     const current = () => version === generation && !controller.signal.aborted;
     busy = true;
+    assigneesRequest?.abort();
+    update({ assignees: initialCasesState().assignees });
     let posted = false;
     let refetch = false;
     update({ workflow: { ...state.workflow, status: 'validating', error: null, resultVersion: null } });
@@ -344,6 +382,12 @@ export function createCasesController(
         if (latest.case.version !== parsed.data.expected_version) throw fail('VERSION_CONFLICT', 'Case đã thay đổi. Đọc detail mới và chủ động dùng version hiện tại.');
         const issue = transitionIssue(latest, scope, parsed.data.action, parsed.data.reason);
         if (issue) throw fail('GUARD_FAILED', issue);
+        if (parsed.data.action === 'assign' && workflow.listAssignees) {
+          const result = await workflow.listAssignees(scope.workspaceId, latest.case.id, controller.signal);
+          if (!current()) return;
+          update({ assignees: { status: 'ready', items: result.items, error: null } });
+          if (!result.items.some(item => item.subject === parsed.data.owner_id && item.roles.some(role => role === 'operator' || role === 'reviewer'))) throw fail('ASSIGNEE_UNAVAILABLE', 'Người nhận không còn đủ điều kiện. Chọn lại từ danh sách mới.');
+        }
         if (parsed.data.action === 'verify_close') {
           if (!evidence) throw fail('GUARD_FAILED', 'Chưa thể kiểm tra pending links.');
           update({ workflowGraph: { status: 'loading', runId: latest.case.run_id, pendingCount: null, error: null } });
@@ -351,7 +395,7 @@ export function createCasesController(
           if (!current()) return;
           if (graph.run_id !== latest.case.run_id) throw fail('INVALID_API_RESPONSE', 'Graph không đúng run.');
           const pending = graph.links.filter(link => link.review_state === 'pending').length;
-          update({ workflowGraph: { status: 'ready', runId: graph.run_id, pendingCount: pending, error: null } });
+          acceptGraph(graph);
           const graphIssue = transitionIssue(latest, scope, parsed.data.action, parsed.data.reason, pending);
           if (graphIssue) throw fail('GUARD_FAILED', graphIssue);
         }
@@ -369,11 +413,88 @@ export function createCasesController(
       const safe = normalizeApiError(error);
       if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) { deny(safe); return; }
       const uncertain = (replay && !posted) || (posted && (axios.isCancel(error) || safe.kind === 'network' || safe.kind === 'timeout' || safe.code === 'INVALID_API_RESPONSE' || (safe.status ?? 0) >= 500));
-      update({ workflow: { ...state.workflow, status: uncertain ? 'uncertain' : safe.code === 'VERSION_CONFLICT' ? 'conflict' : 'error', error: safe }, workflowGraph: { ...state.workflowGraph, status: state.workflowGraph.status === 'loading' ? 'error' : state.workflowGraph.status, error: state.workflowGraph.status === 'loading' ? safe : state.workflowGraph.error } });
-      refetch = posted || safe.code === 'VERSION_CONFLICT';
+      update({ workflow: { ...state.workflow, status: uncertain ? 'uncertain' : safe.code === 'VERSION_CONFLICT' || safe.status === 409 ? 'conflict' : 'error', error: safe }, workflowGraph: { ...state.workflowGraph, status: state.workflowGraph.status === 'loading' ? 'error' : state.workflowGraph.status, error: state.workflowGraph.status === 'loading' ? safe : state.workflowGraph.error } });
+      refetch = posted || safe.status === 409 || safe.status === 422 || safe.code === 'VERSION_CONFLICT';
     } finally { if (current()) busy = false; }
     if (refetch && current()) await load(0, [null], true);
+    if (current() && parsed.data.action === 'assign' && state.workflow.status === 'error' && state.workflow.error?.status === 422) await loadCaseAssignees();
   }
+  async function loadCaseRun(force = false): Promise<void> {
+    if (!savedRun || busy || state.snapshot.status === 'loading' || !readable() || !state.scope || !state.detail.data) return;
+    if (state.caseRun.status === 'loading') return;
+    const scope = state.scope, detail = state.detail.data;
+    if (!force && state.caseRun.status === 'ready' && state.caseRun.run?.id === detail.case.run_id && state.snapshot.status === 'ready') return;
+    const controller = new AbortController();
+    snapshotRequest?.abort(); snapshotRequest = controller;
+    const version = generation, sequence = ++snapshotSequence;
+    const current = () => version === generation && sequence === snapshotSequence && !controller.signal.aborted;
+    update({ caseRun: { status: 'loading', run: null, error: null } });
+    try {
+      const run = await savedRun.getRun(scope.workspaceId, detail.case.run_id, controller.signal);
+      if (!current()) return;
+      if (run.id !== detail.case.run_id) throw new SafeApiError({ kind: 'client', code: 'INVALID_API_RESPONSE', message: 'Lần tái dựng không đúng hồ sơ.' });
+      update({ caseRun: { status: 'ready', run, error: null } });
+    } catch (error: unknown) {
+      if (!current()) return;
+      const safe = normalizeApiError(error);
+      if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) deny(safe);
+      else update({ caseRun: { status: 'error', run: null, error: safe } });
+      return;
+    }
+    if (current() && state.caseRun.run?.status === 'completed') await loadEvidenceSnapshot(force);
+  }
+  async function mutateCaseLink(input: { kind: 'review'; id: string; body: ReviewCreate } | { kind: 'manual'; body: ManualLinkCreate }): Promise<void> {
+    if (!savedRun || !editable() || busy || !state.scope || !state.detail.data || state.snapshot.status !== 'ready' || !state.snapshot.graph ||
+      state.caseRun.run?.status !== 'completed' || state.evidenceMutation.status === 'uncertain' || state.workflow.status === 'uncertain') return;
+    const graph = state.snapshot.graph, scope = state.scope, original = state.detail.data;
+    const link = input.kind === 'review' ? graph.links.find(item => item.id === input.id) : undefined;
+    const parsed = input.kind === 'review' ? reviewCreateSchema.safeParse(input.body) : manualLinkCreateSchema.safeParse(input.body);
+    let issue: string | null = null;
+    if (!parsed.success) issue = 'INVALID_LINK_INPUT';
+    else if (input.kind === 'manual') issue = manualLinkIssue(input.body, graph);
+    else if (!link) issue = 'INVALID_LINK_INPUT';
+    else if (link.version !== input.body.expected_version) issue = 'VERSION_CONFLICT';
+    if (issue) {
+      update({ linkMutation: { status: issue === 'VERSION_CONFLICT' ? 'conflict' : issue === 'LINK_EXISTS' ? 'duplicate' : 'error', error: new SafeApiError({ kind: 'client', code: issue, message: 'Kiểm tra liên kết, phiên bản và lý do.' }), linkId: input.kind === 'review' ? input.id : null } });
+      if (issue === 'VERSION_CONFLICT' || issue === 'LINK_EXISTS') await loadEvidenceSnapshot(true);
+      return;
+    }
+    if (graph.run_id !== original.case.run_id) return;
+    const controller = new AbortController(); request = controller;
+    snapshotRequest?.abort(); snapshotSequence++;
+    const version = generation;
+    const current = () => generation === version && !controller.signal.aborted;
+    busy = true;
+    let posted = false;
+    let refetchCase = false;
+    update({ linkMutation: { status: 'sending', error: null, linkId: input.kind === 'review' ? input.id : null } });
+    try {
+      const latest = await service.getCase(scope.workspaceId, original.case.id, controller.signal);
+      if (!current()) return;
+      if (latest.case.run_id !== original.case.run_id) throw new SafeApiError({ kind: 'client', code: 'RUN_CHANGED', message: 'Lần tái dựng của hồ sơ đã đổi. Tải lại hồ sơ.' });
+      update({ detail: { status: 'ready', id: latest.case.id, data: latest, error: null } });
+      if (latest.case.state === 'closed') throw new SafeApiError({ kind: 'client', code: 'CASE_CLOSED', message: 'Hồ sơ đã đóng; không thể sửa liên kết.' });
+      posted = true;
+      if (input.kind === 'review') await savedRun.reviewLink(scope.workspaceId, graph.run_id, input.id, reviewCreateSchema.parse(input.body), controller.signal);
+      else await savedRun.createManualLink(scope.workspaceId, graph.run_id, manualLinkCreateSchema.parse(input.body), controller.signal);
+      if (!current()) return;
+      update({ linkMutation: { status: 'success', error: null, linkId: input.kind === 'review' ? input.id : null } });
+    } catch (error: unknown) {
+      if (!current()) return;
+      const safe = normalizeApiError(error);
+      if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) { deny(safe); return; }
+      const uncertain = posted && (safe.kind === 'network' || safe.kind === 'timeout' || safe.code === 'INVALID_API_RESPONSE' || (safe.status ?? 0) >= 500);
+      update({ linkMutation: { status: uncertain ? 'uncertain' : safe.code === 'VERSION_CONFLICT' ? 'conflict' : safe.code === 'CASE_CLOSED' ? 'locked' : safe.code === 'LINK_EXISTS' ? 'duplicate' : 'error', error: safe, linkId: input.kind === 'review' ? input.id : null } });
+      refetchCase = safe.code === 'RUN_CHANGED' || safe.code === 'CASE_CLOSED';
+      if (safe.code === 'RUN_CHANGED') {
+        update({ snapshot: initialEvidenceSnapshot(), caseRun: initialCasesState().caseRun, workflowGraph: initialCasesState().workflowGraph });
+      }
+    } finally { if (current()) busy = false; }
+    if (current() && refetchCase) { await load(0, [null], true); return; }
+    if (current()) await loadEvidenceSnapshot(true);
+  }
+  const reviewCaseLink = (id: string, body: ReviewCreate) => mutateCaseLink({ kind: 'review', id, body });
+  const createCaseManualLink = (body: ManualLinkCreate) => mutateCaseLink({ kind: 'manual', body });
   function retryTransition() {
     const attempt = state.workflow.attempt;
     return attempt ? executeTransition(attempt.body, true) : Promise.resolve();
@@ -391,7 +512,7 @@ export function createCasesController(
     },
     sync,
     refresh,
-    loadEvidenceSnapshot, submitEvidence, beginNewEvidence,
+    loadEvidenceSnapshot, loadCaseRun, loadCaseAssignees, reviewCaseLink, createCaseManualLink, submitEvidence, beginNewEvidence,
     submitTransition: (input: CaseTransition) => executeTransition(input, false), retryTransition, beginNewTransition,
     previousPage: () => page(-1),
     nextPage: () => page(1),

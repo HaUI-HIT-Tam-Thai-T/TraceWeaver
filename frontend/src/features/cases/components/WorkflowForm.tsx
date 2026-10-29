@@ -1,7 +1,7 @@
 import { caseActionLabel } from "../presentation";
 import { Select } from "../../../components/ui/Select";
 import { Alert } from "../../../components/ui/primitives/alert";
-import { Input } from "../../../components/ui/Input";
+import { CaseAssigneePicker } from './CaseAssigneePicker';
 import { Button } from "../../../components/ui/Button";
 import { Textarea } from "../../../components/ui/primitives/textarea";
 import { LoadingState } from "../../../components/ui/LoadingState";
@@ -12,6 +12,7 @@ import type {
   CaseWorkflow,
   CaseWorkflowGraph,
   CasesScope,
+  CasesState,
 } from "../state/state";
 import {
   caseActionSchema,
@@ -30,6 +31,8 @@ type Props = {
   submit: (body: CaseTransition) => Promise<void>;
   retry: () => Promise<void>;
   beginNew: () => void;
+  assignees?: CasesState['assignees'];
+  loadAssignees?: () => Promise<void>;
 };
 export function WorkflowForm(props: Props) {
   if (!props.scope.canWrite) return null;
@@ -44,6 +47,8 @@ function WorkflowEditor({
   submit,
   retry,
   beginNew,
+  assignees = { status: 'idle', items: [], error: null },
+  loadAssignees = async () => {},
 }: Props) {
   const first =
     caseActionSchema.options.find(
@@ -62,13 +67,16 @@ function WorkflowEditor({
       action: first,
       expected_version: detail.case.version,
       reason: "",
-      ...(first === "assign" ? { owner_id: scope.subject } : {}),
+      ...(first === "assign" ? { owner_id: '' } : {}),
     },
     shouldUnregister: true,
   });
   const action = useWatch({ control, name: "action" });
   const reason = useWatch({ control, name: "reason" });
   const expected = useWatch({ control, name: "expected_version" });
+  const owner = useWatch({ control, name: 'owner_id' });
+  const eligible = assignees.status === 'ready' && assignees.items.some(item => item.subject === owner && item.roles.some(role => role === 'operator' || role === 'reviewer'));
+  const canAssignSelf = assignees.status === 'ready' && assignees.items.some(item => item.subject === scope.subject && item.roles.some(role => role === 'operator' || role === 'reviewer'));
   const busy =
     !ready ||
     isSubmitting ||
@@ -79,7 +87,7 @@ function WorkflowEditor({
     <section className="my-6 space-y-3" aria-labelledby="workflow-title">
       <h2 id="workflow-title">Xử lý hồ sơ</h2>
       <p>
-        Hệ thống sẽ kiểm tra lại quyền và người xử lý khi gửi. Nhập mã tài khoản do quản trị viên cung cấp hoặc chọn Giao cho tôi; hiện chưa có danh sách tài khoản để chọn.
+        Hệ thống kiểm tra lại quyền, người xử lý và phiên bản hồ sơ khi gửi.
       </p>
       <details><summary>Phiên bản hồ sơ đang xử lý</summary><p>Case.version đã chọn: {expected}; hiện tại: {detail.case.version}.</p></details>
       <form
@@ -113,21 +121,21 @@ function WorkflowEditor({
             <Alert className="block break-words" variant="destructive" role="alert">Phiên bản hồ sơ không hợp lệ; chọn lại phiên bản hiện tại.</Alert>
           )}
           {errors.action && <Alert className="block break-words" variant="destructive" role="alert">Chọn thao tác phù hợp.</Alert>}
-          {action === "assign" && (
+          {action === "assign" && detail.case.state === 'new' && (
             <div>
-              <label className="type-label block">
-                Người xử lý (mã tài khoản){" "}
-                <Input
-                  {...register("owner_id")}
-                  aria-invalid={!!errors.owner_id}
-                />
-              </label>
+              <p className="type-label">Người xử lý</p>
+              <input type="hidden" {...register('owner_id')} />
+              <CaseAssigneePicker state={assignees} selected={owner} disabled={busy || frozen}
+                load={loadAssignees} onSelect={subject => setValue('owner_id', subject, { shouldValidate: true })} />
               <Button variant="secondary"
                 type="button"
-                onClick={() => setValue("owner_id", scope.subject)}
+                disabled={!canAssignSelf}
+                onClick={() => setValue("owner_id", scope.subject, { shouldValidate: true })}
               >
                 Giao cho tôi
               </Button>
+              <p className="text-sm text-muted">Mở danh sách để tải người nhận đủ quyền. Mã tài khoản do hệ thống cung cấp; chọn Giao cho tôi khi tài khoản của bạn có trong danh sách.</p>
+              {owner && assignees.status === 'ready' && !eligible && <p role="status">Người đã chọn không còn trong danh sách đủ điều kiện. Hãy chọn lại.</p>}
               {errors.owner_id && <Alert className="block break-words" variant="destructive" role="alert">{errors.owner_id.message}</Alert>}
             </div>
           )}
@@ -137,7 +145,7 @@ function WorkflowEditor({
               {...register("reason")}
               maxLength={1000}
               aria-invalid={!!errors.reason}
-              aria-describedby="workflow-reason-error"
+              aria-describedby={errors.reason ? 'workflow-reason-error' : undefined}
             />
           </label>
           {errors.reason && (
@@ -146,7 +154,7 @@ function WorkflowEditor({
             </Alert>
           )}
           {issue && <p role="status">{issue}</p>}
-          <Button variant="primary" type="submit" disabled={!!issue}>
+          <Button variant="primary" type="submit" disabled={!!issue || (action === 'assign' && !eligible)}>
             Xác nhận thao tác
           </Button>
         </fieldset>

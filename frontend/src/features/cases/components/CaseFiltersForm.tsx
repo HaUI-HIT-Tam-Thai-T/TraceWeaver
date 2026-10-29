@@ -38,10 +38,7 @@ export function CaseFiltersForm({
       className="filter-grid"
       aria-label="Bộ lọc cases"
     >
-      {/* <p>
-        Bấm Tìm kiếm để áp dụng. Thời gian theo run.created_at (ngày tạo run),
-        không theo ngày tạo case. Múi giờ nhập Asia/Ho_Chi_Minh (UTC+7).
-      </p> */}
+      <p className="filter-wide type-caption text-muted">Lọc theo ngày tạo lần tái dựng, không theo ngày tạo hồ sơ. Múi giờ UTC+7. Danh sách phản ánh trạng thái hiện tại và có thể thay đổi giữa các trang.</p>
       <div className="filter-field">
         <label className="type-label block" htmlFor="case-state">
           Trạng thái

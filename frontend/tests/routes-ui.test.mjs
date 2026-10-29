@@ -186,3 +186,36 @@ test('failed route import renders a safe reload action instead of raw module err
     await server.close()
   }
 })
+
+test('blocked auth and workspace states never load a private route module', { timeout: 10000 }, async () => {
+  let attempts = 0;
+  const server = await createRouteServer({ pageGate: Promise.resolve(), onPageLoad: () => { attempts++; }, name: 'protected' });
+  try {
+    const [{ AppRoutes }, { AuthContext }, { WorkspaceContext }, { initialWorkspaceState }] = await Promise.all([
+      server.ssrLoadModule('/src/routes/AppRoutes.tsx'),
+      server.ssrLoadModule('/src/features/auth/state/authContext.ts'),
+      server.ssrLoadModule('/src/features/workspace/state/workspaceContext.ts'),
+      server.ssrLoadModule('/src/features/workspace/state/state.ts'),
+    ]);
+    const member = { workspace_id: '10000000-0000-4000-8000-000000000001', roles: ['viewer'], group_ids: [] };
+    const ready = { ...initialWorkspaceState(), status: 'ready', selectedWorkspaceId: member.workspace_id, me: { subject: 'test', memberships: [member] } };
+    for (const [authState, workspaceState, canRead, expected] of [
+      [{ status: 'initializing' }, ready, true, /Đang kiểm tra phiên/],
+      [{ status: 'unauthenticated' }, ready, true, /Vui lòng đăng nhập/],
+      [{ status: 'error', reason: 'action', message: 'Hết phiên' }, ready, true, /Đăng nhập lại/],
+      [{ status: 'authenticated' }, { ...initialWorkspaceState(), status: 'loading' }, false, /Đang kiểm tra workspace/],
+      [{ status: 'authenticated' }, ready, false, /chưa có quyền đọc/],
+      [{ status: 'authenticated' }, { ...initialWorkspaceState(), status: 'reauth' }, false, /Đăng nhập lại/],
+    ]) {
+      const auth = { state: authState, signIn: async () => {}, signOut: async () => {} };
+      const workspace = { state: workspaceState, membership: member, permissions: { canRead, canWrite: false, canVerify: false }, selectWorkspace: () => {}, refreshAccess: async () => {} };
+      const element = createElement(MemoryRouter, { initialEntries: ['/knowledge'] },
+        createElement(AuthContext.Provider, { value: auth }, createElement(WorkspaceContext.Provider, { value: workspace }, createElement(AppRoutes))));
+      const html = await renderStream(element).completed;
+      assert.match(html, expected);
+      assert.doesNotMatch(html, /Lazy page finished loading/);
+      assert.equal((html.match(/<main\b/g) ?? []).length, 1);
+      assert.equal(attempts, 0);
+    }
+  } finally { await server.close(); }
+});

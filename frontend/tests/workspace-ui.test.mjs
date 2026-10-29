@@ -8,6 +8,7 @@ test('workspace access guard and sources render pagination, escaped content, and
   const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-workspace', server: { middlewareMode: true, hmr: false, ws: false } })
   try {
     const { WorkspaceAccessState } = await server.ssrLoadModule('/src/components/layout/WorkspaceAccessState.tsx')
+    const { ProtectedRoute } = await server.ssrLoadModule('/src/routes/ProtectedRoute.tsx')
     const { WorkspacePanel } = await server.ssrLoadModule('/src/features/workspace/components/WorkspacePanel.tsx')
     const { WorkspaceContext } = await server.ssrLoadModule('/src/features/workspace/state/workspaceContext.ts')
     const { AuthContext } = await server.ssrLoadModule('/src/features/auth/state/authContext.ts')
@@ -25,7 +26,7 @@ test('workspace access guard and sources render pagination, escaped content, and
       }
       const auth = { state: { status: authenticated ? 'authenticated' : 'unauthenticated' }, signIn: async () => {} }
       return renderToString(createElement(AuthContext.Provider, { value: auth },
-        createElement(WorkspaceContext.Provider, { value: workspace }, createElement(WorkspaceAccessState, null, createElement(WorkspacePanel))))).replace(/<!--.*?-->/g, '')
+        createElement(WorkspaceContext.Provider, { value: workspace }, createElement(ProtectedRoute, null, createElement(WorkspaceAccessState, null, createElement(WorkspacePanel)))))).replace(/<!--.*?-->/g, '')
     }
     assert.match(render(ready, false), /Vui lòng đăng nhập/)
     assert.match(render({ ...initial, status: 'loading' }), /Đang kiểm tra workspace/)

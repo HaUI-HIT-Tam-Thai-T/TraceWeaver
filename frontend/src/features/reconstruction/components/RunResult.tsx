@@ -1,3 +1,4 @@
+import { degradedLabel } from '../presentation';
 import { TechnicalDetails } from "../../../components/ui/TechnicalDetails";
 import { modeLabel, runStatusLabel } from "../presentation";
 import { LoadingState } from "../../../components/ui/LoadingState";
@@ -71,12 +72,10 @@ export function RunResult({
           <TechnicalDetails headingLevel={4} title="Thông tin kỹ thuật của lần tái dựng"><p>Run: {run.id}</p><p>
             Snapshot: {run.input_snapshot_id}; rule: {run.rule_version}; model:{" "}
             {run.model_version ?? "không có"}.
-          </p></TechnicalDetails>
+          </p><p>Lý do dự phòng gốc: {run.degraded_reason ?? 'Không có'}</p></TechnicalDetails>
           {run.degraded && (
             <p role="status">
-              {run.degraded_reason === "ai_unavailable"
-                ? "AI chưa sẵn sàng, kết quả dùng luật"
-                : "Kết quả sử dụng phương pháp suy giảm so với yêu cầu."}
+              {degradedLabel(run.degraded_reason)}
             </p>
           )}
           {run.status === "failed" && (

@@ -1,8 +1,16 @@
 import { z } from "zod";
 import { compareUtc, utcSchema } from "../events/schemas.ts";
+import { roleSchema } from '../workspace/schemas.ts';
 
 const id = z.uuid();
 const subject = z.string().min(1).max(255);
+export const caseAssigneesSchema = z.strictObject({
+  items: z.array(z.strictObject({
+    subject,
+    roles: z.array(roleSchema).refine(roles => new Set(roles).size === roles.length),
+  })),
+});
+export type CaseAssignees = z.infer<typeof caseAssigneesSchema>;
 export const caseStateSchema = z.enum([
   "new",
   "assigned",

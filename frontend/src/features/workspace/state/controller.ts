@@ -1,5 +1,5 @@
 import axios from "axios";
-import { normalizeApiError } from "../../../services/apiError.ts";
+import { ApiError as SafeApiError, normalizeApiError } from "../../../services/apiError.ts";
 import type { ApiError } from "../../../services/apiError.ts";
 import type { WorkspaceService } from "../services/createWorkspaceService.ts";
 import {
@@ -77,13 +77,26 @@ export function createWorkspaceController(
     const task = Promise.resolve().then(async () => {
       try {
         if (!current()) return;
-        const page = await service.listSources(workspaceId, {
-          signal: request.signal,
-          limit: 50,
-          ...(cursor ? { cursor } : {}),
-        });
-        if (!current()) return;
-        dispatch({ type: "sourcesReady", page, append });
+        let next = cursor;
+        let appendPage = append;
+        const visited = new Set<string>();
+        do {
+          if (next !== null) {
+            if (visited.has(next)) throw new SafeApiError({ kind: 'client', code: 'INVALID_API_RESPONSE', message: 'Danh sách nguồn trả con trỏ lặp. Hãy tải lại quyền và nguồn.' });
+            visited.add(next);
+          }
+          const page = await service.listSources(workspaceId, {
+            signal: request.signal,
+            limit: 50,
+            ...(next ? { cursor: next } : {}),
+          });
+          if (!current()) return;
+          dispatch({ type: "sourcesReady", page, append: appendPage });
+          if (!current()) return;
+          next = page.next_cursor;
+          appendPage = true;
+          if (next !== null) dispatch({ type: 'sourcesLoading' });
+        } while (next !== null && current());
       } catch (error: unknown) {
         if (!current()) return;
         if (axios.isCancel(error)) {

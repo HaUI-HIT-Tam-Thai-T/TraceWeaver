@@ -29,8 +29,10 @@ function fixture(overrides = {}) {
   return { client, calls, session }
 }
 
-test('initialization is shared and runs once, with Code + PKCE and check-sso', async () => {
+test('startup redirects straight to Keycloak once with Code + PKCE and no intermediate guest screen', async () => {
   const { session, calls } = fixture()
+  const states = []
+  session.subscribe(() => states.push(session.getSnapshot().status))
   assert.equal(session.getSnapshot().status, 'initializing')
   const first = session.initializeAuth()
   assert.equal(first, session.initializeAuth())
@@ -40,17 +42,20 @@ test('initialization is shared and runs once, with Code + PKCE and check-sso', a
   assert.equal(calls.init.length, 1)
   assert.deepEqual(calls.init[0], {
     flow: 'standard', pkceMethod: 'S256', responseMode: 'query',
-    checkLoginIframe: false, onLoad: 'check-sso', redirectUri: redirects.callbackUri,
+    checkLoginIframe: false, redirectUri: redirects.callbackUri,
     enableLogging: false, messageReceiveTimeout: 10000,
   })
-  assert.equal(session.getSnapshot().status, 'unauthenticated')
+  assert.deepEqual(calls.login, [{ redirectUri: redirects.callbackUri }])
+  assert.equal(session.getSnapshot().status, 'initializing')
+  assert.equal(states.includes('unauthenticated'), false)
 })
 
 test('authenticated initialization publishes a token-free snapshot', async () => {
-  const { session } = fixture({ authenticated: true, token: 'private-token' })
+  const { session, calls } = fixture({ authenticated: true, token: 'private-token' })
   await session.initializeAuth()
   assert.deepEqual(session.getSnapshot(), { status: 'authenticated' })
   assert.equal(JSON.stringify(session.getSnapshot()).includes('private-token'), false)
+  assert.equal(calls.login.length, 0)
 })
 
 test('callback/init errors are sanitized, clear memory, and require reload instead of re-init', async () => {
@@ -73,15 +78,28 @@ test('login uses the registered callback URI', async () => {
   const { session, calls } = fixture()
   await session.initializeAuth()
   await session.signIn()
-  assert.deepEqual(calls.login, [{ redirectUri: redirects.callbackUri }])
+  assert.deepEqual(calls.login, [{ redirectUri: redirects.callbackUri }, { redirectUri: redirects.callbackUri }])
 })
 
 test('login redirect failure becomes a safe UI error', async () => {
-  const { session } = fixture({ async login() { throw new Error('internal detail') } })
+  const { session, client } = fixture({ authenticated: true })
+  await session.initializeAuth()
+  client.onAuthLogout()
+  client.login = async () => { throw new Error('internal detail') }
   await session.signIn()
   assert.equal(session.getSnapshot().status, 'error')
   assert.equal(session.getSnapshot().reason, 'action')
   assert.equal(JSON.stringify(session.getSnapshot()).includes('internal detail'), false)
+})
+
+test('failed startup redirect is sanitized and cannot create an automatic login loop', async () => {
+  let attempts = 0
+  const { session } = fixture({ async login() { attempts++; throw new Error('private callback detail') } })
+  await session.initializeAuth(); await session.initializeAuth(); await session.signIn()
+  assert.equal(attempts, 1)
+  assert.equal(session.getSnapshot().status, 'error')
+  assert.equal(session.getSnapshot().reason, 'initialization')
+  assert.equal(JSON.stringify(session.getSnapshot()).includes('private callback detail'), false)
 })
 
 test('concurrent token requests share refresh and receive the refreshed access token', async () => {
