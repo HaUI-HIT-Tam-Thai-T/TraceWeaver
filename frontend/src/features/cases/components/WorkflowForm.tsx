@@ -1,3 +1,4 @@
+import { caseActionLabel } from "../presentation";
 import { Select } from "../../../components/ui/Select";
 import { Alert } from "../../../components/ui/primitives/alert";
 import { Input } from "../../../components/ui/Input";
@@ -76,20 +77,17 @@ function WorkflowEditor({
   const frozen = workflow.attempt !== null || workflow.status === "conflict";
   return (
     <section className="my-6 space-y-3" aria-labelledby="workflow-title">
-      <h2 id="workflow-title">Chuyển trạng thái case</h2>
+      <h2 id="workflow-title">Xử lý hồ sơ</h2>
       <p>
-        BE kiểm lại owner, membership và grants. Owner dùng subject, không dùng
-        username.
+        Hệ thống sẽ kiểm tra lại quyền và người xử lý khi gửi. Nhập mã tài khoản do quản trị viên cung cấp hoặc chọn Giao cho tôi; hiện chưa có danh sách tài khoản để chọn.
       </p>
-      <p>
-        Case.version đã chọn: {expected}; hiện tại: {detail.case.version}.
-      </p>
+      <details><summary>Phiên bản hồ sơ đang xử lý</summary><p>Case.version đã chọn: {expected}; hiện tại: {detail.case.version}.</p></details>
       <form
         onSubmit={handleSubmit((values) => submit(values))}
         className="space-y-3"
       >
         <fieldset disabled={busy || frozen} className="space-y-3">
-          <label className="type-label block" htmlFor="workflow-action">Action</label>
+          <label className="type-label block" htmlFor="workflow-action">Thao tác</label>
             <Select id="workflow-action" {...register("action")}>
               {caseActionSchema.options.map((value) => (
                 <option
@@ -103,7 +101,7 @@ function WorkflowEditor({
                       !scope.canVerify)
                   }
                 >
-                  {value}
+                  {caseActionLabel(value)}
                 </option>
               ))}
             </Select>
@@ -112,13 +110,13 @@ function WorkflowEditor({
             {...register("expected_version", { valueAsNumber: true })}
           />
           {errors.expected_version && (
-            <Alert className="block break-words" variant="destructive" role="alert">Version không hợp lệ; chọn lại version hiện tại.</Alert>
+            <Alert className="block break-words" variant="destructive" role="alert">Phiên bản hồ sơ không hợp lệ; chọn lại phiên bản hiện tại.</Alert>
           )}
-          {errors.action && <Alert className="block break-words" variant="destructive" role="alert">Chọn action hợp lệ.</Alert>}
+          {errors.action && <Alert className="block break-words" variant="destructive" role="alert">Chọn thao tác phù hợp.</Alert>}
           {action === "assign" && (
             <div>
               <label className="type-label block">
-                Owner subject{" "}
+                Người xử lý (mã tài khoản){" "}
                 <Input
                   {...register("owner_id")}
                   aria-invalid={!!errors.owner_id}
@@ -134,7 +132,7 @@ function WorkflowEditor({
             </div>
           )}
           <label className="type-label block">
-            Reason{" "}
+            Lý do{" "}
             <Textarea
               {...register("reason")}
               maxLength={1000}
@@ -149,40 +147,39 @@ function WorkflowEditor({
           )}
           {issue && <p role="status">{issue}</p>}
           <Button variant="primary" type="submit" disabled={!!issue}>
-            Gửi transition
+            Xác nhận thao tác
           </Button>
         </fieldset>
       </form>
       {workflow.status === "validating" && (
-        <LoadingState message="Đang kiểm tra detail và điều kiện hiện tại…" />
+        <LoadingState message="Đang kiểm tra hồ sơ và điều kiện hiện tại…" />
       )}
       {workflow.status === "sending" && (
-        <LoadingState message="Đang gửi transition…" />
+        <LoadingState message="Đang cập nhật hồ sơ…" />
       )}
       {workflow.status === "success" && (
         <p role="status">
-          Đã ghi transition.{" "}
+          Đã cập nhật hồ sơ.{" "}
           {ready
-            ? "Detail đã đồng bộ từ BE."
-            : "Chưa đồng bộ detail; hãy tải lại, không gửi POST lại."}
+            ? "Thông tin hiện tại đã được tải lại."
+            : "Chưa tải được thông tin mới; hãy tải lại hồ sơ, không gửi lại thao tác."}
         </p>
       )}
       {workflow.error && (
         <Alert className="block break-words" variant="destructive" role="alert">
-          {workflow.error.code}: {workflow.error.message}
+          {workflow.status === "conflict" ? "Hồ sơ đã thay đổi. Đọc thông tin mới và chủ động chọn phiên bản hiện tại trước khi gửi tiếp." : workflow.error.message}<details><summary>Mã tra cứu</summary>{workflow.error.code}</details>
         </Alert>
       )}
       {action === "verify_close" && (
         <p>
-          Kiểm pending links của toàn run trước khi gửi:{" "}
-          {graph.pendingCount ?? "sẽ tải graph mới"}.
+          Liên kết còn chờ duyệt trong toàn bộ kết quả tái dựng:{" "}
+          {graph.pendingCount ?? "sẽ kiểm tra kết quả mới nhất"}.
         </p>
       )}
       {workflow.status === "uncertain" && (
         <>
           <p>
-            Kết quả chưa rõ. Gửi lại giữ nguyên body/key trong 24 giờ; thao tác
-            mới có thể ghi thêm transition.
+            Chưa rõ kết quả. Gửi lại trong 24 giờ dùng nội dung và mã chống trùng cũ. Bắt đầu thao tác mới có thể tạo thêm lần cập nhật.
           </p>
           <Button variant="secondary"
             type="button"
@@ -209,11 +206,11 @@ function WorkflowEditor({
           }}
         >
           {workflow.status === "conflict"
-            ? "Dùng Case.version hiện tại"
-            : "Bắt đầu thao tác mới với version hiện tại"}
+            ? "Dùng phiên bản hồ sơ hiện tại"
+            : "Bắt đầu thao tác mới với phiên bản hiện tại"}
         </Button>
       )}
-      <p>Hủy chờ ở FE không chứng minh BE đã rollback.</p>
+      <p>Rời trang hoặc ngừng chờ không có nghĩa thao tác đã bị hủy trên hệ thống.</p>
     </section>
   );
 }

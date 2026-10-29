@@ -14,7 +14,7 @@ export function Button({ variant = 'primary', loading = false, disabled, type = 
       aria-busy={loading || undefined}
       className={cn('min-h-10 h-auto whitespace-normal py-2 font-semibold motion-reduce:transition-none',
         variant === 'primary' && 'hover:bg-primary-hover',
-        variant === 'danger' && 'border border-danger/50 bg-danger/10 text-danger hover:bg-danger/20', className)}>
+        variant === 'danger' && 'border border-danger/50 bg-danger/10 text-danger hover:border-danger hover:bg-danger hover:text-white', className)}>
       {children}
     </ShadcnButton>
   );

@@ -1,13 +1,16 @@
+import { usePageTitle } from "../../hooks/usePageTitle";
 import { Button } from '../ui/Button';
 import { Suspense, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import ChevronRight from '@mui/icons-material/ChevronRight';
+import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import { AppHeader } from './AppHeader';
 import { AppSidebar } from './AppSidebar';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '../ui/primitives/sheet';
 import { PageLoading } from '../../routes/PageLoadFeedback';
 
 export function AppLayout() {
+  usePageTitle();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
@@ -34,18 +37,20 @@ export function AppLayout() {
           <Button variant="secondary" type="button" onClick={() => setSidebarCollapsed(previous => !previous)}
             aria-controls="desktop-sidebar" aria-expanded={!sidebarCollapsed}
             aria-label={sidebarCollapsed ? 'Mở thanh bên' : 'Thu gọn thanh bên'}
-            className="sidebar-toggle absolute top-1/2 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-l-md rounded-r-full border border-line bg-panel text-foreground shadow-md hover:bg-control focus-visible:outline-focus">
-            <ChevronRight sx={{ fontSize: '1.5rem' }} aria-hidden="true" />
+            className="sidebar-toggle absolute top-1/2 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-l-md rounded-r-full border border-line bg-panel text-foreground shadow-md hover:border-primary hover:bg-primary hover:text-white focus-visible:outline-focus">
+            {sidebarCollapsed
+              ? <ChevronRight sx={{ fontSize: '1.5rem' }} aria-hidden="true" />
+              : <ChevronLeft sx={{ fontSize: '1.5rem' }} aria-hidden="true" />}
           </Button>
         </div>
         <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 p-4 md:p-6 xl:p-8">
-          <Suspense fallback={<PageLoading />}><Outlet /></Suspense>
+          <div className="page-container"><Suspense fallback={<PageLoading />}><Outlet /></Suspense></div>
         </main>
       </div>
     </div>
     <SheetContent showCloseButton={false} aria-modal="true" side="left" className="mobile-sidebar-sheet chrome-surface h-dvh w-[min(20rem,85vw)] gap-0 border-white/20 bg-chrome p-0 text-white [&_[data-slot=sheet-title]]:text-white [&_[data-slot=sheet-description]]:text-chrome-muted">
       <SheetClose asChild>
-        <Button variant="secondary" type="button" aria-label="Đóng menu" className="absolute -right-5 top-1/2 z-10 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-l-md rounded-r-full border border-line bg-panel text-foreground shadow-md hover:bg-control">
+        <Button variant="secondary" type="button" aria-label="Đóng menu" className="absolute -right-5 top-1/2 z-10 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-l-md rounded-r-full border border-line bg-panel text-foreground shadow-md hover:border-primary hover:bg-primary hover:text-white">
           <ChevronRight sx={{ fontSize: '1.5rem' }} aria-hidden="true" />
         </Button>
       </SheetClose>

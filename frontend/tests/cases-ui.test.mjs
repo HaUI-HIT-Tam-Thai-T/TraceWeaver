@@ -23,13 +23,13 @@ test('case pages render filters, owner null, exact history/evidence DTO, precisi
         createElement(WorkspaceContext.Provider,{value:{state:{status:'ready',selectedWorkspaceId:WID,sources:{status:'ready',items:[],nextCursor:null}},membership:{workspace_id:WID,roles:['viewer']},permissions:{canRead:true,canWrite:false},refreshAccess:async()=>{}}},
           createElement(CasesContext.Provider,{value:{state,setFilters:noop,refresh:noop,previousPage:noop,nextPage:noop}},createElement(CasesPage)))))).replace(/<!--.*?-->/g,'')
     const html=render({...initial,list:{status:'ready',items:[caseItem()],error:null},nextCursor:'next'})
-    for(const text of ['run.created_at','Owner subject','Tìm kiếm','Trước','Tiếp','live-state','Chưa được gán'])assert.ok(html.includes(text))
+    for(const text of ['run.created_at','Người xử lý','Tìm kiếm','Trước','Tiếp','live-state','Chưa được gán'])assert.ok(html.includes(text))
     assert.match(html,new RegExp(`/cases/${CID}`));assert.doesNotMatch(html,/<script>/)
-    assert.match(render({...initial,list:{status:'ready',items:[],error:null}}),/Không có case phù hợp/)
+    assert.match(render({...initial,list:{status:'ready',items:[],error:null}}),/Chưa có hồ sơ/)
     assert.match(render(initial,false),/Đăng nhập để xem/)
     assert.match(render({...initial,status:'invalid'}),/không hợp lệ/)
     const detail=renderToString(createElement(CaseDetailView,{detail:caseDetail()})).replace(/<!--.*?-->/g,'')
-    for(const text of ['Khởi tạo (null)','Evidence refs (ID evidence)','Không có event tham chiếu','Case.version: 1','2026-10-27T07:00:01.123456Z','UTC+7'])assert.ok(detail.includes(text))
+    for(const text of ['Khởi tạo','Evidence refs (ID evidence)','Không có event tham chiếu','Case.version: 1','2026-10-27T07:00:01.123456Z','UTC+7'])assert.ok(detail.includes(text))
     assert.match(detail,/&lt;script&gt;note/);assert.doesNotMatch(detail,/<script>|<img/)
   } finally {await server.close()}
 })

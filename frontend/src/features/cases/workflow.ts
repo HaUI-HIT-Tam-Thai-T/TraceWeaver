@@ -26,16 +26,16 @@ export function lastCloseReason(detail: CaseDetail): string | null {
 }
 export function transitionIssue(detail: CaseDetail, scope: CasesScope, action: CaseAction, reason = '', pendingCount: number | null = null): string | null {
   if (!scope.canWrite) return 'Vai trò hiện tại không có quyền chuyển trạng thái.'
-  if (detail.case.state !== transitionStates[action].from) return 'Action không phù hợp state hiện tại.'
+  if (detail.case.state !== transitionStates[action].from) return 'Thao tác không phù hợp với trạng thái hồ sơ hiện tại.'
   const reviewer = scope.canVerify === true
-  if (['verify_close', 'verification_failed', 'reopen'].includes(action) && !reviewer) return 'Thao tác này cần reviewer.'
-  if (action !== 'assign' && !detail.case.owner_id) return 'Case chưa có owner; BE còn kiểm tra owner có đủ quyền hiện tại.'
-  if (['start', 'request_verification'].includes(action) && !reviewer && detail.case.owner_id !== scope.subject) return 'Chỉ owner hoặc reviewer được thực hiện.'
+  if (['verify_close', 'verification_failed', 'reopen'].includes(action) && !reviewer) return 'Thao tác này cần người có quyền xác minh (reviewer).'
+  if (action !== 'assign' && !detail.case.owner_id) return 'Hồ sơ chưa được giao người xử lý. Hãy giao hồ sơ trước; hệ thống sẽ kiểm tra quyền của người nhận.'
+  if (['start', 'request_verification'].includes(action) && !reviewer && detail.case.owner_id !== scope.subject) return 'Chỉ người đang xử lý hồ sơ hoặc người có quyền xác minh (reviewer) được thực hiện.'
   if (['request_verification', 'verify_close'].includes(action)) {
-    if (detail.evidence.length === 0) return 'Case cần ít nhất một evidence.'
-    if (!detail.evidence.some(item => /\S/.test(item.note))) return 'Cần note xử lý đã lưu trong evidence; reason không thay thế note.'
+    if (detail.evidence.length === 0) return 'Cần lưu ít nhất một bằng chứng trước khi gửi xác minh.'
+    if (!detail.evidence.some(item => /\S/.test(item.note))) return 'Hãy lưu một ghi chú xử lý trong bằng chứng. Lý do chuyển trạng thái không thay thế ghi chú này.'
   }
-  if (action === 'verify_close' && pendingCount !== null && pendingCount > 0) return 'Toàn run còn link pending; cần review trước khi đóng case.'
-  if (action === 'reopen' && reason.trim() && reason.trim() === lastCloseReason(detail)?.trim()) return 'Reason reopen phải khác lần verify_close gần nhất.'
+  if (action === 'verify_close' && pendingCount !== null && pendingCount > 0) return 'Kết quả tái dựng còn liên kết chờ duyệt. Hãy duyệt hết trước khi đóng hồ sơ.'
+  if (action === 'reopen' && reason.trim() && reason.trim() === lastCloseReason(detail)?.trim()) return 'Lý do mở lại phải khác lý do đóng hồ sơ gần nhất.'
   return null
 }

@@ -26,16 +26,16 @@ export function AppHeader() {
   return <header className="sticky top-0 z-30 border-b border-white/20 bg-chrome text-chrome-foreground lg:h-16 chrome-surface">
     <div className="flex min-h-16 flex-wrap items-center gap-3 px-4 py-3 lg:h-full lg:flex-nowrap lg:gap-0 lg:px-0 lg:py-0">
       <SheetTrigger asChild>
-        <Button variant="secondary" type="button" aria-label="Mở menu điều hướng" className="inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white lg:hidden">
+        <Button variant="secondary" type="button" aria-label="Mở menu điều hướng" className="inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-white/30 bg-transparent text-white hover:bg-chrome-active hover:text-white lg:hidden">
           <ChevronRight sx={{ fontSize: '1.25rem' }} aria-hidden="true" />
         </Button>
       </SheetTrigger>
       <div className="header-brand flex shrink-0 items-center">
-        <Link to="/dashboard" aria-label="TraceWeaver" title="TraceWeaver" className="type-h3 shrink-0 text-white lg:px-6">
+        <Link to="/dashboard" aria-label="TraceWeaver" title="TraceWeaver" className="type-h3 shrink-0 whitespace-nowrap text-white">
           <span className="header-brand-full">TraceWeaver</span><span className="header-brand-compact">TW</span>
         </Link>
       </div>
-      <div className="order-last flex w-full min-w-0 lg:order-none lg:w-auto lg:flex-1 lg:pl-6 xl:pl-8">
+      <div className="order-last flex w-full min-w-0 lg:order-none lg:w-auto lg:flex-1">
         <div className="min-w-0 flex-1 lg:max-w-md">
           <label htmlFor="workspace-picker" className="type-caption mb-1 block text-chrome-muted lg:sr-only">Chọn workspace</label>
           <WorkspacePicker key={ready ? state.me?.subject : 'unavailable'}
@@ -51,7 +51,7 @@ export function AppHeader() {
           {membership.roles.map(role => <Badge key={role} tone="info" className="text-chrome-muted">{role}</Badge>)}
         </div>}
         {!authenticated && <Button variant="secondary" loading={busy} disabled={auth.status === 'initializing'}
-          className="border-white/30 bg-white text-chrome hover:bg-white/90 focus-visible:ring-white/60"
+          className="border-white/30 bg-white text-chrome hover:bg-chrome-active hover:text-white focus-visible:ring-white/60"
           onClick={() => {
             if (auth.status === 'error' && auth.reason === 'initialization') window.location.reload();
             else void act(signIn);

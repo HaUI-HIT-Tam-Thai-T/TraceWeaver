@@ -12,7 +12,7 @@ export function CasesFeedback() {
     <div aria-live="polite">
       {state.status === "invalid" && (
         <Alert className="block break-words" variant="destructive" role="alert">
-          Case ID hoặc bộ lọc URL không hợp lệ.{" "}
+          Mã hồ sơ hoặc bộ lọc URL không hợp lệ.{" "}
           <Link to="/cases">Bắt đầu lại</Link>
         </Alert>
       )}
@@ -36,7 +36,7 @@ export function CasesFeedback() {
           <Button variant="secondary" type="button" onClick={refresh}>
             {error.code === "INVALID_CURSOR"
               ? "Bắt đầu lại từ trang đầu"
-              : "Thử tải lại case"}
+              : "Thử tải lại hồ sơ"}
           </Button>
         )
       )}

@@ -62,6 +62,7 @@ test('AppShell keeps one main, active cases navigation and safe access states wi
       [{ ...initial, status: 'reauth', error: { message: 'Hết phiên' } }, undefined, /Đăng nhập lại/],
     ]) {
       const html = render(state, auth);
+      assert.equal((html.match(/<h1\b/g) ?? []).length, 1);
       assert.match(html, expected);
       assert.doesNotMatch(html, /Protected payload/);
       assert.match(html, /aria-label="Thanh bên"/);

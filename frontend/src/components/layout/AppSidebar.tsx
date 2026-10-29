@@ -12,7 +12,7 @@ import { cn } from '../../lib/utils';
 const items = [
   { to: '/dashboard', label: 'Tổng quan', icon: DashboardOutlined },
   { to: '/events', label: 'Sự kiện', icon: TimelineOutlined },
-  { to: '/cases', label: 'Cases', icon: FolderOpenOutlined },
+  { to: '/cases', label: 'Hồ sơ', icon: FolderOpenOutlined },
   { to: '/knowledge', label: 'Tri thức', icon: MenuBookOutlined },
 ];
 
@@ -42,7 +42,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
     {auth.status === 'authenticated' && <div className="shrink-0 border-t border-white/20 p-4">
       {error && <p role="alert" className="type-body-sm mb-3 text-white">{error}</p>}
       <Button variant="ghost" loading={busy} onClick={() => { void logout(); }}
-        className="w-full justify-start gap-3 text-white hover:bg-white/10 hover:text-white focus-visible:ring-white/60">
+        className="w-full justify-start gap-3 text-white hover:bg-chrome-active hover:text-white focus-visible:ring-white/60">
         <LogoutOutlined sx={{ fontSize: '1.25rem' }} aria-hidden="true" />
         {busy ? 'Đang đăng xuất…' : 'Đăng xuất'}
       </Button>

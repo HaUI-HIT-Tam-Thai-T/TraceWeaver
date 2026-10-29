@@ -65,7 +65,7 @@ function renderStream(element, streamShell = false) {
   return { loading, completed, abort: () => stream.abort() }
 }
 
-test('all eight routes resolve lazy pages and preserve access guards without requesting the API', { timeout: 10000 }, async () => {
+test('all nine routes resolve lazy pages and preserve access guards without requesting the API', { timeout: 10000 }, async () => {
   const server = await createRouteServer()
   try {
     const [
@@ -92,6 +92,7 @@ test('all eight routes resolve lazy pages and preserve access guards without req
     const routes = [
       ['/', /TraceWeaver/],
       ['/events', /Vui lòng đăng nhập để tiếp tục/],
+      ['/events/11111111-1111-4111-8111-111111111111', /Vui lòng đăng nhập để tiếp tục/],
       ['/cases', /Vui lòng đăng nhập để tiếp tục/],
       ['/cases/88888888-8888-4888-8888-888888888888', /Vui lòng đăng nhập để tiếp tục/],
       ['/knowledge', /Vui lòng đăng nhập để tiếp tục/],
@@ -116,7 +117,7 @@ test('all eight routes resolve lazy pages and preserve access guards without req
     workspace.state = { ...initialWorkspaceState(), status: 'ready', selectedWorkspaceId: member.workspace_id, me: { subject: 'test', memberships: [member] } }
     workspace.membership = member
     workspace.permissions.canRead = true
-    for (const [url, title] of [['/events', 'Events'], ['/dashboard', 'Dashboard'], ['/knowledge', 'Knowledge'], ['/cases', 'Cases'], ['/cases/88888888-8888-4888-8888-888888888888', 'Chi tiết case']]) {
+    for (const [url, title] of [['/events', 'Sự kiện'], ['/events/11111111-1111-4111-8111-111111111111', 'Chi tiết sự kiện'], ['/dashboard', 'Tổng quan'], ['/knowledge', 'Tri thức'], ['/cases', 'Hồ sơ'], ['/cases/88888888-8888-4888-8888-888888888888', 'Chi tiết hồ sơ']]) {
       const element = createElement(MemoryRouter, { initialEntries: [url] },
         createElement(AuthContext.Provider, { value: auth }, createElement(WorkspaceContext.Provider, { value: workspace },
           createElement(EventsContext.Provider, { value: events }, createElement(CasesContext.Provider, { value: cases }, createElement(AppRoutes))))))

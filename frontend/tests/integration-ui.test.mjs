@@ -20,10 +20,10 @@ test('integration UI: actual case detail composes role guards and hides artifact
   const value={state:cases,refresh:noop,setFilters:noop,previousPage:noop,nextPage:noop,loadEvidenceSnapshot:asyncNoop,submitEvidence:asyncNoop,beginNewEvidence:noop,submitTransition:asyncNoop,retryTransition:asyncNoop,beginNewTransition:noop}
   return renderToString(createElement(MemoryRouter,{initialEntries:['/cases/'+CID]},createElement(AuthContext.Provider,{value:{state:{status:auth},signIn:asyncNoop,signOut:asyncNoop}},createElement(WorkspaceContext.Provider,{value:{state:{status:access,me,selectedWorkspaceId:WID,sources:{status:'ready',items:[],nextCursor:null,error:null}},membership:member,permissions,refreshAccess:asyncNoop,selectWorkspace:noop,loadMoreSources:asyncNoop}},createElement(CasesContext.Provider,{value},createElement(Routes,null,createElement(Route,{path:'/cases/:caseId',element:createElement(CaseDetailPage)}))))))).replace(/<!--.*?-->/g,'')
  }
- for(const role of ['viewer','admin']){const html=render(role);assert.match(html,/Sensitive case artifact/);assert.doesNotMatch(html,/Gửi transition|Thêm evidence hoặc note/)}
- const operator=render('operator');assert.match(operator,/Thêm evidence hoặc note/);assert.match(operator,/Thao tác này cần reviewer/);assert.match(operator,/<button(?=[^>]*type="submit")(?=[^>]*disabled="")[^>]*>Gửi transition/)
- const reviewer=render('reviewer');assert.match(reviewer,/<button(?![^>]*\sdisabled=")(?=[^>]*type="submit")[^>]*>Gửi transition/);assert.doesNotMatch(reviewer,/Thao tác này cần reviewer/)
- for(const options of [{auth:'unauthenticated'},{access:'loading'},{access:'error'},{auth:'error'}])assert.doesNotMatch(render('reviewer',options),/Sensitive case artifact|Gửi transition|Thêm evidence hoặc note/)
- const closed=render('reviewer',{state:'closed'});assert.match(closed,/Case closed: chỉ đọc/);assert.match(closed,/<option value="reopen">reopen/)
+ for(const role of ['viewer','admin']){const html=render(role);assert.match(html,/Sensitive case artifact/);assert.doesNotMatch(html,/Xác nhận thao tác|Thêm bằng chứng hoặc ghi chú/)}
+ const operator=render('operator');assert.match(operator,/Thêm bằng chứng hoặc ghi chú/);assert.match(operator,/Thao tác này cần người có quyền xác minh/);assert.match(operator,/<button(?=[^>]*type="submit")(?=[^>]*disabled="")[^>]*>Xác nhận thao tác/)
+ const reviewer=render('reviewer');assert.match(reviewer,/<button(?![^>]*\sdisabled=")(?=[^>]*type="submit")[^>]*>Xác nhận thao tác/);assert.doesNotMatch(reviewer,/Thao tác này cần người có quyền xác minh/)
+ for(const options of [{auth:'unauthenticated'},{access:'loading'},{access:'error'},{auth:'error'}])assert.doesNotMatch(render('reviewer',options),/Sensitive case artifact|Xác nhận thao tác|Thêm bằng chứng hoặc ghi chú/)
+ const closed=render('reviewer',{state:'closed'});assert.match(closed,/Hồ sơ đã đóng: chỉ được xem/);assert.match(closed,/<option value="reopen">Mở lại hồ sơ/)
  }finally{await server.close()}
 })

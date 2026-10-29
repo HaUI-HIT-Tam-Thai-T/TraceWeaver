@@ -1,3 +1,5 @@
+import { SectionReveal } from "../../../components/ui/SectionReveal";
+import { TechnicalDetails } from "../../../components/ui/TechnicalDetails";
 import { Input } from "../../../components/ui/Input";
 import { Alert } from "../../../components/ui/primitives/alert";
 import { Select } from "../../../components/ui/Select";
@@ -29,7 +31,7 @@ export function KnowledgeSearchForm({
   return (
     <form
       aria-label="Tìm kiếm knowledge"
-      className="my-4 space-y-3"
+      className="filter-grid"
       onSubmit={handleSubmit((values) =>
         apply({
           limit: Number(values.limit),
@@ -37,35 +39,46 @@ export function KnowledgeSearchForm({
         }),
       )}
     >
-      <label className="type-label block" htmlFor="knowledge-q">
-        Tìm trong tiêu đề và nội dung
-      </label>
-      <Input
-        type="search"
-        id="knowledge-q"
-        {...register("q")}
-        maxLength={500}
-        aria-invalid={!!errors.q}
-        aria-describedby="knowledge-search-help knowledge-q-error"
-      />
-      {errors.q && (
-        <Alert className="block break-words" variant="destructive" id="knowledge-q-error" role="alert">
-          {errors.q.message}
-        </Alert>
-      )}
-      <p id="knowledge-search-help">
+      <div className="filter-field sm:col-span-2 xl:col-span-1">
+        <label className="type-label block" htmlFor="knowledge-q">
+          Tìm trong tiêu đề và nội dung
+        </label>
+        <Input
+          type="search"
+          id="knowledge-q"
+          {...register("q")}
+          maxLength={500}
+          aria-invalid={!!errors.q}
+          aria-describedby="knowledge-search-help knowledge-q-error"
+        />
+        {errors.q && (
+          <Alert
+            className="block break-words"
+            variant="destructive"
+            id="knowledge-q-error"
+            role="alert"
+          >
+            {errors.q.message}
+          </Alert>
+        )}
+      </div>
+      <div className="filter-field">
+        <label className="type-label block" htmlFor="knowledge-limit">
+          Số bài mỗi trang
+        </label>
+        <Select id="knowledge-limit" {...register("limit")}>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </Select>
+      </div>
+      <Button variant="primary" type="submit">
+        Tìm kiếm
+      </Button>
+      {/* <p id="knowledge-search-help" className="type-caption text-muted">
         Bấm Tìm kiếm để áp dụng. Tìm chuỗi con, không phân biệt hoa/thường, trên
         phiên bản mới nhất.
-      </p>
-      <label className="type-label block" htmlFor="knowledge-limit">
-        Số bài mỗi trang
-      </label>
-      <Select id="knowledge-limit" {...register("limit")}>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-      </Select>
-      <Button variant="primary" type="submit">Tìm kiếm</Button>
+      </p> */}
     </form>
   );
 }
@@ -85,21 +98,28 @@ export function KnowledgeResults({
   const ready = state.status === "ready";
   return (
     <section aria-label="Kết quả knowledge" className="space-y-4">
-      <p>
+      {/* <p>
         Chỉ đọc, hiển thị phiên bản mới nhất. Dữ liệu có thể thay đổi giữa các
         lần tải; không có tổng số trang.
-      </p>
-      <Button variant="secondary"
+      </p> */}
+      <Button
+        variant="secondary"
         type="button"
         disabled={["loading", "invalid", "reauth"].includes(state.status)}
         onClick={refresh}
       >
-        Làm mới knowledge
+        Làm mới bài hướng dẫn
       </Button>
       <div aria-live="polite">
-        {state.status === "loading" && <LoadingState message="Đang tải knowledge…" />}
+        {state.status === "loading" && (
+          <LoadingState message="Đang tải bài hướng dẫn…" />
+        )}
         {state.error && (
-          <Alert className="block break-words" variant="destructive" role="alert">
+          <Alert
+            className="block break-words"
+            variant="destructive"
+            role="alert"
+          >
             {state.error.message}{" "}
             {state.error.requestId && <>Request ID: {state.error.requestId}</>}
           </Alert>
@@ -113,35 +133,48 @@ export function KnowledgeResults({
             <Button variant="secondary" type="button" onClick={refresh}>
               {state.error.code === "INVALID_CURSOR"
                 ? "Bắt đầu lại từ trang đầu"
-                : "Thử tải lại knowledge"}
+                : "Thử tải lại bài hướng dẫn"}
             </Button>
           )
         )}
         {ready && state.items.length === 0 && (
-          <EmptyState title="Không có bài knowledge phù hợp." />
+          <EmptyState
+            title={
+              state.filters.q
+                ? "Không có bài hướng dẫn phù hợp với từ khóa."
+                : state.index > 0
+                  ? "Trang này không có bài hướng dẫn."
+                  : "Chưa có bài hướng dẫn trong phạm vi được phép đọc."
+            }
+          />
         )}
       </div>
-      {ready &&
-        state.items.map((item) => (
-          <article key={item.id} className="space-y-2 border-b py-4">
-            <h2 className="text-xl font-semibold">{item.title}</h2>
-            <p>
-              ID: {item.id} · Version: {item.version}
-            </p>
-            <p className="break-all">source_ref: {item.source_ref}</p>
-            <p>Tác giả (subject): {item.author_subject}</p>
-            <p>
-              Tạo lúc (UTC gốc):{" "}
-              <time dateTime={item.created_at}>{item.created_at}</time>
-            </p>
-            <details>
-              <summary>Đọc nội dung</summary>
-              <pre className="whitespace-pre-wrap break-words">{item.body}</pre>
-            </details>
-          </article>
-        ))}
-      <nav aria-label="Phân trang knowledge" className="space-x-4">
-        <Button variant="secondary"
+      {ready && (
+        <SectionReveal className="min-w-0">
+          {state.items.map((item) => (
+            <article key={item.id} className="knowledge-article">
+              <h2 className="text-xl font-semibold">{item.title}</h2>
+              <div className="max-w-prose whitespace-pre-wrap break-words leading-7">
+                {item.body}
+              </div>
+
+              <TechnicalDetails title="Phiên bản và thông tin bài viết">
+                <p>
+                  ID: {item.id} · Version: {item.version}
+                </p>
+                <p>Tác giả (subject): {item.author_subject}</p>
+                <p>
+                  Tạo lúc (UTC gốc):{" "}
+                  <time dateTime={item.created_at}>{item.created_at}</time>
+                </p>
+              </TechnicalDetails>
+            </article>
+          ))}
+        </SectionReveal>
+      )}
+      <nav aria-label="Phân trang knowledge" className="flex flex-wrap items-center justify-end gap-4">
+        <Button
+          variant="secondary"
           type="button"
           disabled={!ready || state.index === 0}
           onClick={previous}
@@ -149,7 +182,8 @@ export function KnowledgeResults({
           Trước
         </Button>
         <span>Trang {state.index + 1}</span>
-        <Button variant="secondary"
+        <Button
+          variant="secondary"
           type="button"
           disabled={!ready || state.nextCursor === null}
           onClick={next}
@@ -159,4 +193,17 @@ export function KnowledgeResults({
       </nav>
     </section>
   );
+}
+
+function safeSource(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      (url.protocol === "https:" || url.protocol === "http:") &&
+      !url.username &&
+      !url.password
+    );
+  } catch {
+    return false;
+  }
 }

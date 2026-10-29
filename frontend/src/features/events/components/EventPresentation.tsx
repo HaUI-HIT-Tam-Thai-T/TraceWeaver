@@ -1,3 +1,4 @@
+import { TechnicalDetails } from "../../../components/ui/TechnicalDetails";
 import { Badge } from '../../../components/ui/Badge';
 import type { Event } from "../schemas";
 import { errorLabel, eventDescription, eventTimeLabel, outcomeLabel } from "../presentation";
@@ -14,14 +15,14 @@ export function EventOutcome({ outcome }: { outcome: Event["outcome"] }) {
 export function EventContent({ event }: { event: Event }) {
   const error = errorLabel(event);
   return <div className="space-y-1 break-words">
-    <p>{eventDescription(event)}</p>
+    <p className="whitespace-pre-wrap">{eventDescription(event)}</p>
     {error && <p className="text-sm text-danger">Lỗi ghi nhận: {error}</p>}
   </div>;
 }
 
-export function EventTechnicalDetails({ event }: { event: Event }) {
-  return <details className="rounded border p-3">
-    <summary className="cursor-pointer font-medium focus-visible:outline-2">Chi tiết kỹ thuật</summary>
+export function EventTechnicalDetails({ event, headingLevel = 3 }: { event: Event; headingLevel?: 3 | 4 }) {
+  const Subheading = headingLevel === 4 ? "h5" : "h4";
+  return <TechnicalDetails headingLevel={headingLevel} title="Chi tiết kỹ thuật" className="rounded-md border border-line px-4">
     <dl className="mt-3 space-y-2 break-all text-sm">
       <dt>Event ID</dt><dd>{event.event_id}</dd>
       <dt>Source ID</dt><dd>{event.source_id}</dd>
@@ -36,9 +37,9 @@ export function EventTechnicalDetails({ event }: { event: Event }) {
       <dt>Locator</dt><dd>{event.provenance.locator}</dd>
       <dt>SHA-256 redacted</dt><dd>{event.provenance.sha256_redacted}</dd>
     </dl>
-    <h4 className="mt-3 font-semibold">Identifiers</h4>
+    <Subheading className="mt-3 font-semibold">Mã định danh</Subheading>
     <pre className="overflow-x-auto text-sm">{JSON.stringify(event.identifiers, null, 2)}</pre>
-    <h4 className="mt-3 font-semibold">Payload đã redacted</h4>
+    <Subheading className="mt-3 font-semibold">Dữ liệu đã che thông tin nhạy cảm</Subheading>
     <pre className="overflow-x-auto text-sm">{JSON.stringify(event.payload_redacted, null, 2)}</pre>
-  </details>;
+  </TechnicalDetails>;
 }

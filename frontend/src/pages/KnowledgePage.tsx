@@ -1,3 +1,4 @@
+import { PageHeading } from "../components/layout/PageHeading";
 import { Alert } from "../components/ui/primitives/alert";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -32,7 +33,7 @@ export function KnowledgePage() {
     wid !== null;
   return (
     <>
-      <h1 className="type-h1 mb-6">TraceWeaver — Knowledge</h1>
+      <PageHeading title="Tri thức" />
       <KnowledgeBrowser
         scope={
           allowed

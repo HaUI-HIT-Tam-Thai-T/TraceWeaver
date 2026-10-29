@@ -123,10 +123,16 @@
   .app-shell[data-sidebar-collapsed='true'] { --shell-sidebar-width: 3rem; }
   .header-brand-compact { display: none; }
   @media (width >= 64rem) {
-    .header-brand { width: var(--shell-sidebar-width); overflow: hidden; transition: width 280ms ease-in-out; }
+    .app-shell { --shell-content-inset: 1.5rem; }
+    /* Include Main's inset in the brand area so TW centers in the full gap. */
+    .header-brand { width: calc(var(--shell-sidebar-width) + var(--shell-content-inset)); overflow: hidden; transition: width 280ms ease-in-out; }
+    .header-brand a { display: flex; width: 100%; align-items: center; padding-inline: 1.5rem; }
     .app-shell[data-sidebar-collapsed='true'] .header-brand-full { display: none; }
     .app-shell[data-sidebar-collapsed='true'] .header-brand-compact { display: inline; }
-    .app-shell[data-sidebar-collapsed='true'] .header-brand a { width: 100%; padding-inline: 0; text-align: center; }
+    .app-shell[data-sidebar-collapsed='true'] .header-brand a { padding-inline: 0; justify-content: center; }
+  }
+  @media (width >= 80rem) {
+    .app-shell { --shell-content-inset: 2rem; }
   }
   .desktop-sidebar {
     width: var(--shell-sidebar-width);
@@ -148,4 +154,52 @@
     .desktop-sidebar, .desktop-sidebar-content, .sidebar-toggle, .header-brand { transition: none; }
     .mobile-sidebar-sheet { animation: none; }
   }
+}
+
+
+@layer components {
+  .page-container { @apply mx-auto w-full max-w-[90rem] space-y-6; }
+  .page-heading { @apply mb-6 min-w-0; }
+  .page-heading h1 { text-wrap: balance; letter-spacing: -0.025em; }
+  .filter-grid { @apply my-6 grid min-w-0 grid-cols-1 items-end gap-4 rounded-xl border border-line bg-panel p-4 sm:grid-cols-2 sm:p-6 xl:grid-cols-3; }
+  .filter-grid > p, .filter-grid > section, .filter-grid > [role=alert], .filter-grid > .filter-wide { @apply col-span-full; }
+  .filter-field { @apply min-w-0 space-y-2; }
+  .content-panel { @apply min-w-0 rounded-xl border border-line bg-panel p-4 sm:p-6; }
+  .detail-workspace { @apply grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(19rem,24rem)]; }
+  .detail-workspace > * { @apply min-w-0; }
+  .case-content { @apply space-y-6; }
+  .case-content .case-overview { @apply rounded-xl border border-line bg-panel p-4 sm:p-6; }
+  .case-tools { @apply grid min-w-0 content-start gap-6; }
+  .case-tools > section { @apply m-0 rounded-xl border border-line bg-panel p-4 sm:p-6; }
+  .case-tools h2, .case-tools h3 { @apply text-lg font-semibold; }
+  .technical-content pre { @apply max-w-full overflow-x-auto whitespace-pre-wrap break-all; }
+  [data-slot=accordion-content][data-state=closed] { display: none; }
+  [data-slot=tabs-content][data-state=inactive] { display: none; }
+  [data-slot=tabs-trigger] { @apply min-h-10 px-4; }
+  [data-slot=tabs-list] { @apply h-auto max-w-full flex-wrap bg-control; }
+  [data-slot=accordion-trigger] { @apply min-h-10 break-words; }
+  [data-slot=accordion-trigger], [data-slot=tabs-trigger] { @apply motion-reduce:transition-none; }
+  .reconstruction-grid { @apply grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]; }
+  .reconstruction-grid fieldset { @apply min-w-0 space-y-4; }
+  .reconstruction-summary { @apply self-start rounded-xl bg-control p-5; }
+  .result-summary { @apply rounded-xl border border-line bg-panel p-4 sm:p-6; }
+  .knowledge-article { @apply mx-auto min-w-0 w-full max-w-[75ch] space-y-4 border-b border-line py-8; }
+  .knowledge-article h2 { @apply text-xl font-semibold; text-wrap: balance; }
+  .knowledge-article > div { @apply max-w-[70ch]; }
+  [data-slot=table] { font-variant-numeric: tabular-nums; }
+  [data-slot=table-container] { @apply max-w-full bg-panel; }
+}
+
+@layer components {
+  .events-results { @apply grid min-w-0 gap-6; }
+}
+
+@layer components {
+  .link-review-layout { @apply grid min-w-0 gap-5 xl:grid-cols-2; }
+  .link-review-layout > :not(form) { @apply col-span-full; }
+  .link-review-layout > form { @apply min-w-0 rounded-xl border border-line bg-panel p-4 sm:p-6; }
+}
+
+@layer utilities {
+  .case-tools > section { margin-block: 0; }
 }

@@ -4,7 +4,7 @@ import { setImmediate } from 'node:timers/promises'
 import { CanceledError } from 'axios'
 import { ApiError } from '../src/services/apiError.ts'
 import { createEventsController } from '../src/features/events/state/controller.ts'
-import { readEventQuery } from '../src/features/events/query.ts'
+import { readEventLocation, readEventQuery } from '../src/features/events/query.ts'
 import { EID, EID2, event, scope } from './event-fixtures.mjs'
 
 const settle = async () => { await setImmediate(); await setImmediate() }
@@ -208,4 +208,35 @@ test('network/timeout/schema errors preserve applied filters; cancellation stays
   controller.sync(scope(), true, readEventQuery(''))
   await settle()
   assert.equal(controller.getSnapshot().list.error, null)
+})
+
+
+test('detail route validates path IDs and loads independently; returning preserves cursor page', async () => {
+  assert.equal(readEventLocation('?limit=50', 'invalid').success, false)
+  const filters = '?q=accepted&limit=25'
+  assert.equal(readEventLocation(filters, EID).eventId, EID)
+  const { controller, calls } = fixture()
+  const currentScope = scope()
+  controller.sync(currentScope, true, readEventLocation(filters, EID), false)
+  await settle()
+  assert.equal(calls.list.length, 0)
+  assert.equal(calls.detail.length, 1)
+  controller.sync(currentScope, true, readEventLocation(filters, null))
+  await settle()
+  assert.equal(calls.list.length, 1)
+  assert.equal(controller.getSnapshot().detail.id, null)
+
+  const pages = fixture({ async listEvents(id, filters, options) { return { items: [event()], next_cursor: options.cursor ? null : 'next-page' } } })
+  pages.controller.sync(currentScope, true, readEventLocation(filters, null))
+  await settle()
+  await pages.controller.nextPage()
+  const before = pages.controller.getSnapshot()
+  pages.controller.sync(currentScope, true, readEventLocation(filters, EID), false)
+  await settle()
+  pages.controller.sync(currentScope, true, readEventLocation(filters, null))
+  await settle()
+  assert.equal(pages.controller.getSnapshot().pageIndex, 1)
+  assert.deepEqual(pages.controller.getSnapshot().history, before.history)
+  assert.deepEqual(pages.controller.getSnapshot().list, before.list)
+  assert.equal(pages.controller.getSnapshot().detail.event, null)
 })

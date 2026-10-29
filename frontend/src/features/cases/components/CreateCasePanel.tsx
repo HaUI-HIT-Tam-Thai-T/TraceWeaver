@@ -77,15 +77,14 @@ export function CreateCasePanel({
       className="mt-6 space-y-3 border-t pt-4"
     >
       <h3 id="create-case-title" className="text-xl font-semibold">
-        Tạo case từ run completed
+        Tạo hồ sơ từ kết quả tái dựng
       </h3>
       <p>
-        Run: {runId}. State/owner/workflow do BE quản lý. Hủy chờ ở FE không hủy
-        case đã được tạo.
+        Lưu kết quả này thành hồ sơ để phân công, điều tra và xác minh. Rời trang không hủy hồ sơ đã được tạo.
       </p>
       <form onSubmit={handleSubmit(({ title }) => controller.create(title))}>
         <fieldset disabled={state.status !== "idle"}>
-          <label className="type-label block" htmlFor="case-title">Tiêu đề case</label>
+          <label className="type-label block" htmlFor="case-title">Tiêu đề hồ sơ</label>
           <Input
             id="case-title"
             aria-invalid={!!errors.title}
@@ -97,14 +96,14 @@ export function CreateCasePanel({
               {errors.title.message}
             </Alert>
           )}
-          <Button variant="primary" type="submit">Tạo case</Button>
+          <Button variant="primary" type="submit">Tạo hồ sơ</Button>
         </fieldset>
       </form>
       {busy && (
         <p role="status">
           {state.status === "validating"
-            ? "Đang kiểm tra run và quyền…"
-            : "Đang tạo case…"}
+            ? "Đang kiểm tra kết quả tái dựng và quyền…"
+            : "Đang tạo hồ sơ…"}
         </p>
       )}
       {state.error && (
@@ -116,8 +115,7 @@ export function CreateCasePanel({
       {state.status === "uncertain" && (
         <>
           <Alert className="block break-words" variant="destructive" role="alert">
-            Chưa rõ case đã được tạo hay chưa. Gửi lại giữ nguyên body/key trong
-            24 giờ; thao tác mới có thể tạo thêm case.
+            Chưa rõ hồ sơ đã được tạo hay chưa. Gửi lại trong 24 giờ dùng nội dung và mã chống trùng cũ. Bắt đầu thao tác mới có thể tạo thêm hồ sơ.
           </Alert>
           <Button variant="secondary"
             type="button"
@@ -125,7 +123,7 @@ export function CreateCasePanel({
               void controller.retry();
             }}
           >
-            Gửi lại thao tác tạo case
+            Gửi lại thao tác tạo hồ sơ
           </Button>
         </>
       )}
@@ -147,7 +145,7 @@ export function CreateCasePanel({
             controller.newOperation();
           }}
         >
-          Bắt đầu thao tác tạo case mới
+          Bắt đầu thao tác tạo hồ sơ mới
         </Button>
       )}
     </section>

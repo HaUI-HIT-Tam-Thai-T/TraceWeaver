@@ -25,7 +25,7 @@ export function WorkspacePicker({ workspaceIds, selectedId, disabled, initializi
       <Button id="workspace-picker" role="combobox" aria-label="Chọn workspace" aria-haspopup="dialog"
         aria-expanded={open && !disabled} aria-describedby={selected ? 'workspace-picker-current' : undefined}
         disabled={disabled} variant="secondary" title={selected ?? label}
-        className="w-full justify-start gap-2 border border-white/30 bg-chrome-active text-white hover:bg-chrome-active/80 hover:text-white focus-visible:ring-white/60">
+        className="w-full justify-start gap-2 border border-white/30 bg-chrome-active text-white hover:bg-white hover:text-chrome focus-visible:ring-white/60">
         <WorkspacesOutlined aria-hidden="true" sx={{ fontSize: '1.25rem' }} className="shrink-0" />
         <span className="min-w-0 flex-1 truncate text-left">{label}</span>
         <KeyboardArrowDown aria-hidden="true" sx={{ fontSize: '1.25rem' }} className="shrink-0" />

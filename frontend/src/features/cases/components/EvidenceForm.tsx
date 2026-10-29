@@ -1,3 +1,4 @@
+import { actionLabel, eventTimeLabel, requestLabel, sourceName } from "../../events/presentation";
 import { LoadingState } from "../../../components/ui/LoadingState";
 import { Alert } from "../../../components/ui/primitives/alert";
 import { Button } from "../../../components/ui/Button";
@@ -74,52 +75,47 @@ function EditableEvidenceForm({
       className="mt-6 space-y-3 border-t pt-4"
       aria-labelledby="add-evidence-title"
     >
-      <h3 id="add-evidence-title" className="text-xl font-semibold">
-        Thêm evidence hoặc note
-      </h3>
+      <h2 id="add-evidence-title" className="text-xl font-semibold">
+        Thêm bằng chứng hoặc ghi chú
+      </h2>
       <p>
-        Chỉ tham chiếu events thuộc snapshot của run trong case. Evidence là
-        append-only; FE không tự tăng Case.version.
+        Chọn sự kiện trong ảnh chụp dữ liệu của lần tái dựng gắn với hồ sơ này, hoặc lưu ghi chú xử lý. Bằng chứng đã lưu được giữ trong lịch sử; phiên bản trạng thái do hệ thống quản lý.
       </p>
       {closed && (
         <p role="status">
-          Case closed: chỉ đọc. Cần reviewer xử lý workflow để mở lại; form
-          không tự gọi reopen.
+          Hồ sơ đã đóng: chỉ được xem. Nhờ người có quyền xác minh mở lại hồ sơ nếu cần bổ sung bằng chứng.
         </p>
       )}
-      {mutation.status === "sending" && <LoadingState message="Đang gửi evidence…" />}
+      {mutation.status === "sending" && <LoadingState message="Đang lưu bằng chứng…" />}
       {mutation.status === "success" && (
         <p role="status">
-          Đã lưu evidence.{" "}
+          Đã lưu bằng chứng.{" "}
           {detailReady
-            ? "Đã đọc lại detail từ BE."
-            : "Chưa đồng bộ được detail; nếu GET lỗi, chỉ tải lại detail."}
+            ? "Thông tin hồ sơ đã được tải lại."
+            : "Chưa tải được thông tin mới; hãy tải lại hồ sơ thay vì gửi thêm bằng chứng."}
         </p>
       )}
       {mutation.status === "uncertain" && (
         <>
           <Alert className="block break-words" variant="destructive" role="alert">
-            Chưa rõ POST đã được ghi hay chưa. Đã yêu cầu đọc lại detail, không
-            tự gửi lại POST. Evidence trùng nội dung không chứng minh thao tác
-            này thành công.
+            Chưa rõ bằng chứng đã lưu hay chưa. Hệ thống đang tải lại hồ sơ và không tự gửi lại thao tác. Nội dung trùng với bằng chứng có sẵn không chứng minh lần gửi này đã thành công.
           </Alert>
           <Button variant="secondary"
             type="button"
             disabled={!detailReady || closed}
             onClick={beginNew}
           >
-            Bắt đầu thao tác evidence mới
+            Bắt đầu thêm bằng chứng mới
           </Button>
           <p>
-            Chỉ bấm sau khi kiểm tra detail. Gửi tiếp có thể tạo evidence trùng;
+            Chỉ bấm sau khi kiểm tra hồ sơ. Gửi tiếp có thể tạo bằng chứng trùng;
             nháp hiện tại được giữ.
           </p>
         </>
       )}
       {mutation.status === "locked" && (
         <Alert className="block break-words" variant="destructive" role="alert">
-          CASE_CLOSED: form đã khóa. Tải lại detail và nhờ reviewer xử lý
-          workflow.
+          Hồ sơ đã đóng (CASE_CLOSED): form đã khóa. Tải lại hồ sơ và nhờ người có quyền xác minh kiểm tra việc mở lại.
         </Alert>
       )}
       {mutation.error && (
@@ -132,7 +128,7 @@ function EditableEvidenceForm({
       )}
       {!detailReady && (
         <p role="status">
-          Chờ detail hợp lệ trước khi gửi. Nháp vẫn giữ trong form.
+          Đợi thông tin hồ sơ mới tải xong trước khi gửi. Nội dung đang nhập vẫn được giữ.
         </p>
       )}
       <form
@@ -144,17 +140,17 @@ function EditableEvidenceForm({
         )}
       >
         <fieldset disabled={disabled} className="space-y-3">
-          <legend>Nội dung evidence</legend>
-          <label className="type-label block" htmlFor="evidence-kind">Loại evidence</label>
+          <legend>Nội dung bằng chứng</legend>
+          <label className="type-label block" htmlFor="evidence-kind">Loại bằng chứng</label>
           <Select id="evidence-kind" {...register("kind")}>
-            <option value="note">Note</option>
-            <option value="events">Events trong snapshot</option>
+            <option value="note">Ghi chú</option>
+            <option value="events">Sự kiện trong ảnh chụp dữ liệu</option>
           </Select>
           {kind === "events" && (
             <fieldset>
-              <legend>Chọn events trong snapshot (tối đa 1.000)</legend>
+              <legend>Chọn sự kiện đã ghi nhận (tối đa 1.000)</legend>
               {snapshot.status === "loading" && (
-                <LoadingState message="Đang tải graph snapshot…" />
+                <LoadingState message="Đang tải sự kiện của lần tái dựng…" />
               )}
               {snapshot.status === "error" && (
                 <>
@@ -170,12 +166,12 @@ function EditableEvidenceForm({
                       void loadSnapshot();
                     }}
                   >
-                    Tải lại snapshot
+                    Tải lại sự kiện
                   </Button>
                 </>
               )}
               {snapshot.status === "ready" && snapshot.events.length === 0 && (
-                <p>Snapshot không có event để chọn.</p>
+                <p>Lần tái dựng này không có sự kiện để chọn.</p>
               )}
               {snapshot.status === "ready" &&
                 snapshot.events.map((event) => (
@@ -186,18 +182,17 @@ function EditableEvidenceForm({
                       value={event.event_id}
                       {...register("event_ids")}
                     />
-                    {event.event_id} — {event.service} / {event.action} /{" "}
-                    {event.occurred_at}
+                    {actionLabel(event.action)} · {requestLabel(event)} · {sourceName(event.service)} · {eventTimeLabel(event.occurred_at)}
                   </label>
                 ))}
-              <p>Đã chọn {selected.length} events.</p>
+              <p>Đã chọn {selected.length} sự kiện.</p>
               {errors.event_ids && (
                 <Alert className="block break-words" variant="destructive" role="alert">{errors.event_ids.message}</Alert>
               )}
             </fieldset>
           )}
           <label className="type-label block" htmlFor="evidence-note">
-            Note (tối đa 10.000 ký tự; được rỗng với Events)
+            Ghi chú (tối đa 10.000 ký tự; có thể rỗng khi chọn sự kiện)
           </label>
           <Textarea
             id="evidence-note"
@@ -211,7 +206,7 @@ function EditableEvidenceForm({
             </Alert>
           )}
           <Button variant="primary" type="submit" disabled={!snapshotReady}>
-            Thêm evidence
+            Lưu bằng chứng
           </Button>
         </fieldset>
       </form>

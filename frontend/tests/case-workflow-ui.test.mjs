@@ -12,10 +12,10 @@ test('workflow UI exposes labelled controls, explicit version adoption/replay an
  const {WorkflowForm}=await server.ssrLoadModule('/src/features/cases/components/WorkflowForm.tsx')
  const initial=initialCasesState()
  const render=(patch={})=>renderToString(createElement(WorkflowForm,{detail:caseDetail(),scope:scope(),ready:true,workflow:initial.workflow,graph:initial.workflowGraph,submit:async()=>{},retry:async()=>{},beginNew(){},...patch})).replace(/<!--.*?-->/g,'')
- const html=render();assert.match(html,/Giao cho tôi/);assert.match(html,/Owner subject/);assert.match(html,/Case.version đã chọn: 1/);assert.match(html,/verification_failed/)
+ const html=render();assert.match(html,/Giao cho tôi/);assert.match(html,/Người xử lý/);assert.match(html,/Case.version đã chọn: 1/);assert.match(html,/verification_failed/)
  assert.equal(render({scope:scope(false)}),'');assert.match(render({ready:false}),/fieldset disabled/)
- assert.match(render({workflow:{...initial.workflow,status:'conflict',error:{code:'VERSION_CONFLICT',message:'<script>'}}}),/Dùng Case.version hiện tại/)
+ assert.match(render({workflow:{...initial.workflow,status:'conflict',error:{code:'VERSION_CONFLICT',message:'<script>'}}}),/Dùng phiên bản hồ sơ hiện tại/)
  assert.match(render({workflow:{...initial.workflow,status:'uncertain'}}),/Gửi lại thao tác/)
- assert.match(render({workflow:{...initial.workflow,status:'success'},ready:false}),/Chưa đồng bộ detail/)
+ assert.match(render({workflow:{...initial.workflow,status:'success'},ready:false}),/Chưa tải được thông tin mới/)
  }finally{await server.close()}
 })

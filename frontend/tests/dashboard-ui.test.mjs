@@ -8,7 +8,7 @@ test('dashboard UI renders four zero counters, exact semantics, waiting disclosu
  try {
  const {DashboardTimeForm,DashboardCounters}=await server.ssrLoadModule('/src/features/dashboard/components/DashboardView.tsx')
  const counters=renderToString(createElement(DashboardCounters,{data:{runs:0,degraded_runs:0,unresolved_events:0,waiting_cases:0,filters:{}},waiting:false,showWaiting(){}}))
- assert.equal((counters.match(/<dd[^>]*>0<\/dd>/g)??[]).length,4);assert.equal((counters.match(/data-slot="card"/g)??[]).length,4);assert.match(counters,/aria-expanded="false"/);assert.match(counters,/new \+ assigned/);assert.match(counters,/occurrence theo từng run completed/)
+ assert.equal((counters.match(/<dd[^>]*>0<\/dd>/g)??[]).length,4);assert.equal((counters.match(/data-slot="card"/g)??[]).length,4);assert.match(counters,/aria-expanded="false"/);assert.match(counters,/Mới \(new\) và Đã phân công \(assigned\)/);assert.match(counters,/đếm theo từng lần tái dựng hoàn tất/)
  const form=renderToString(createElement(DashboardTimeForm,{filters:{},apply(){}}));assert.match(form,/run.created_at/);assert.match(form,/UTC\+7/);assert.equal((form.match(/type="datetime-local"/g)??[]).length,2);assert.match(form,/Áp dụng/)
  }finally{await server.close()}
 })

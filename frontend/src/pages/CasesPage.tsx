@@ -1,8 +1,16 @@
+import { caseStateLabel, nextCaseStep } from "../features/cases/presentation";
 import { Button } from "../components/ui/Button";
 import { LoadingState } from "../components/ui/LoadingState";
 import { EmptyState } from "../components/ui/EmptyState";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../components/ui/Table";
-import { Link } from "react-router-dom";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "../components/ui/Table";
+import { DetailLink } from "../components/ui/DetailLink";
 import { useCases } from "../features/cases/hooks/useCases";
 import { CasesLayout } from "../features/cases/components/CasesLayout";
 import { CasesFeedback } from "../features/cases/components/CasesFeedback";
@@ -13,54 +21,69 @@ import { writeCaseQuery } from "../features/cases/query";
 export function CasesPage() {
   const { state, setFilters, refresh, previousPage, nextPage } = useCases();
   return (
-    <CasesLayout title="TraceWeaver — Cases">
+    <CasesLayout
+      title="Hồ sơ"
+      actions={
+        <Button
+          variant="secondary"
+          type="button"
+          disabled={
+            state.status !== "active" || state.list.status === "loading"
+          }
+          onClick={refresh}
+        >
+          Làm mới danh sách
+        </Button>
+      }
+    >
       <CaseFiltersForm filters={state.filters} onSearch={setFilters} />
-      <p>
+      {/* <p>
         Phân trang theo trạng thái hiện tại (live-state); nội dung có thể thay
         đổi giữa các trang. Không có tổng số trang.
-      </p>
-      <Button variant="secondary"
-        type="button"
-        disabled={state.status !== "active" || state.list.status === "loading"}
-        onClick={refresh}
-      >
-        Làm mới danh sách
-      </Button>
+      </p> */}
       <CasesFeedback />
-      {state.list.status === "loading" && <LoadingState message="Đang tải cases…" />}
+      {state.list.status === "loading" && (
+        <LoadingState message="Đang tải hồ sơ…" variant="table" />
+      )}
       {state.list.status === "ready" &&
         (state.list.items.length === 0 ? (
-          <EmptyState title="Không có case phù hợp trong trang này." />
+          <EmptyState
+            title={
+              state.filters.state ||
+              state.filters.owner_id ||
+              state.filters.from ||
+              state.filters.to
+                ? "Không có hồ sơ phù hợp với bộ lọc."
+                : state.index > 0
+                  ? "Trang này không có hồ sơ."
+                  : "Chưa có hồ sơ trong phạm vi được phép đọc."
+            }
+          />
         ) : (
           <div className="overflow-x-auto">
-            <Table caption="Cases được phép đọc" className="w-full text-left">
-
+            <Table caption="Hồ sơ được phép đọc" className="w-full text-left">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tiêu đề / ID</TableHead>
-                  <TableHead>State / version</TableHead>
-                  <TableHead>Owner subject</TableHead>
-                  <TableHead>Run</TableHead>
-                  <TableHead>Ngày tạo case (không phải thời gian lọc)</TableHead>
+                  <TableHead>Hồ sơ</TableHead>
+                  <TableHead>Trạng thái</TableHead>
+                  <TableHead>Người xử lý</TableHead>
+                  <TableHead>Việc tiếp theo</TableHead>
+                  <TableHead>Ngày tạo hồ sơ</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {state.list.items.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell>
-                      <Link
-                        className="underline"
+                    <TableCell className="max-w-56 p-2 font-medium">
+                      <DetailLink
+                        label={item.title}
+                        accessibleLabel={`Xem hồ sơ ${item.title}`}
                         to={`/cases/${item.id}?${writeCaseQuery(state.filters)}`}
-                      >
-                        {item.title}
-                      </Link>
-                      <p>{item.id}</p>
+                      />
                     </TableCell>
-                    <TableCell>
-                      {item.state} / {item.version}
-                    </TableCell>
+                    <TableCell>{caseStateLabel(item.state)}</TableCell>
                     <TableCell>{item.owner_id ?? "Chưa được gán"}</TableCell>
-                    <TableCell>{item.run_id}</TableCell>
+                    <TableCell>{nextCaseStep(item.state)}</TableCell>
                     <TableCell>
                       <CaseTime value={item.created_at} />
                     </TableCell>
@@ -70,8 +93,12 @@ export function CasesPage() {
             </Table>
           </div>
         ))}
-      <nav aria-label="Phân trang cases" className="my-4 space-x-4">
-        <Button variant="secondary"
+      <nav
+        aria-label="Phân trang cases"
+        className="my-4 flex flex-wrap items-center justify-end gap-4"
+      >
+        <Button
+          variant="secondary"
           type="button"
           disabled={
             state.status !== "active" ||
@@ -83,7 +110,8 @@ export function CasesPage() {
           Trước
         </Button>
         <span>Trang {state.index + 1}</span>
-        <Button variant="secondary"
+        <Button
+          variant="secondary"
           type="button"
           disabled={
             state.status !== "active" ||

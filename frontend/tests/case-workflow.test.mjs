@@ -32,10 +32,10 @@ test('all six state transitions enforce reviewer, owner, evidence/note, pending 
   d.case.state='invalid';assert.ok(transitionIssue(d,access,action))
  }
  for(const action of ['verify_close','verification_failed','reopen']){d.case.state=transitionStates[action].from;assert.match(transitionIssue(d,{...access,canVerify:false},action),/reviewer/)}
- d.case.state='assigned';assert.match(transitionIssue(d,{...access,subject:'other',canVerify:false},'start'),/owner/)
- d.case.state='investigating';d.evidence=[];assert.match(transitionIssue(d,access,'request_verification'),/evidence/)
- d.evidence=caseDetail().evidence;d.evidence[0].note=' ';assert.match(transitionIssue(d,access,'request_verification'),/note/)
- d.evidence=caseDetail().evidence;d.case.state='awaiting_verification';assert.match(transitionIssue(d,access,'verify_close','why',1),/pending/)
+ d.case.state='assigned';assert.match(transitionIssue(d,{...access,subject:'other',canVerify:false},'start'),/người đang xử lý/)
+ d.case.state='investigating';d.evidence=[];assert.match(transitionIssue(d,access,'request_verification'),/bằng chứng/)
+ d.evidence=caseDetail().evidence;d.evidence[0].note=' ';assert.match(transitionIssue(d,access,'request_verification'),/ghi chú/)
+ d.evidence=caseDetail().evidence;d.case.state='awaiting_verification';assert.match(transitionIssue(d,access,'verify_close','why',1),/chờ duyệt/)
  d.case.state='closed';d.history.push({...d.history[0],action:'verify_close',reason:'old',version:5});assert.match(transitionIssue(d,access,'reopen',' old '),/khác/)
 })
 test('service sends only DTO plus key and rejects wrong target/version/ID',async()=>{

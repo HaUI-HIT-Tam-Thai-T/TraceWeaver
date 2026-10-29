@@ -10,6 +10,11 @@ const EventsPage = lazy(() =>
     .then((module) => ({ default: module.EventsPage }))
     .catch(() => ({ default: PageLoadError })),
 );
+const EventDetailPage = lazy(() =>
+  import("../pages/EventDetailPage")
+    .then((module) => ({ default: module.EventDetailPage }))
+    .catch(() => ({ default: PageLoadError })),
+);
 const CasesPage = lazy(() =>
   import("../pages/CasesPage")
     .then((module) => ({ default: module.CasesPage }))
@@ -38,6 +43,7 @@ export const APP_ROUTES = [
   { path: "/cases/:caseId", element: createElement(CaseDetailPage) },
   { path: "/", element: createElement(Navigate, { to: "/dashboard", replace: true }) },
   { path: "/events", element: createElement(EventsPage) },
+  { path: "/events/:eventId", element: createElement(EventDetailPage) },
 ];
 
 export const PUBLIC_ROUTES = [

@@ -1335,3 +1335,117 @@ search không khớp, lọc UUID, chọn bằng ArrowDown/Enter, chuyển worksp
 Escape trả focus, mở lại xóa query cũ; revalidation đóng portal, khóa trigger, không còn UUID
 scope cũ trong DOM. Mobile 390px: popup bằng chiều rộng trigger, nằm trong viewport, không
 tràn ngang. Chưa kiểm thử lại API/Keycloak thật trong lượt UI này. Không commit/push.
+
+
+### Sửa logo TW bị cắt khi thu gọn
+
+Bỏ utility lg:px-6 trên link thương hiệu vì utility ghi đè padding=0 trong CSS components.
+Padding desktop của logo và padding khi thu gọn được đặt cùng CSS layer; link dùng flex
+căn giữa khi thu gọn, nowrap để TW không xuống dòng. Giữ nguyên rail 48px và căn lề picker.
+File đổi: AppHeader.tsx, src/index.css và README. Lint, build strict, 4 tests AppShell/routes
+và diff check pass. Browser fixture desktop 1280/1024px: TW có padding=0, rộng 30.75px trong
+vùng 48px, căn giữa chính xác và không bị clip. Mobile 390px giữ TraceWeaver đầy đủ, không
+tràn ngang. Chưa chạy lại toàn bộ tests hoặc API/Keycloak trong lượt sửa CSS này.
+
+
+### Cải thiện trải nghiệm đọc log, tái dựng và xử lý hồ sơ
+
+- Sự kiện hiển thị nguyên thông điệp log đã được BE cung cấp, giữ xuống dòng và escape bằng React; tên hoạt động không thay thế nội dung. Tên nguồn intake/account/provision và các mã lỗi đã biết có diễn giải tiếng Việt; mã chưa biết giữ nguyên để tra cứu.
+- “Xem cùng mã yêu cầu” áp dụng `q` với mã request, bỏ các điều kiện nguồn/thời gian/hoạt động cũ và giữ limit. API hiện chỉ hỗ trợ tìm chuỗi con, nên kết quả có thể bao gồm log khớp nội dung hoặc identifier khác; đối chiếu mã yêu cầu từng dòng. Không tự thêm query `request_id` ngoài contract.
+- Events/Cases/Dashboard/Knowledge có điều kiện đã áp dụng và nút xóa bộ lọc; bản nhập nháp vẫn chỉ áp dụng khi submit. Xóa giữ limit ở nơi có phân trang. Trạng thái rỗng phân biệt chưa có dữ liệu trong phạm vi được đọc, trang rỗng và không khớp bộ lọc; không suy rằng toàn hệ thống chưa có log.
+- Tái dựng có hướng dẫn theo bước, diễn giải sự kiện mốc và phạm vi nguồn. Chọn tất cả tải hết các trang sources trước khi thay lựa chọn, dừng khi cursor lặp/lỗi và không hủy request nguồn dùng chung. Lỗi trang đầu cần kiểm tra lại quyền/nguồn, thao tác này có thể purge root theo cơ chế scope hiện có. Giữ lựa chọn cũ nếu chưa tải đủ; không giả trang đầu là toàn bộ nguồn.
+- Bộ chọn ngày giờ UTC+7 giữ mặc định root ±5 phút. Lịch chỉnh phần đến giây, phần giây thập phân có ô riêng và không làm tròn bằng Date. Form vẫn kiểm root/source/window hiện có; khóa tạo khi đang chọn tất cả. Theo luật và Kết hợp luật và AI có giải thích, vẫn gửi `rule_only`/`hybrid` đúng DTO.
+- Kết quả có dòng thời gian, tên các bước, điểm bắt đầu, tóm tắt, liên kết/bằng chứng, bước còn thiếu và sự kiện chưa nối với mốc. Thứ tự thời gian không phải kết luận nhân quả; thiếu bằng chứng trong phạm vi đã chọn không chứng minh bước chưa diễn ra. Điểm AI không trình bày như xác suất đúng. Phân biệt xử lý thất bại, chưa có liên kết và chưa có bằng chứng log. JSON, ID, phiên bản luật/model/snapshot nằm trong disclosure.
+- Duyệt liên kết dùng tên hai bước và bằng chứng cạnh lý do/nút chấp nhận/từ chối. Giữ snapshot Link.version và cơ chế chủ động dùng phiên bản mới khi conflict; không đổi sang Graph.version, không tự replay POST. Thông báo khóa hồ sơ, thay đổi dữ liệu, trùng cạnh và chu trình được diễn giải bằng hướng dẫn.
+- Hồ sơ ưu tiên trạng thái, người xử lý và bước tiếp theo. Việt hóa trạng thái/thao tác và điều kiện thiếu; guards state/role/owner/evidence/pending giữ nguyên. Lịch sử mở đúng evidence ID bằng disclosure; mã/phiên bản/UTC nguyên gốc ở phần kỹ thuật. Thêm bằng chứng không tự tăng Case.version.
+- Tổng quan dùng chỉ số tiếng Việt, giải thích cách đếm lượt sự kiện theo từng run completed và danh sách hồ sơ Mới/Đã phân công tải riêng. Số hàng trên trang không thay tổng counter.
+- Tri thức hiển thị nội dung như bài đọc, giữ xuống dòng và escape; source_ref chỉ thành liên kết với HTTP/HTTPS không có username/password. URN và protocol khác giữ dạng text. Metadata kỹ thuật được thu gọn.
+
+File chính thay đổi/thêm:
+
+| Khu vực | File |
+| --- | --- |
+| UI chung | `src/components/ui/FilterSummary.tsx`, `PreciseDateTimeField.tsx` |
+| Sự kiện | `features/events/presentation.ts`, `components/EventPresentation.tsx`, `EventFiltersForm.tsx`, `EventsExplorer.tsx` |
+| Tái dựng | `features/reconstruction/presentation.ts`, `form.ts`, `components/SourceScopePicker.tsx`, `ReconstructionPanel.tsx`, `RunResult.tsx`, `GraphTable.tsx` |
+| Liên kết | `features/link-review/components/LinkReviewPanel.tsx` |
+| Hồ sơ | `features/cases/presentation.ts`, `workflow.ts`, `components/CaseDetailView.tsx`, `CaseFiltersForm.tsx`, `CasesFeedback.tsx`, `CasesLayout.tsx`, `CreateCasePanel.tsx`, `EvidenceForm.tsx`, `WorkflowForm.tsx` |
+| Tổng quan/tri thức | `features/dashboard/components/DashboardView.tsx`, `WaitingCaseList.tsx`; `features/knowledge/components/KnowledgeView.tsx` |
+| Trang/điều hướng | `src/pages/EventsPage.tsx`, `DashboardPage.tsx`, `CasesPage.tsx`, `CaseDetailPage.tsx`, `KnowledgePage.tsx`; `src/components/layout/AppSidebar.tsx` |
+| Kiểm thử | Cập nhật các tests UI/presentation/workflow/routes/integration hiện có; thêm `tests/ux-presentation.test.mjs`, `tests/fixtures/ux.html`, `ux.tsx` |
+
+Các đường dẫn `features/...` trong bảng nằm dưới `src/`. Không thêm dependency hoặc đổi service/DTO/controller/state. Bảo toàn thay đổi logo/header/CSS có trước lượt UX này; không commit/push.
+
+Kiến thức sử dụng: function component TSX, props, render điều kiện/list/key; useState/useEffect/useRef và Context hiện có; hàm thuần/type/union cơ bản; React Hook Form + Zod; URL filters/router; HTML semantic/details/time, ARIA, responsive và escape nội dung. Không thêm hook nâng cao, store hoặc cơ chế refresh/retry mới.
+
+Kiểm thử: lint, 180/180 node tests (gồm hồi quy quyền/scope/version/idempotency), build TypeScript strict với env công khai hợp lệ và git diff --check. Browser fixture cô lập `/tests/fixtures/ux.html`: tìm cùng mã, xóa điều kiện, chọn đủ 3 nguồn qua 3 trang, cursor lặp dừng và giữ lựa chọn, mặc định ±5 phút với `.000001`, sửa giờ vẫn giữ precision; từ chối gửi expected_version=1; mở evidence từ history; nguồn HTTP(S) có link; desktop 1280px/mobile 390px không tràn trang. Đã sửa cấu trúc HTML thời gian để disclosure không nằm trong paragraph; phiên browser kiểm tra hồ sơ mới không có warning/error console.
+
+Chưa nghiệm thu lại API/Keycloak hoặc mutation thật trong lượt này; fixture chỉ thay state trong memory, không ingest/sửa grants/case BE. Không có tài khoản reviewer để chạy luồng xác minh thật. Tên workspace và ô chọn người xử lý chờ BE bổ sung contract tên workspace và danh sách tài khoản/subject được phép chọn; hiện tiếp tục hiển thị UUID/subject thật, không tự đặt tên hay đoán endpoint.
+
+
+### Đồng bộ layout nghiệp vụ với shadcn/ui và Motion (29/10/2026)
+
+Giữ Header/Sidebar xanh lá, font hệ thống, typography, MUI icons, Badge không nền/viền. Dùng skill `redesign-existing-projects` để cải thiện bố cục theo mức cân bằng; không áp dụng các gợi ý đổi font/ảnh/branding trái lựa chọn của dự án.
+
+- AppLayout giới hạn nội dung tối đa 1440px; PageHeading thống nhất tiêu đề, mô tả, action và Separator. PublicLayout căn vùng callback/404 gọn; 404 có nút về Tổng quan. Không thêm main/provider hoặc thay route.
+- Dashboard có bộ lọc dạng lưới, bốn counter theo 4/2/1 cột, số dùng tabular figures; hai nhóm waiting cases có container và cursor riêng. Không gộp query new/assigned.
+- Events: nguồn/limit/nút tìm ở hàng đầu, thời gian/action/search ở vùng kế tiếp; điều kiện áp dụng và nút xóa bên dưới. Từ 1280px, detail mở bên phải bảng; đóng detail trả bảng về một cột. Bảng cuộn bên trong, không làm tràn toàn trang.
+- Reconstruction: hướng dẫn ba bước, cấu hình và tóm tắt nguồn/thời gian/chế độ thành hai cột trên desktop, một cột trên mobile. Vẫn dùng bộ chọn UTC+7 chính xác, root ±5 phút và phần giây thập phân hiện có. Kết quả có summary panel, timeline và bằng chứng; review/manual form chia hai cột khi đủ rộng.
+- Cases: bộ lọc lưới, refresh ở heading. Detail có Breadcrumb, tóm tắt và Tabs lịch sử/bằng chứng; forms evidence/workflow đặt riêng ở cột thao tác, không nằm trong tab. Đổi tab không unmount forms hoặc gọi API. Mở evidence từ history chọn đúng tab, mở mục và đưa focus tới trigger. Đổi case/run reset state trình bày; viewer không có cột thao tác rỗng.
+- Knowledge: thanh tìm kiếm có control thẳng hàng; nội dung bài đọc tối đa 70ch, hỗ trợ chuỗi dài; metadata trong Accordion. Giữ nguồn HTTP(S) an toàn và phân trang hiện có.
+- TechnicalDetails dùng Accordion; trạng thái closed/inactive được ẩn bằng CSS. Nội dung forceMount chỉ để giữ dữ liệu đã đọc/DOM cần thiết trong cùng scope, không phải cache xuyên scope. Guard/unmount vẫn xóa toàn bộ cây ngay khi mất quyền.
+- LoadingState dùng Skeleton panel/table/counters kèm role=status, nội dung trang trí aria-hidden; tắt pulse theo prefers-reduced-motion.
+
+Primitive lấy từ registry shadcn `new-york-v4`: Tabs, Accordion, Skeleton, Breadcrumb; thay icon bằng MUI và import đúng Radix package hiện có. Separator dùng phần trình bày shadcn với semantic separator HTML, không cần thêm dependency Radix cho đường kẻ. Không cài toàn bộ thư viện/CLI hoặc package icon khác. Dependency mới: `@radix-ui/react-tabs@1.2.1`, `@radix-ui/react-accordion@1.3.1`; package.json và lockfile đã cập nhật.
+
+SectionReveal dùng `MotionConfig reducedMotion="user"`, `LazyMotion` + `domAnimation` từ `motion/react`, và `m.div` từ `motion/react-m`. Đây là cấu hình thư viện tối thiểu để chỉ dùng tính năng animation cần thiết; không thêm hook nâng cao. Entrance opacity/y=6px, 180ms; không exit animation, AnimatePresence, key theo filter, layout animation, drag hoặc animation từng hàng/node. Provider/controller và cleanup không đổi; dữ liệu mất quyền không chờ chuyển động. Motion chỉ được import qua các trang lazy có dùng hiệu ứng. Ngoại lệ đã ghi trong rule.md (file hiện bị Git ignore, không đổi .gitignore hoặc tự stage).
+
+File layout thêm/sửa trong lượt này:
+
+| Nhóm | File |
+| --- | --- |
+| Layout | `src/components/layout/PageHeading.tsx` (mới), `AppLayout.tsx`, `PublicLayout.tsx`; các page hiện có trừ callback giữ logic cũ |
+| UI | `src/components/ui/SectionReveal.tsx`, `TechnicalDetails.tsx` (mới), `LoadingState.tsx`, `FilterSummary.tsx`; `primitives/tabs.tsx`, `accordion.tsx`, `separator.tsx`, `skeleton.tsx`, `breadcrumb.tsx` (mới) |
+| Features | components của dashboard/events/cases/knowledge/reconstruction/link-review được bố trí lại; service/schema/controller/state nghiệp vụ không đổi |
+| Khác | `src/index.css`, `package.json`, `package-lock.json`, `rule.md`, README; tests UI hiện có cập nhật và thêm `tests/page-layout-ui.test.mjs`, `tests/fixtures/layout.html`, `layout.tsx` |
+
+Kiểm tra: lint sạch; toàn bộ 181/181 tests, build TypeScript strict với env hợp lệ, git diff --check. Lần chạy suite lạnh dưới tải song song từng timeout test route 10 giây; chạy lại toàn bộ sau warm cache pass, không tăng timeout hay đổi config để che lỗi. Browser fixture `/tests/fixtures/layout.html` dùng shell/pages thật với Context và callback trong memory: desktop 1280/1440px, tablet 768px, mobile 390px; bảng cuộn nội bộ, điều kiện lọc, đóng detail; tab bằng ArrowRight, history mở đúng evidence/focus, giữ nháp note; viewer chỉ đọc; revalidation xóa payload/tab/form ngay. Phiên tải mới không có warning/error console. Fixture không gọi BE, Keycloak hoặc mutation thật.
+
+Build đo tại lượt này: chunk SectionReveal dùng m/domAnimation 84,65 KB raw / 29,80 KB gzip, so với bản motion đầy đủ thử ban đầu 132,92 / 43,75 KB. Các import JS tĩnh từ entry có tổng khoảng 695,38 KB raw / 226,51 KB tổng gzip từng file, chưa tính page lazy được mở; CSS khoảng 59,3 KB. Đây là số artifact build, không phải số đo mạng thực tế hoặc so sánh toàn bundle trước/sau; không đổi ngưỡng cảnh báo.
+
+Chưa xác minh zoom browser 200%: phím tắt qua công cụ không thay đổi viewport/devicePixelRatio. Đã kiểm cấu hình reducedMotion và CSS, nhưng chưa bật/tắt tùy chọn reduced motion của hệ điều hành thật. Chưa nghiệm thu lại API/Keycloak, thao tác ghi với BE thật hay reviewer thật. Tên workspace/danh sách người xử lý vẫn chờ contract BE. Không commit/push; mọi thay đổi trong frontend và giữ các thay đổi chưa commit có trước.
+
+Nguồn: [registry shadcn](https://ui.shadcn.com/docs/components), [giảm bundle Motion](https://motion.dev/docs/react-reduce-bundle-size), [Motion accessibility](https://motion.dev/docs/react-accessibility).
+
+
+### Áp dụng nguyên tắc thiết kế trong giới hạn kiến thức (29/10/2026)
+
+Tham khảo có chọn lọc [bài MIKO TECH](https://mikotech.vn/nguyen-tac-thiet-ke-website/) cho ứng dụng điều tra nội bộ: tính rõ ràng, nhất quán, điều hướng, responsive, nội dung và kiểm thử. Không thêm chức năng marketing hoặc tự nhận hoàn thành SEO. Mục 18 của `rule.md` quy định checklist thiết kế, giữ giới hạn React/TS cơ bản và ngoại lệ shadcn/Motion đã duyệt. File rule.md đang bị Git ignore; không sửa .gitignore hoặc force-add.
+
+Thay đổi bổ sung trong lượt này:
+
+- `src/constants/pageTitles.ts`, `src/hooks/usePageTitle.ts` (mới): tên tab cố định theo pathname. AppLayout/PublicLayout gọi hook bằng useEffect; cập nhật khi chuyển route hoặc quay lại/đi tiếp. Detail luôn là “Chi tiết hồ sơ | TraceWeaver”, không chứa title hồ sơ, UUID, query hoặc subject. Callback và 404 có tên riêng; không đổi cấu hình routes.
+- `index.html`: meta description chung mô tả chức năng, không thêm robots, sitemap hoặc schema SEO.
+- `components/ui/primitives/accordion.tsx` và `TechnicalDetails.tsx`: prop trình bày `headingLevel` (3/4/5/6, mặc định 3), giữ Radix trigger/keyboard/ARIA. Cập nhật EventPresentation/EventsExplorer, GraphTable/RunResult, CaseDetailView cho metadata đúng cấp. EvidenceForm dùng h2 vì là nhóm tác vụ chính. Không dùng cỡ chữ để quyết định heading.
+- `components/layout/WorkspaceAccessState.tsx`: phản hồi chưa đăng nhập, đang xác minh, lỗi và thiếu quyền có một h1 cùng hướng dẫn phù hợp. Giữ nguyên điều kiện quyền và handler; không gọi API thêm hoặc giữ nội dung nghiệp vụ phía sau guard.
+- CaseFiltersForm, DashboardView, CasesPage và WorkflowForm: nhãn hồ sơ/tái dựng/thao tác/phiên bản dùng tiếng Việt; giữ nguyên DTO, mã lỗi và cơ chế xử lý kết quả chưa rõ.
+- `tests/design-principles.test.mjs` (mới), bổ sung assertions một h1 ở `tests/app-shell-ui.test.mjs`; mở rộng fixture layout với callback/404 và nút lịch sử Router. Mọi callback fixture chỉ thay state trong memory.
+
+Các đường dẫn feature/component trong danh sách trên nằm dưới `src/`. Không thêm dependency, sửa service/schema/controller, thay quyền/polling/idempotency hay cơ chế purge. Bảo toàn mọi thay đổi UI chưa commit từ các lượt trước.
+
+Kiến thức áp dụng: props/union cho headingLevel, hàm thuần và object lookup cho tên trang, custom hook useEffect + useLocation cho document.title; JSX semantic và component shadcn hiện có. Không thêm useMemo/useCallback/useReducer, Redux, any, ép kiểu che lỗi hoặc kỹ thuật TS nâng cao.
+
+Kết quả: lint sạch; 184/184 tests pass; build tsc strict + Vite với env công khai hợp lệ pass; git diff --check pass. Browser fixture xác nhận tab Tổng quan/detail, lịch sử quay lại/đi tiếp qua Router, callback chưa đăng nhập và 404; dữ liệu hồ sơ/UUID không lên tab. Kiểm heading evidence h3/h4/h5, mở evidence đúng focus, giữ nháp và logout xóa form/tab. Kiểm 1440/1280/768/390px không tràn ngang trang; một h1 trong Main ở detail và trạng thái bị chặn. Phiên kiểm tra không có error/warning console.
+
+Đo tương phản từ token CSS hiện tại: chữ chính/panel 13,53:1; chữ phụ/panel 6,07:1; chữ nút/primary 5,02:1; chữ/header-sidebar 7,13:1; chữ lỗi/panel 5,62:1. Đây là phép đo các cặp token đang dùng, không phải chứng nhận toàn bộ giao diện hoặc kiểm định mọi trạng thái hover/disabled.
+
+Chưa xác minh zoom browser 200% và bật/tắt reduced motion của hệ điều hành bằng công cụ hiện có. Chưa chạy lại BE/Keycloak hoặc mutation thật; không dùng fixture để xác nhận tích hợp thật. Không commit/push; chỉ chỉnh trong frontend.
+
+
+### Trang danh sách và chi tiết sự kiện
+
+- `/events` chỉ hiển thị bộ lọc, kết quả và phân trang. Nút Xem mở `/events/:eventId` trong cùng AppShell.
+- Trang chi tiết hiển thị log, định danh, provenance và thao tác chọn điểm bắt đầu/tái dựng theo quyền. Có liên kết quay lại danh sách với bộ lọc trên URL.
+- Chuyển danh sách → chi tiết → danh sách giữ trang/cursor trong memory khi scope và bộ lọc không đổi. Reload tải lại dữ liệu; không lưu cursor hoặc payload vào storage.
+- Mở trực tiếp detail chỉ GET sự kiện, không tải collection. URL cũ `/events?event_id=...` được chuyển sang route detail. ID không hợp lệ bị từ chối trước khi gọi API.
+- Provider tiếp tục hủy request và purge khi đổi scope/mất quyền; reconstruction unmount khi rời detail, không tự gửi mutation khi quay lại.
