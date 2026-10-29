@@ -17,6 +17,7 @@ export function adminInput(kind, body) {
       new Set(body.roles).size !== body.roles.length || body.roles.some(r => !roles.has(r)))) adminInvalid();
   for (const k of ['active', 'enabled']) if (fields.includes(k) && typeof body[k] !== 'boolean') adminInvalid();
   if (kind === 'account' && (typeof body.username !== 'string' || !/^[a-z0-9][a-z0-9._-]{2,63}$/.test(body.username) ||
+      body.username.startsWith('service-account-') ||
       typeof body.temporary_password !== 'string' || body.temporary_password.length < 12 || body.temporary_password.length > 128 ||
       body.temporary_password.includes('\u0000') || !body.temporary_password.isWellFormed())) adminInvalid();
   return body;

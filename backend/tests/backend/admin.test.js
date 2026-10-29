@@ -44,6 +44,7 @@ test('admin validation rejects self-asserted identity/provider fields and servic
   const valid = { subject: 'person', roles: ['viewer'], expected_version: 1 };
   for (const body of [{ ...valid, actor: 'admin' }, { ...valid, roles: ['ingest_service'] }, { ...valid, roles: [] }, { ...valid, expected_version: 0 }])
     assert.throws(() => adminInput('add', body), e => e.status === 400);
+  assert.throws(() => adminInput('account', { username: 'service-account-reserved', temporary_password: 'synthetic-password', roles: ['viewer'], expected_version: 1 }), e => e.status === 400);
 });
 test('account provider uses temporary passwords and refuses adoption/reset of unrelated accounts', async () => {
   let creates = 0, posted;

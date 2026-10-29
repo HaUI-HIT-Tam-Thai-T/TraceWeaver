@@ -26,7 +26,7 @@ export function createAccountProvider({ oidcIssuer, accountClientId, accountClie
     if (r.status === 404) throw new ApiError(422, 'ACCOUNT_NOT_FOUND', 'Account not found');
     if (!r.ok) throw unavailable();
     const u = await r.json();
-    if (u.id !== id || u.serviceAccountClientId || u.enabled !== true) throw new ApiError(422, 'ACCOUNT_UNAVAILABLE', 'Active human account required');
+    if (u.id !== id || u.serviceAccountClientId || u.username?.startsWith('service-account-') || u.enabled !== true) throw new ApiError(422, 'ACCOUNT_UNAVAILABLE', 'Active human account required');
     return u;
   }
   return {

@@ -2824,7 +2824,7 @@
                 "properties": {
                   "username": {
                     "type": "string",
-                    "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+                    "pattern": "^(?!service-account-)[a-z0-9][a-z0-9._-]{2,63}$"
                   },
                   "temporary_password": {
                     "type": "string",

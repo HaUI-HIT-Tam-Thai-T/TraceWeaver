@@ -50,6 +50,9 @@ test('account provisioning recovers same owned operation after DB/audit failure 
   assert.equal((await pool.query("SELECT count(*)::int n FROM core.memberships WHERE subject='new-person'")).rows[0].n, 0);
   assert.equal((await service.operation('admin', wid, 'stable-key')).state, 'pending');
   await pool.query('DROP TRIGGER fail_admin_audit ON core.audit_events; DROP FUNCTION core.fail_admin_audit()');
+  await repo.member('admin', wid, 'viewer', { active: false, roles: ['viewer'], expected_version: 1 });
+  await assert.rejects(service.account('admin', wid, input, 'stable-key'), e => e.code === 'VERSION_CONFLICT');
+  input.expected_version = 2;
   const done = await service.account('admin', wid, input, 'stable-key');
   assert.equal(done.state, 'completed'); assert.equal(creations, 1);
   assert.deepEqual(await service.account('admin', wid, input, 'stable-key'), done);
