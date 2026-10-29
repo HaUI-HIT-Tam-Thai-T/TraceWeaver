@@ -1,0 +1,14 @@
+node_modules
+/.npm-cache/
+dist
+# Environment files stay local; only the public template is tracked.
+.env
+.env.*
+!.env.example
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local agent instructions
+/AGENTS.md
+/rule.md
