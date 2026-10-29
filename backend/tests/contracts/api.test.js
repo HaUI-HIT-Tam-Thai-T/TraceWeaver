@@ -21,12 +21,17 @@ test('OpenAPI validates with all local refs and no remote resolution', async () 
   const api = await SwaggerParser.validate(fileURLToPath(new URL('openapi.json', root)), { resolve: { http: false } });
   assert.equal(api.openapi, '3.1.0');
   const operations = Object.entries(api.paths).flatMap(([path, methods]) => Object.entries(methods).map(([method, op]) => ({ path, method, ...op })));
-  assert.equal(operations.length, 21);
+  assert.equal(operations.length, 22);
   assert.equal(new Set(operations.map((op) => op.operationId)).size, operations.length);
-  const implemented = new Set(['getMe', 'listSources', 'listKnowledge', 'ingestEvents', 'listEvents', 'getEvent']);
+  const implemented = new Set(['getMe', 'listSources', 'listKnowledge', 'ingestEvents', 'listEvents', 'getEvent', 'createRun', 'getRun', 'getGraph', 'reviewLink', 'createManualLink', 'createCase', 'listCases', 'getCase', 'addEvidence', 'transitionCase', 'getDashboard', 'createWorkflowInstance', 'transitionWorkflowInstance', 'getWorkflowInstance', 'scorePairs']);
+  implemented.add('listCaseAssignees');
   for (const op of operations) {
     assert.equal(op['x-implementation-status'], implemented.has(op.operationId) ? 'implemented' : 'planned');
     assert.equal(op.security.length, 1);
+    if (op.path.startsWith('/core/')) {
+      assert.deepEqual(Object.keys(op.security[0]).sort(), ['appServiceBearer', 'delegatedUserBearer']);
+      assert.ok(op.parameters.some((p) => p.name === 'X-Workspace-Id' && p.in === 'header' && p.required));
+    }
     for (const param of op.path.matchAll(/\{(\w+)\}/g)) {
       assert.ok(op.parameters.some((p) => p.in === 'path' && p.name === param[1] && p.required));
     }

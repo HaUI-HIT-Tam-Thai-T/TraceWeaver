@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Phiên bản 0.1.0-base.1 là bộ khung phát triển; chưa có API nghiệp vụ hoặc đăng nhập. Chưa có cam kết hỗ trợ production. Chỉ báo lỗi bảo mật qua kênh riêng với maintainer; không đăng credential hoặc dữ liệu nhạy cảm lên issue công khai.
+Tag0.1.0-base.1 là bộ khung cũ. Nhánh phát triển hiện có20 APIs/local Keycloak; xem [hiện trạng](docs/CURRENT_STATUS.md). Chưa có cam kết production. Chỉ báo lỗi bảo mật qua kênh riêng với maintainer; không đăng credential/dữ liệu nhạy cảm lên issue công khai.
 
 ## Quy tắc thực hiện
 
@@ -14,6 +14,8 @@ Phiên bản 0.1.0-base.1 là bộ khung phát triển; chưa có API nghiệp v
 - Model artifact do đội tạo, checksum kiểm trước load; không load pickle không tin cậy.
 - AI không có credential ghi DB/workflow hoặc tự chạy lệnh từ nội dung log.
 - .env và credential cục bộ bị ignore; .env.example không chứa giá trị dùng được.
+- API/core từ chối compressed request415; body-parser2.4.0 và fast-uri3.1.9 đã pin để xử lý advisory đã audit. npm audit0 chỉ áp dụng cây npm/lần kiểm, không chứng minh Docker/OS/model an toàn.
+- CORS exact origins chỉ cho API/health, không thay auth; core dùng server credentials. Production browser origins phải HTTPS explicit, runtime DB role/TLS phải chuẩn bị riêng khỏi cấu hình development.
 
 ## Khi phát hiện vấn đề
 

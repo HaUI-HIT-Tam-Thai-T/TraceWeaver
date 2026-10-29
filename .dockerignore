@@ -1,0 +1,20 @@
+# Allow only the files required by the API image.
+**
+!package.json
+!package-lock.json
+!LICENSE
+!NOTICE
+!backend/
+!backend/package.json
+!backend/Dockerfile
+!backend/THIRD_PARTY_NOTICES.txt
+!backend/src/
+!backend/src/**
+!backend/scripts/
+!backend/scripts/migrate.js
+!backend/scripts/container-env.js
+!backend/contracts/
+!backend/contracts/openapi.json
+!backend/contracts/health.openapi.json
+!backend/contracts/schemas/
+!backend/contracts/schemas/**

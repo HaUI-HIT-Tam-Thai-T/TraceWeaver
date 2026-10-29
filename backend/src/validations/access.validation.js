@@ -6,7 +6,9 @@ import { ApiError } from '../core/identity/api-error.js';
 export function queryParams(query, kind) {
   const allowed = new Set(['limit', 'cursor', ...(kind === 'knowledge' ? ['q'] : [])]);
   for (const [key, value] of Object.entries(query)) {
-    if (!allowed.has(key) || typeof value !== 'string') throw new ApiError(400, 'INVALID_QUERY', 'Query parameters are invalid');
+    if (!allowed.has(key) || typeof value !== 'string' || value.includes('\u0000') || !value.isWellFormed()) {
+      throw new ApiError(400, 'INVALID_QUERY', 'Query parameters are invalid');
+    }
   }
   const limit = query.limit ?? '50';
   if (!/^\d+$/.test(limit) || Number(limit) < 1 || Number(limit) > 100 ||

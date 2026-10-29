@@ -1,0 +1,20 @@
+{
+  "fixture_version": "sandbox-feature-conformance-2",
+  "policy_version": "sandbox-rules-1",
+  "feature_version": "sandbox-observable-features-2",
+  "feature_schema_version": "1",
+  "case_count": 42,
+  "reference_runtime": {
+    "python": "3.10.11",
+    "unicode": "13.0.0"
+  },
+  "sha256": {
+    "features-v2.json": "431eec0c8d6f0dd3bb6e730fd905f03d362443aa3dfd6798eb06043f03b1e76f",
+    "README.md": "4ddc48789716c127df1c00de4ec590501429838206a432abdabeed6f0d0ac016",
+    "reference/ai/features/sandbox_policy.py": "b96c30db6c78b67ec739df5d981c2618b2de2d7abc3aa03fe3f1af0f7962a071",
+    "reference/ai/features/pair_features.py": "060dbb89ebeff11ea3f74aceec3dd311896fa37aef53869dc6e8e47315094b6e",
+    "check_features.py": "4cd4b3df74e204ade4e770564375e257b1ec84fabd1fadd325c776804788e1b9",
+    "check_features.cjs": "18f50d30709df2b71a558d35718331373ff15b9c8eaa8e4418a0827c0afe0485",
+    "LICENSE": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5"
+  }
+}

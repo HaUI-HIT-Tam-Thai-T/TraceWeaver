@@ -12,10 +12,11 @@ Project code: Apache-2.0. Third-party packages retain their original licenses. T
 | npm | 11.11.0 | Package manager | [Upstream](https://github.com/npm/cli/tree/v11.11.0) |
 | PostgreSQL | 17.11 | Development database | [PostgreSQL License](https://www.postgresql.org/about/licence/) |
 | PostgreSQL image | postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24 | Compose development | [Docker Official Image source](https://github.com/docker-library/postgres); image/base packages require a separate audit when distributing images |
+| Keycloak image | 26.8.1@sha256:79c623a22abacf3fe6c00a5fb30f5b7843d717b234033b80995891c06116d244 | Local OIDC/PKCE IdP | [Apache-2.0](https://github.com/keycloak/keycloak/blob/26.8.1/LICENSE.txt); bundled image dependencies require separate distribution audit |
 
-React, Identity provider, AI runtime and model are not installed in this scaffold. Add their pinned versions, licenses and notices when implemented.
+React, AI runtime and model are not installed in this scaffold. Add their pinned versions, licenses and notices when implemented.
 
-## npm packages (96)
+## npm packages (98)
 
 | Package | Version | Scope | License | Source |
 |---|---|---|---|---|
@@ -23,13 +24,14 @@ React, Identity provider, AI runtime and model are not installed in this scaffol
 | @apidevtools/openapi-schemas | 2.1.0 | development / transitive | MIT | [npm](https://www.npmjs.com/package/@apidevtools/openapi-schemas/v/2.1.0) |
 | @apidevtools/swagger-methods | 3.0.2 | development / transitive | MIT | [npm](https://www.npmjs.com/package/@apidevtools/swagger-methods/v/3.0.2) |
 | @apidevtools/swagger-parser | 13.1.0 | development / direct | MIT | [npm](https://www.npmjs.com/package/@apidevtools/swagger-parser/v/13.1.0) |
+| @scarf/scarf | 1.4.0 | runtime / transitive | Apache-2.0 | [npm](https://www.npmjs.com/package/@scarf/scarf/v/1.4.0) |
 | @types/json-schema | 7.0.15 | development / transitive | MIT | [npm](https://www.npmjs.com/package/@types/json-schema/v/7.0.15) |
 | accepts | 2.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/accepts/v/2.0.0) |
 | ajv | 8.20.0 | runtime / direct | MIT | [npm](https://www.npmjs.com/package/ajv/v/8.20.0) |
 | ajv-draft-04 | 1.0.0 | development / transitive | MIT | [npm](https://www.npmjs.com/package/ajv-draft-04/v/1.0.0) |
 | ajv-formats | 3.0.1 | runtime / direct | MIT | [npm](https://www.npmjs.com/package/ajv-formats/v/3.0.1) |
 | argparse | 3.0.3 | development / transitive | PSF-2.0 | [npm](https://www.npmjs.com/package/argparse/v/3.0.3) |
-| body-parser | 2.3.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/body-parser/v/2.3.0) |
+| body-parser | 2.4.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/body-parser/v/2.4.0) |
 | bytes | 3.1.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/bytes/v/3.1.2) |
 | call-bind-apply-helpers | 1.0.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/call-bind-apply-helpers/v/1.0.2) |
 | call-bound | 1.0.4 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/call-bound/v/1.0.4) |
@@ -50,7 +52,7 @@ React, Identity provider, AI runtime and model are not installed in this scaffol
 | etag | 1.8.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/etag/v/1.8.1) |
 | express | 5.3.0 | runtime / direct | MIT | [npm](https://www.npmjs.com/package/express/v/5.3.0) |
 | fast-deep-equal | 3.1.3 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/fast-deep-equal/v/3.1.3) |
-| fast-uri | 3.1.8 | runtime / transitive | BSD-3-Clause | [npm](https://www.npmjs.com/package/fast-uri/v/3.1.8) |
+| fast-uri | 3.1.9 | runtime / transitive | BSD-3-Clause | [npm](https://www.npmjs.com/package/fast-uri/v/3.1.9) |
 | finalhandler | 2.1.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/finalhandler/v/2.1.1) |
 | forwarded | 0.2.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/forwarded/v/0.2.0) |
 | fresh | 2.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/fresh/v/2.0.0) |
@@ -109,6 +111,7 @@ React, Identity provider, AI runtime and model are not installed in this scaffol
 | side-channel-weakmap | 1.0.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/side-channel-weakmap/v/1.0.2) |
 | split2 | 4.2.0 | runtime / transitive | ISC | [npm](https://www.npmjs.com/package/split2/v/4.2.0) |
 | statuses | 2.0.2 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/statuses/v/2.0.2) |
+| swagger-ui-dist | 5.34.0 | runtime / direct | Apache-2.0 | [npm](https://www.npmjs.com/package/swagger-ui-dist/v/5.34.0) |
 | toidentifier | 1.0.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/toidentifier/v/1.0.1) |
 | type-is | 2.1.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/type-is/v/2.1.0) |
 | unpipe | 1.0.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/unpipe/v/1.0.0) |

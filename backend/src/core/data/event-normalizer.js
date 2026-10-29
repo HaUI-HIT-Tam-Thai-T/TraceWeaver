@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { validEvent } from '../../validations/ingestion.validation.js';
 
 const secretKey = /password|passwd|secret|token|authorization|cookie|api[_-]?key|credential/i;
-function text(value) {
+export function redactText(value) {
   if (value.includes('\u0000') || !value.isWellFormed()) throw new Error('unsupported text');
   return value.replace(/\bBearer\s+[A-Za-z0-9._~+\/-]+=*/gi, 'Bearer [REDACTED]')
     .replace(/\b(password|passwd|secret|token|api[_-]?key|authorization|cookie)\s*[:=]\s*(?:"[^"\r\n]*"|'[^'\r\n]*'|[^\s,;]+)/gi, '$1=[REDACTED]');
@@ -13,7 +13,7 @@ function text(value) {
 function redact(value, depth = 0) {
   if (depth > 32) throw new Error('depth');
   if (typeof value === 'number' && !Number.isFinite(value)) throw new Error('non-finite number');
-  if (typeof value === 'string') return text(value);
+  if (typeof value === 'string') return redactText(value);
   if (Array.isArray(value)) return value.map((entry) => redact(entry, depth + 1));
   if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value)
     .map(([key, entry]) => {
@@ -35,10 +35,17 @@ export function normalizeEvent(input, source) {
   if (input.service !== source.service) return { code: 'SOURCE_SERVICE_MISMATCH' };
   if (!['intake', 'account', 'provision'].includes(source.service) || source.parser_version !== `${source.service}-v1`) return { code: 'UNSUPPORTED_PARSER' };
   try {
+    const fraction = input.occurred_at.includes('.') ? input.occurred_at.slice(20, -1) : '';
+    // PostgreSQL stores microseconds. Never silently round distinct source instants.
+    if (/[1-9]/.test(fraction.slice(6))) return { code: 'UNSUPPORTED_TIMESTAMP_PRECISION' };
+    const instant = new Date(input.occurred_at).toISOString();
+    const exactFraction = fraction.slice(0, 6).padEnd(6, '0').replace(/0+$/, '').padEnd(3, '0');
     const event = redact(input);
     // Source identity is opaque; never alter it during normalization.
     event.source_event_id = input.source_event_id;
-    event.occurred_at = new Date(input.occurred_at).toISOString();
+    // Keep existing millisecond canonical hashes while retaining finer instants.
+    event.occurred_at = `${instant.slice(0, 19)}.${exactFraction}Z`;
+    if (!validEvent(event)) return { code: 'INVALID_EVENT' };
     const { payload, ...fields } = event;
     const normalized = { ...fields, payload_redacted: payload, parser_version: source.parser_version };
     return { event: normalized, hash: digest(normalized) };
