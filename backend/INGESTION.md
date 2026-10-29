@@ -2,7 +2,7 @@
 
 `POST /api/v1/workspaces/{wid}/sources/{sid}/events:batch` receives the existing normalized `BatchRequest` contract. It does not parse raw simulator log files. Source metadata must use intake/intake-v1, account/account-v1 or provision/provision-v1; each record service must match the source.
 
-The JWT/JWKS checks are reused with a separate authorized client from `INGEST_CLIENT_ID` (default traceweaver-ingest), which must differ from OIDC_CLIENT_ID. User-client tokens cannot ingest; ingest-client tokens cannot access user read routes. The subject needs an active workspace membership, the `ingest_service` database role, and an active direct/group `ingest` grant. A read grant or admin role alone does not permit ingestion. The producer obtains its token from the IdP; INGEST_CLIENT_SECRET is not read by this API. Live IdP integration remains to be verified; do not enable a token bypass.
+The JWT/JWKS checks use a separate client from INGEST_CLIENT_ID (default traceweaver-ingest), distinct from the user client. User tokens cannot ingest; ingest tokens cannot access user read routes. Active membership, ingest_service DB role and direct/group ingest grants are required; read/admin alone is insufficient. Producers obtain tokens from the IdP; this API does not read INGEST_CLIENT_SECRET. Local Keycloak integration is verified; production IdP remains separate. No token bypass.
 
 Envelopes contain 1–500 records, with the existing 1 MiB JSON body limit. Invalid envelopes return 422. Individual invalid records return a sanitized rejection code while valid records proceed. Unknown input fields such as received_at/parser_version are rejected. A whole batch and its audit commit in one transaction; infrastructure/audit failure rolls everything back and returns sanitized 503. Source grant revocation is checked on every new batch.
 
@@ -10,6 +10,8 @@ Migration 003 adds batches and immutable events. Source event identity is unique
 
 Redaction recursively masks credential-named payload keys and common key=value/key:value credentials and Bearer values in strings. It is a bounded heuristic, not arbitrary sensitive-data classification: producers must keep secrets out of source IDs, identifier values, field names and other free text. Payload nesting beyond 32 levels is rejected. Original input is never echoed in errors or audit. No raw log archive is created.
 
-Provenance is stored as batch_id, one-based line locator, content_hash, source/parser metadata and receive time. Event read APIs will assemble the public Event DTO; they are not implemented by this change.
+Provenance stores batch_id, one-based locator, content_hash, source/parser metadata and receive time. [Event read APIs](EVENTS.md) assemble the implemented public Event DTO.
+
+Revalidate all bounded fields after redaction: an expanded message/action/identifier rejects that record before storage. Timestamps are canonicalized without losing microseconds; millisecond input retains legacy canonical hashes. Nonzero digits beyond6 fractional places reject with UNSUPPORTED_TIMESTAMP_PRECISION; extra trailing zeroes are accepted. Existing stored events are not rewritten or reconstructed. Compressed HTTP bodies are unsupported and return415 before decompression.
 
 Checks: `npm test`, `npm run check:base`, `npm run licenses:check`; PostgreSQL coverage: `node --env-file-if-exists=.env --test backend/tests/integration/ingestion.test.js`. Integration tests create and retain an isolated test DB, including a deliberate audit-failure trigger in that test DB only. Run `npm run db:migrate` before serving against an existing development DB. No automatic migration on server startup.

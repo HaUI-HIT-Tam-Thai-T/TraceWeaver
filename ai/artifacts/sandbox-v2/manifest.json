@@ -1,0 +1,31 @@
+{
+  "model_version": "logistic-regression-sandbox-features-2-experiment-1",
+  "feature_schema_version": "1",
+  "policy_version": "sandbox-rules-1",
+  "feature_version": "sandbox-observable-features-2",
+  "dataset_version": "sandbox-oracle-scenarios-1",
+  "usage": "local_experiment_not_default",
+  "model_file": "model_sandbox_v2.json",
+  "sha256": "f06fc43f8784cb93e1d4b52b230e8ca7ec4fc846d9cd068a97a75f6145e76420",
+  "dataset_checksums": {
+    "train.json": "0cbcb0eaeebb717bb018edd03ba3551c931a08b3d22c688dabd3045a210c4f6d",
+    "validation.json": "98a691e3dd8f5af9ad6b53909bdd449bf2c0fd34a7e9df688f98a251a9758664",
+    "test.json": "d8123545c605120231711ca418351d358db55794bd9f519becf3aaa14aa9b69a",
+    "oracle.json": "e93c1ba83278d4e412de6185da64ea9acfbc9d687338a1eeb9b5795309a1f8b2"
+  },
+  "evaluation_sha256": "e5477db95c4cbc5bb4322e415f32be2911beb19237012ccf66d78045fc33d3d2",
+  "scaler_fit_split": "train",
+  "threshold_selection_split": "validation",
+  "metrics_summary": {
+    "accuracy": 0.8125,
+    "precision": 0.7273,
+    "recall": 1.0,
+    "f1": 0.8421,
+    "tp": 144,
+    "fp": 54,
+    "fn": 0,
+    "tn": 90,
+    "total": 288
+  },
+  "license": "Apache-2.0"
+}

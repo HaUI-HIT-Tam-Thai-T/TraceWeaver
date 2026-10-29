@@ -9,6 +9,17 @@ export function createIngestTokenVerifier(config) {
   return createTokenVerifier({ ...config, oidcUserClientId: config.oidcIngestClientId });
 }
 
+export function createAppTokenVerifier(config) {
+  if (!config.oidcAppClientId || [config.oidcUserClientId, config.oidcIngestClientId].includes(config.oidcAppClientId)) throw new Error('OIDC app client must be distinct');
+  const verify = createTokenVerifier({ ...config, oidcUserClientId: config.oidcAppClientId });
+  return async (token) => {
+    if (!config.oidcAppSubject) throw new ApiError(503, 'CORE_NOT_READY', 'Core app identity is not configured');
+    const identity = await verify(token);
+    if (identity.subject !== config.oidcAppSubject) throw new ApiError(401, 'INVALID_TOKEN', 'App access token is not valid for this API');
+    return identity;
+  };
+}
+
 export function createTokenVerifier(config) {
   const keys = createRemoteJWKSet(new URL(config.oidcJwksUri), {
     timeoutDuration: config.oidcTimeoutMs,

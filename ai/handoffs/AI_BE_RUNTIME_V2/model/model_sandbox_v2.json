@@ -1,0 +1,43 @@
+{
+  "model_version": "logistic-regression-sandbox-features-2-experiment-1",
+  "feature_schema_version": "1",
+  "policy_version": "sandbox-rules-1",
+  "feature_version": "sandbox-observable-features-2",
+  "dataset_version": "sandbox-oracle-scenarios-1",
+  "usage": "local_experiment_not_default",
+  "algorithm": "LogisticRegression",
+  "training_method": "full_batch_gradient_descent_with_l2",
+  "feature_names": [
+    "delta_seconds",
+    "shared_id_count",
+    "text_similarity",
+    "transition_allowed",
+    "conflicting_id"
+  ],
+  "weights": [
+    -0.4086925356026311,
+    0.39116315281360114,
+    0.0,
+    2.2302661553102783,
+    -2.5317397239359165
+  ],
+  "bias": -1.068008569317225,
+  "scaler": {
+    "mean": [
+      463.77752976190476,
+      0.9375,
+      1.0,
+      0.875,
+      0.1875
+    ],
+    "std": [
+      1185.4267993086003,
+      0.24206145913796356,
+      1.0,
+      0.33071891388307384,
+      0.3903123748998999
+    ]
+  },
+  "evaluation_threshold": 0.2,
+  "threshold_usage": "offline_evaluation_only_not_edge_confirmation"
+}

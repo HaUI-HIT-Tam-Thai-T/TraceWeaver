@@ -1,19 +1,34 @@
-# Tài liệu dùng chung của team TraceWeaver
+# Tài liệu TraceWeaver
 
-Cập nhật đối chiếu: 19/10/2026. Đọc từ đây sau khi clone; các file trong mục lục được Git track. `.local/` và `.planning/` là tài liệu chuẩn bị local, không phải tài liệu mà thành viên khác tự nhận được khi clone.
+Tài liệu được chia theo tổng quan, vận hành và thành phần kỹ thuật. Chỉ các chức năng trong [hiện trạng](CURRENT_STATUS.md) được xem là đã triển khai.
 
-| Đọc theo thứ tự | Dùng để làm gì |
+| Chủ đề | Tài liệu |
 |---|---|
-| [01 — Đối chiếu đề thi](01-DOI-CHIEU-DE-THI.md) | Yêu cầu bắt buộc/khuyến nghị, hiện trạng và phần còn thiếu; nguồn đề, trang/mục và rubric |
-| [02 — Tích hợp BE/FE/AI](02-TICH-HOP-BE-FE-AI.md) | Phần mỗi người cần làm, API đã có/planned, hợp đồng bàn giao và thứ tự tích hợp |
-| [03 — Dữ liệu, kiểm thử, minh chứng](03-DU-LIEU-KIEM-THU-MINH-CHUNG.md) | Dữ liệu demo/evaluation, test matrix và cách lưu bằng chứng thật |
-| [04 — Demo và hồ sơ nộp](04-DEMO-VA-HO-SO-NOP.md) | Checklist source/release/install/report/slide, kịch bản 10 phút và cổng nghiệm thu |
-| [Hướng dẫn license](HUONG-DAN-LICENSE-CHO-TEAM.md) | Các lệnh kiểm/cập nhật license và giới hạn npm/FE/AI/container |
+| Tổng quan, kiến trúc ba tầng, công nghệ | [README](../README.md) |
+| Cài từ source, cấu hình và kiểm thử | [INSTALL](../INSTALL.md) |
+| Docker, local Identity và demo login | [Docker](../backend/DOCKER.md), [Keycloak](../backend/KEYCLOAK.md) |
+| Backend/API | [Backend](../backend/README.md), [OpenAPI và schemas](../backend/contracts/README.md) |
+| Bàn giao React/Vite | [Luồng và tích hợp FE](FRONTEND_HANDOFF.md), [API reference chi tiết](FRONTEND_API_REFERENCE.md) |
+| Xác thực và quyền dữ liệu | [Identity](../backend/IDENTITY.md) |
+| Dữ liệu đầu vào và truy vấn | [Ingestion](../backend/INGESTION.md), [Events](../backend/EVENTS.md) |
+| Tái dựng và duyệt liên kết | [Reconstruction](../backend/RECONSTRUCTION.md) |
+| AI scorer, model opt-in và cách test | [Scorer](../backend/SCORER.md), [Model và provenance](../ai/artifacts/sandbox-v2/README.md) |
+| Quy trình và thống kê | [Cases](../backend/CASES.md), [Core workflow](../backend/WORKFLOW.md), [Dashboard](../backend/DASHBOARD.md) |
+| Tích hợp FE/AI/simulator | [Integration](INTEGRATION.md), [AI handoff](BACKEND_HANDOFF.md), [Backend response](BACKEND_HANDOFF_RESPONSE.md) |
+| Đóng góp, license, bảo mật | [Contributing](../CONTRIBUTING.md), [Dependency inventory](../backend/DEPENDENCIES.md), [Notices](../backend/THIRD_PARTY_NOTICES.txt), [Security](../SECURITY.md) |
+| Thay đổi và báo lỗi | [Changelog](../CHANGELOG.md), [Issues](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues) |
 
-Lệnh chạy hiện có ở [INSTALL](../INSTALL.md), [backend README](../backend/README.md) và [Identity BE](../backend/IDENTITY.md). Contract authoritative ở [backend/contracts](../backend/contracts/README.md); không định nghĩa DTO riêng khác schema khi làm FE/AI.
+OpenAPI/JSON Schema là hợp đồng chung; không tạo DTO riêng khác schema. Checklist chuẩn bị thi và báo cáo kiểm chứng local không thuộc tài liệu sử dụng công khai. Backend đã tích hợp scorer baseline/model v2 opt-in; kết quả và giới hạn cập nhật ở [CURRENT_STATUS](CURRENT_STATUS.md). Tag v0.1.0-base.1 là bản scaffold.
 
-## Hiện trạng để tránh hiểu nhầm
+## Quy ước thư mục
 
-BE có PostgreSQL/migrations, JWT/JWKS enforcement và ba API đọc me/sources/knowledge. 17 test thường và 15 test identity đã pass local; Identity dùng Postman JWKS stand-in, không phải Keycloak thật. Frontend/AI/simulator còn là khung. Workflow, ingestion/reconstruction/review/case/dashboard chưa chạy đầu-cuối. Tag v0.1.0-base.1 là bộ khung trước các thay đổi BE mới, không phải release nghiệm thu toàn sản phẩm.
+- `docs/`: tài liệu dùng chung và bàn giao giữa các thành phần.
+- `backend/*.md`, `ai/*.md`, `frontend/README.md`: hướng dẫn gắn với source của từng thành phần.
+- `.planning/`: kế hoạch, quyết định và trạng thái làm việc local.
+- `ai/handoffs/`: gói bàn giao AI được quản lý trong Git, giữ nguyên nội dung/checksum.
+- `.local/reports/`: kết quả kiểm tra và bản ghi thao tác local.
+- `.local/scripts/`: script vận hành/demo dùng riêng trên máy.
+- `.local/releases/`: bản nháp PR và release.
+- `.local/ai-test/`: phiên test AI đang chạy, payload, log và báo cáo của phiên.
 
-Các bảng trong docs là checklist làm việc, không phải điểm số hoặc xác nhận BTC đã nghiệm thu. Yêu cầu vòng HaUI và thể lệ Quốc gia được ghi tách riêng; deadline lịch thực tế cần đội xác nhận.
+Runtime AI, Keycloak và cache giữ nguyên ở `.local/ai-venv/`, `.local/keycloak/` và `.local/npm-cache/`. Không đưa secret, môi trường Python hoặc cache vào Git.
