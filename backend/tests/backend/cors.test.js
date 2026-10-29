@@ -17,6 +17,9 @@ test('browser origins use exact allowlists; preflights do not bypass authenticat
   const allowed = await preflight(); assert.equal(allowed.status, 204);
   assert.equal(allowed.headers.get('access-control-allow-origin'), origin);
   assert.match(allowed.headers.get('vary'), /Origin/);
+  const adminPreflight = await preflight({ 'Access-Control-Request-Method': 'PUT' }, '/api/v1/workspaces/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/admin/members/person');
+  assert.equal(adminPreflight.status, 204);
+  assert.match(adminPreflight.headers.get('access-control-allow-methods'), /PUT/);
   for (const patch of [{ Origin: origin + '.evil.test' }, { 'Access-Control-Request-Method': 'DELETE' },
     { 'Access-Control-Request-Headers': 'x-end-user-authorization' }]) assert.equal((await preflight(patch)).status, 403);
   const anonymous = await fetch(base + '/api/v1/me', { headers: { Origin: origin } });
