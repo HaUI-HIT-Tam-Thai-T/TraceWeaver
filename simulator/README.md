@@ -1,4 +1,46 @@
-# Simulator dữ liệu lab
+# Simulator TraceWeaver
+
+Thư mục này có hai phần dùng chung ba nguồn intake, account và provision:
+
+- **Mô phỏng nghiệp vụ có trạng thái:** kiểm tra RAM, image và tài khoản; sửa điều kiện rồi chạy lại để sinh bằng chứng mới.
+- **Sinh dữ liệu kiểm thử:** tạo log tổng hợp cho ingestion, tái dựng hành trình và demo. Dữ liệu sinh sẵn không thay thế kết quả chạy lại nghiệp vụ.
+
+## Cấu trúc mã nguồn
+
+```text
+simulator/
+├── README.md                  # Hướng dẫn cấu trúc, sinh dữ liệu và demo
+├── lab-state.mjs              # Logic thuần: điều kiện, sửa, chạy lại, lịch sử và kiểm tra kết quả
+├── generate.mjs               # Sinh sự kiện ba nguồn, delivery, scenario và oracle riêng
+├── upload.mjs                 # Gửi observable/delivery qua API ingestion, kiểm tra duplicate/conflict
+├── prepare-demo.mjs           # Helper tạo run và hồ sơ mẫu qua API
+├── cli.mjs                    # Điểm vào lệnh npm run sim:generate
+└── tests/
+    ├── lab-state.test.mjs     # Lỗi kết hợp, sửa sai, replay, tài nguyên và bằng chứng
+    ├── generate.test.mjs      # Tính tái lập, schema, thứ tự gửi và tách oracle
+    └── upload.test.mjs        # Gửi dữ liệu, chống trùng và giới hạn HTTP
+```
+
+Các thư mục khung `sources/`, `scenarios/`, `fixtures/` không được chương trình sử dụng nên đã bỏ.
+Ba nguồn và các tình huống sinh log được định nghĩa trong `generate.mjs`; không có ba dịch vụ độc lập
+hay trình thiết kế kịch bản tổng quát cần khởi động riêng.
+
+## Phần nào chạy ở đâu?
+
+| Phần | Mã nguồn / nơi lưu | Cách sử dụng |
+|---|---|---|
+| Nghiệp vụ RAM/image/tài khoản | [lab-state.mjs](lab-state.mjs) | BE gọi trong giao dịch; không chạy trực tiếp bằng CLI sinh log |
+| API, quyền, version và lưu trạng thái | [lab-repository.js](../backend/src/core/data/lab-repository.js), bảng `core.lab_sandboxes` | Đọc/sửa/chạy lại qua API sandbox |
+| Log mới và chuyển sang ingestion | [lab-collector.js](../backend/src/core/data/lab-collector.js), bảng `core.lab_outbox` | Collector dùng `LAB_INGEST_SUBJECT` khi đã cấu hình |
+| Gắn hồ sơ và lưu kiểm chứng | [case-verification.js](../backend/src/core/data/case-verification.js), bảng `core.case_verifications` | Reviewer kiểm tra bằng chứng nguồn trước khi đóng |
+| Dataset sinh bằng CLI | Thư mục `--out`, mặc định dưới `.local/simulator/` | Chứa các file JSON được liệt kê bên dưới; không commit dữ liệu chạy thử |
+| Kiểm thử giao dịch và HTTP với PostgreSQL | [lab.test.js](../backend/tests/integration/lab.test.js) | Dùng DB test riêng, không phải DB demo |
+
+Contract, phân quyền, cách cấu hình và ví dụ sửa/chạy lại theo hồ sơ nằm trong
+[hướng dẫn sandbox của BE](../backend/LAB_SANDBOX.md).
+Mô tả dataset demo phía dưới không xác nhận API sandbox mới đã được triển khai lên server.
+
+## Bộ sinh log tổng hợp
 
 Sinh dữ liệu tổng hợp cho TraceWeaver bằng Node.js có sẵn, không thêm dependency.
 Mặc định có **36 yêu cầu / 111 sự kiện duy nhất**, thuộc ba nguồn intake, account và provision.
