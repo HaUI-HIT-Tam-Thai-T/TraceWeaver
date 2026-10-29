@@ -10,6 +10,7 @@ services:
       SCORER_MODEL_VERSION: logistic-regression-sandbox-features-2-experiment-1
       SCORER_TIMEOUT_MS: '5000'
       NODE_EXTRA_CA_CERTS: /run/scorer-ca/server.crt
+      LAB_INGEST_SUBJECT: ${LAB_INGEST_SUBJECT:-}
     volumes:
       - ./scorer-ca:/run/scorer-ca:ro,Z
     depends_on:

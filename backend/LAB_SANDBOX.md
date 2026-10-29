@@ -1,7 +1,9 @@
 # Stateful lab sandbox and case verification
 
-This module simulates resource allocation; it does not provision a VM or execute a network health probe.
-`passed` means the simulated environment is running and its successful attempt allocated the requested RAM.
+This module simulates RAM allocation, an available image and an active business account; it does not
+provision a VM, access a registry or execute a network health probe. Business accounts are synthetic,
+independent of Keycloak login accounts. `passed` means a current attempt satisfied all three conditions
+and its simulated environment matches the request and allocated RAM.
 Do not describe this evidence as verification of an external production environment.
 
 ## Setup
@@ -19,10 +21,66 @@ The administrator role does not imply data access or reviewer permission.
 Set `LAB_INGEST_SUBJECT` on the API to an existing dedicated service-account subject with active workspace
 membership, `ingest_service` role and ingest grants for these sources. No service token is exposed to browsers.
 The collector sends the transactional outbox through the existing ingestion service every two seconds.
+The Oracle deployment overlay forwards the optional `LAB_INGEST_SUBJECT` from its private server env.
 Absent this setting, logs stay queued. Failed deliveries retry; source IDs remain stable across retries.
 Operators cannot impersonate this service account by submitting a subject in request bodies.
 
 ## Demo sequence
+
+### Case-bound API for FE (checker `lab-state-2`)
+
+`GET /api/v1/workspaces/{wid}/cases/{cid}/sandbox` returns
+`{case_id,case_version,observation}`. Observation includes `request_id`, `source_version`, `conditions`,
+`attempts`, latest `attempt`, `environment`, `result`, `reason`, and `delivery:{status,total,delivered}`.
+`conditions` carries immutable `required_ram`, `image_id`, `account_id` and current booleans
+`image_available`, `account_active`. Each attempt stores these IDs/booleans, RAM requirements/availability,
+three `checks:{step,passed,reason}`, all `blockers`, the first blocking `reason`, operation ID and timestamp.
+Checks are preflight conditions: all three are evaluated; they do not claim external infrastructure ran.
+
+Use `POST .../cases/{cid}/sandbox/commands` with `expected_case_version` and `expected_version`
+(the observed sandbox `source_version`). Never send `request_id`; BE derives it from the case root.
+The root must be an ingested event from the sandbox outbox, not another event with the same request string.
+Commands use one transaction with the case/run and sandbox locks. Closed cases must be reopened.
+
+```json
+{"action":"capacity","ram":8,"expected_case_version":4,"expected_version":3}
+```
+```json
+{"action":"image","image_id":"lab-image-LAB-001","available":true,"expected_case_version":4,"expected_version":4}
+```
+```json
+{"action":"account","account_id":"lab-account-LAB-001","active":true,"expected_case_version":4,"expected_version":5}
+```
+```json
+{"action":"provision","operation_id":"unique-new-attempt","expected_case_version":4,"expected_version":6}
+```
+
+Capacity/image/account require administrator plus source read access. Provision requires operator/reviewer
+plus source access. The same commands on `/lab/commands` need `request_id` except capacity.
+At submit, optional `image_available:false` and/or `account_active:false` create combined faults;
+both default true, so existing RAM demos retain their meaning. Image/account IDs are stable per request;
+repairing a different resource returns 422 `LAB_COMMAND_REJECTED` / `RESOURCE_MISMATCH`.
+These are per-request simulated resources, not a shared real registry/account administration system.
+
+Rerunning an existing environment reuses its allocation/identity and never spends RAM twice.
+A failed rerun stops that simulated environment while keeping its RAM reserved; a later successful retry
+reactivates it. No deletion/release route is introduced. Reusing an operation ID never creates another
+attempt or log; case command responses include `execution:{replayed,operation_id,attempt}` so FE can
+distinguish the original operation result from the current observation.
+
+Any sandbox state version change requires a fresh execution, even unrelated changes (conservative policy).
+No attempt -> `inconclusive/NOT_EXECUTED`; old execution -> `inconclusive/RERUN_REQUIRED`;
+failed conditions -> `failed` with blockers. Old checker-v1 attempts require rerunning, not data rewriting.
+Input/version errors: 400 invalid body; 409 case or sandbox version conflict; 422 closed case,
+wrong resource, request binding or attempt limit; 403 role failure; 404 inaccessible scope.
+
+Execution and delivery are separate: `passed` plus `delivery.status=pending` means simulation succeeded
+but its new log is not confirmed ingested. It is not a business failure. Reviewer POSTs `{}` to the existing
+case `verifications` endpoint after delivery; a proof saved while pending cannot close the case, even if
+delivery finishes later. A new reviewer check is required. Closure compares checker/source/case versions,
+request/attempt/environment and current successful delivery. No new migration is needed beyond 008–010.
+
+### Original RAM example
 
 1. `GET /api/v1/workspaces/{wid}/lab` reads the current `version`.
 2. Operator sends commands to `POST /api/v1/workspaces/{wid}/lab/commands`:
@@ -50,8 +108,7 @@ Opening a case again requires a new reason and a new verification for its new ca
 - Configuring a sandbox enables the additional closure guard for cases in that workspace. Use a dedicated
   workspace: historic static requests absent from the sandbox produce an inconclusive check and cannot close.
 - The root event must carry exactly one distinct request identifier. It is matched to authoritative source state.
-- A change to any lab state version invalidates a previously passing check, including unrelated allocations.
-  Recheck before closing; this deliberately conservative first policy avoids stale proofs.
+- A change to any lab state version requires rerunning and then a new reviewer check, including unrelated allocations.
 - Non-sandbox workspaces retain the existing reviewer/evidence closure policy. This is NOT a general verifier
   for arbitrary external systems. Those need a trusted source adapter and an explicit verification policy.
 - Max 1,000 requests and 20 attempts per request. No reset/delete route is provided.
