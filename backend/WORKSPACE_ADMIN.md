@@ -41,7 +41,10 @@ Phân trang live theo subject, có thể thay đổi giữa các trang; refresh 
 qua đổi workspace/logout. Giới hạn/cursor này không dùng signed cursor của events/cases.
 
 Không thể bỏ role admin hoặc thu hồi membership của admin active cuối cùng:422 LAST_ADMIN_REQUIRED.
-Tài khoản đang là ingest_service:422 SERVICE_ACCOUNT_PROTECTED. Thu hồi direct read không bảo đảm mất
+Tài khoản đang là ingest_service và subject core/collector cấu hình qua `CORE_APP_SUBJECT` /
+`LAB_INGEST_SUBJECT`:422 SERVICE_ACCOUNT_PROTECTED ở lớp DB, kể cả service chưa có data role.
+Không thêm membership, sửa role/active hoặc cấp/thu hồi direct read của các subject được bảo vệ qua
+API người dùng. Thu hồi direct read không bảo đảm mất
 mọi quyền nếu còn group grant; để mất quyền workspace ngay thì thu hồi membership. Không có nút xóa.
 
 ## Ví dụ request
@@ -96,8 +99,11 @@ account_provisionings; SELECT/INSERT/UPDATE trên memberships/source_grants; SEL
 membership_roles; quyền audit INSERT giữ nguyên. Không cấp quyền xóa tài khoản/log hay sửa workflow history.
 
 ACCOUNT_ADMIN_CLIENT_ID và ACCOUNT_ADMIN_CLIENT_SECRET là cấu hình server-only, để trống mặc định.
-Thiếu adapter: ACCOUNT_PROVIDER_DISABLED hoặc pending khi tạo chưa hoàn tất; phần đọc và thu hồi DB vẫn
-dùng được. Cấp/kích hoạt tài khoản/read và thêm membership cần xác minh human account ở Keycloak.
+Thiếu adapter:503 ACCOUNT_PROVIDER_DISABLED; yêu cầu mới không tạo pending operation hay audit yêu cầu
+tạo account. Operation pending từ trước vẫn giữ nguyên và đọc được; retry khi thiếu adapter trả lỗi
+disabled, không suy diễn đã tạo account. Completed replay cùng key/body vẫn trả kết quả cũ, khác body
+vẫn409 IDEMPOTENCY_CONFLICT. Phần đọc và thu hồi thành viên người dùng qua DB vẫn dùng được.
+Cấp/kích hoạt tài khoản/read và thêm membership cần xác minh human account ở Keycloak.
 Production vẫn bắt buộc TLS theo OIDC_ISSUER. Adapter dùng client credentials, timeout chung10giây,
 không dùng admin password trong runtime và không đưa token admin ra browser.
 

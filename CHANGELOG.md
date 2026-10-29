@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Administration audit fixes (BE-50)
+
+- Protect configured core and collector subjects independently of ingest roles at the repository boundary. Human administration cannot add their membership, change roles/active state or direct-read grants; human revocation still works without the identity provider.
+- Reject new account provisioning with ACCOUNT_PROVIDER_DISABLED before creating a pending operation or request audit when no provider is configured. Keep existing pending status, completed replay and conflicting-body detection available.
+- Verify138 BE tests (two optional Python skips),10 simulator tests and15 PostgreSQL admin/lab/case checks, plus base/license98/diff checks. No migration, dependency, FE or production change; fixes are local source commits pending push/deployment.
+
 ## Unreleased — Workspace administration and account provisioning (BE-48)
 
 - Add workspace-admin member directory, existing-account membership, role/revocation and scoped direct-read grants with workspace CAS, last-admin and service-account protection, atomic audit and PUT CORS support for existing allowed origins.
