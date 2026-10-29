@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Workspace administration and account provisioning (BE-48)
+
+- Add workspace-admin member directory, existing-account membership, role/revocation and scoped direct-read grants with workspace CAS, last-admin and service-account protection, atomic audit and PUT CORS support for existing allowed origins.
+- Add opt-in Keycloak human-account creation with temporary password, owned idempotent provisioning, caller-scoped operation status and safe retry after provider/DB/audit failures. Passwords/provider tokens are not persisted in application state/audit or returned. Add migration011 and OpenAPI36 operations; handoff backend/WORKSPACE_ADMIN.md.
+- Verify138 BE tests (two optional Python skips),10 simulator tests,13 PostgreSQL admin/lab/case checks, additional real-HTTP adapter and race/audit fault regressions, base/license98/diff checks. FE unchanged. New production rollout is blocked by automatic approval review pending explicit approval for the dedicated Keycloak service client/secret/profile and migration011/runtime grants; existing simulator deployment is unchanged.
+
 ## Unreleased — FE sandbox integration handoff
 
 - Add docs/FE_SANDBOX_HANDOFF.md with deployed workspace, role matrix, case-bound endpoints, JSON examples, separate execution/delivery/proof states, CAS/replay/error handling and UAT checklist. Describe admin-only repair visibility and the total-RAM semantics explicitly. No runtime or FE changes.
