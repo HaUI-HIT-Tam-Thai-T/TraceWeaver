@@ -1,22 +1,7 @@
 # TraceWeaver Frontend
 
-React + TypeScript + Vite, có cấu hình, routing, phiên Keycloak, Axios client,
-workspace/sources, event explorer, reconstruction, review liên kết, case workflow,
-dashboard và tra cứu knowledge. Các kết quả kiểm chứng và giới hạn được ghi ở từng mục bên dưới.
-
-## Tích hợp backend
-
-OIDC Code + PKCE; không đưa client secret vào trình duyệt. Quyền truy cập được backend kiểm tra.
-
-Backend đã có 20 operations; xem [hiện trạng](../docs/CURRENT_STATUS.md),
-[hướng dẫn tích hợp frontend](../docs/FRONTEND_HANDOFF.md) và
-[API reference](../docs/FRONTEND_API_REFERENCE.md).
-Frontend local chạy tại `http://localhost:5173`, callback `/auth/callback` và gọi API
-qua Vite proxy như hướng dẫn bên dưới. Khi gọi API trực tiếp khác origin, cấu hình
-`FRONTEND_ORIGINS` theo origin thực tế; callback/Web Origin của Keycloak cần đăng ký
-riêng theo [Keycloak guide](../backend/KEYCLOAK.md).
-API/health hỗ trợ preflight Authorization/Content-Type/Idempotency-Key và expose
-Location/X-Request-ID; core HTTP chỉ dành cho app server. CORS không thay token/DB permissions.
+React + TypeScript + Vite, có cấu hình, routing, phiên Keycloak, Axios client, workspace/sources và event explorer.
+Chưa triển khai reconstruction, dashboard hoặc các thao tác case.
 
 ## Công cụ và phần đã làm
 
