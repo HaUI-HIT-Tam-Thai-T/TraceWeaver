@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Sandbox ID validation and CLI guidance (BE-44)
+
+- Reject new sandbox request IDs whose request/account/image identifiers would change under ingestion redaction, before state or outbox writes. Apply validation at HTTP and repository boundaries, preserve redaction and existing data, and return a non-echoing 400 INVALID_INPUT.
+- Verify rejected IDs leave DB/outbox unchanged and accepted Unicode IDs survive simulator -> ingestion -> run -> case binding. 133 BE tests pass (two optional Python tests skipped), 10 simulator and three sandbox PostgreSQL tests pass; OpenAPI/base/license98/diff pass.
+- Correct simulator README: JSON is written only with explicit --out; the CLI has no default output directory. FE and server deployment remain unchanged.
+
 ## Unreleased — Three-condition sandbox verification (BE-41)
 
 - Add combined RAM/image/account faults, targeted repairs, immutable attempt snapshots and safe retries of an existing simulated environment without duplicate allocations.

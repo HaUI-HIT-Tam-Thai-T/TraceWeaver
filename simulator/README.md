@@ -33,7 +33,7 @@ hay trình thiết kế kịch bản tổng quát cần khởi động riêng.
 | API, quyền, version và lưu trạng thái | [lab-repository.js](../backend/src/core/data/lab-repository.js), bảng `core.lab_sandboxes` | Đọc/sửa/chạy lại qua API sandbox |
 | Log mới và chuyển sang ingestion | [lab-collector.js](../backend/src/core/data/lab-collector.js), bảng `core.lab_outbox` | Collector dùng `LAB_INGEST_SUBJECT` khi đã cấu hình |
 | Gắn hồ sơ và lưu kiểm chứng | [case-verification.js](../backend/src/core/data/case-verification.js), bảng `core.case_verifications` | Reviewer kiểm tra bằng chứng nguồn trước khi đóng |
-| Dataset sinh bằng CLI | Thư mục `--out`, mặc định dưới `.local/simulator/` | Chứa các file JSON được liệt kê bên dưới; không commit dữ liệu chạy thử |
+| Dataset sinh bằng CLI | Thư mục chỉ định bằng `--out`, ví dụ `.local/simulator/demo-01` | Chỉ ghi JSON khi có `--out`; không có thư mục output mặc định; không commit dữ liệu chạy thử |
 | Kiểm thử giao dịch và HTTP với PostgreSQL | [lab.test.js](../backend/tests/integration/lab.test.js) | Dùng DB test riêng, không phải DB demo |
 
 Contract, phân quyền, cách cấu hình và ví dụ sửa/chạy lại theo hồ sơ nằm trong
@@ -91,6 +91,13 @@ npm.cmd run sim:generate -- --seed=traceweaver-realistic-v3 --base-time=2026-10-
 ```
 
 Cùng seed, base-time và count tạo cùng dữ liệu. Đổi seed tạo namespace ID khác.
+`npm run sim:generate` không có `--out` chỉ in manifest ra terminal, không lưu các file JSON.
+Để xuất bộ dữ liệu ra đĩa, chỉ định rõ thư mục, ví dụ:
+
+```powershell
+npm.cmd run sim:generate -- --out=.local/simulator/demo-01
+```
+
 Nếu thay giờ bắt đầu trong cùng ngày cho một bộ đã nạp, hãy dùng seed mới để không xung đột ID cũ.
 Thư mục output phải chưa có các file tương ứng; công cụ không ghi đè bộ đã sinh.
 
