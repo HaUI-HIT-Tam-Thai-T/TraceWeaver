@@ -50,6 +50,9 @@ export function readConfig(env = process.env) {
     throw new Error('DATABASE_URL must be a PostgreSQL URL with credentials and database');
   }
   const oidcIssuer = identityUrl(env.OIDC_ISSUER ?? 'http://localhost:8081/realms/traceweaver', 'OIDC_ISSUER', appEnv);
+  const accountClientId = env.ACCOUNT_ADMIN_CLIENT_ID ?? '', accountClientSecret = env.ACCOUNT_ADMIN_CLIENT_SECRET ?? '';
+  if ((accountClientId || accountClientSecret) && (!/^[a-zA-Z0-9._-]{1,100}$/.test(accountClientId) ||
+      !/^[\x21-\x7e]{32,255}$/.test(accountClientSecret))) throw new Error('Account administration client configuration is invalid');
   const oidcAudience = env.OIDC_API_AUDIENCE ?? 'traceweaver-api';
   const oidcUserClientId = env.OIDC_CLIENT_ID ?? 'traceweaver-web';
   const oidcIngestClientId = env.INGEST_CLIENT_ID ?? 'traceweaver-ingest';
@@ -68,6 +71,7 @@ export function readConfig(env = process.env) {
   if (scorerUrl && (scorerSecret.length < 32 || !/^[\x21-\x7e]+$/.test(scorerSecret))) throw new Error('SCORER_SERVICE_SECRET must contain at least 32 printable ASCII characters');
   return Object.freeze({
     labIngestSubject,
+    accountClientId, accountClientSecret,
     scorerUrl, scorerSecret, scorerModelVersion, scorerTimeoutMs: positiveInteger(env.SCORER_TIMEOUT_MS, 'SCORER_TIMEOUT_MS', 5000, 5000),
     appEnv,
     frontendOrigins: Object.freeze([...new Set(frontendOrigins)]),

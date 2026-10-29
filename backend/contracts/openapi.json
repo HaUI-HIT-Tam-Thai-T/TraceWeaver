@@ -4,7 +4,7 @@
   "info": {
     "title": "TraceWeaver API",
     "version": "0.1.0",
-    "description": "Public/core/scorer interfaces. 30 operations implemented in source, including opt-in stateful sandbox, case-bound commands and immutable source verification. Non-sandbox workspaces retain their existing closure policy. See backend/LAB_SANDBOX.md."
+    "description": "Public/core/scorer interfaces. 36 operations implemented in source, including opt-in stateful sandbox, case-bound commands and immutable source verification. Non-sandbox workspaces retain their existing closure policy. See backend/LAB_SANDBOX.md."
   },
   "paths": {
     "/api/v1/workspaces/{wid}/cases/{cid}/assignees": {
@@ -2366,6 +2366,559 @@
                 ]
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/admin/members": {
+      "get": {
+        "operationId": "listWorkspaceMembers",
+        "summary": "listWorkspaceMembers",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          }
+        }
+      },
+      "post": {
+        "operationId": "addWorkspaceMember",
+        "summary": "addWorkspaceMember",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "subject",
+                  "roles",
+                  "expected_version"
+                ],
+                "properties": {
+                  "subject": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                  },
+                  "roles": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "uniqueItems": true,
+                    "items": {
+                      "enum": [
+                        "viewer",
+                        "operator",
+                        "reviewer",
+                        "admin"
+                      ]
+                    }
+                  },
+                  "expected_version": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/admin/members/{subject}": {
+      "put": {
+        "operationId": "updateWorkspaceMember",
+        "summary": "updateWorkspaceMember",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "roles",
+                  "active",
+                  "expected_version"
+                ],
+                "properties": {
+                  "roles": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "uniqueItems": true,
+                    "items": {
+                      "enum": [
+                        "viewer",
+                        "operator",
+                        "reviewer",
+                        "admin"
+                      ]
+                    }
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "expected_version": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/admin/members/{subject}/sources/{sid}": {
+      "put": {
+        "operationId": "setWorkspaceMemberSource",
+        "summary": "setWorkspaceMemberSource",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          },
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "enabled",
+                  "expected_version"
+                ],
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "expected_version": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/admin/accounts": {
+      "post": {
+        "operationId": "createWorkspaceAccount",
+        "summary": "createWorkspaceAccount",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "username",
+                  "temporary_password",
+                  "roles",
+                  "expected_version"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+                  },
+                  "temporary_password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 128,
+                    "writeOnly": true
+                  },
+                  "roles": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "uniqueItems": true,
+                    "items": {
+                      "enum": [
+                        "viewer",
+                        "operator",
+                        "reviewer",
+                        "admin"
+                      ]
+                    }
+                  },
+                  "expected_version": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/admin/accounts/provisioning": {
+      "get": {
+        "operationId": "getAccountProvisioning",
+        "summary": "Read caller-owned provisioning state without resending temporary password",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
           }
         }
       }

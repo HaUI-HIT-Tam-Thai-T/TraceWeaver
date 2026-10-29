@@ -16,8 +16,9 @@ import { createCaseRouter } from './routers/case.route.js';
 import { createDashboardRouter } from './routers/dashboard.route.js';
 import { createWorkflowRouter } from './routers/workflow.route.js';
 import { createLabRouter } from './routers/lab.route.js';
+import { createAdminRouter } from './routers/admin.route.js';
 
-export function createApp({ checkReadiness, verifyToken, verifyIngestToken, verifyAppToken, access, ingestion, events, runs, reviews, cases, dashboard, workflows, lab, oidc, frontendOrigins = [], logError = () => {} }) {
+export function createApp({ checkReadiness, verifyToken, verifyIngestToken, verifyAppToken, access, ingestion, events, runs, reviews, cases, dashboard, workflows, lab, admin, oidc, frontendOrigins = [], logError = () => {} }) {
   const app = express();
   app.disable('x-powered-by');
   app.use(requestContext);
@@ -32,6 +33,7 @@ export function createApp({ checkReadiness, verifyToken, verifyIngestToken, veri
   app.use('/api/v1', createReviewRouter({ verifyToken, access, reviews }));
   app.use('/api/v1', createCaseRouter({ verifyToken, access, cases }));
   app.use('/api/v1', createLabRouter({ verifyToken, access, lab }));
+  app.use('/api/v1', createAdminRouter({ verifyToken, access, admin }));
   app.use('/api/v1', createDashboardRouter({ verifyToken, access, dashboard }));
   app.use('/core/v1', express.json({ limit: 1048576, strict: true, inflate: false }), createWorkflowRouter({ verifyAppToken, verifyToken, workflows }));
   app.use(notFound);
