@@ -1,5 +1,8 @@
 # Tài liệu TraceWeaver
 
+Bàn giao mới cho FE: [Simulator và kiểm chứng hồ sơ](FE_SANDBOX_HANDOFF.md) — API đã triển khai,
+quyền, request/response, version/retry, trạng thái log/proof và checklist UAT.
+
 Tài liệu được chia theo tổng quan, vận hành và thành phần kỹ thuật. Chỉ các chức năng trong [hiện trạng](CURRENT_STATUS.md) được xem là đã triển khai.
 
 | Chủ đề | Tài liệu |

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — FE sandbox integration handoff
+
+- Add docs/FE_SANDBOX_HANDOFF.md with deployed workspace, role matrix, case-bound endpoints, JSON examples, separate execution/delivery/proof states, CAS/replay/error handling and UAT checklist. Describe admin-only repair visibility and the total-RAM semantics explicitly. No runtime or FE changes.
+
 ## Unreleased — Oracle sandbox rollout (BE-46)
 
 - Push Phuoc/feat/be-sandbox-verification and deploy API source60919cd as be-60919cd on Oracle. Apply migrations008–010, runtime grants and server-local collector configuration; create a separate sandbox workspace using existing operator/reviewer/admin/viewer/ingest identities without password changes.
