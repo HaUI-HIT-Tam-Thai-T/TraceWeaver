@@ -6,6 +6,26 @@ import { once } from 'node:events';
 import { createApp } from '../../src/app.js';
 import { labCommand } from '../../src/validations/lab.validation.js';
 
+test('submit rejects source IDs changed by redaction before invoking the repository', async t => {
+  let calls = 0;
+  const server = createApp({ verifyToken: async () => ({ subject: 'operator' }), access: {},
+    lab: { command: async () => { calls++; return { version: 2 }; } }
+  }).listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const url = `http://127.0.0.1:${server.address().port}/api/v1/workspaces/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/lab/commands`;
+  for (const request_id of ['token=synthetic-audit-only', 'LAB password:synthetic', 'Bearer synthetic-token']) {
+    const body = { action: 'submit', expected_version: 1, ram: 4, request_id };
+    assert.throws(() => labCommand(body), e => e.status === 400 && e.code === 'INVALID_INPUT');
+    const response = await fetch(url, { method: 'POST', headers: { authorization: 'Bearer test', 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    assert.equal(response.status, 400);
+    assert.ok(!(await response.text()).includes(request_id));
+  }
+  assert.equal(calls, 0);
+  for (const request_id of ['LAB-001', 'Yêu-cầu-01', 'token-label-01'])
+    assert.equal(labCommand({ action: 'submit', expected_version: 1, ram: 4, request_id }).request_id, request_id);
+});
+
 test('case sandbox binds request server-side and rejects forged success, request and versions', async t => {
   const calls = [];
   const server = createApp({ verifyToken: async () => ({ subject: 'operator' }), access: {},

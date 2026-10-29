@@ -61,6 +61,10 @@ At submit, optional `image_available:false` and/or `account_active:false` create
 both default true, so existing RAM demos retain their meaning. Image/account IDs are stable per request;
 repairing a different resource returns 422 `LAB_COMMAND_REJECTED` / `RESOURCE_MISMATCH`.
 These are per-request simulated resources, not a shared real registry/account administration system.
+At submit, request ID and its derived account/image IDs must remain unchanged under ingestion redaction.
+IDs containing credential-like text (for example `token=...` or `Bearer ...`) return400 `INVALID_INPUT`
+before state/log creation; use stable codes such as `LAB-001`. The response never echoes the rejected ID.
+Existing requests/logs are not renamed or rewritten by this validation change.
 
 Rerunning an existing environment reuses its allocation/identity and never spends RAM twice.
 A failed rerun stops that simulated environment while keeping its RAM reserved; a later successful retry

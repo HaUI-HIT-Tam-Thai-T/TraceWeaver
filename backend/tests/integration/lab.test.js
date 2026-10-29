@@ -12,9 +12,13 @@ import { createCaseService } from '../../src/services/case.service.js';
 import { once } from 'node:events';
 
 test('three persisted conditions repair independently and retries retain old evidence', async t => {
-  const { pool, workspace, sources } = await caseFixture(t);
+  const { pool, workspace, sources, runs, cases } = await caseFixture(t);
   const lab = createLabRepository(pool);
   let state = await lab.configure('admin', workspace, sources);
+  await assert.rejects(lab.command('operator', workspace, { action: 'submit', request_id: 'token=synthetic-audit-only',
+    ram: 4, expected_version: state.version }), e => e.status === 400 && e.code === 'INVALID_INPUT');
+  assert.deepEqual(await lab.read('operator', workspace), state);
+  assert.equal((await pool.query('SELECT count(*)::int AS n FROM core.lab_outbox')).rows[0].n, 0);
   const send = async (subject, command) => { state = await lab.command(subject, workspace, { expected_version: state.version, ...command }); };
   await send('operator', { action: 'submit', request_id: 'multi', ram: 4, image_available: false, account_active: false });
   const run = operation_id => send('operator', { action: 'provision', request_id: 'multi', operation_id });
@@ -39,6 +43,22 @@ test('three persisted conditions repair independently and retries retain old evi
   assert.equal((await createLabRepository(pool).read('reviewer', workspace)).requests[0].attempts.length, 4);
   const result = await createLabCollector(pool, createIngestionService(createIngestionRepository(pool)), 'writer')();
   assert.equal(result.delivered, result.examined);
+  const request_id = 'Yêu-cầu-01';
+  await send('operator', { action: 'submit', request_id, ram: 1 });
+  await send('operator', { action: 'provision', request_id, operation_id: 'unicode-request' });
+  const collect = createLabCollector(pool, createIngestionService(createIngestionRepository(pool)), 'writer');
+  await collect();
+  const root = (await pool.query(`SELECT event_id,document FROM core.events WHERE workspace_id=$1
+    AND document->>'action'='request.accepted' AND document->'identifiers' @> $2::jsonb`,
+    [workspace, JSON.stringify([{ namespace: 'request', value: request_id }])])).rows[0];
+  assert.ok(root);
+  const at = Date.parse(root.document.occurred_at);
+  const unicodeRun = await runs.create('operator', workspace, { root_event_id: root.event_id, source_ids: sources, mode: 'rule_only',
+    window: { from: new Date(at - 1000).toISOString(), to: new Date(at + 60000).toISOString() } });
+  const item = await cases.create('operator', workspace, { run_id: unicodeRun.id, title: 'Unicode request binding regression' });
+  const bound = await cases.sandbox('operator', workspace, item.id);
+  assert.equal(bound.observation.request_id, request_id);
+  assert.equal(bound.observation.result, 'passed');
 });
 
 test('persistent sandbox enforces permissions, retries and concurrent capacity allocation', async t => {

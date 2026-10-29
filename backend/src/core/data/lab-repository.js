@@ -5,6 +5,7 @@ import { createLab, changeCapacity, changeCondition, submitRequest, provision, i
 import { withTransaction } from './database.js';
 import { authorize } from './run-repository.js';
 import { ApiError } from '../identity/api-error.js';
+import { labCommand } from '../../validations/lab.validation.js';
 
 export function createLabRepository(pool) {
   async function access(client, subject, workspace, sources, admin = false, write = false) {
@@ -45,6 +46,7 @@ export function createLabRepository(pool) {
       const execute = async client => {
         const administrative = ['capacity', 'image', 'account'].includes(command.action);
         const row = await locked(client, subject, workspace, administrative, !administrative);
+        labCommand(command);
         let next;
         try {
           if (command.action === 'capacity') next = changeCapacity(row.document, command.ram, command.expected_version);

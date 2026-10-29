@@ -1781,7 +1781,8 @@
                       "request_id": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 200
+                        "maxLength": 200,
+                        "description": "Stable request code, e.g. LAB-001. The request ID and derived account/image IDs must remain unchanged by ingestion redaction; otherwise 400 INVALID_INPUT before state or log creation. Existing identifiers are not rewritten."
                       },
                       "image_available": {
                         "type": "boolean",
