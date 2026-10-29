@@ -4,7 +4,7 @@
   "info": {
     "title": "TraceWeaver API",
     "version": "0.1.0",
-    "description": "Public/core/scorer interfaces. 22 operations implemented in source, including case-scoped assignee discovery. Health routes are in health.openapi.json. Sandbox and case verification endpoints are opt-in; legacy non-sandbox workspaces retain their existing closure policy. See backend/LAB_SANDBOX.md."
+    "description": "Public/core/scorer interfaces. 30 operations implemented in source, including opt-in stateful sandbox, case-bound commands and immutable source verification. Non-sandbox workspaces retain their existing closure policy. See backend/LAB_SANDBOX.md."
   },
   "paths": {
     "/api/v1/workspaces/{wid}/cases/{cid}/assignees": {
@@ -280,6 +280,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -288,12 +294,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -523,6 +523,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -531,12 +537,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -710,6 +710,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -718,12 +724,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -786,6 +786,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -794,12 +800,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -859,6 +859,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -867,12 +873,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -1079,6 +1079,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -1087,12 +1093,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -1152,6 +1152,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -1160,12 +1166,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -1304,6 +1304,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -1312,12 +1318,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "requestBody": {
@@ -1370,6 +1370,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -1378,12 +1384,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -1507,6 +1507,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -1515,12 +1521,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "requestBody": {
@@ -1682,7 +1682,7 @@
     "/api/v1/workspaces/{wid}/lab/commands": {
       "post": {
         "operationId": "commandLabSandbox",
-        "summary": "Execute a versioned sandbox command; capacity requires admin, submit/provision operator or reviewer",
+        "summary": "Execute sandbox command: capacity/image/account admin; submit/provision operator or reviewer",
         "x-implementation-status": "implemented",
         "security": [
           {
@@ -1775,13 +1775,21 @@
                       },
                       "ram": {
                         "type": "integer",
-                        "minimum": 0,
+                        "minimum": 1,
                         "maximum": 1048576
                       },
                       "request_id": {
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 200
+                      },
+                      "image_available": {
+                        "type": "boolean",
+                        "default": true
+                      },
+                      "account_active": {
+                        "type": "boolean",
+                        "default": true
                       }
                     },
                     "required": [
@@ -1819,6 +1827,72 @@
                       "request_id",
                       "operation_id"
                     ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "request_id",
+                      "image_id",
+                      "available"
+                    ],
+                    "properties": {
+                      "action": {
+                        "const": "image"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "request_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "image_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 220
+                      },
+                      "available": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "request_id",
+                      "account_id",
+                      "active"
+                    ],
+                    "properties": {
+                      "action": {
+                        "const": "account"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "request_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "account_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 220
+                      },
+                      "active": {
+                        "type": "boolean"
+                      }
+                    }
                   }
                 ]
               }
@@ -2028,6 +2102,267 @@
                 "additionalProperties": false,
                 "properties": {},
                 "required": []
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/cases/{cid}/sandbox": {
+      "get": {
+        "operationId": "getCaseSandbox",
+        "summary": "Read bound simulated request, conditions, attempts and log delivery",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseSandbox"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/cases/{cid}/sandbox/commands": {
+      "post": {
+        "operationId": "commandCaseSandbox",
+        "summary": "Execute command bound to case root; requires case and lab versions; closed case rejected",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseSandbox"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "action": {
+                        "const": "capacity"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "ram": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1048576
+                      },
+                      "expected_case_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "ram",
+                      "expected_case_version"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "action": {
+                        "const": "provision"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "operation_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "expected_case_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "operation_id",
+                      "expected_case_version"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "image_id",
+                      "available",
+                      "expected_case_version"
+                    ],
+                    "properties": {
+                      "action": {
+                        "const": "image"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "image_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 220
+                      },
+                      "available": {
+                        "type": "boolean"
+                      },
+                      "expected_case_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "account_id",
+                      "active",
+                      "expected_case_version"
+                    ],
+                    "properties": {
+                      "action": {
+                        "const": "account"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "account_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 220
+                      },
+                      "active": {
+                        "type": "boolean"
+                      },
+                      "expected_case_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    }
+                  }
+                ]
               }
             }
           }
@@ -2276,6 +2611,265 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Internal scorer service credential via Authorization; never delivered to frontend."
+      }
+    },
+    "schemas": {
+      "LabObservation": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "enum": [
+              "passed",
+              "failed",
+              "inconclusive"
+            ]
+          },
+          "simulated": {
+            "const": true
+          },
+          "checker_version": {
+            "type": "string"
+          },
+          "source_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "conditions": {
+            "type": "object",
+            "properties": {
+              "required_ram": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "image_id": {
+                "type": "string"
+              },
+              "account_id": {
+                "type": "string"
+              },
+              "image_available": {
+                "type": "boolean"
+              },
+              "account_active": {
+                "type": "boolean"
+              }
+            }
+          },
+          "attempts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Historical immutable attempt snapshot; checker-v1 entries retained. Checker-v2 fields described by LabAttempt."
+            }
+          },
+          "attempt": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LabAttempt"
+              },
+              {
+                "type": "object",
+                "description": "Legacy checker-v1 attempt; result cannot pass until rerun"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "environment": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "delivery": {
+            "type": "object",
+            "required": [
+              "status",
+              "total",
+              "delivered"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "pending",
+                  "delivered"
+                ]
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "delivered": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      },
+      "CaseSandbox": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "case_version",
+          "observation"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "case_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "observation": {
+            "$ref": "#/components/schemas/LabObservation"
+          },
+          "execution": {
+            "type": "object",
+            "required": [
+              "replayed",
+              "operation_id",
+              "attempt"
+            ],
+            "properties": {
+              "replayed": {
+                "type": "boolean"
+              },
+              "operation_id": {
+                "type": "string"
+              },
+              "attempt": {
+                "$ref": "#/components/schemas/LabAttempt"
+              }
+            }
+          }
+        }
+      },
+      "LabAttempt": {
+        "type": "object",
+        "required": [
+          "id",
+          "operation_id",
+          "number",
+          "at",
+          "source_version",
+          "checker_version",
+          "result",
+          "reason",
+          "blockers",
+          "checks",
+          "required_ram",
+          "available_ram",
+          "image_id",
+          "account_id",
+          "image_available",
+          "account_active"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operation_id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "checker_version": {
+            "const": "lab-state-2"
+          },
+          "result": {
+            "enum": [
+              "passed",
+              "failed"
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "checks": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "required": [
+                "step",
+                "passed",
+                "reason"
+              ],
+              "properties": {
+                "step": {
+                  "enum": [
+                    "ram",
+                    "image",
+                    "account"
+                  ]
+                },
+                "passed": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required_ram": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "available_ram": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "image_id": {
+            "type": "string"
+          },
+          "account_id": {
+            "type": "string"
+          },
+          "image_available": {
+            "type": "boolean"
+          },
+          "account_active": {
+            "type": "boolean"
+          }
+        }
       }
     }
   }

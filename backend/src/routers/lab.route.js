@@ -4,6 +4,7 @@ import { Router } from 'express';
 import { authenticateAccessToken } from '../middlewares/auth.middleware.js';
 import { workspaceId } from '../validations/access.validation.js';
 import { ApiError } from '../core/identity/api-error.js';
+import { labCommand } from '../validations/lab.validation.js';
 
 export function createLabRouter({ verifyToken, access, lab }) {
   const router = Router(), auth = authenticateAccessToken(verifyToken, access);
@@ -30,15 +31,7 @@ export function createLabRouter({ verifyToken, access, lab }) {
     res.status(201).json(await lab.configure(req.identity.subject, req.params.wid, body.source_ids, body.ram));
   }));
   router.post('/workspaces/:wid/lab/commands', protect(async (req, res) => {
-    const body = req.body;
-    const fields = { capacity: ['action', 'ram', 'expected_version'], submit: ['action', 'ram', 'request_id', 'expected_version'],
-      provision: ['action', 'request_id', 'operation_id', 'expected_version'] };
-    const allowed = body && Object.hasOwn(fields, body.action) ? fields[body.action] : null;
-    if (!allowed || allowed.some(k => !Object.hasOwn(body, k)) || Object.keys(body).some(k => !allowed.includes(k)) || !Number.isSafeInteger(body.expected_version) || body.expected_version < 1)
-      throw new ApiError(400, 'INVALID_INPUT', 'Invalid sandbox command');
-    if (body.action !== 'capacity' && (typeof body.request_id !== 'string' || !body.request_id.trim() || body.request_id.length > 200)) throw new ApiError(400, 'INVALID_INPUT', 'Request ID required');
-    if (body.action !== 'provision' && (!Number.isSafeInteger(body.ram) || body.ram < (body.action === 'submit' ? 1 : 0) || body.ram > 1048576)) throw new ApiError(400, 'INVALID_INPUT', 'Invalid RAM');
-    if (body.action === 'provision' && (typeof body.operation_id !== 'string' || !body.operation_id.trim() || body.operation_id.length > 200)) throw new ApiError(400, 'INVALID_INPUT', 'Operation ID required');
+    const body = labCommand(req.body);
     res.json(await lab.command(req.identity.subject, req.params.wid, body));
   }));
   router.get('/workspaces/:wid/lab/requests/:rid/inspection', protect(async (req, res) => res.json(await lab.inspect(req.identity.subject, req.params.wid, req.params.rid))));

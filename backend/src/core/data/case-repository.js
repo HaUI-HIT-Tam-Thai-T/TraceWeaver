@@ -13,6 +13,7 @@ import { ApiError } from '../identity/api-error.js';
 import { artifactTimeScope, artifactTimeValues } from './artifact-time.js';
 import { visibleSource } from '../identity/access-repository.js';
 import { inspectCaseSource, verifiedClosure } from './case-verification.js';
+import { createLabRepository } from './lab-repository.js';
 
 const notFound = () => new ApiError(404, 'NOT_FOUND', 'Resource not found');
 const projection = `SELECT c.*,h.to_state,h.owner_subject,h.version,h.occurred_at AS updated_at
@@ -77,6 +78,28 @@ export function createCaseRepository(pool) {
     return { row, run, engine: createWorkflowEngine(instance.definition) };
   }
   return {
+    sandbox(subject, workspace, id, command) {
+      return withTransaction(pool, async client => {
+        const { row } = await lockedCase(client, subject, workspace, id, false);
+        let observation = await inspectCaseSource(client, subject, workspace, row.run_id, false);
+        let execution;
+        if (!observation?.request_id) throw new ApiError(422, 'SANDBOX_BINDING_REQUIRED', 'Case root must originate from this sandbox request');
+        if (command) {
+          const replay = command.action === 'provision' && observation.attempts.some(a => a.operation_id === command.operation_id);
+          if (row.version !== command.expected_case_version) throw new ApiError(409, 'VERSION_CONFLICT', 'Case changed');
+          if (row.to_state === 'closed') throw new ApiError(422, 'CASE_CLOSED', 'Reopen case before changing sandbox');
+          const { expected_case_version, ...input } = command;
+          await createLabRepository(pool).command(subject, workspace,
+            { ...input, ...(input.action === 'capacity' ? {} : { request_id: observation.request_id }) }, client);
+          observation = await inspectCaseSource(client, subject, workspace, row.run_id, false);
+          if (input.action === 'provision') execution = { replayed: replay, operation_id: input.operation_id,
+            attempt: observation.attempts.find(a => a.operation_id === input.operation_id) };
+          await audit(client, workspace, subject, 'case.sandbox_command', id, null,
+            { action: input.action, request_id: observation.request_id, source_version: observation.source_version });
+        }
+        return { case_id: id, case_version: row.version, observation, ...(execution ? { execution } : {}) };
+      });
+    },
     verifications(subject, workspace, id) {
       return withTransaction(pool, async client => {
         const { row, run } = await lockedCase(client, subject, workspace, id, false);
@@ -94,8 +117,9 @@ export function createCaseRepository(pool) {
         if (row.to_state !== 'awaiting_verification') throw new ApiError(409, 'INVALID_STATE', 'Case must be awaiting verification');
         const observation = await inspectCaseSource(client, subject, workspace, row.run_id);
         if (!observation) throw new ApiError(422, 'VERIFIER_UNAVAILABLE', 'No source verifier configured');
+        const { attempts, ...current } = observation;
         const proof = { id: randomUUID(), case_id: id, case_version: row.version, actor_subject: subject,
-          checked_at: new Date().toISOString(), observation };
+          checked_at: new Date().toISOString(), observation: current };
         await client.query('INSERT INTO core.case_verifications(id,workspace_id,case_id,case_version,document) VALUES($1,$2,$3,$4,$5)',
           [proof.id, workspace, id, row.version, proof]);
         await audit(client, workspace, subject, 'case.verified', id, null, { verification_id: proof.id, result: observation.result });

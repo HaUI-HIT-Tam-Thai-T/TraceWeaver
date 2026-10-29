@@ -13,6 +13,7 @@ export function createCaseService(repository, access, cursors) {
     }
   }
   return {
+    sandbox(subject, workspace, id, command) { return protect(() => repository.sandbox(subject, workspace, id, command)); },
     verifications(subject, workspace, id) { return protect(() => repository.verifications(subject, workspace, id)); },
     verify(subject, workspace, id) { return protect(() => repository.verify(subject, workspace, id)); },
     create(subject, workspace, input, key) {

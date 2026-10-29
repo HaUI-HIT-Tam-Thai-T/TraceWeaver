@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 TraceWeaver contributors
 // SPDX-License-Identifier: Apache-2.0
 import { randomUUID } from 'node:crypto';
-import { createLab, changeCapacity, submitRequest, provision, inspectRequest } from '../../../../simulator/lab-state.mjs';
+import { createLab, changeCapacity, changeCondition, submitRequest, provision, inspectRequest } from '../../../../simulator/lab-state.mjs';
 import { withTransaction } from './database.js';
 import { authorize } from './run-repository.js';
 import { ApiError } from '../identity/api-error.js';
@@ -41,15 +41,18 @@ export function createLabRepository(pool) {
     read(subject, workspace) {
       return withTransaction(pool, async client => (await locked(client, subject, workspace, false, false)).document);
     },
-    command(subject, workspace, command) {
-      return withTransaction(pool, async client => {
-        const row = await locked(client, subject, workspace, command.action === 'capacity', command.action !== 'capacity');
+    command(subject, workspace, command, transactionClient) {
+      const execute = async client => {
+        const administrative = ['capacity', 'image', 'account'].includes(command.action);
+        const row = await locked(client, subject, workspace, administrative, !administrative);
         let next;
         try {
           if (command.action === 'capacity') next = changeCapacity(row.document, command.ram, command.expected_version);
+          else if (['image', 'account'].includes(command.action)) next = changeCondition(row.document, command);
           else if (command.action === 'submit') {
             if (command.expected_version !== row.document.version) throw new Error('VERSION_CONFLICT');
-            next = submitRequest(row.document, { id: command.request_id, ram: command.ram });
+            next = submitRequest(row.document, { id: command.request_id, ram: command.ram,
+              image_available: command.image_available, account_active: command.account_active });
           } else if (command.action === 'provision') next = provision(row.document, command.request_id,
             { expectedVersion: command.expected_version, operationId: command.operation_id });
           else throw new Error('INVALID_ACTION');
@@ -71,8 +74,15 @@ export function createLabRepository(pool) {
             records.push({ service: 'provision', action: attempt.result === 'passed' ? 'provision.completed' : 'provision.failed',
               outcome: attempt.result === 'passed' ? 'success' : 'failed', identifiers: [...identifiers, { namespace: 'account', value: account }],
               payload: { attempt_id: attempt.id, attempt: attempt.number, required_ram_gb: attempt.required_ram, available_ram_gb: attempt.available_ram,
-                reason: attempt.reason, environment: request.environment, sandbox: true } });
+                reason: attempt.reason, checks: attempt.checks, blockers: attempt.blockers,
+                source_version: attempt.source_version, image_id: attempt.image_id, account_id: attempt.account_id,
+                image_available: attempt.image_available, account_active: attempt.account_active,
+                environment: request.environment, sandbox: true } });
           }
+          if (['image', 'account', 'capacity'].includes(command.action)) records.push({
+            service: command.action === 'account' ? 'account' : 'provision', action: `sandbox.${command.action}.changed`,
+            outcome: 'success', identifiers: command.request_id ? identifiers : [],
+            payload: { ...command, sandbox: true, source_version: next.version } });
           for (const record of records) {
             const { rows: [source] } = await client.query('SELECT id FROM core.sources WHERE workspace_id=$1 AND id=ANY($2::uuid[]) AND service=$3', [workspace, row.source_ids, record.service]);
             const eventId = randomUUID();
@@ -81,7 +91,8 @@ export function createLabRepository(pool) {
           }
         }
         return next;
-      });
+      };
+      return transactionClient ? execute(transactionClient) : withTransaction(pool, execute);
     },
     inspect(subject, workspace, requestId) {
       return withTransaction(pool, async client => {
