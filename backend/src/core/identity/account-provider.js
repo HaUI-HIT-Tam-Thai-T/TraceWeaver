@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 import { ApiError } from './api-error.js';
 
-export function createAccountProvider({ oidcIssuer, accountClientId, accountClientSecret }, fetcher = fetch) {
+export function createAccountProvider({ oidcIssuer, accountClientId, accountClientSecret, accountAdminBaseUrl }, fetcher = fetch) {
   if (!accountClientId || !accountClientSecret) return null;
   const issuer = new URL(oidcIssuer), at = issuer.pathname.lastIndexOf('/realms/');
   if (at < 0) throw new Error('Invalid account realm');
-  const base = issuer.origin + issuer.pathname.slice(0, at) + '/admin/realms/' + issuer.pathname.slice(at + 8);
+  const base = accountAdminBaseUrl || issuer.origin + issuer.pathname.slice(0, at) + '/admin/realms/' + issuer.pathname.slice(at + 8);
   const unavailable = () => new ApiError(503, 'ACCOUNT_PROVIDER_UNAVAILABLE', 'Account provider temporarily unavailable');
   async function session(work) {
     const signal = AbortSignal.timeout(10000);

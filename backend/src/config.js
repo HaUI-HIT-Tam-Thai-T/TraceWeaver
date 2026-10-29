@@ -14,9 +14,11 @@ function identityUrl(value, name, appEnv, allowLocalKeycloak = false) {
   try {
     const url = new URL(value);
     const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname);
-    const localKeycloak = allowLocalKeycloak && name === 'OIDC_JWKS_URI' && url.hostname === 'keycloak' && url.port === '8080' && url.pathname === '/realms/traceweaver/protocol/openid-connect/certs';
+    const localPaths = { OIDC_JWKS_URI: '/realms/traceweaver/protocol/openid-connect/certs', ACCOUNT_ADMIN_BASE_URL: '/identity/admin/realms/traceweaver' };
+    const localKeycloak = allowLocalKeycloak && url.hostname === 'keycloak' && url.port === '8080' && url.pathname === localPaths[name];
     if (url.username || url.password || url.search || url.hash ||
-        (url.protocol !== 'https:' && !(appEnv !== 'production' && (loopback || localKeycloak) && url.protocol === 'http:'))) throw new Error();
+        (url.protocol !== 'https:' && !(url.protocol === 'http:' &&
+          ((appEnv !== 'production' && (loopback || localKeycloak)) || (name === 'ACCOUNT_ADMIN_BASE_URL' && localKeycloak))))) throw new Error();
     return url.href.replace(/\/$/, '');
   } catch { throw new Error(`${name} must be a trusted HTTPS URL (loopback HTTP allowed outside production)`); }
 }
@@ -71,6 +73,7 @@ export function readConfig(env = process.env) {
   if (scorerUrl && (scorerSecret.length < 32 || !/^[\x21-\x7e]+$/.test(scorerSecret))) throw new Error('SCORER_SERVICE_SECRET must contain at least 32 printable ASCII characters');
   return Object.freeze({
     labIngestSubject,
+    accountAdminBaseUrl: env.ACCOUNT_ADMIN_BASE_URL ? identityUrl(env.ACCOUNT_ADMIN_BASE_URL, 'ACCOUNT_ADMIN_BASE_URL', appEnv, true) : '',
     accountClientId, accountClientSecret,
     scorerUrl, scorerSecret, scorerModelVersion, scorerTimeoutMs: positiveInteger(env.SCORER_TIMEOUT_MS, 'SCORER_TIMEOUT_MS', 5000, 5000),
     appEnv,

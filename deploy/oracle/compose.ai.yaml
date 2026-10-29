@@ -13,6 +13,7 @@ services:
       LAB_INGEST_SUBJECT: ${LAB_INGEST_SUBJECT:-}
       ACCOUNT_ADMIN_CLIENT_ID: ${ACCOUNT_ADMIN_CLIENT_ID:-}
       ACCOUNT_ADMIN_CLIENT_SECRET: ${ACCOUNT_ADMIN_CLIENT_SECRET:-}
+      ACCOUNT_ADMIN_BASE_URL: ${ACCOUNT_ADMIN_BASE_URL:-}
     volumes:
       - ./scorer-ca:/run/scorer-ca:ro,Z
     depends_on:

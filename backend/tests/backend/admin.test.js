@@ -17,6 +17,25 @@ test('account client configuration is opt-in, paired and does not expose bad sec
     assert.throws(() => readConfig({ ...env, ...patch }), e => !e.message.includes('private-bad-secret'));
   }
 });
+test('account admin endpoint permits only HTTPS or the exact private Keycloak route in production', () => {
+  const env = { APP_ENV: 'production', DATABASE_URL: 'postgresql://u:p@localhost/db', CURSOR_SECRET: 'x'.repeat(32), OIDC_ISSUER: 'https://idp.example.test/identity/realms/traceweaver' };
+  const internal = 'http://keycloak:8080/identity/admin/realms/traceweaver';
+  assert.equal(readConfig({ ...env, ACCOUNT_ADMIN_BASE_URL: internal }).accountAdminBaseUrl, internal);
+  for (const value of ['http://evil.test/admin', internal + '?key=secret', internal.replace('keycloak', 'other'), internal.replace('traceweaver', 'master')])
+    assert.throws(() => readConfig({ ...env, ACCOUNT_ADMIN_BASE_URL: value }), /ACCOUNT_ADMIN_BASE_URL/);
+});
+
+test('private admin route preserves the canonical token issuer and avoids public admin REST', async () => {
+  const urls = [];
+  const provider = createAccountProvider({ oidcIssuer: 'https://idp.example.test/identity/realms/traceweaver', accountClientId: 'svc', accountClientSecret: 'x'.repeat(32),
+    accountAdminBaseUrl: 'http://keycloak:8080/identity/admin/realms/traceweaver' }, async url => {
+    urls.push(url);
+    return url.endsWith('/token') ? Response.json({ access_token: 'private-token' }) : Response.json({ id: 'person', username: 'person', enabled: true });
+  });
+  assert.equal((await provider.existing('person')).subject, 'person');
+  assert.deepEqual(urls, ['https://idp.example.test/identity/realms/traceweaver/protocol/openid-connect/token', 'http://keycloak:8080/identity/admin/realms/traceweaver/users/person']);
+});
+
 test('account adapter exercises real HTTP serialization, ownership replay and upstream failure sanitization', async t => {
   let stored, failure = false;
   const server = createServer(async (req, res) => {
