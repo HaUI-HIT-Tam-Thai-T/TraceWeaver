@@ -6,6 +6,43 @@ import { caseFixture } from '../support/case-fixture.js';
 import { createAdminRepository } from '../../src/core/data/admin-repository.js';
 import { createAdminService } from '../../src/services/admin.service.js';
 import { createAccessRepository } from '../../src/core/identity/access-repository.js';
+import { randomUUID } from 'node:crypto';
+import { once } from 'node:events';
+import { createApp } from '../../src/app.js';
+import { createWorkflowRepository } from '../../src/core/data/workflow-repository.js';
+
+test('human admin API preserves configured core and collector identities without data roles', async t => {
+  const { pool, workspace: wid, sources } = await caseFixture(t);
+  const protectedSubjects = ['core-service', 'collector-service', 'unattached-service'];
+  const repo = createAdminRepository(pool, { protectedSubjects });
+  for (const subject of protectedSubjects.slice(0, 2))
+    await pool.query('INSERT INTO core.memberships(workspace_id,subject) VALUES($1,$2)', [wid, subject]);
+  const workflows = createWorkflowRepository(pool);
+  const document = await workflows.create('core-service', 'operator', wid, {
+    definition_key: 'document_review', definition_version: 1, entity_ref: { type: 'document', id: randomUUID() },
+  });
+  let providerCalls = 0;
+  const service = createAdminService(repo, { existing: async () => { providerCalls++; throw Error('provider offline'); } }, 'test-secret');
+  const server = createApp({ verifyToken: async () => ({ subject: 'admin' }), access: {}, admin: service }).listen(0, '127.0.0.1');
+  await once(server, 'listening'); t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}/api/v1/workspaces/${wid}/admin/members`;
+  for (const subject of protectedSubjects.slice(0, 2)) {
+    for (const [path, body] of [[subject, { active: false, roles: ['viewer'], expected_version: 1 }],
+      [`${subject}/sources/${sources[0]}`, { enabled: false, expected_version: 1 }]]) {
+      const response = await fetch(`${base}/${path}`, { method: 'PUT', headers: { authorization: 'Bearer test', 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      assert.equal(response.status, 422);
+      assert.equal((await response.json()).error.code, 'SERVICE_ACCOUNT_PROTECTED');
+    }
+    await assert.rejects(repo.member('admin', wid, subject, { active: true, roles: ['admin'], expected_version: 1 }), e => e.code === 'SERVICE_ACCOUNT_PROTECTED');
+  }
+  await assert.rejects(repo.add('admin', wid, { subject: protectedSubjects[2], roles: ['viewer'], expected_version: 1 }), e => e.code === 'SERVICE_ACCOUNT_PROTECTED');
+  assert.equal(providerCalls, 0);
+  assert.equal((await workflows.get('core-service', 'operator', wid, document.id)).state, 'draft');
+  assert.equal((await repo.list('admin', wid, 50)).version, 1);
+  assert.equal((await pool.query("SELECT count(*)::int n FROM core.audit_events WHERE action LIKE 'admin.%'")).rows[0].n, 0);
+  await service.member('admin', wid, 'viewer', { active: false, roles: ['viewer'], expected_version: 1 });
+  assert.equal(providerCalls, 0);
+});
 test('workspace admin scope, CAS, last admin, membership and read grants are transactional', async t => {
   const { pool, workspace: wid, otherWorkspace, sources } = await caseFixture(t);
   const r = createAdminRepository(pool), access = createAccessRepository(pool);

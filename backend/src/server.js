@@ -46,7 +46,9 @@ try {
     verifyAppToken: createAppTokenVerifier(config),
     workflows: createWorkflowService(createWorkflowRepository(database)),
     lab: createLabRepository(database),
-    admin: createAdminService(createAdminRepository(database), createAccountProvider(config), config.cursorSecret),
+    admin: createAdminService(createAdminRepository(database, {
+      protectedSubjects: [config.oidcAppSubject, config.labIngestSubject],
+    }), createAccountProvider(config), config.cursorSecret),
     oidc: { issuer: config.oidcIssuer, clientId: config.oidcUserClientId },
     access: createAccessService(createAccessRepository(database), createCursorCodec(config.cursorSecret)),
     ingestion: createIngestionService(createIngestionRepository(database)),

@@ -5,7 +5,12 @@ import { withTransaction } from './database.js';
 import { ApiError } from '../identity/api-error.js';
 import { visibleSource } from '../identity/access-repository.js';
 const error = (status, code, message) => { throw new ApiError(status, code, message); };
-export function createAdminRepository(pool) {
+export function createAdminRepository(pool, { protectedSubjects = [] } = {}) {
+  const services = new Set(protectedSubjects.filter(Boolean));
+  async function humanTarget(c, wid, subject) {
+    if (services.has(subject) || (await c.query("SELECT 1 FROM core.membership_roles WHERE workspace_id=$1 AND subject=$2 AND role_key='ingest_service'", [wid, subject])).rowCount)
+      error(422, 'SERVICE_ACCOUNT_PROTECTED', 'Service accounts are managed outside this human administration API');
+  }
   async function permitted(c, actor, wid) {
     const { rows: [row] } = await c.query(`SELECT EXISTS(SELECT 1 FROM core.membership_roles r WHERE r.workspace_id=m.workspace_id
       AND r.subject=m.subject AND r.role_key='admin') allowed FROM core.memberships m
@@ -29,6 +34,7 @@ export function createAdminRepository(pool) {
     return (await c.query('UPDATE core.workspace_admin_versions SET version=version+1 WHERE workspace_id=$1 RETURNING version', [wid])).rows[0].version;
   }
   async function add(c, wid, subject, roles) {
+    await humanTarget(c, wid, subject);
     const inserted = await c.query('INSERT INTO core.memberships(workspace_id,subject) VALUES($1,$2) ON CONFLICT DO NOTHING', [wid, subject]);
     if (!inserted.rowCount) error(409, 'MEMBER_EXISTS', 'Membership already exists; edit it explicitly');
     for (const role of roles) await c.query('INSERT INTO core.membership_roles(workspace_id,subject,role_key) VALUES($1,$2,$3)', [wid, subject, role]);
@@ -67,8 +73,7 @@ export function createAdminRepository(pool) {
         await locked(c, actor, wid, input.expected_version);
         const { rows: [old] } = await c.query('SELECT revoked_at FROM core.memberships WHERE workspace_id=$1 AND subject=$2', [wid, subject]);
         if (!old) error(404, 'NOT_FOUND', 'Member not found');
-        if ((await c.query("SELECT 1 FROM core.membership_roles WHERE workspace_id=$1 AND subject=$2 AND role_key='ingest_service'", [wid, subject])).rowCount)
-          error(422, 'SERVICE_ACCOUNT_PROTECTED', 'Service accounts are managed outside this human administration API');
+        await humanTarget(c, wid, subject);
         const { rows: admins } = await c.query(`SELECT m.subject FROM core.memberships m JOIN core.membership_roles r USING(workspace_id,subject)
           WHERE m.workspace_id=$1 AND m.revoked_at IS NULL AND r.role_key='admin'`, [wid]);
         if (admins.some(a => a.subject === subject) && (!input.active || !input.roles.includes('admin')) && admins.length === 1)
@@ -87,8 +92,7 @@ export function createAdminRepository(pool) {
         if (!visible.rowCount) error(404, 'NOT_FOUND', 'Source not found');
         const member = await c.query('SELECT 1 FROM core.memberships WHERE workspace_id=$1 AND subject=$2 AND revoked_at IS NULL', [wid, subject]);
         if (!member.rowCount) error(422, 'MEMBER_INACTIVE', 'Active membership required');
-        if ((await c.query("SELECT 1 FROM core.membership_roles WHERE workspace_id=$1 AND subject=$2 AND role_key='ingest_service'", [wid, subject])).rowCount)
-          error(422, 'SERVICE_ACCOUNT_PROTECTED', 'Service accounts are managed outside this human administration API');
+        await humanTarget(c, wid, subject);
         await c.query(`UPDATE core.source_grants SET revoked_at=clock_timestamp() WHERE workspace_id=$1 AND source_id=$2 AND grantee_subject=$3 AND permission='read' AND revoked_at IS NULL`, [wid, sid, subject]);
         if (input.enabled) await c.query(`INSERT INTO core.source_grants(id,workspace_id,source_id,grantee_subject,permission,granted_by) VALUES($1,$2,$3,$4,'read',$5)`, [randomUUID(), wid, sid, subject, actor]);
         await audit(c, actor, wid, 'admin.direct_read_changed', subject, { source_id: sid, enabled: input.enabled });
