@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Administration deployed and FE handoff (BE-51)
+
+- Push and deploy runtime4cdd022 as traceweaver-api:be-4cdd022 on Oracle; apply011 and runtime grants. Configure dedicated service-only Keycloak account client with manage/view/query-users, admin-only ownership marker and server-only secret. Keep public Admin REST closed; route BE Admin REST over the exact private Docker endpoint while token issuer stays HTTPS.
+- Preserve existing credentials and hashes of all pre-existing rows checked across events/runs/cases/memberships/roles/grants/sources/workflows. Append one UAT human account and one simulator journey; no deletion/reset. Reuse existing scorer/IdP/database containers.
+- Pass40 live HTTPS/Keycloak account checks including required password/profile actions, login, grants/revocation/replay/service protection; pass36 simulator checks through collector, hybrid non-degraded, immutable proof and closure. Add exact production FE CORS/callback/Web Origin/logout; preflights pass.140BE pass/2optional Python skips,10sim and15PG pass; base/license98/diff pass.
+- Add docs/FE_WORKSPACE_ADMIN_HANDOFF.md for sidebar, endpoints, versions, recovery, first login and UAT; update deployment status and simulator handoff. No FE edits/deployment or browser UI E2E claim. Private rollout evidence and credentials remain on server.
 ## Unreleased — Administration audit fixes (BE-50)
 
 - Protect configured core and collector subjects independently of ingest roles at the repository boundary. Human administration cannot add their membership, change roles/active state or direct-read grants; human revocation still works without the identity provider.

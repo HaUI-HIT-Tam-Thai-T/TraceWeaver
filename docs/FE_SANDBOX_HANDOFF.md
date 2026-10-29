@@ -1,6 +1,7 @@
 # Bàn giao FE — Simulator và kiểm chứng hồ sơ
 
-Cập nhật 29/10/2026. Contract theo BE60919cd, đã triển khai tại `https://api.quizlearn.tech`.
+Cập nhật 30/10/2026. Contract simulator giữ tương thích BE60919cd; runtime mới `4cdd022`
+đã triển khai tại `https://api.quizlearn.tech`. Xem thêm [bàn giao quản trị FE](FE_WORKSPACE_ADMIN_HANDOFF.md).
 Đây là phần mở rộng xử lý/kiểm chứng nghiệp vụ; AI vẫn chỉ chấm điểm liên kết sự kiện.
 
 ## 1. Phạm vi FE cần làm
@@ -27,7 +28,7 @@ Không dùng ghi chú, state tự đặt ở FE hoặc nút xác nhận để th
 | Tên | `TraceWeaver Sandbox — Mô phỏng kiểm chứng` |
 | Hồ sơ đã kiểm thành công | `f10e80e1-7972-4b4f-856b-155c6d9f4ced` — đã đóng, dùng để xem lịch sử |
 | Mã yêu cầu tương ứng | `LAB-LIVE-20261029-155343` |
-| BE runtime | `traceweaver-api:be-60919cd`, migrations008–010, collector đã bật |
+| BE runtime | `traceweaver-api:be-4cdd022`, migrations001–011, collector đã bật |
 
 Dùng SSO/PKCE hiện có. BE đã cấp quyền riêng trong workspace này cho các tài khoản operator,
 reviewer, workspace-admin và viewer hiện có. Không đưa mật khẩu, access/refresh token hoặc service

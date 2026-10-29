@@ -1,7 +1,8 @@
 # Tài liệu TraceWeaver
 
-Bàn giao quản trị: [Workspace-admin và tài khoản](../backend/WORKSPACE_ADMIN.md) — API thành viên,
-role, quyền đọc nguồn, tạo tài khoản và phục hồi cấp quyền chưa hoàn tất; FE chưa tích hợp.
+Bàn giao quản trị: [FE — workspace và tài khoản](FE_WORKSPACE_ADMIN_HANDOFF.md) — sidebar, API,
+version, retry/pending, đăng nhập lần đầu và UAT. BE đã deploy 30/10/2026; FE chưa tích hợp.
+Chi tiết vận hành: [Workspace-admin BE](../backend/WORKSPACE_ADMIN.md).
 
 Bàn giao mới cho FE: [Simulator và kiểm chứng hồ sơ](FE_SANDBOX_HANDOFF.md) — API đã triển khai,
 quyền, request/response, version/retry, trạng thái log/proof và checklist UAT.

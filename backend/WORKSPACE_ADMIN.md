@@ -1,9 +1,10 @@
 # Workspace-admin và tài khoản — bàn giao BE/FE
 
-Trạng thái: mã BE và OpenAPI đã triển khai trong nhánh source, kiểm thử local đạt. Chưa rollout lên
-Oracle: bộ duyệt tự động chặn service client/secret Keycloak, profile attribute và migration011 trên
-server vì cần quyền rõ ràng cho thay đổi production. Server vẫn giữ BE simulator đang chạy trước đó.
-Không diễn giải kiểm thử adapter HTTP giả lập là đã tạo/login tài khoản thật trên Keycloak production.
+Trạng thái 30/10/2026: đã push và rollout Oracle source `4cdd022`, image `traceweaver-api:be-4cdd022`,
+migration011 và runtime grants. User đã yêu cầu deploy sau lần chặn cũ; dedicated Keycloak service-only
+client và admin-only profile marker đã cấu hình, secret chỉ lưu server. 40 kiểm tra quản trị HTTPS/Keycloak
+thật đạt, gồm tạo account, required password/profile actions, login và cấp/thu hồi quyền; 36 kiểm tra
+simulator cũng đạt. FE chưa sửa/triển khai. Xem [bàn giao FE](../docs/FE_WORKSPACE_ADMIN_HANDOFF.md).
 
 Phạm vi tối thiểu: quản lý thành viên trong workspace hiện có, role viewer/operator/reviewer/admin,
 quyền đọc trực tiếp từng nguồn và tạo tài khoản Keycloak với mật khẩu tạm. Không tạo/xóa workspace,
@@ -106,6 +107,11 @@ vẫn409 IDEMPOTENCY_CONFLICT. Phần đọc và thu hồi thành viên người
 Cấp/kích hoạt tài khoản/read và thêm membership cần xác minh human account ở Keycloak.
 Production vẫn bắt buộc TLS theo OIDC_ISSUER. Adapter dùng client credentials, timeout chung10giây,
 không dùng admin password trong runtime và không đưa token admin ra browser.
+
+`ACCOUNT_ADMIN_BASE_URL` tách Admin REST khỏi issuer công khai. Oracle dùng
+`http://keycloak:8080/identity/admin/realms/traceweaver` trên mạng Docker riêng vì proxy public chặn
+Admin REST. Config chỉ cho HTTPS hoặc đúng route Docker này trong production; không mở HTTP tùy ý.
+Token endpoint vẫn theo issuer HTTPS chuẩn. Cấu hình và service credential chỉ thuộc BE, không vào VITE.
 
 Service client riêng trong realm, có quyền quản lý/tra cứu user phù hợp; không cấp realm-admin.
 Khai báo User Profile attribute `traceweaverProvisioningKey` có permissions view/edit chỉ admin để marker

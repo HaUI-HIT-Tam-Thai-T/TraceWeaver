@@ -1,5 +1,10 @@
 # Bàn giao Frontend — TraceWeaver
 
+> Cập nhật triển khai 30/10/2026: runtime `4cdd022`, migrations001–011, quản trị account và simulator
+> đã deploy. CORS/callback/Web Origin/logout production `https://traceweaver.quizlearn.tech` đã đăng ký.
+> Xem [bàn giao quản trị mới](FE_WORKSPACE_ADMIN_HANDOFF.md) và [simulator](FE_SANDBOX_HANDOFF.md).
+> Các bước mục2 bên dưới là snapshot cũ; không thực hiện lại phần production đã hoàn tất.
+
 > Bổ sung 29/10/2026: [Knowledge, tên workspace/nguồn và danh sách người nhận hồ sơ](FRONTEND_READABLE_DATA_HANDOFF.md). Xem trạng thái rollout trong bản bổ sung trước khi dùng API mới.
 
 Cập nhật 27/10/2026, theo source và API Oracle tại commit `116e156`. FE dùng **React/Vite**, local **http://localhost:5173**, production dự kiến **https://traceweaver.quizlearn.tech**. Trạng thái cấu hình đang chạy và các bước còn thiếu được ghi ở mục 2.

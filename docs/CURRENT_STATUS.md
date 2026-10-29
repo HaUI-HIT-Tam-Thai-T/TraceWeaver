@@ -1,5 +1,17 @@
 # Hiện trạng TraceWeaver
 
+## Cập nhật hiện tại — 30/10/2026
+
+Oracle đang chạy API source `4cdd022`, image `traceweaver-api:be-4cdd022`, migrations001–011,
+collector và dedicated account-administration client/marker đã cấu hình. CORS/callback/Web Origin/logout
+cho `https://traceweaver.quizlearn.tech` đã đăng ký. Secret và credentials giữ trên server.
+40 kiểm tra quản trị HTTPS/Keycloak thật và36 kiểm tra simulator đạt: tạo account/required actions/login,
+scope/grants/revoke/replay, RAM -> image -> account -> pass -> ingestion -> proof -> closed.
+140 BE tests đạt,2 Python tùy chọn bỏ qua;10 simulator và15 PostgreSQL admin/lab/case đạt.
+Các dòng dữ liệu cũ được đối chiếu hash không đổi; thêm account/hành trình UAT, không xóa/reset.
+FE chưa sửa hoặc deploy, browser UI E2E và hosting frontend chưa xác minh. Xem [bàn giao quản trị](FE_WORKSPACE_ADMIN_HANDOFF.md)
+và [simulator](FE_SANDBOX_HANDOFF.md). Các mục bên dưới là lịch sử theo mốc, không thay trạng thái mới này.
+
 BE-38 (29/10/2026): đã deploy BE + model AI v2 lên Oracle tại https://api.quizlearn.tech/docs/, runtime release `oracle-4e2805e`. API gọi scorer bằng TLS nội bộ, AI không publish cổng Internet. Pass 23 mẫu scorer qua TLS, 20 kiểm tra hybrid/PKCE/audit/replay/dữ liệu và 49 kiểm tra live hiện có. Hashes của 72 events, 25 runs và 25 cases cũ giữ nguyên; test thêm đúng một run hybrid, không thêm event/case. PostgreSQL/Keycloak và các ứng dụng khác giữ nguyên. Xem [hướng dẫn deploy](../deploy/oracle/README.md). Các ghi chú container cũ bên dưới mô tả lịch sử hoặc container local8080, không phải deployment Oracle mới.
 
 ## BE-34 — 28/10/2026: trained model v2 opt-in
