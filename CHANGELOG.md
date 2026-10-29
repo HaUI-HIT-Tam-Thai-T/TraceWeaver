@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Three-condition sandbox verification (BE-41)
+
+- Add combined RAM/image/account faults, targeted repairs, immutable attempt snapshots and safe retries of an existing simulated environment without duplicate allocations.
+- Bind case sandbox commands to ingested sandbox root events in one transaction; reject client-selected request IDs. Require matching checker/source/case versions, consistent allocation/conditions and delivered attempt logs before closure.
+- Add case-bound read/command endpoints and FE handoff in backend/LAB_SANDBOX.md. Preserve non-sandbox closure policy and all FE source. Existing migrations 008–010 suffice.
+- Verify 132 BE tests (two optional Python tests skipped), 10 simulator tests, three sandbox PostgreSQL tests, eight legacy case PostgreSQL checks and eight real JWT/HTTP/PostgreSQL case checks. OpenAPI/base/license/diff checks pass. No remote deployment or browser E2E claim: uploading the source bundle to Oracle was blocked by automatic approval review pending explicit destination/source-transfer authorization.
+
 ## Unreleased — Realistic deployed lab demo
 
 - Append LAB-DEMO-20261028-v2 to the existing Oracle demo workspace: 36 Vietnamese operational events, 12 runs and 12 cases with readable request codes, synthetic student accounts, courses, resource sizes, varied timings and three specific provisioning failures. Preserve missing-evidence and missing-correlation scenarios and mark every message/case as demo.
