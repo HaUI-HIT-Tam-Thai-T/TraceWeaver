@@ -10,7 +10,7 @@ import type { EventQuery } from "../query.ts";
 export interface EventsController {
   getSnapshot(): EventsState;
   subscribe(listener: () => void): () => void;
-  sync(scope: EventsScope | null, visible: boolean, query: EventQuery): void;
+  sync(scope: EventsScope | null, visible: boolean, query: EventQuery, loadList?: boolean): void;
   stop(): void;
   refresh(filters?: EventFilters): Promise<void>;
   openDetail(id: string | null): Promise<void>;
@@ -175,6 +175,7 @@ export function createEventsController(
     scope: EventsScope | null,
     visible: boolean,
     query: EventQuery,
+    loadList = true,
   ) {
     if (!scope) {
       abortAll();
@@ -229,10 +230,11 @@ export function createEventsController(
         type: "reset",
         state: initialEventsState(scope, query.filters),
       });
-      void loadPage(0, [null]);
+      if (loadList) void loadPage(0, [null]);
       void openDetail(query.eventId);
-    } else if (state.detail.id !== query.eventId) {
-      void openDetail(query.eventId);
+    } else {
+      if (loadList && state.list.status === "idle") void loadPage(0, [null]);
+      if (state.detail.id !== query.eventId) void openDetail(query.eventId);
     }
   }
 

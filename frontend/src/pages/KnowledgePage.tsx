@@ -1,9 +1,9 @@
+import { PageHeading } from "../components/layout/PageHeading";
+import { Alert } from "../components/ui/primitives/alert";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../features/auth/hooks/useAuth";
-import { AuthStatus } from "../features/auth/components/AuthStatus";
 import { useWorkspace } from "../features/workspace/hooks/useWorkspace";
-import { WorkspacePanel } from "../features/workspace/components/WorkspacePanel";
 import {
   createKnowledgeController,
   initialKnowledgeState,
@@ -33,14 +33,7 @@ export function KnowledgePage() {
     wid !== null;
   return (
     <>
-      <h1 className="mb-4 text-3xl font-bold">TraceWeaver — Knowledge</h1>
-      <nav aria-label="Điều hướng knowledge" className="space-x-4">
-        <Link to="/">Trang chủ</Link>
-        <Link to="/events">Event explorer</Link>
-        <Link to="/cases">Cases</Link>
-      </nav>
-      <AuthStatus />
-      <WorkspacePanel />
+      <PageHeading title="Tri thức" />
       <KnowledgeBrowser
         scope={
           allowed
@@ -95,9 +88,9 @@ function KnowledgeBrowser({
   return (
     <>
       {!query.success && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           Bộ lọc URL không hợp lệ. <Link to="/knowledge">Bắt đầu lại</Link>
-        </p>
+        </Alert>
       )}
       <KnowledgeSearchForm
         key={JSON.stringify([scope.subject, scope.workspaceId, search])}

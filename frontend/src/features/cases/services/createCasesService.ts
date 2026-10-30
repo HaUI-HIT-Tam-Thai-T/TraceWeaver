@@ -1,7 +1,8 @@
 import { z } from "zod";
 import type { AxiosInstance } from "axios";
 import { ApiError } from "../../../services/apiError.ts";
-import { evidenceCreateSchema, evidenceSchema } from "../schemas.ts";
+import { caseAssigneesSchema, evidenceCreateSchema, evidenceSchema } from "../schemas.ts";
+import type { CaseAssignees } from '../schemas.ts';
 import type { Evidence, EvidenceCreate } from "../schemas.ts";
 import { transitionSchema, transitionStates } from "../workflow.ts";
 import type { CaseTransition } from "../workflow.ts";
@@ -31,6 +32,7 @@ export type CasesOptions = {
 };
 
 export interface CasesService {
+  listAssignees(workspaceId: string, caseId: string, signal?: AbortSignal): Promise<CaseAssignees>;
   createCase(
     workspaceId: string,
     body: CaseCreate,
@@ -203,5 +205,11 @@ export function createCasesService(
       throw invalidResponse();
     return result.data;
   }
-  return { createCase, listCases, getCase, addEvidence, transitionCase };
+  async function listAssignees(wid: string, cid: string, signal?: AbortSignal): Promise<CaseAssignees> {
+    const response = await client.get<unknown>(`${path(wid, cid)}/assignees`, { signal });
+    const result = caseAssigneesSchema.safeParse(response.data);
+    if (!result.success) throw invalidResponse();
+    return result.data;
+  }
+  return { createCase, listCases, getCase, addEvidence, transitionCase, listAssignees };
 }

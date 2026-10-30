@@ -37,7 +37,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
     void controller.start();
     const focus = () => {
-      void controller.refreshAccess();
+      void controller.revalidateAccess();
     };
     window.addEventListener("focus", focus);
     return () => {

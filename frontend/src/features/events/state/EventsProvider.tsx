@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { matchPath, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { useWorkspace } from "../../workspace/hooks/useWorkspace";
 import { createEventsController } from "./controller";
 import { eventsService } from "../services/service";
-import { readEventQuery, writeEventQuery } from "../query";
+import { readEventLocation, readEventQuery, writeEventQuery } from "../query";
 import { initialEventsState } from "./state";
 import { EventsContext } from "./eventsContext";
 
@@ -34,6 +34,8 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, [controller]);
   const location = useLocation();
+  const navigate = useNavigate();
+  const eventId = matchPath("/events/:eventId", location.pathname)?.params.eventId ?? null;
   const [, setSearchParams] = useSearchParams();
   const lastScope = useRef<string | null>(null);
   const me = workspace.me;
@@ -44,7 +46,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     permissions.canRead &&
     me !== null &&
     workspaceId !== null;
-  const visible = location.pathname === "/events";
+  const visible = location.pathname === "/events" || eventId !== null;
 
   useEffect(() => {
     if (auth.status !== "authenticated") {
@@ -55,7 +57,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (!allowed || !me || !workspaceId) {
-      controller.sync(null, visible, readEventQuery(location.search));
+      controller.sync(null, visible, readEventLocation(location.search, eventId));
       return;
     }
     const key = JSON.stringify([me.subject, workspaceId]);
@@ -70,9 +72,9 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     if (changed && visible) {
       const query = readEventQuery("");
       controller.sync(scope, visible, query);
-      setSearchParams(new URLSearchParams(), { replace: true });
+      navigate("/events", { replace: true });
     } else {
-      controller.sync(scope, visible, readEventQuery(location.search));
+      controller.sync(scope, visible, readEventLocation(location.search, eventId), eventId === null);
     }
   }, [
     auth.status,
@@ -82,19 +84,29 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     permissions.canWrite,
     visible,
     location.search,
+    eventId,
+    navigate,
     controller,
     setSearchParams,
   ]);
+
+  useEffect(() => {
+    if (location.pathname !== "/events") return;
+    const legacy = readEventQuery(location.search);
+    if (legacy.success && legacy.eventId) {
+      navigate(`/events/${legacy.eventId}?${writeEventQuery(legacy.filters)}`, { replace: true });
+    }
+  }, [location.pathname, location.search, navigate]);
 
   useEffect(() => () => controller.stop(), [controller]);
 
   useEffect(() => {
     if (visible && snapshot.list.error?.code === "INVALID_CURSOR") {
-      const query = readEventQuery(location.search);
+      const query = readEventLocation(location.search, eventId);
       if (query.success && query.eventId)
-        setSearchParams(writeEventQuery(query.filters), { replace: true });
+        navigate(`/events?${writeEventQuery(query.filters)}`, { replace: true });
     }
-  }, [snapshot.list.error, visible, location.search, setSearchParams]);
+  }, [snapshot.list.error, visible, location.search, eventId, navigate]);
 
   // Identity response object changes on every access revalidation, even for the same subject.
   const state =
@@ -103,7 +115,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     snapshot.scope.workspaceId === workspaceId
       ? snapshot
       : hiddenState;
-  const query = readEventQuery(location.search);
+  const query = readEventLocation(location.search, eventId);
   const filters = query.success ? query.filters : { limit: 50 };
   const clearDetailQuery = () => setSearchParams(writeEventQuery(filters));
   return (
@@ -111,11 +123,11 @@ export function EventsProvider({ children }: { children: ReactNode }) {
       value={{
         state,
         setFilters(next) {
-          setSearchParams(writeEventQuery(next));
+          navigate(`/events?${writeEventQuery(next)}`);
           void controller.refresh(next);
         },
         showEvent(id) {
-          setSearchParams(writeEventQuery(filters, id));
+          navigate(id ? `/events/${id}?${writeEventQuery(filters)}` : `/events?${writeEventQuery(filters)}`);
         },
         refresh() {
           clearDetailQuery();

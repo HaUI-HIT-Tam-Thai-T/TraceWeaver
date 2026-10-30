@@ -32,6 +32,13 @@ export function readEventQuery(search: string): EventQuery {
   return { success: true, filters: result.data, eventId };
 }
 
+// The path owns the detail ID; query parameters retain only the list filters.
+export function readEventLocation(search: string, eventId: string | null): EventQuery {
+  const params = new URLSearchParams(search);
+  if (eventId !== null) params.set("event_id", eventId);
+  return readEventQuery(params.toString());
+}
+
 export function writeEventQuery(
   filters: EventFilters,
   eventId: string | null = null,

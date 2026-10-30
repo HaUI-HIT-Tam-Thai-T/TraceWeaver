@@ -114,6 +114,7 @@ export function activeMembership(state: WorkspaceState): Membership | null {
 }
 
 export type WorkspacePermissions = {
+  canAdmin: boolean;
   canRead: boolean;
   canWrite: boolean;
   canVerify: boolean;
@@ -124,6 +125,7 @@ export function workspacePermissions(
 ): WorkspacePermissions {
   const roles = membership?.roles ?? [];
   return {
+    canAdmin: roles.includes('admin'),
     canRead: roles.some((role) =>
       ["viewer", "operator", "reviewer", "admin"].includes(role),
     ),

@@ -20,11 +20,6 @@ try {
   throw error;
 }
 
-const loading = document.createElement("p");
-loading.setAttribute("role", "status");
-loading.textContent = "Đang kiểm tra phiên đăng nhập…";
-root.replaceChildren(loading);
-await initializeAuth();
 createRoot(root).render(
   <StrictMode>
     <AppProviders>
@@ -32,3 +27,4 @@ createRoot(root).render(
     </AppProviders>
   </StrictMode>,
 );
+void initializeAuth();

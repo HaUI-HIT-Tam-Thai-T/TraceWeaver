@@ -1,5 +1,8 @@
+import { caseStateLabel, nextCaseStep } from "../../cases/presentation";
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Button } from "../../../components/ui/Button";
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { DetailLink } from '../../../components/ui/DetailLink';
 import { createCasesController } from '../../cases/state/controller';
 import { initialCasesState } from '../../cases/state/state';
 import { writeCaseQuery } from '../../cases/query';
@@ -31,20 +34,22 @@ export function WaitingCaseList({ scope, filters, caseState, deny }: {
   useEffect(() => { if (aligned && ['blocked', 'reauth'].includes(snapshot.status) && snapshot.error) deny(snapshot.error); }, [aligned, snapshot.status, snapshot.error, deny]);
   const ready = state.list.status === 'ready' && state.status === 'active';
   const error = state.error ?? state.list.error;
-  return <section aria-label={`Waiting cases ${caseState}`} className="my-6 space-y-3">
-    <h3 className="text-xl font-semibold">Cases {caseState}</h3>
-    {state.list.status === 'loading' && <p role="status">Đang tải cases {caseState}…</p>}
-    {error && <p role="alert">{error.message} {error.requestId && <>Request ID: {error.requestId}</>}</p>}
-    {error && state.status === 'active' && <button type="button" onClick={() => void controller.refresh()}>{error.code === 'INVALID_CURSOR' ? 'Bắt đầu lại từ trang đầu' : 'Thử tải lại'}</button>}
-    {ready && state.list.items.length === 0 && <p>Không có case {caseState} trong trang này.</p>}
+  return <section aria-label={`Waiting cases ${caseState}`} className="content-panel my-4 flex min-w-0 flex-col">
+    <div className="min-w-0 flex-1 space-y-4">
+    <h3 className="text-xl font-semibold">Hồ sơ {caseStateLabel(caseState)}</h3>
+    {state.list.status === 'loading' && <p role="status">Đang tải hồ sơ {caseStateLabel(caseState)}…</p>}
+    {error && <Alert className="block break-words" variant="destructive" role="alert">{error.message} {error.requestId && <>Request ID: {error.requestId}</>}</Alert>}
+    {error && state.status === 'active' && <Button variant="secondary" type="button" onClick={() => void controller.refresh()}>{error.code === 'INVALID_CURSOR' ? 'Bắt đầu lại từ trang đầu' : 'Thử tải lại'}</Button>}
+    {ready && state.list.items.length === 0 && <p>Không có hồ sơ {caseStateLabel(caseState)} trong trang này.</p>}
     {ready && <ul>{state.list.items.map(item => <li key={item.id} className="my-2">
-      <Link className="underline" to={`/cases/${item.id}?${writeCaseQuery(state.filters)}`}>{item.title}</Link>
-      <p>State: {item.state} · Case.version: {item.version} · Owner: {item.owner_id ?? 'Chưa được gán'}</p>
+      <DetailLink label={item.title} accessibleLabel={`Xem hồ sơ ${item.title}`} to={`/cases/${item.id}?${writeCaseQuery(state.filters)}`} />
+      <p>Trạng thái: {caseStateLabel(item.state)} · Người xử lý: {item.owner_id ?? 'Chưa được gán'}</p><p>{nextCaseStep(item.state)}</p>
     </li>)}</ul>}
-    <nav aria-label={`Phân trang cases ${caseState}`} className="space-x-4">
-      <button type="button" disabled={!ready || state.index === 0} onClick={() => void controller.previousPage()}>Trước</button>
+    </div>
+    <nav aria-label={`Phân trang cases ${caseState}`} className="flex flex-wrap items-center justify-end gap-4 pt-4">
+      <Button variant="secondary" type="button" disabled={!ready || state.index === 0} onClick={() => void controller.previousPage()}>Trước</Button>
       <span>Trang {state.index + 1}</span>
-      <button type="button" disabled={!ready || !state.nextCursor} onClick={() => void controller.nextPage()}>Tiếp</button>
+      <Button variant="secondary" type="button" disabled={!ready || !state.nextCursor} onClick={() => void controller.nextPage()}>Tiếp</Button>
     </nav>
   </section>;
 }

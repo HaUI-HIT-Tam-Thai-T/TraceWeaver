@@ -36,7 +36,7 @@ export function runFormSchema(root: Event) {
         code: "custom",
         path: ["to"],
         message:
-          "Window phải chứa root, không quá một giờ; nguồn phải duy nhất và chứa nguồn root.",
+          "Khoảng thời gian phải chứa sự kiện bắt đầu và không quá một giờ. Chọn các nguồn khác nhau, bao gồm nguồn của sự kiện bắt đầu.",
       });
     }
   });

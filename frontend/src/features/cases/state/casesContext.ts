@@ -4,7 +4,18 @@ import type { CasesState } from "./state";
 import type { CaseFilters } from "../schemas";
 import type { EvidenceCreate } from '../schemas';
 
+import type { ReviewCreate, ManualLinkCreate } from '../../link-review/schemas';
+import type { Command } from '../../case-sandbox/schemas';
 export type CasesContextValue = {
+  loadSandbox: () => Promise<void>;
+  submitSandboxCommand: (body: Command) => Promise<void>;
+  retrySandboxProvision: () => Promise<void>;
+  saveSandboxProof: () => Promise<void>;
+  beginSandboxIntent: () => void;
+  loadCaseAssignees: () => Promise<void>;
+  loadCaseRun: (force?: boolean) => Promise<void>;
+  reviewCaseLink: (id: string, body: ReviewCreate) => Promise<void>;
+  createCaseManualLink: (body: ManualLinkCreate) => Promise<void>;
   state: CasesState;
   setFilters: (filters: CaseFilters) => void;
   refresh: () => void;

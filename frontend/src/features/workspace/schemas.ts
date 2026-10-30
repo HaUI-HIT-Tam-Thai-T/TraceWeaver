@@ -10,6 +10,7 @@ export const roleSchema = z.enum([
 ]);
 export const membershipSchema = z.strictObject({
   workspace_id: idSchema,
+  workspace_name: z.string().trim().min(1).max(200).optional(),
   roles: z
     .array(roleSchema)
     .refine((roles) => new Set(roles).size === roles.length),

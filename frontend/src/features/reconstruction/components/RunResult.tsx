@@ -1,3 +1,9 @@
+import { degradedLabel } from '../presentation';
+import { TechnicalDetails } from "../../../components/ui/TechnicalDetails";
+import { modeLabel, runStatusLabel } from "../presentation";
+import { LoadingState } from "../../../components/ui/LoadingState";
+import { Alert } from "../../../components/ui/primitives/alert";
+import { Button } from "../../../components/ui/Button";
 import type { ReconstructionState } from "../state/state";
 import { GraphTable } from "./GraphTable";
 import { LinkReviewPanel } from "../../link-review/components/LinkReviewPanel";
@@ -28,82 +34,78 @@ export function RunResult({
   return (
     <div className="space-y-3" aria-live="polite">
       {state.phase === "validating" && (
-        <p role="status">Đang xác minh root và quyền truy cập…</p>
+        <LoadingState message="Đang kiểm tra sự kiện bắt đầu và quyền truy cập…" />
       )}
       {state.phase === "sending" && (
-        <p role="status">Đang gửi thao tác tạo run…</p>
+        <LoadingState message="Đang yêu cầu tái dựng…" />
       )}
       {state.phase === "uncertain" && (
         <>
-          <p role="alert">
-            Chưa rõ kết quả thao tác. Run có thể đã được tạo; gửi lại sẽ dùng
-            cùng body và Idempotency-Key.
-          </p>
-          <button type="button" onClick={retry}>
+          <Alert className="block break-words" variant="destructive" role="alert">
+            Chưa rõ yêu cầu đã được xử lý hay chưa. Gửi lại thao tác này sẽ dùng mã chống trùng và nội dung cũ; không sửa phạm vi trước khi gửi lại.
+          </Alert>
+          <Button variant="secondary" type="button" onClick={retry}>
             Gửi lại thao tác
-          </button>
+          </Button>
         </>
       )}
       {error && (
-        <p role="alert">
+        <Alert className="block break-words" variant="destructive" role="alert">
           {error.code === "WINDOW_TOO_LARGE"
-            ? "Window hoặc số event vượt giới hạn. Thu hẹp thời gian hoặc nguồn; không cắt dữ liệu ở FE."
+            ? "Phạm vi thời gian hoặc số sự kiện vượt giới hạn. Thu hẹp thời gian hoặc bớt nguồn rồi bắt đầu thao tác mới."
             : error.message}{" "}
           {error.requestId && <>Request ID: {error.requestId}</>}
-        </p>
+        </Alert>
       )}
       {state.phase === "reauth" && (
-        <button type="button" onClick={signIn}>
+        <Button variant="secondary" type="button" onClick={signIn}>
           Đăng nhập lại
-        </button>
+        </Button>
       )}
       {run && (
-        <>
-          <h3 className="text-xl font-semibold">Run {run.id}</h3>
+        <section className="result-summary space-y-4" aria-label="Tóm tắt kết quả tái dựng">
+          <h3 className="text-xl font-semibold">Kết quả tái dựng</h3>
           <p>
-            Trạng thái: {run.status}. Yêu cầu: {run.mode}. Phương pháp thực tế:{" "}
-            {run.effective_method}.
+            Trạng thái: {runStatusLabel(run.status)}. Yêu cầu: {modeLabel(run.mode)}. Phương pháp thực tế:{" "}
+            {modeLabel(run.effective_method)}.
           </p>
-          <p>
+          <TechnicalDetails headingLevel={4} title="Thông tin kỹ thuật của lần tái dựng"><p>Run: {run.id}</p><p>
             Snapshot: {run.input_snapshot_id}; rule: {run.rule_version}; model:{" "}
             {run.model_version ?? "không có"}.
-          </p>
+          </p><p>Lý do dự phòng gốc: {run.degraded_reason ?? 'Không có'}</p></TechnicalDetails>
           {run.degraded && (
             <p role="status">
-              {run.degraded_reason === "ai_unavailable"
-                ? "AI chưa sẵn sàng, kết quả dùng luật"
-                : "Kết quả sử dụng phương pháp suy giảm so với yêu cầu."}
+              {degradedLabel(run.degraded_reason)}
             </p>
           )}
           {run.status === "failed" && (
-            <p role="alert">
-              Run thất bại. Mã: {runErrorCode}. Không có graph để hiển thị.
-            </p>
+            <Alert className="block break-words" variant="destructive" role="alert">
+              Tái dựng thất bại. Hãy kiểm tra phạm vi nguồn và thử lại bằng một thao tác mới. Mã: {runErrorCode}. Chưa có kết quả để hiển thị; đây không phải kết luận thiếu log.
+            </Alert>
           )}
           {(state.tracking === "loading" || state.tracking === "waiting") && (
-            <p role="status">Đang theo dõi run…</p>
+            <LoadingState message="Đang theo dõi tiến trình tái dựng…" />
           )}
           {(state.tracking === "paused" || state.tracking === "error") && (
             <>
               <p>
-                Theo dõi đã dừng; trạng thái cuối không phải kết luận run thất
-                bại.
+                Đã dừng chờ cập nhật. Tác vụ vẫn có thể đang xử lý; bấm kiểm tra tiếp để xem kết quả mới.
               </p>
-              <button type="button" onClick={track}>
+              <Button variant="secondary" type="button" onClick={track}>
                 Kiểm tra tiếp trạng thái
-              </button>
+              </Button>
             </>
           )}
-        </>
+        </section>
       )}
-      {state.graphStatus === "loading" && <p role="status">Đang tải graph…</p>}
+      {state.graphStatus === "loading" && <LoadingState message="Đang tải kết quả liên kết…" />}
       {state.graphStatus === "error" && (
-        <button type="button" onClick={loadGraph}>
-          Tải lại graph
-        </button>
+        <Button variant="secondary" type="button" onClick={loadGraph}>
+          Tải lại kết quả liên kết
+        </Button>
       )}
       {state.graph && state.graphStatus === "ready" && (
-        <GraphTable graph={state.graph} />
+        <GraphTable graph={state.graph} rootId={run?.root_event_id} />
       )}
       {state.run?.status === "completed" && linkActions && (
         <LinkReviewPanel

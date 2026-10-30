@@ -10,6 +10,10 @@ import { initialCasesState } from "./state";
 import { readCaseQuery, writeCaseQuery } from "../query";
 import { reconstructionService } from '../../reconstruction/services/service';
 
+import { linkReviewService } from '../../link-review/services/service';
+import { createSandboxService } from '../../case-sandbox/service';
+import { apiClient } from '../../../services/apiClient';
+const sandboxService = createSandboxService(apiClient);
 const hiddenState = initialCasesState();
 export function CasesProvider({ children }: { children: ReactNode }) {
   const { state: auth } = useAuth();
@@ -20,7 +24,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     refreshAccess,
   } = useWorkspace();
   const [controller] = useState(() =>
-    createCasesController(casesService, refreshAccess, { addEvidence: casesService.addEvidence, getGraph: reconstructionService.getGraph }, { transitionCase: casesService.transitionCase }),
+    createCasesController(casesService, refreshAccess, { addEvidence: casesService.addEvidence, getGraph: reconstructionService.getGraph }, { transitionCase: casesService.transitionCase, listAssignees: casesService.listAssignees }, { getRun: reconstructionService.getRun, reviewLink: linkReviewService.reviewLink, createManualLink: linkReviewService.createManualLink }, sandboxService),
   );
   const [snapshot, setSnapshot] = useState(controller.getSnapshot);
 
@@ -68,7 +72,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     const key = JSON.stringify([me.subject, wid]);
     const changed = lastScope.current !== null && lastScope.current !== key;
     lastScope.current = key;
-    const scope = { subject: me.subject, workspaceId: wid, accessKey: me, canWrite: permissions.canWrite, canVerify: permissions.canVerify };
+    const scope = { subject: me.subject, workspaceId: wid, accessKey: me, canWrite: permissions.canWrite, canVerify: permissions.canVerify, canAdmin: permissions.canAdmin };
     if (changed && isCases) {
       controller.sync(scope, { kind: "list", search: "" });
       navigate("/cases", { replace: true });
@@ -78,6 +82,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     allowed,
     permissions.canWrite,
     permissions.canVerify,
+    permissions.canAdmin,
     me,
     wid,
     detailId,
@@ -94,13 +99,15 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     allowed &&
     aligned &&
     snapshot.scope?.accessKey === me &&
-    snapshot.scope.workspaceId === wid && snapshot.scope.canWrite === permissions.canWrite && snapshot.scope.canVerify === permissions.canVerify
+    snapshot.scope.workspaceId === wid && snapshot.scope.canWrite === permissions.canWrite && snapshot.scope.canVerify === permissions.canVerify && snapshot.scope.canAdmin === permissions.canAdmin
       ? snapshot
       : hiddenState;
   return (
     <CasesContext.Provider
       value={{
         state,
+        loadSandbox: controller.loadSandbox, submitSandboxCommand: controller.submitSandboxCommand, retrySandboxProvision: controller.retrySandboxProvision,
+        saveSandboxProof: controller.saveSandboxProof, beginSandboxIntent: controller.beginSandboxIntent,
         setFilters(filters) {
           const params = writeCaseQuery(filters);
           if (state.scope) {
@@ -118,6 +125,10 @@ export function CasesProvider({ children }: { children: ReactNode }) {
         nextPage() {
           void controller.nextPage();
         },
+        loadCaseRun: controller.loadCaseRun,
+        loadCaseAssignees: controller.loadCaseAssignees,
+        reviewCaseLink: controller.reviewCaseLink,
+        createCaseManualLink: controller.createCaseManualLink,
         loadEvidenceSnapshot: controller.loadEvidenceSnapshot,
         submitEvidence: controller.submitEvidence,
         beginNewEvidence: controller.beginNewEvidence,

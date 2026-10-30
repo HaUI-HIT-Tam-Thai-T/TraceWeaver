@@ -9,7 +9,7 @@ test('auth UI renders loading, session failure, login/logout, and callback feedb
   const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-auth', server: { middlewareMode: true, hmr: false, ws: false } })
   try {
     const { AuthContext } = await server.ssrLoadModule('/src/features/auth/state/authContext.ts')
-    const { HomePage } = await server.ssrLoadModule('/src/pages/HomePage.tsx')
+    const { AuthStatus } = await server.ssrLoadModule('/src/features/auth/components/AuthStatus.tsx')
     const { AuthCallbackPage } = await server.ssrLoadModule('/src/pages/AuthCallbackPage.tsx')
     const { WorkspaceContext } = await server.ssrLoadModule('/src/features/workspace/state/workspaceContext.ts')
     const { initialWorkspaceState } = await server.ssrLoadModule('/src/features/workspace/state/state.ts')
@@ -19,7 +19,7 @@ test('auth UI renders loading, session failure, login/logout, and callback feedb
       selectWorkspace: () => false, refreshAccess: async () => {}, loadMoreSources: async () => {},
     }
     const actions = { signIn: async () => {}, signOut: async () => {}, getAccessToken: async () => '' }
-    function render(state, page = HomePage) {
+    function render(state, page = AuthStatus) {
       return renderToString(createElement(AuthContext.Provider, { value: { ...actions, state } },
         createElement(WorkspaceContext.Provider, { value: workspace },
           createElement(MemoryRouter, null, createElement(page)))))
@@ -31,6 +31,7 @@ test('auth UI renders loading, session failure, login/logout, and callback feedb
     const signedOut = render({ status: 'unauthenticated', message: 'Phiên đã hết hạn.' })
     assert.match(signedOut, /Phiên đã hết hạn/)
     assert.match(signedOut, /Đăng nhập/)
+    assert.match(signedOut, /<h2[^>]*>Phiên đăng nhập<\/h2>/)
     assert.doesNotMatch(signedOut, /Đăng xuất/)
     const signedIn = render({ status: 'authenticated' })
     assert.match(signedIn, /Đã đăng nhập/)
@@ -40,7 +41,8 @@ test('auth UI renders loading, session failure, login/logout, and callback feedb
     assert.match(error, /Tải lại trang/)
     const callback = render({ status: 'unauthenticated' }, AuthCallbackPage)
     assert.match(callback, /Đăng nhập chưa hoàn tất hoặc đã bị hủy/)
-    assert.match(callback, /Về trang chủ/)
+    assert.match(callback, /Về Tổng quan/)
+    assert.match(callback, /<h1[^>]*>Đăng nhập<\/h1>/)
   } finally {
     await server.close()
   }

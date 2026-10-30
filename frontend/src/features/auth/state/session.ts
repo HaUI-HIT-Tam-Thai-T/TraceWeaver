@@ -81,14 +81,17 @@ export function createAuthSession(
           pkceMethod: "S256",
           responseMode: "query",
           checkLoginIframe: false,
-          onLoad: "check-sso",
           redirectUri: redirects.callbackUri,
           enableLogging: false,
           messageReceiveTimeout: 10000,
         });
-        publish({
-          status: authenticated ? "authenticated" : "unauthenticated",
-        });
+        if (authenticated) publish({ status: 'authenticated' });
+        else {
+          // Start login once at bootstrap. Avoid SDK login-required: clearToken()
+          // would otherwise start another login while logout is still redirecting.
+          await client.login({ redirectUri: redirects.callbackUri });
+          // Keep the loader visible until navigation; do not flash a login prompt.
+        }
       } catch {
         client?.clearToken();
         publish({

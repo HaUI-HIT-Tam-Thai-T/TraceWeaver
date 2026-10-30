@@ -1,15 +1,28 @@
+import { Button } from "../components/ui/Button";
+import { Loader } from "../components/ui/Loader";
+import { ErrorState } from "../components/ui/ErrorState";
+
 export function PageLoading() {
-  return <p role="status">Đang tải trang…</p>;
+  return <Loader message="Đang tải trang…" />;
 }
 
 export function PageLoadError() {
   return (
-    <section role="alert" aria-labelledby="page-load-error-title">
-      <h1 id="page-load-error-title">Không tải được trang</h1>
-      <p>Vui lòng kiểm tra kết nối rồi tải lại trang để thử lại.</p>
-      <button type="button" onClick={() => window.location.reload()}>
-        Tải lại trang
-      </button>
+    <section
+      aria-labelledby="page-load-error-title"
+      className="ui-panel space-y-4"
+    >
+      <h1 id="page-load-error-title" className="type-h1">
+        Không tải được trang
+      </h1>
+      <ErrorState
+        message="Vui lòng kiểm tra kết nối rồi tải lại trang để thử lại."
+        action={
+          <Button onClick={() => window.location.reload()}>
+            Tải lại trang
+          </Button>
+        }
+      />
     </section>
   );
 }

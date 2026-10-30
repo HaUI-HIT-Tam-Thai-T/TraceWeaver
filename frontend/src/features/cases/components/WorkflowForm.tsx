@@ -1,3 +1,10 @@
+import { caseActionLabel } from "../presentation";
+import { Select } from "../../../components/ui/Select";
+import { Alert } from "../../../components/ui/primitives/alert";
+import { CaseAssigneePicker } from './CaseAssigneePicker';
+import { Button } from "../../../components/ui/Button";
+import { Textarea } from "../../../components/ui/primitives/textarea";
+import { LoadingState } from "../../../components/ui/LoadingState";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { CaseDetail } from "../schemas";
@@ -5,6 +12,7 @@ import type {
   CaseWorkflow,
   CaseWorkflowGraph,
   CasesScope,
+  CasesState,
 } from "../state/state";
 import {
   caseActionSchema,
@@ -23,6 +31,8 @@ type Props = {
   submit: (body: CaseTransition) => Promise<void>;
   retry: () => Promise<void>;
   beginNew: () => void;
+  assignees?: CasesState['assignees'];
+  loadAssignees?: () => Promise<void>;
 };
 export function WorkflowForm(props: Props) {
   if (!props.scope.canWrite) return null;
@@ -37,6 +47,8 @@ function WorkflowEditor({
   submit,
   retry,
   beginNew,
+  assignees = { status: 'idle', items: [], error: null },
+  loadAssignees = async () => {},
 }: Props) {
   const first =
     caseActionSchema.options.find(
@@ -55,13 +67,16 @@ function WorkflowEditor({
       action: first,
       expected_version: detail.case.version,
       reason: "",
-      ...(first === "assign" ? { owner_id: scope.subject } : {}),
+      ...(first === "assign" ? { owner_id: '' } : {}),
     },
     shouldUnregister: true,
   });
   const action = useWatch({ control, name: "action" });
   const reason = useWatch({ control, name: "reason" });
   const expected = useWatch({ control, name: "expected_version" });
+  const owner = useWatch({ control, name: 'owner_id' });
+  const eligible = assignees.status === 'ready' && assignees.items.some(item => item.subject === owner && item.roles.some(role => role === 'operator' || role === 'reviewer'));
+  const canAssignSelf = assignees.status === 'ready' && assignees.items.some(item => item.subject === scope.subject && item.roles.some(role => role === 'operator' || role === 'reviewer'));
   const busy =
     !ready ||
     isSubmitting ||
@@ -70,22 +85,18 @@ function WorkflowEditor({
   const frozen = workflow.attempt !== null || workflow.status === "conflict";
   return (
     <section className="my-6 space-y-3" aria-labelledby="workflow-title">
-      <h2 id="workflow-title">Chuyển trạng thái case</h2>
+      <h2 id="workflow-title">Xử lý hồ sơ</h2>
       <p>
-        BE kiểm lại owner, membership và grants. Owner dùng subject, không dùng
-        username.
+        Hệ thống kiểm tra lại quyền, người xử lý và phiên bản hồ sơ khi gửi.
       </p>
-      <p>
-        Case.version đã chọn: {expected}; hiện tại: {detail.case.version}.
-      </p>
+      <details><summary>Phiên bản hồ sơ đang xử lý</summary><p>Case.version đã chọn: {expected}; hiện tại: {detail.case.version}.</p></details>
       <form
         onSubmit={handleSubmit((values) => submit(values))}
         className="space-y-3"
       >
         <fieldset disabled={busy || frozen} className="space-y-3">
-          <label className="block">
-            Action{" "}
-            <select {...register("action")}>
+          <label className="type-label block" htmlFor="workflow-action">Thao tác</label>
+            <Select id="workflow-action" {...register("action")}>
               {caseActionSchema.options.map((value) => (
                 <option
                   key={value}
@@ -98,99 +109,97 @@ function WorkflowEditor({
                       !scope.canVerify)
                   }
                 >
-                  {value}
+                  {caseActionLabel(value)}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
           <input
             type="hidden"
             {...register("expected_version", { valueAsNumber: true })}
           />
           {errors.expected_version && (
-            <p role="alert">Version không hợp lệ; chọn lại version hiện tại.</p>
+            <Alert className="block break-words" variant="destructive" role="alert">Phiên bản hồ sơ không hợp lệ; chọn lại phiên bản hiện tại.</Alert>
           )}
-          {errors.action && <p role="alert">Chọn action hợp lệ.</p>}
-          {action === "assign" && (
+          {errors.action && <Alert className="block break-words" variant="destructive" role="alert">Chọn thao tác phù hợp.</Alert>}
+          {action === "assign" && detail.case.state === 'new' && (
             <div>
-              <label>
-                Owner subject{" "}
-                <input
-                  {...register("owner_id")}
-                  aria-invalid={!!errors.owner_id}
-                />
-              </label>
-              <button
+              <p className="type-label">Người xử lý</p>
+              <input type="hidden" {...register('owner_id')} />
+              <CaseAssigneePicker state={assignees} selected={owner} disabled={busy || frozen}
+                load={loadAssignees} onSelect={subject => setValue('owner_id', subject, { shouldValidate: true })} />
+              <Button variant="secondary"
                 type="button"
-                onClick={() => setValue("owner_id", scope.subject)}
+                disabled={!canAssignSelf}
+                onClick={() => setValue("owner_id", scope.subject, { shouldValidate: true })}
               >
                 Giao cho tôi
-              </button>
-              {errors.owner_id && <p role="alert">{errors.owner_id.message}</p>}
+              </Button>
+              <p className="text-sm text-muted">Mở danh sách để tải người nhận đủ quyền. Mã tài khoản do hệ thống cung cấp; chọn Giao cho tôi khi tài khoản của bạn có trong danh sách.</p>
+              {owner && assignees.status === 'ready' && !eligible && <p role="status">Người đã chọn không còn trong danh sách đủ điều kiện. Hãy chọn lại.</p>}
+              {errors.owner_id && <Alert className="block break-words" variant="destructive" role="alert">{errors.owner_id.message}</Alert>}
             </div>
           )}
-          <label className="block">
-            Reason{" "}
-            <textarea
+          <label className="type-label block">
+            Lý do{" "}
+            <Textarea
               {...register("reason")}
               maxLength={1000}
               aria-invalid={!!errors.reason}
-              aria-describedby="workflow-reason-error"
+              aria-describedby={errors.reason ? 'workflow-reason-error' : undefined}
             />
           </label>
           {errors.reason && (
-            <p id="workflow-reason-error" role="alert">
+            <Alert className="block break-words" variant="destructive" id="workflow-reason-error" role="alert">
               {errors.reason.message}
-            </p>
+            </Alert>
           )}
           {issue && <p role="status">{issue}</p>}
-          <button type="submit" disabled={!!issue}>
-            Gửi transition
-          </button>
+          <Button variant="primary" type="submit" disabled={!!issue || (action === 'assign' && !eligible)}>
+            Xác nhận thao tác
+          </Button>
         </fieldset>
       </form>
       {workflow.status === "validating" && (
-        <p role="status">Đang kiểm tra detail và điều kiện hiện tại…</p>
+        <LoadingState message="Đang kiểm tra hồ sơ và điều kiện hiện tại…" />
       )}
       {workflow.status === "sending" && (
-        <p role="status">Đang gửi transition…</p>
+        <LoadingState message="Đang cập nhật hồ sơ…" />
       )}
       {workflow.status === "success" && (
         <p role="status">
-          Đã ghi transition.{" "}
+          Đã cập nhật hồ sơ.{" "}
           {ready
-            ? "Detail đã đồng bộ từ BE."
-            : "Chưa đồng bộ detail; hãy tải lại, không gửi POST lại."}
+            ? "Thông tin hiện tại đã được tải lại."
+            : "Chưa tải được thông tin mới; hãy tải lại hồ sơ, không gửi lại thao tác."}
         </p>
       )}
       {workflow.error && (
-        <p role="alert">
-          {workflow.error.code}: {workflow.error.message}
-        </p>
+        <Alert className="block break-words" variant="destructive" role="alert">
+          {workflow.status === "conflict" ? "Hồ sơ đã thay đổi. Đọc thông tin mới và chủ động chọn phiên bản hiện tại trước khi gửi tiếp." : workflow.error.message}<details><summary>Mã tra cứu</summary>{workflow.error.code}</details>
+        </Alert>
       )}
       {action === "verify_close" && (
         <p>
-          Kiểm pending links của toàn run trước khi gửi:{" "}
-          {graph.pendingCount ?? "sẽ tải graph mới"}.
+          Liên kết còn chờ duyệt trong toàn bộ kết quả tái dựng:{" "}
+          {graph.pendingCount ?? "sẽ kiểm tra kết quả mới nhất"}.
         </p>
       )}
       {workflow.status === "uncertain" && (
         <>
           <p>
-            Kết quả chưa rõ. Gửi lại giữ nguyên body/key trong 24 giờ; thao tác
-            mới có thể ghi thêm transition.
+            Chưa rõ kết quả. Gửi lại trong 24 giờ dùng nội dung và mã chống trùng cũ. Bắt đầu thao tác mới có thể tạo thêm lần cập nhật.
           </p>
-          <button
+          <Button variant="secondary"
             type="button"
             disabled={busy || workflow.error?.code === "IDEMPOTENCY_EXPIRED"}
             onClick={() => void retry()}
           >
             Gửi lại thao tác
-          </button>
+          </Button>
         </>
       )}
       {(workflow.attempt || workflow.status === "conflict") && (
-        <button
+        <Button variant="secondary"
           type="button"
           disabled={busy}
           onClick={() => {
@@ -205,11 +214,11 @@ function WorkflowEditor({
           }}
         >
           {workflow.status === "conflict"
-            ? "Dùng Case.version hiện tại"
-            : "Bắt đầu thao tác mới với version hiện tại"}
-        </button>
+            ? "Dùng phiên bản hồ sơ hiện tại"
+            : "Bắt đầu thao tác mới với phiên bản hiện tại"}
+        </Button>
       )}
-      <p>Hủy chờ ở FE không chứng minh BE đã rollback.</p>
+      <p>Rời trang hoặc ngừng chờ không có nghĩa thao tác đã bị hủy trên hệ thống.</p>
     </section>
   );
 }
