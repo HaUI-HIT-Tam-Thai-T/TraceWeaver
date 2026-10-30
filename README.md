@@ -81,6 +81,20 @@ Vai trò module và luồng dữ liệu ở [ARCHITECTURE.md](./ARCHITECTURE.md)
 ![Kiến trúc TraceWeaver: Open-Core cung cấp năng lực dùng chung, H-P-D-I tổ chức không gian vận hành, ứng dụng Web/API/Sandbox xử lý nghiệp vụ lab](./.github/assets/architecture-layers-vi.svg)
 
 Các mũi tên thể hiện năng lực được xây từ core lên ứng dụng, không phải thứ tự gọi HTTP.
+
+| Tầng | Thành phần |
+|---|---|
+| **1. Open-Core** — không có giao diện người dùng | Identity (SSO, quyền workspace/nguồn), Data (transaction, lưu trữ), Reconstruction (snapshot, luật liên kết), Workflow (guard, chuyển bước) và audit |
+| **2. H-P-D-I** | Bốn không gian **Human, Process, Data, Intelligence** được tổ chức từ các năng lực core, kết hợp tri thức, dashboard và scorer tùy chọn |
+| **3. Ứng dụng** | **TraceWeaver** — Web điều tra và quản lý hồ sơ, API nghiệp vụ, sandbox cấp môi trường thực hành |
+
+| Không gian | Điều tra và xử lý hồ sơ | Sandbox và kiểm chứng |
+|---|---|---|
+| **H — Human** | Workspace, thành viên, vai trò và quyền đọc từng nguồn; tri thức hỗ trợ người vận hành | Operator điều tra, admin sửa điều kiện, reviewer kiểm chứng và quyết định đóng theo quyền |
+| **P — Process** | Tạo run, review liên kết, phân công hồ sơ, bổ sung bằng chứng và chuyển trạng thái có guard | Sửa điều kiện → chạy lại yêu cầu → giao log → kiểm chứng nguồn → đóng hồ sơ khi đủ điều kiện |
+| **D — Data** | Sự kiện đa nguồn, provenance, snapshot hành trình, lịch sử/audit và dashboard | Trạng thái RAM/image/tài khoản, các lần thực thi, log delivery và proof được lưu để đối chiếu |
+| **I — Intelligence** | Luật tái dựng, scorer hỗ trợ đánh giá cặp hợp lệ; giữ unresolved khi chưa đủ căn cứ | Đối chiếu kết quả thực thi và bằng chứng nguồn theo điều kiện hiện tại; điểm AI không thay thế proof |
+
 Xem [kiến trúc chi tiết](./ARCHITECTURE.md) và [ranh giới core](./backend/src/core/README.md).
 
 ## 🧩 Tính năng
