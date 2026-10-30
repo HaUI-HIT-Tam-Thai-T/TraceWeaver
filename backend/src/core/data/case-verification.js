@@ -34,7 +34,8 @@ export async function verifiedClosure(client, subject, workspace, row) {
     WHERE workspace_id=$1 AND case_id=$2 AND case_version=$3 ORDER BY created_at DESC,id DESC LIMIT 1`, [workspace, row.id, row.version]);
   const saved = proof?.document.observation;
   if (current.result !== 'passed' || saved?.result !== 'passed' || current.delivery?.status !== 'delivered' ||
-      saved.delivery?.status !== 'delivered' || saved.checker_version !== current.checker_version || saved.source_version !== current.source_version ||
+      saved.delivery?.status !== 'delivered' || saved.checker_version !== current.checker_version ||
+      saved.attempt?.source_version !== current.attempt?.source_version ||
       saved.request_id !== current.request_id || saved.attempt?.id !== current.attempt?.id || saved.environment?.id !== current.environment?.id)
     throw new ApiError(422, 'VERIFICATION_REQUIRED', 'A current passing source verification is required before closing');
   return { verification_id: proof.id, ...proof.document };

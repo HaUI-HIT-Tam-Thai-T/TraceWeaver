@@ -92,7 +92,19 @@ reactivates it. No deletion/release route is introduced. Reusing an operation ID
 attempt or log; case command responses include `execution:{replayed,operation_id,attempt}` so FE can
 distinguish the original operation result from the current observation.
 
-Any sandbox state version change requires a fresh execution, even unrelated changes (conservative policy).
+Global `source_version` remains the optimistic-concurrency token for every command. It is not an
+execution freshness token. Creating, repairing or running another request does not invalidate a passed
+request whose reserved environment still matches. Changing that request's image/account, including a
+change followed by a reversal, requires a new execution. An actual shared RAM capacity change also
+requires a new execution; setting an already-current condition/capacity does not invalidate evidence.
+For failed attempts, a change in currently available RAM also requires rerunning. Other allocations
+cannot invalidate a passing reserved environment while the total allocation invariant holds.
+This source fix requires deploying the updated BE and simulator together; it is not deployed by editing this document.
+
+Freshness is stored as `verification_version` inside each source request, without changing case command
+DTOs or attempt/proof snapshots. Existing JSON state is read without migration or rewriting history.
+A legacy execution already stale under the old global policy remains inconclusive until explicitly rerun;
+the new checker cannot establish whether its conditions changed and changed back in the past.
 No attempt -> `inconclusive/NOT_EXECUTED`; old execution -> `inconclusive/RERUN_REQUIRED`;
 failed conditions -> `failed` with blockers. Old checker-v1 attempts require rerunning, not data rewriting.
 Input/version errors: 400 invalid body; 409 case or sandbox version conflict; 422 closed case,
@@ -101,8 +113,11 @@ wrong resource, request binding or attempt limit; 403 role failure; 404 inaccess
 Execution and delivery are separate: `passed` plus `delivery.status=pending` means simulation succeeded
 but its new log is not confirmed ingested. It is not a business failure. Reviewer POSTs `{}` to the existing
 case `verifications` endpoint after delivery; a proof saved while pending cannot close the case, even if
-delivery finishes later. A new reviewer check is required. Closure compares checker/source/case versions,
-request/attempt/environment and current successful delivery. No new migration is needed beyond 008–010.
+delivery finishes later. A new reviewer check is required. Closure compares checker/case versions,
+request, attempt ID and its immutable source version, environment and current successful delivery.
+It re-inspects current request freshness under the sandbox lock, rather than comparing global source
+versions across proof/current observation. A new attempt needs a new proof even if both attempts pass.
+No new migration is needed beyond 008–010.
 
 ### Original RAM example
 
@@ -132,7 +147,7 @@ Opening a case again requires a new reason and a new verification for its new ca
 - Configuring a sandbox enables the additional closure guard for cases in that workspace. Use a dedicated
   workspace: historic static requests absent from the sandbox produce an inconclusive check and cannot close.
 - The root event must carry exactly one distinct request identifier. It is matched to authoritative source state.
-- A change to any lab state version requires rerunning and then a new reviewer check, including unrelated allocations.
+- Global version changes still reject stale writes; only relevant source changes require rerunning/proof refresh as described above.
 - Non-sandbox workspaces retain the existing reviewer/evidence closure policy. This is NOT a general verifier
   for arbitrary external systems. Those need a trusted source adapter and an explicit verification policy.
 - Max 1,000 requests and 20 attempts per request. No reset/delete route is provided.

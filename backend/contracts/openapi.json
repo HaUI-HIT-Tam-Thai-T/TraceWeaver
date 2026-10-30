@@ -3189,7 +3189,8 @@
           },
           "source_version": {
             "type": "integer",
-            "minimum": 1
+            "minimum": 1,
+            "description": "Global sandbox version used as command expected_version. A change alone does not invalidate an unrelated request's passing observation; use current result and bound attempt/environment."
           },
           "request_id": {
             "type": "string"

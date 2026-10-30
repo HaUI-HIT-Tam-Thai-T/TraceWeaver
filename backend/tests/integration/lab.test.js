@@ -154,8 +154,28 @@ test('reviewer closes only after source repair and fresh server-owned verificati
   state = await lab.read('operator', workspace);
   assert.equal(rerun.observation.result, 'passed');
   await collect();
-  await cases.verify('reviewer', workspace, item.id);
+  const beforeChanges = await cases.verify('reviewer', workspace, item.id);
+  for (const active of [false, true]) state = await lab.command('admin', workspace, {
+    action: 'account', request_id: 'R1', account_id: state.requests[0].account_id, active, expected_version: state.version });
+  assert.equal((await cases.sandbox('reviewer', workspace, item.id)).observation.reason, 'RERUN_REQUIRED');
+  await assert.rejects(step('verify_close', 4), e => e.code === 'VERIFICATION_REQUIRED');
+  state = await lab.command('operator', workspace, { action: 'provision', request_id: 'R1', operation_id: 'after-condition-repair', expected_version: state.version });
+  await collect();
+  await assert.rejects(step('verify_close', 4), e => e.code === 'VERIFICATION_REQUIRED'); // New attempt needs its own proof.
+  const finalProof = await cases.verify('reviewer', workspace, item.id);
+  state = await lab.command('operator', workspace, { action: 'submit', request_id: 'R2', ram: 2, image_available: false, expected_version: state.version });
+  state = await lab.command('operator', workspace, { action: 'provision', request_id: 'R2', operation_id: 'unrelated-failed', expected_version: state.version });
+  state = await lab.command('admin', workspace, { action: 'image', request_id: 'R2', image_id: 'lab-image-R2', available: true, expected_version: state.version });
+  state = await lab.command('operator', workspace, { action: 'provision', request_id: 'R2', operation_id: 'unrelated-passed', expected_version: state.version });
+  const current = (await cases.sandbox('reviewer', workspace, item.id)).observation;
+  assert.equal(current.result, 'passed');
+  assert.notEqual(finalProof.observation.source_version, current.source_version);
+  assert.equal(finalProof.observation.attempt.id, current.attempt.id);
+  const proofs = await cases.verifications('reviewer', workspace, item.id);
+  assert.deepEqual(proofs.items.find(p => p.id === beforeChanges.id), beforeChanges);
+  assert.deepEqual(proofs.items.find(p => p.id === finalProof.id), finalProof);
   assert.equal((await step('verify_close', 4)).state, 'closed');
+  assert.equal((await cases.sandbox('reviewer', workspace, item.id)).observation.result, 'passed');
   await assert.rejects(cases.sandbox('operator', workspace, item.id, { action: 'provision', expected_case_version: 5,
     expected_version: state.version, operation_id: 'closed' }), e => e.code === 'CASE_CLOSED');
   await step('reopen', 5, { reason: 'New symptom after closure' });

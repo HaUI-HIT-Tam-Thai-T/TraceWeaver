@@ -4,6 +4,12 @@ Cập nhật 30/10/2026 sau thay dữ liệu server. Contract simulator giữ t�
 đã triển khai tại `https://api.quizlearn.tech`. Xem thêm [bàn giao quản trị FE](FE_WORKSPACE_ADMIN_HANDOFF.md).
 Đây là phần mở rộng xử lý/kiểm chứng nghiệp vụ; AI vẫn chỉ chấm điểm liên kết sự kiện.
 
+**Bản sửa source về hiệu lực kiểm chứng (chưa triển khai server):** `source_version` vẫn là version
+toàn sandbox để gửi lệnh. Tạo/sửa/chạy yêu cầu khác không tự làm mất hiệu lực một yêu cầu đã đạt.
+Sửa image/account của chính yêu cầu hoặc thay tổng RAM thực sự vẫn bắt buộc chạy lại; sửa cùng giá trị
+không làm mất hiệu lực. Kết quả lỗi cần chạy lại nếu RAM khả dụng đổi do yêu cầu khác giữ chỗ.
+Không thêm field bắt buộc hay đổi DTO. Quy tắc mới chỉ có hiệu lực sau khi triển khai BE/simulator cùng nhau.
+
 ## 0. Contract để FE triển khai ngay
 
 Đối chiếu source BE `1b6a72e`: case-repository.sandbox/verify/verifications, lab-repository,
@@ -38,9 +44,14 @@ khi inconclusive; không bắt buộc conditions/attempts trong mọi response, 
 | Transition.Idempotency-Key | Cơ chế workflow hiện có | Cùng key/body khi retry trong24giờ; khác cơ chế simulator |
 
 Commands không tăng Case.version; workflow tăng Case.version. Không tự cộng bất kỳ version nào.
-Một request khác hoặc lệnh sửa cùng giá trị cũng có thể tăng source_version, làm attempt/proof cũ stale.
+Một request khác hoặc lệnh sửa cùng giá trị vẫn có thể tăng source_version để chống ghi đè,
+nhưng không tự làm attempt/proof cũ stale theo bản sửa source ở trên.
 Vì vậy attempt.result=failed hoặc passed trong lịch sử không quyết định observation.result hiện tại.
 `inconclusive/RERUN_REQUIRED` sau thay đổi nguồn là yêu cầu thực thi mới, không phải lỗi schema FE.
+FE không dùng riêng `proof.observation.source_version !== observation.source_version` để kết luận proof
+hết hiệu lực. Đối chiếu case_version, checker_version, request_id, attempt.id, attempt.source_version,
+environment.id, kết quả hiện tại và chuyển log; BE vẫn là nơi quyết định cuối cùng khi đóng.
+Snapshot cũ đã stale theo chính sách trước không tự trở thành đạt; chạy lại để có bằng chứng mới.
 
 ### Retry bắt buộc
 
@@ -56,8 +67,9 @@ Vì vậy attempt.result=failed hoặc passed trong lịch sử không quyết �
 
 Idempotency provision chỉ bảo đảm không lặp execution/log nguồn; case-bound command vẫn có thể ghi
 audit thao tác khi replay. Trước mọi command, BE vẫn kiểm quyền, expected_case_version và case chưa đóng.
-Không coi cùng operation_id là quyền bỏ qua các guard đó. Proof từng đạt nhưng case/source version đổi,
-reopen hoặc delivery chưa đủ không được FE tự gắn nhãn đủ điều kiện đóng; BE kiểm lại trong transaction.
+Không coi cùng operation_id là quyền bỏ qua các guard đó. Proof từng đạt nhưng case version đổi,
+điều kiện liên quan đổi, có attempt mới, reopen hoặc delivery chưa đủ không được FE tự gắn nhãn đủ
+điều kiện đóng; BE kiểm lại trong transaction. Chênh global source_version đơn thuần không đủ kết luận.
 
 ## 1. Phạm vi FE cần làm
 
