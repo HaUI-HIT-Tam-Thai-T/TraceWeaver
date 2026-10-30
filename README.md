@@ -78,26 +78,10 @@ Vai trò module và luồng dữ liệu ở [ARCHITECTURE.md](./ARCHITECTURE.md)
 
 ## 🧱 Kiến trúc 3 tầng
 
-<details>
-<summary>Xem kiến trúc ba tầng và ánh xạ H-P-D-I</summary>
+![Kiến trúc TraceWeaver: Open-Core cung cấp năng lực dùng chung, H-P-D-I tổ chức không gian vận hành, ứng dụng Web/API/Sandbox xử lý nghiệp vụ lab](./.github/assets/architecture-layers-vi.svg)
 
-| Tầng | Thành phần | Vai trò trong TraceWeaver |
-|---|---|---|
-| 1. Open-Core headless | Identity, Data, Reconstruction, Workflow và audit | Cung cấp quyền, transaction, snapshot và engine dùng chung |
-| 2. H-P-D-I | Human, Process, Data, Intelligence | Ghép chức năng core thành không gian vận hành |
-| 3. Ứng dụng | TraceWeaver Web, API nghiệp vụ và sandbox | Điều tra yêu cầu cấp môi trường thực hành |
-
-| Không gian | Áp dụng trong TraceWeaver |
-|---|---|
-| **H** — Human | Workspace, thành viên, vai trò, quyền nguồn và tri thức |
-| **P** — Process | Review liên kết, phân công hồ sơ, workflow và kiểm chứng trước đóng |
-| **D** — Data | Events, provenance, snapshots, tìm kiếm và dashboard |
-| **I** — Intelligence | Luật tái dựng, scorer tùy chọn, lý do và trường hợp unresolved |
-
-Core không phụ thuộc React/Express; các policy riêng của hồ sơ lab được nối qua lớp nghiệp vụ/adapter.
-Ranh giới và trạng thái refactor ở [core README](./backend/src/core/README.md).
-
-</details>
+Các mũi tên thể hiện năng lực được xây từ core lên ứng dụng, không phải thứ tự gọi HTTP.
+Xem [kiến trúc chi tiết](./ARCHITECTURE.md) và [ranh giới core](./backend/src/core/README.md).
 
 ## 🧩 Tính năng
 

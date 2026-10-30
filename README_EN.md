@@ -78,26 +78,10 @@ Module responsibilities and data flows are described in [ARCHITECTURE.md](./ARCH
 
 ## 🧱 Three-layer architecture
 
-<details>
-<summary>Three layers and the H-P-D-I mapping</summary>
+![TraceWeaver architecture: shared Open-Core capabilities support H-P-D-I operational spaces and the Web/API/Sandbox application](./.github/assets/architecture-layers-en.svg)
 
-| Layer | Components | TraceWeaver responsibility |
-|---|---|---|
-| 1. Headless Open-Core | Identity, Data, Reconstruction, Workflow and audit | Authorization, transactions, snapshots and shared engines |
-| 2. H-P-D-I | Human, Process, Data, Intelligence | Compose core capabilities into operational workspaces |
-| 3. Application | TraceWeaver Web, business APIs and sandbox | Investigate lab provisioning requests |
-
-| Space | Application in TraceWeaver |
-|---|---|
-| **H** — Human | Workspaces, membership, roles, source grants and knowledge |
-| **P** — Process | Link review, case assignment, workflows and verification before closure |
-| **D** — Data | Events, provenance, snapshots, search and dashboards |
-| **I** — Intelligence | Reconstruction rules, optional scoring, explanations and unresolved cases |
-
-The core is independent of React/Express; lab-case policies are connected through business services/adapters.
-See the [core README](./backend/src/core/README.md) for module boundaries and refactor status.
-
-</details>
+Arrows show how shared capabilities support the application, rather than the HTTP call sequence.
+See the [architecture details](./ARCHITECTURE.md) and [core boundaries](./backend/src/core/README.md).
 
 ## 🧩 Features
 
