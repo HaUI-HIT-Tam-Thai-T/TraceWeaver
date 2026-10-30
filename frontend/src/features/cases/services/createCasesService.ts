@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { AxiosInstance } from "axios";
 import { ApiError } from "../../../services/apiError.ts";
 import { caseAssigneesSchema, evidenceCreateSchema, evidenceSchema } from "../schemas.ts";
-import type { CaseAssignees } from '../schemas.ts';
+import type { CaseAssignees } from "../schemas.ts";
 import type { Evidence, EvidenceCreate } from "../schemas.ts";
 import { transitionSchema, transitionStates } from "../workflow.ts";
 import type { CaseTransition } from "../workflow.ts";
@@ -13,13 +13,7 @@ import {
   casesPageSchema,
   caseFiltersSchema,
 } from "../schemas.ts";
-import type {
-  Case,
-  CaseCreate,
-  CaseDetail,
-  CaseFilters,
-  CasesPage,
-} from "../schemas.ts";
+import type { Case, CaseCreate, CaseDetail, CaseFilters, CasesPage } from "../schemas.ts";
 
 export type CaseMutationOptions = {
   idempotencyKey: string;
@@ -33,21 +27,9 @@ export type CasesOptions = {
 
 export interface CasesService {
   listAssignees(workspaceId: string, caseId: string, signal?: AbortSignal): Promise<CaseAssignees>;
-  createCase(
-    workspaceId: string,
-    body: CaseCreate,
-    options: CaseMutationOptions,
-  ): Promise<Case>;
-  listCases(
-    workspaceId: string,
-    filters: CaseFilters,
-    options?: CasesOptions,
-  ): Promise<CasesPage>;
-  getCase(
-    workspaceId: string,
-    caseId: string,
-    signal?: AbortSignal,
-  ): Promise<CaseDetail>;
+  createCase(workspaceId: string, body: CaseCreate, options: CaseMutationOptions): Promise<Case>;
+  listCases(workspaceId: string, filters: CaseFilters, options?: CasesOptions): Promise<CasesPage>;
+  getCase(workspaceId: string, caseId: string, signal?: AbortSignal): Promise<CaseDetail>;
   addEvidence(
     workspaceId: string,
     caseId: string,
@@ -74,9 +56,7 @@ const invalidResponse = () =>
     code: "INVALID_API_RESPONSE",
     message: "Dữ liệu case không đúng định dạng.",
   });
-export function createCasesService(
-  client: Pick<AxiosInstance, "get" | "post">,
-): CasesService {
+export function createCasesService(client: Pick<AxiosInstance, "get" | "post">): CasesService {
   function path(wid: string, cid?: string) {
     if (
       ![wid, ...(cid === undefined ? [] : [cid])].every(
@@ -100,11 +80,7 @@ export function createCasesService(
       headers: { "Idempotency-Key": options.idempotencyKey },
     });
     const result = caseSchema.safeParse(response.data);
-    if (
-      !result.success ||
-      result.data.workspace_id !== wid ||
-      result.data.run_id !== body.run_id
-    )
+    if (!result.success || result.data.workspace_id !== wid || result.data.run_id !== body.run_id)
       throw invalidResponse();
     return result.data;
   }
@@ -135,25 +111,14 @@ export function createCasesService(
       params,
     });
     const result = casesPageSchema.safeParse(response.data);
-    if (
-      !result.success ||
-      result.data.items.some((item) => item.workspace_id !== wid)
-    )
+    if (!result.success || result.data.items.some((item) => item.workspace_id !== wid))
       throw invalidResponse();
     return result.data;
   }
-  async function getCase(
-    wid: string,
-    cid: string,
-    signal?: AbortSignal,
-  ): Promise<CaseDetail> {
+  async function getCase(wid: string, cid: string, signal?: AbortSignal): Promise<CaseDetail> {
     const response = await client.get<unknown>(path(wid, cid), { signal });
     const result = caseDetailSchema.safeParse(response.data);
-    if (
-      !result.success ||
-      result.data.case.workspace_id !== wid ||
-      result.data.case.id !== cid
-    )
+    if (!result.success || result.data.case.workspace_id !== wid || result.data.case.id !== cid)
       throw invalidResponse();
     return result.data;
   }
@@ -199,13 +164,16 @@ export function createCasesService(
       result.data.workspace_id !== wid ||
       result.data.version !== parsed.data.expected_version + 1 ||
       result.data.state !== transitionStates[parsed.data.action].to ||
-      (parsed.data.action === "assign" &&
-        result.data.owner_id !== parsed.data.owner_id)
+      (parsed.data.action === "assign" && result.data.owner_id !== parsed.data.owner_id)
     )
       throw invalidResponse();
     return result.data;
   }
-  async function listAssignees(wid: string, cid: string, signal?: AbortSignal): Promise<CaseAssignees> {
+  async function listAssignees(
+    wid: string,
+    cid: string,
+    signal?: AbortSignal,
+  ): Promise<CaseAssignees> {
     const response = await client.get<unknown>(`${path(wid, cid)}/assignees`, { signal });
     const result = caseAssigneesSchema.safeParse(response.data);
     if (!result.success) throw invalidResponse();

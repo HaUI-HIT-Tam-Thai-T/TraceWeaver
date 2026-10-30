@@ -23,9 +23,7 @@ function invalid(code: string) {
   });
 }
 
-export function createEventsService(
-  client: Pick<AxiosInstance, "get">,
-): EventsService {
+export function createEventsService(client: Pick<AxiosInstance, "get">): EventsService {
   async function listEvents(
     workspaceId: string,
     filters: EventFilters,
@@ -43,15 +41,14 @@ export function createEventsService(
     for (const [key, value] of Object.entries(parsed.data))
       if (value !== undefined) params.set(key, String(value));
     if (options.cursor !== undefined) params.set("cursor", options.cursor);
-    const response = await client.get<unknown>(
-      `/api/v1/workspaces/${workspaceId}/events`,
-      { params, signal: options.signal },
-    );
+    const response = await client.get<unknown>(`/api/v1/workspaces/${workspaceId}/events`, {
+      params,
+      signal: options.signal,
+    });
     const result = eventsPageSchema.safeParse(response.data);
     if (
       !result.success ||
-      (filters.source_id &&
-        result.data.items.some((item) => item.source_id !== filters.source_id))
+      (filters.source_id && result.data.items.some((item) => item.source_id !== filters.source_id))
     )
       throw invalid("INVALID_API_RESPONSE");
     return result.data;
@@ -62,18 +59,14 @@ export function createEventsService(
     eventId: string,
     signal?: AbortSignal,
   ): Promise<Event> {
-    if (
-      !z.uuid().safeParse(workspaceId).success ||
-      !z.uuid().safeParse(eventId).success
-    )
+    if (!z.uuid().safeParse(workspaceId).success || !z.uuid().safeParse(eventId).success)
       throw invalid("INVALID_EVENT_QUERY");
     const response = await client.get<unknown>(
       `/api/v1/workspaces/${workspaceId}/events/${eventId}`,
       { signal },
     );
     const result = eventSchema.safeParse(response.data);
-    if (!result.success || result.data.event_id !== eventId)
-      throw invalid("INVALID_API_RESPONSE");
+    if (!result.success || result.data.event_id !== eventId) throw invalid("INVALID_API_RESPONSE");
     return result.data;
   }
   return { listEvents, getEvent };

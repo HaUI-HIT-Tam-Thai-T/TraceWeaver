@@ -1,8 +1,24 @@
-import type { ComponentProps } from 'react';
-import { cn } from '../../../lib/utils';
+import type { ComponentProps } from "react";
+import { cn } from "../../../lib/utils";
 
 // shadcn Separator presentation with native separator semantics; no interactive primitive is needed.
-export function Separator({ className, orientation = 'horizontal', decorative = true, ...props }: ComponentProps<'div'> & { orientation?: 'horizontal' | 'vertical'; decorative?: boolean }) {
-  return <div data-slot="separator" data-orientation={orientation} role={decorative ? 'none' : 'separator'} aria-orientation={decorative ? undefined : orientation}
-    className={cn('shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px', className)} {...props} />;
+export function Separator({
+  className,
+  orientation = "horizontal",
+  decorative = true,
+  ...props
+}: ComponentProps<"div"> & { orientation?: "horizontal" | "vertical"; decorative?: boolean }) {
+  return (
+    <div
+      data-slot="separator"
+      data-orientation={orientation}
+      role={decorative ? "none" : "separator"}
+      aria-orientation={decorative ? undefined : orientation}
+      className={cn(
+        "shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px",
+        className,
+      )}
+      {...props}
+    />
+  );
 }

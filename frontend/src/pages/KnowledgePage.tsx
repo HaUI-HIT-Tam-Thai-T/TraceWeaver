@@ -10,10 +10,7 @@ import {
 } from "../features/knowledge/state/controller";
 import type { KnowledgeScope } from "../features/knowledge/state/controller";
 import { knowledgeService } from "../features/knowledge/services/service";
-import {
-  readKnowledgeQuery,
-  writeKnowledgeQuery,
-} from "../features/knowledge/query";
+import { readKnowledgeQuery, writeKnowledgeQuery } from "../features/knowledge/query";
 import {
   KnowledgeResults,
   KnowledgeSearchForm,
@@ -35,29 +32,17 @@ export function KnowledgePage() {
     <>
       <PageHeading title="Tri thức" />
       <KnowledgeBrowser
-        scope={
-          allowed
-            ? { subject: me.subject, workspaceId: wid, accessKey: me }
-            : null
-        }
+        scope={allowed ? { subject: me.subject, workspaceId: wid, accessKey: me } : null}
         search={params.toString()}
       />
     </>
   );
 }
-function KnowledgeBrowser({
-  scope,
-  search,
-}: {
-  scope: KnowledgeScope | null;
-  search: string;
-}) {
+function KnowledgeBrowser({ scope, search }: { scope: KnowledgeScope | null; search: string }) {
   const { refreshAccess } = useWorkspace();
   const { signIn } = useAuth();
   const [params, setParams] = useSearchParams();
-  const [controller] = useState(() =>
-    createKnowledgeController(knowledgeService, refreshAccess),
-  );
+  const [controller] = useState(() => createKnowledgeController(knowledgeService, refreshAccess));
   const [snapshot, setSnapshot] = useState(controller.getSnapshot);
 
   useEffect(() => {
@@ -81,10 +66,7 @@ function KnowledgeBrowser({
     snapshot.scope?.accessKey === scope.accessKey &&
     snapshot.scope.workspaceId === scope.workspaceId;
   const state = aligned ? snapshot : initialKnowledgeState();
-  if (!scope)
-    return (
-      <p>Đăng nhập và chọn workspace có quyền đọc để tra cứu knowledge.</p>
-    );
+  if (!scope) return <p>Đăng nhập và chọn workspace có quyền đọc để tra cứu knowledge.</p>;
   return (
     <>
       {!query.success && (
@@ -99,8 +81,7 @@ function KnowledgeBrowser({
           const next = writeKnowledgeQuery(filters);
           if (
             next.toString() === params.toString() ||
-            (query.success &&
-              JSON.stringify(filters) === JSON.stringify(query.filters))
+            (query.success && JSON.stringify(filters) === JSON.stringify(query.filters))
           )
             void controller.refresh();
           setParams(next);

@@ -71,8 +71,7 @@ export function createAuthSession(
           generation += 1;
           publish({ status: "unauthenticated" });
         };
-        client.onAuthRefreshError = () =>
-          clearSession("Phiên đã hết hạn. Vui lòng đăng nhập lại.");
+        client.onAuthRefreshError = () => clearSession("Phiên đã hết hạn. Vui lòng đăng nhập lại.");
         client.onTokenExpired = () => {
           void getAccessToken().catch(() => undefined);
         };
@@ -85,7 +84,7 @@ export function createAuthSession(
           enableLogging: false,
           messageReceiveTimeout: 10000,
         });
-        if (authenticated) publish({ status: 'authenticated' });
+        if (authenticated) publish({ status: "authenticated" });
         else {
           // Start login once at bootstrap. Avoid SDK login-required: clearToken()
           // would otherwise start another login while logout is still redirecting.
@@ -97,8 +96,7 @@ export function createAuthSession(
         publish({
           status: "error",
           reason: "initialization",
-          message:
-            "Không thể xác thực phiên đăng nhập. Vui lòng tải lại trang để thử lại.",
+          message: "Không thể xác thực phiên đăng nhập. Vui lòng tải lại trang để thử lại.",
         });
       }
     });
@@ -107,11 +105,7 @@ export function createAuthSession(
 
   async function signIn(): Promise<void> {
     await initializeAuth();
-    if (
-      !client ||
-      (state.status === "error" && state.reason === "initialization")
-    )
-      return;
+    if (!client || (state.status === "error" && state.reason === "initialization")) return;
     try {
       await client.login({ redirectUri: redirects.callbackUri });
     } catch {

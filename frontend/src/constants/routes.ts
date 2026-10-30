@@ -2,18 +2,14 @@ import { createElement, lazy } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthCallbackPage } from "../pages/AuthCallbackPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
+import { EventDetailPage } from "../pages/EventDetailPage";
 import { PageLoadError } from "../routes/PageLoadFeedback";
-import { WorkspaceAdminPage } from '../pages/WorkspaceAdminPage';
+import { WorkspaceAdminPage } from "../pages/WorkspaceAdminPage";
 
 // Declare once so rendering does not recreate the lazy component or reset its state.
 const EventsPage = lazy(() =>
   import("../pages/EventsPage")
     .then((module) => ({ default: module.EventsPage }))
-    .catch(() => ({ default: PageLoadError })),
-);
-const EventDetailPage = lazy(() =>
-  import("../pages/EventDetailPage")
-    .then((module) => ({ default: module.EventDetailPage }))
     .catch(() => ({ default: PageLoadError })),
 );
 const CasesPage = lazy(() =>
@@ -38,7 +34,7 @@ const DashboardPage = lazy(() =>
 );
 
 export const APP_ROUTES = [
-  { path: '/workspace-admin', element: createElement(WorkspaceAdminPage) },
+  { path: "/workspace-admin", element: createElement(WorkspaceAdminPage) },
   { path: "/dashboard", element: createElement(DashboardPage) },
   { path: "/knowledge", element: createElement(KnowledgePage) },
   { path: "/cases", element: createElement(CasesPage) },

@@ -20,8 +20,7 @@ export interface EventsController {
   nextPage(): Promise<void>;
 }
 
-const scopeId = (scope: EventsScope) =>
-  JSON.stringify([scope.subject, scope.workspaceId]);
+const scopeId = (scope: EventsScope) => JSON.stringify([scope.subject, scope.workspaceId]);
 
 export function createEventsController(
   service: EventsService,
@@ -72,17 +71,14 @@ export function createEventsController(
     if (!reauth && first) void revalidateWorkspace().catch(() => undefined);
   }
   function isAccessError(error: ApiError) {
-    return (
-      error.kind === "auth" || error.status === 403 || error.status === 404
-    );
+    return error.kind === "auth" || error.status === 403 || error.status === 404;
   }
 
   function openDetail(id: string | null): Promise<void> {
     detailGeneration += 1;
     detailRequest?.abort();
     dispatch({ type: "detailLoading", id });
-    if (!id || !state.scope || !active || state.status !== "active")
-      return Promise.resolve();
+    if (!id || !state.scope || !active || state.status !== "active") return Promise.resolve();
     const scope = state.scope;
     const request = new AbortController();
     detailRequest = request;
@@ -96,11 +92,7 @@ export function createEventsController(
     return Promise.resolve().then(async () => {
       try {
         if (!current()) return;
-        const event = await service.getEvent(
-          scope.workspaceId,
-          id,
-          request.signal,
-        );
+        const event = await service.getEvent(scope.workspaceId, id, request.signal);
         if (current()) dispatch({ type: "detailReady", event });
       } catch (error: unknown) {
         if (!current() || axios.isCancel(error)) return;
@@ -112,8 +104,7 @@ export function createEventsController(
   }
 
   function loadPage(index: number, history: (string | null)[]): Promise<void> {
-    if (!active || !state.scope || state.status !== "active")
-      return Promise.resolve();
+    if (!active || !state.scope || state.status !== "active") return Promise.resolve();
     listRequest?.abort();
     const request = new AbortController();
     listRequest = request;
@@ -121,10 +112,7 @@ export function createEventsController(
     const filters = state.filters;
     const version = generation;
     const current = () =>
-      active &&
-      version === generation &&
-      listRequest === request &&
-      !request.signal.aborted;
+      active && version === generation && listRequest === request && !request.signal.aborted;
     dispatch({ type: "pageLoading", index, history });
     const task = Promise.resolve().then(async () => {
       try {
@@ -160,8 +148,7 @@ export function createEventsController(
   }
 
   function refresh(filters: EventFilters = state.filters): Promise<void> {
-    if (!active || !state.scope || state.status === "reauth")
-      return Promise.resolve();
+    if (!active || !state.scope || state.status === "reauth") return Promise.resolve();
     abortAll();
     blocked = null;
     dispatch({
@@ -171,12 +158,7 @@ export function createEventsController(
     return loadPage(0, [null]);
   }
 
-  function sync(
-    scope: EventsScope | null,
-    visible: boolean,
-    query: EventQuery,
-    loadList = true,
-  ) {
+  function sync(scope: EventsScope | null, visible: boolean, query: EventQuery, loadList = true) {
     if (!scope) {
       abortAll();
       active = false;
@@ -241,8 +223,7 @@ export function createEventsController(
   function changePage(direction: -1 | 1): Promise<void> {
     if (listFlight || state.status !== "active") return Promise.resolve();
     const index = state.pageIndex + direction;
-    if (index < 0 || (direction === 1 && !state.nextCursor))
-      return Promise.resolve();
+    if (index < 0 || (direction === 1 && !state.nextCursor)) return Promise.resolve();
     const history =
       direction === 1
         ? [...state.history.slice(0, state.pageIndex + 1), state.nextCursor]

@@ -49,9 +49,7 @@ export function manualLinkIssue(
     return "INVALID_LINK_INPUT";
   if (
     graph.links.some(
-      (link) =>
-        link.from_event_id === body.from_event_id &&
-        link.to_event_id === body.to_event_id,
+      (link) => link.from_event_id === body.from_event_id && link.to_event_id === body.to_event_id,
     )
   )
     return "LINK_EXISTS";

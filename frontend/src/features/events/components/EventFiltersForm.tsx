@@ -4,7 +4,7 @@ import { Alert } from "../../../components/ui/primitives/alert";
 import { Button } from "../../../components/ui/Button";
 import { DateTimePicker } from "../../../components/ui/DateTimePicker";
 import { useEffect, useRef } from "react";
-import { FilterTimeRange } from '../../../components/ui/FilterTimeRange';
+import { FilterTimeRange } from "../../../components/ui/FilterTimeRange";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useWorkspace } from "../../workspace/hooks/useWorkspace";
@@ -31,8 +31,18 @@ export function EventFiltersForm() {
   const previousFilters = useRef(state.filters);
   useEffect(() => {
     const previous = previousFilters.current;
-    const sizeOnly = previous.limit !== state.filters.limit && previous.source_id === state.filters.source_id && previous.from === state.filters.from && previous.to === state.filters.to && previous.action === state.filters.action && previous.q === state.filters.q;
-    reset(sizeOnly ? { ...getValues(), limit: formDefaults(state.filters).limit } : formDefaults(state.filters));
+    const sizeOnly =
+      previous.limit !== state.filters.limit &&
+      previous.source_id === state.filters.source_id &&
+      previous.from === state.filters.from &&
+      previous.to === state.filters.to &&
+      previous.action === state.filters.action &&
+      previous.q === state.filters.q;
+    reset(
+      sizeOnly
+        ? { ...getValues(), limit: formDefaults(state.filters).limit }
+        : formDefaults(state.filters),
+    );
     previousFilters.current = state.filters;
   }, [state.filters, reset, getValues]);
   const sources = workspace.sources;
@@ -50,7 +60,7 @@ export function EventFiltersForm() {
         setFilters(formToFilters({ ...values, action: "", q: "" })),
       )}
     >
-      <input type="hidden" {...register('limit')} />
+      <input type="hidden" {...register("limit")} />
       <div className="filter-field">
         <label className="type-label block" htmlFor="event-source">
           Nguồn
@@ -63,9 +73,7 @@ export function EventFiltersForm() {
         >
           <option value="">Tất cả nguồn được phép đọc</option>
           {missingSource && (
-            <option value={state.filters.source_id}>
-              Nguồn đang lọc (chưa tải được tên)
-            </option>
+            <option value={state.filters.source_id}>Nguồn đang lọc (chưa tải được tên)</option>
           )}
           {sources.items.map((source) => (
             <option key={source.id} value={source.id}>
@@ -96,7 +104,11 @@ export function EventFiltersForm() {
           </Button>
         )}
       </div>
-      <FilterTimeRange id="event-time-range" expanded={!!(state.filters.from || state.filters.to)} hasError={!!(errors.from || errors.to)}>
+      <FilterTimeRange
+        id="event-time-range"
+        expanded={!!(state.filters.from || state.filters.to)}
+        hasError={!!(errors.from || errors.to)}
+      >
         {fields.map(({ name, label }) => (
           <div key={name}>
             <label className="type-label block" htmlFor={`event-${name}`}>
@@ -108,7 +120,7 @@ export function EventFiltersForm() {
               label={label}
               value={name === "from" ? from : to}
               inputRef={register(name).ref}
-              onChange={value => setValue(name, value, { shouldDirty: true })}
+              onChange={(value) => setValue(name, value, { shouldDirty: true })}
               onBlur={() => setValue(name, name === "from" ? from : to, { shouldTouch: true })}
               invalid={!!errors[name]}
               describedBy={errors[name] ? `event-${name}-error` : undefined}
@@ -126,7 +138,14 @@ export function EventFiltersForm() {
           </div>
         ))}
       </FilterTimeRange>
-      <Button className="filter-submit" variant="primary" type="submit" disabled={state.status === 'reauth'}>Tìm kiếm</Button>
+      <Button
+        className="filter-submit"
+        variant="primary"
+        type="submit"
+        disabled={state.status === "reauth"}
+      >
+        Tìm kiếm
+      </Button>
     </form>
   );
 }

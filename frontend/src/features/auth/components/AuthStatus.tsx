@@ -18,16 +18,12 @@ export function AuthStatus() {
     }
   }
 
-  if (state.status === "initializing")
-    return <Loader message="Đang kiểm tra phiên đăng nhập…" />;
+  if (state.status === "initializing") return <Loader message="Đang kiểm tra phiên đăng nhập…" />;
   if (state.status === "error") {
     return (
       <section className="ui-panel space-y-4" aria-label="Trạng thái đăng nhập">
         <ErrorState message={state.message} />
-        <Button
-          type="button"
-          onClick={() => window.location.reload()}
-        >
+        <Button type="button" onClick={() => window.location.reload()}>
           Tải lại trang
         </Button>
       </section>
@@ -43,9 +39,7 @@ export function AuthStatus() {
         </Badge>
       </div>
       <p role="status" className="type-body-sm text-muted">
-        {authenticated
-          ? "Đã đăng nhập."
-          : (state.message ?? "Bạn chưa đăng nhập.")}
+        {authenticated ? "Đã đăng nhập." : (state.message ?? "Bạn chưa đăng nhập.")}
       </p>
       <Button
         type="button"
@@ -54,11 +48,7 @@ export function AuthStatus() {
           void handleAction(authenticated ? signOut : signIn);
         }}
       >
-        {busy
-          ? "Đang chuyển hướng…"
-          : authenticated
-            ? "Đăng xuất"
-            : "Đăng nhập"}
+        {busy ? "Đang chuyển hướng…" : authenticated ? "Đăng xuất" : "Đăng nhập"}
       </Button>
     </section>
   );

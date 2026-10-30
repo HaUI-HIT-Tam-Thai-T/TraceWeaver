@@ -3,20 +3,14 @@ import type { ReactNode } from "react";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { createWorkspaceController } from "./controller";
 import { workspaceService } from "../services/service";
-import {
-  activeMembership,
-  initialWorkspaceState,
-  workspacePermissions,
-} from "./state";
+import { activeMembership, initialWorkspaceState, workspacePermissions } from "./state";
 import { WorkspaceContext } from "./workspaceContext";
 
 const hiddenState = initialWorkspaceState();
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const { state: auth } = useAuth();
-  const [controller] = useState(() =>
-    createWorkspaceController(workspaceService),
-  );
+  const [controller] = useState(() => createWorkspaceController(workspaceService));
   const [snapshot, setSnapshot] = useState(controller.getSnapshot);
 
   useEffect(() => {

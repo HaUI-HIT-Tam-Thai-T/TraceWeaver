@@ -29,18 +29,12 @@ export type AppEnv = z.infer<typeof publicEnvSchema>;
 export function parseEnv(input: unknown, production: boolean): AppEnv {
   const result = publicEnvSchema.safeParse(input);
   if (!result.success) {
-    const fields = [
-      ...new Set(result.error.issues.map((issue) => issue.path.join("."))),
-    ];
+    const fields = [...new Set(result.error.issues.map((issue) => issue.path.join(".")))];
     // Report field names only; never print environment values.
-    throw new Error(
-      `Invalid frontend configuration: ${fields.join(", ")}. See .env.example.`,
-    );
+    throw new Error(`Invalid frontend configuration: ${fields.join(", ")}. See .env.example.`);
   }
   if (production && !result.data.VITE_API_BASE_URL) {
-    throw new Error(
-      "VITE_API_BASE_URL must be an HTTPS origin for production.",
-    );
+    throw new Error("VITE_API_BASE_URL must be an HTTPS origin for production.");
   }
   return result.data;
 }

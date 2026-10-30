@@ -9,9 +9,7 @@ export function readCaseQuery(search: string) {
   if ([...keys, "limit"].some((key) => params.getAll(key).length > 1))
     return { success: false } as const;
   const parsed = caseFiltersSchema.safeParse({
-    ...Object.fromEntries(
-      keys.flatMap((key) => (params.has(key) ? [[key, params.get(key)]] : [])),
-    ),
+    ...Object.fromEntries(keys.flatMap((key) => (params.has(key) ? [[key, params.get(key)]] : []))),
     limit: params.has("limit") ? Number(params.get("limit")) : 50,
   });
   if (!parsed.success || ![25, 50, 100].includes(parsed.data.limit))
@@ -20,8 +18,7 @@ export function readCaseQuery(search: string) {
 }
 export function writeCaseQuery(filters: CaseFilters) {
   const params = new URLSearchParams({ limit: String(filters.limit) });
-  for (const key of keys)
-    if (filters[key] !== undefined) params.set(key, filters[key]);
+  for (const key of keys) if (filters[key] !== undefined) params.set(key, filters[key]);
   return params;
 }
 const formBase = z.object({

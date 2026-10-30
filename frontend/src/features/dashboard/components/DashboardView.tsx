@@ -5,11 +5,7 @@ import { Alert } from "../../../components/ui/primitives/alert";
 import { Button } from "../../../components/ui/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  dashboardFormDefaults,
-  dashboardFormSchema,
-  toDashboardFilters,
-} from "../query";
+import { dashboardFormDefaults, dashboardFormSchema, toDashboardFilters } from "../query";
 import type { DashboardFormValues } from "../query";
 import type { DashboardFilters, Dashboard } from "../schemas";
 
@@ -34,17 +30,14 @@ export function DashboardTimeForm({
       className="filter-grid"
       onSubmit={handleSubmit((values) => apply(toDashboardFilters(values)))}
     >
-      <p className="filter-wide type-caption text-muted">Lọc theo ngày tạo lần tái dựng, múi giờ UTC+7.</p>
+      <p className="filter-wide type-caption text-muted">
+        Lọc theo ngày tạo lần tái dựng, múi giờ UTC+7.
+      </p>
       <div className="filter-field">
         <label className="type-label block" htmlFor="dashboard-from">
           Tái dựng tạo từ
         </label>
-        <Input
-          id="dashboard-from"
-          type="datetime-local"
-          step="any"
-          {...register("from")}
-        />
+        <Input id="dashboard-from" type="datetime-local" step="any" {...register("from")} />
       </div>
       <div className="filter-field">
         <label className="type-label block" htmlFor="dashboard-to">
@@ -87,7 +80,11 @@ export function DashboardCounters({
   return (
     <SectionReveal>
       <section aria-label="Bốn counter dashboard" className="my-4 space-y-3">
-        <p className="type-caption text-muted">Hồ sơ chờ xử lý gồm Mới và Đã phân công. Lượt sự kiện chưa liên kết được đếm theo từng lần tái dựng hoàn tất; cùng một sự kiện có thể được tính trong nhiều lần. Bộ lọc thời gian áp dụng ngày tạo lần tái dựng.</p>
+        <p className="type-caption text-muted">
+          Hồ sơ chờ xử lý gồm Mới và Đã phân công. Lượt sự kiện chưa liên kết được đếm theo từng lần
+          tái dựng hoàn tất; cùng một sự kiện có thể được tính trong nhiều lần. Bộ lọc thời gian áp
+          dụng ngày tạo lần tái dựng.
+        </p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { label: "Lần tái dựng được phép xem", value: data.runs },
@@ -101,18 +98,11 @@ export function DashboardCounters({
             },
             { label: "Hồ sơ chờ xử lý", value: data.waiting_cases },
           ].map((counter) => (
-            <Card
-              key={counter.label}
-              className="min-w-0 border-line shadow-none"
-            >
+            <Card key={counter.label} className="min-w-0 border-line shadow-none">
               <CardContent>
                 <dl>
-                  <dt className="type-body-sm break-words text-muted">
-                    {counter.label}
-                  </dt>
-                  <dd className="type-h1 mt-3 tabular-nums text-foreground">
-                    {counter.value}
-                  </dd>
+                  <dt className="type-body-sm break-words text-muted">{counter.label}</dt>
+                  <dd className="type-h1 mt-3 tabular-nums text-foreground">{counter.value}</dd>
                 </dl>
               </CardContent>
             </Card>

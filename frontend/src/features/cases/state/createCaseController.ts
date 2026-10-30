@@ -37,8 +37,7 @@ type Dependencies = {
 };
 export function createCaseCreationController(deps: Dependencies) {
   let state = initialCaseCreation();
-  let binding: { scope: EventsScope; runId: string; anchor: object } | null =
-    null;
+  let binding: { scope: EventsScope; runId: string; anchor: object } | null = null;
   let generation = 0;
   let request: AbortController | null = null;
   let busy = false;
@@ -56,11 +55,7 @@ export function createCaseCreationController(deps: Dependencies) {
     state = initialCaseCreation();
     listeners.forEach((listener) => listener());
   }
-  function sync(
-    scope: EventsScope | null,
-    runId: string | null,
-    anchor: object | null,
-  ) {
+  function sync(scope: EventsScope | null, runId: string | null, anchor: object | null) {
     if (!scope || !runId || !anchor) {
       reset();
       binding = null;
@@ -81,15 +76,13 @@ export function createCaseCreationController(deps: Dependencies) {
     binding = { scope, runId, anchor };
   }
   function expired() {
-    if (!state.attempt || now() - state.attempt.createdAt < 86400000)
-      return false;
+    if (!state.attempt || now() - state.attempt.createdAt < 86400000) return false;
     update({
       status: "error",
       error: new ApiError({
         kind: "client",
         code: "IDEMPOTENCY_EXPIRED",
-        message:
-          "Đã quá 24 giờ. Case trước có thể đã được tạo; không gửi lại thao tác cũ.",
+        message: "Đã quá 24 giờ. Case trước có thể đã được tạo; không gửi lại thao tác cũ.",
       }),
     });
     return true;
@@ -130,8 +123,7 @@ export function createCaseCreationController(deps: Dependencies) {
         throw new ApiError({
           kind: "client",
           code: "RUN_NOT_READY",
-          message:
-            "Run chưa completed hoặc không hợp lệ. Kiểm tra run trước khi tạo case.",
+          message: "Run chưa completed hoặc không hợp lệ. Kiểm tra run trước khi tạo case.",
         });
       if (retry && expired()) return;
       const attempt =
@@ -144,16 +136,17 @@ export function createCaseCreationController(deps: Dependencies) {
             };
       update({ status: "sending", attempt });
       sent = true;
-      const result = await deps.service.createCase(
-        currentBinding.scope.workspaceId,
-        attempt.body,
-        { idempotencyKey: attempt.key, signal: controller.signal },
-      );
-      if (current())
-        update({ status: "success", caseId: result.id, error: null });
+      const result = await deps.service.createCase(currentBinding.scope.workspaceId, attempt.body, {
+        idempotencyKey: attempt.key,
+        signal: controller.signal,
+      });
+      if (current()) update({ status: "success", caseId: result.id, error: null });
     } catch (error: unknown) {
       if (!current()) return;
-      if (axios.isCancel(error)) { update({ status: sent || retry ? 'uncertain' : 'idle', error: null }); return; }
+      if (axios.isCancel(error)) {
+        update({ status: sent || retry ? "uncertain" : "idle", error: null });
+        return;
+      }
       const safe = normalizeApiError(error);
       if (safe.kind === "auth" || safe.status === 403 || safe.status === 404) {
         reset();

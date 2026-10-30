@@ -14,9 +14,7 @@ export const knowledgeArticleSchema = z.strictObject({
 export const knowledgePageSchema = z.strictObject({
   items: z
     .array(knowledgeArticleSchema)
-    .refine(
-      (items) => new Set(items.map((item) => item.id)).size === items.length,
-    ),
+    .refine((items) => new Set(items.map((item) => item.id)).size === items.length),
   next_cursor: z.string().min(1).max(4096).nullable(),
 });
 export const knowledgeFiltersSchema = z.strictObject({

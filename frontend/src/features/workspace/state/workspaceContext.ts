@@ -12,6 +12,4 @@ export type WorkspaceContextValue = Pick<
   permissions: WorkspacePermissions;
 };
 
-export const WorkspaceContext = createContext<
-  WorkspaceContextValue | undefined
->(undefined);
+export const WorkspaceContext = createContext<WorkspaceContextValue | undefined>(undefined);
