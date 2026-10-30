@@ -9,6 +9,7 @@ Chi tiết vận hành: [Workspace-admin BE](../backend/WORKSPACE_ADMIN.md).
 
 Bàn giao mới cho FE: [Simulator và kiểm chứng hồ sơ](FE_SANDBOX_HANDOFF.md) — API đã triển khai,
 quyền, request/response, version/retry, trạng thái log/proof và checklist UAT.
+Contract sandbox dùng ngay nằm ở mục0; mục2 đã cập nhật request/case IDs sau khi thay dữ liệu server30/10.
 
 Tài liệu được chia theo tổng quan, vận hành và thành phần kỹ thuật. Chỉ các chức năng trong [hiện trạng](CURRENT_STATUS.md) được xem là đã triển khai.
 

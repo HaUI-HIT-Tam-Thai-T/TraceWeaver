@@ -1,8 +1,63 @@
 # Bàn giao FE — Simulator và kiểm chứng hồ sơ
 
-Cập nhật 30/10/2026. Contract simulator giữ tương thích BE60919cd; runtime mới `4cdd022`
+Cập nhật 30/10/2026 sau thay dữ liệu server. Contract simulator giữ tương thích BE60919cd; runtime `1b6a72e`
 đã triển khai tại `https://api.quizlearn.tech`. Xem thêm [bàn giao quản trị FE](FE_WORKSPACE_ADMIN_HANDOFF.md).
 Đây là phần mở rộng xử lý/kiểm chứng nghiệp vụ; AI vẫn chỉ chấm điểm liên kết sự kiện.
+
+## 0. Contract để FE triển khai ngay
+
+Đối chiếu source BE `1b6a72e`: case-repository.sandbox/verify/verifications, lab-repository,
+case-verification và simulator/lab-state. [OpenAPI đang phục vụ](https://api.quizlearn.tech/docs/openapi.json)
+là hợp đồng schema; các mục4–5 bên dưới mô tả DTO, JSON body, replay và errors chi tiết.
+Không gọi lại API chạy tái dựng để thay cho simulator. Không cần API mới cho luồng sandbox này.
+
+### Các nguồn dữ liệu phải tách riêng
+
+| Dữ liệu | Lấy ở đâu | Dùng làm gì |
+|---|---|---|
+| Case state/owner/version | GET `/api/v1/workspaces/{wid}/cases/{cid}` | Workflow và quyền đóng/mở theo trạng thái |
+| Binding, conditions, latest attempt, attempts, environment, delivery | GET `.../cases/{cid}/sandbox` | Trạng thái nguồn hiện tại và lịch sử thực thi |
+| Kết quả thao tác provision vừa gửi/replay | `execution` trong response POST sandbox commands | Đối chiếu đúng operation_id; có thể khác latest attempt hiện tại |
+| Proof reviewer đã lưu | GET `.../cases/{cid}/verifications` | Snapshot kiểm chứng bất biến; không thay thế quan sát nguồn mới |
+| Timeline/graph của run | API run/graph hiện có | Phân tích log snapshot; không tự cập nhật thành snapshot mới sau simulator rerun |
+
+GET sandbox trả `{case_id,case_version,observation}`. POST commands trả cùng envelope; provision có
+thêm `execution:{replayed,operation_id,attempt}`. Conditions là hiện tại; attempts là lịch sử.
+GET verifications trả `{case_id,case_version,items}` theo thứ tự cũ đến mới; không phân trang.
+POST verifications trả201 một proof, không tự đóng case. Proof observation có thể chỉ có result/reason
+khi inconclusive; không bắt buộc conditions/attempts trong mọi response, không biến thiếu dữ liệu thành passed.
+
+### Version và khóa chống trùng
+
+| Trường gửi | Nguồn phải lấy | Phạm vi |
+|---|---|---|
+| Command.expected_case_version | GET sandbox.case_version | Case workflow hiện tại |
+| Command.expected_version | GET sandbox.observation.source_version | Toàn sandbox workspace, không riêng request |
+| Transition.expected_version | Case.version mới nhất | Giao/nhận/chờ xác minh/đóng/mở case |
+| Provision.operation_id | FE sinh UUID cho một ý định chạy | Dùng lại khi retry đúng ý định; không dùng Idempotency-Key để thay trường này |
+| Transition.Idempotency-Key | Cơ chế workflow hiện có | Cùng key/body khi retry trong24giờ; khác cơ chế simulator |
+
+Commands không tăng Case.version; workflow tăng Case.version. Không tự cộng bất kỳ version nào.
+Một request khác hoặc lệnh sửa cùng giá trị cũng có thể tăng source_version, làm attempt/proof cũ stale.
+Vì vậy attempt.result=failed hoặc passed trong lịch sử không quyết định observation.result hiện tại.
+`inconclusive/RERUN_REQUIRED` sau thay đổi nguồn là yêu cầu thực thi mới, không phải lỗi schema FE.
+
+### Retry bắt buộc
+
+| Tình huống | Hành vi FE |
+|---|---|
+| Provision timeout/network/5xx | Giữ command/operation_id; GET sandbox đối chiếu attempts. Người dùng retry cùng operation_id, không tự tạo lần chạy mới |
+| Replay provision | Xem execution.attempt của ID đó và observation hiện tại riêng; replay không tạo thêm attempt/log nguồn |
+| Sửa RAM/image/account timeout | GET đối chiếu conditions/version; không tự POST lại hoặc coi timeout là failed nghiệp vụ |
+| POST proof timeout | GET history; không tự POST lại vì không có bảo đảm chống trùng proof |
+| 409 version conflict | Đọc lại case/sandbox, hiển thị thay đổi và yêu cầu xác nhận; không tự sửa version rồi ghi mù |
+| Delivery pending | Chỉ poll GET có giới hạn; dừng khi rời scope, không poll command/proof |
+| Scope đổi/logout | Abort và bỏ response cũ; abort không bảo đảm server chưa thực hiện |
+
+Idempotency provision chỉ bảo đảm không lặp execution/log nguồn; case-bound command vẫn có thể ghi
+audit thao tác khi replay. Trước mọi command, BE vẫn kiểm quyền, expected_case_version và case chưa đóng.
+Không coi cùng operation_id là quyền bỏ qua các guard đó. Proof từng đạt nhưng case/source version đổi,
+reopen hoặc delivery chưa đủ không được FE tự gắn nhãn đủ điều kiện đóng; BE kiểm lại trong transaction.
 
 ## 1. Phạm vi FE cần làm
 
@@ -26,9 +81,23 @@ Không dùng ghi chú, state tự đặt ở FE hoặc nút xác nhận để th
 | Swagger | [API docs](https://api.quizlearn.tech/docs/) |
 | Workspace | `10000000-0000-4000-8000-000000000016` |
 | Tên | `TraceWeaver Sandbox — Mô phỏng kiểm chứng` |
-| Hồ sơ đã kiểm thành công | `f10e80e1-7972-4b4f-856b-155c6d9f4ced` — đã đóng, dùng để xem lịch sử |
-| Mã yêu cầu tương ứng | `LAB-LIVE-20261029-155343` |
-| BE runtime | `traceweaver-api:be-4cdd022`, migrations001–011, collector đã bật |
+| Hồ sơ đã kiểm thành công | `17d4a82d-98a1-4d51-b09b-56ab3f2135d3` — đã đóng, dùng để xem lịch sử |
+| Mã yêu cầu tương ứng | `REQ-20261030-103` |
+| BE runtime | `traceweaver-api:be-1b6a72e`, migrations001–011, collector đã bật |
+
+Dữ liệu cũ đã được người dùng yêu cầu thay ngày30/10. Các ID LAB-LIVE/BE51 trong tài liệu lịch sử
+không còn dùng để gọi API. Bộ mới để FE chọn đúng hồ sơ:
+
+| Request | Case ID | Trạng thái khi tạo | Tình huống |
+|---|---|---|---|
+| `REQ-20261030-101` | `6dfedae9-7fe7-4f7c-abb1-83424c2101b1` | investigating | Cần8GB RAM, image chưa khả dụng, tài khoản inactive |
+| `REQ-20261030-102` | `f8ea7759-47db-48d0-9184-60c54c8dd69a` | new | Cần2GB RAM, image chưa khả dụng |
+| `REQ-20261030-103` | `17d4a82d-98a1-4d51-b09b-56ab3f2135d3` | closed | Đã passed/delivered, có proof reviewer để xem |
+
+Đây là snapshot bàn giao, không hardcode trạng thái/version/conditions vào ứng dụng.
+101/102 có attempt failed nhưng có thể trả RERUN_REQUIRED vì sandbox dùng version chung;
+đọc GET mới trước thao tác. Tổng RAM lúc tạo bộ mới là4GB, yêu cầu103 giữ2GB; đọc trạng thái thật
+ở GET `/lab` thay vì dùng số này như giá trị cố định. Trạng thái có thể thay đổi khi người dùng thao tác.
 
 Dùng SSO/PKCE hiện có. BE đã cấp quyền riêng trong workspace này cho các tài khoản operator,
 reviewer, workspace-admin và viewer hiện có. Không đưa mật khẩu, access/refresh token hoặc service
@@ -212,8 +281,9 @@ Nếu GET sandbox không dùng được, báo trạng thái module; giữ nguyê
 
 ## 6. Luồng UAT và chuẩn bị dữ liệu mới
 
-Hồ sơ live ở mục2 đã closed: dùng để xem lịch sử, không bấm sửa trực tiếp. Có một hồ sơ thử khác còn
-investigating được giữ lại. Không xóa/reset demo hay gọi lại lab/configure (đã cấu hình sẽ409).
+Hồ sơ103 ở mục2 đã closed: dùng để xem lịch sử, không bấm sửa trực tiếp. Dùng101 để xử lý lỗi kết hợp,
+102 để kiểm tra lỗi image; chỉ thao tác sau khi đọc case/sandbox mới. Không xóa/reset hoặc gọi lại
+lab/configure (đã cấu hình sẽ409). Các JSON ở mục4 là ví dụ, phải thay bằng IDs/version từ response thật.
 
 Để có kịch bản lỗi kép mới, BE/operator chuẩn bị qua API lab hiện có; không bắt buộc xây trang thiết kế scenario:
 
