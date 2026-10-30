@@ -2,7 +2,7 @@
 
 [Mục lục tài liệu](../README.md)
 
-TraceWeaver **Dự thi OLP Phần mềm nguồn mở 2026**, do đội **HaUI.Tam_Thái_Tử**, Trường Công nghệ Thông tin và Truyền thông, Đại học Công nghiệp Hà Nội thực hiện.
+TraceWeaver **Dự thi OLP Phần mềm nguồn mở 2026**, do đội **HaUI.HIT-Tam-Thái-Tử**, Trường Công nghệ Thông tin và Truyền thông, Đại học Công nghiệp Hà Nội thực hiện.
 
 Sản phẩm nối sự kiện từ nhiều dịch vụ thành hành trình có bằng chứng, hỗ trợ điều tra, review, xử lý hồ sơ và kiểm chứng việc khắc phục. Tình huống minh họa là tiếp nhận yêu cầu → tạo tài khoản → cấp phát môi trường CNTT.
 
