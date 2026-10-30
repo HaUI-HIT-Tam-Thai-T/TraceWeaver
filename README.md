@@ -1,3 +1,5 @@
+# TraceWeaver (Bài dự thi Phần Mềm Nguồn Mở 2026)
+
 <p align="center">
   <img src=".github/assets/traceweaver-overview.svg" alt="TraceWeaver — request investigation through connected evidence" width="100%">
 </p>
