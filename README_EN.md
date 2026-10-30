@@ -81,6 +81,20 @@ Module responsibilities and data flows are described in [ARCHITECTURE.md](./ARCH
 ![TraceWeaver architecture: shared Open-Core capabilities support H-P-D-I operational spaces and the Web/API/Sandbox application](./.github/assets/architecture-layers-en.svg)
 
 Arrows show how shared capabilities support the application, rather than the HTTP call sequence.
+
+| Layer | Components |
+|---|---|
+| **1. Open-Core** — no end-user interface | Identity (SSO, workspace/source authorization), Data (transactions, storage), Reconstruction (snapshots, linking rules), Workflow (guards, transitions) and audit |
+| **2. H-P-D-I** | Four spaces — **Human, Process, Data, Intelligence** — composed from core capabilities, with knowledge, dashboards and optional scoring |
+| **3. Application** | **TraceWeaver** — investigation and case-management web app, business APIs and lab-provisioning sandbox |
+
+| Space | Investigation and case handling | Sandbox and verification |
+|---|---|---|
+| **H — Human** | Workspaces, members, roles and per-source read grants; knowledge for operators | Operators investigate, admins repair conditions, reviewers verify and decide closure within their permissions |
+| **P — Process** | Create runs, review links, assign cases, add evidence and follow guarded transitions | Repair conditions → rerun request → deliver logs → verify source evidence → close when guards pass |
+| **D — Data** | Multi-source events, provenance, journey snapshots, history/audit and dashboards | RAM/image/account state, execution attempts, log delivery and retained source proofs |
+| **I — Intelligence** | Reconstruction rules and scoring for eligible pairs; preserve unresolved cases when evidence is insufficient | Compare execution outcomes and source evidence against current conditions; AI scores do not replace proof |
+
 See the [architecture details](./ARCHITECTURE.md) and [core boundaries](./backend/src/core/README.md).
 
 ## 🧩 Features
