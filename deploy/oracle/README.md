@@ -19,3 +19,19 @@ docker compose -f compose.yaml -f ../../deploy/oracle/compose.ai.yaml up -d --no
 Check public HTTPS live/ready/docs, private TLS scorer readiness/sample predictions, real Keycloak PKCE and a new hybrid run with durable scores. Verify existing data remains readable and other hosted applications stay healthy. A successful rollout does not approve the synthetic model's quality; see `ai/artifacts/sandbox-v2/README.md`.
 
 The existing base Compose keeps the previous API image. If rollout validation fails, restore API with `docker compose -f compose.yaml up -d --no-deps --no-build --pull never --wait api` while investigating. No DB/Keycloak restart, volume removal, pruning, credential rotation or migration-history rewrite is required. Future restarts of the new release must include this overlay and the recorded TRACEWEAVER_RELEASE.
+
+## Local frontend without the Vite proxy
+
+To explicitly allow local browser development against this HTTPS API, set
+`FRONTEND_LOCAL_ORIGINS=http://localhost:5173,http://127.0.0.1:5173` in the private
+`.local/oracle/.env`. The overlay forwards this variable to API only. Deploy the updated API
+and recreate API to apply it; no database migration or scorer restart is needed.
+Keep the existing `FRONTEND_ORIGINS` HTTPS allowlist unchanged. The new list defaults empty
+and accepts only exact HTTP loopback origins, with no wildcards, paths or LAN/public hosts.
+
+Verify API GET/POST/PUT preflights for each configured origin, a 401 with the correct CORS
+header for anonymous `/api/v1/me`, and rejection of an unconfigured origin/port. Verify the
+Keycloak public client's exact callback, Web Origin and logout entries for each local origin;
+API CORS does not configure identity. Keep Authorization Code + PKCE and existing origins.
+Frontend uses `VITE_API_BASE_URL=https://api.quizlearn.tech`; keep existing Keycloak values
+and restart Vite. No frontend UI or API contract changes are required.

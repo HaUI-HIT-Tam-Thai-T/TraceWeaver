@@ -43,8 +43,24 @@ xóa tài khoản/log hoặc reset mật khẩu vào phạm vi này.
 API đã cho phép exact-origin CORS GET/POST/PUT và Authorization/Content-Type/Idempotency-Key cho origin
 production trên, giữ origin Swagger. Keycloak đã có callback, Web Origin và logout URI production;
 kiểm form login, token CORS và API PUT preflight đạt. Chưa xác nhận DNS, hosting SPA hoặc UI production.
-Local `http://localhost:5173` dùng Vite proxy `/api`; production API không cho HTTP origin local gọi
-trực tiếp. Callback/Web Origin local đã có từ trước. Xem [cấu hình React/Vite](FRONTEND_HANDOFF.md).
+Local `http://localhost:5173` hiện dùng Vite proxy `/api`. BE hỗ trợ opt-in gọi trực tiếp bằng
+`FRONTEND_LOCAL_ORIGINS=http://localhost:5173,http://127.0.0.1:5173` trong môi trường API server;
+chỉ có hiệu lực sau khi triển khai source mới và khởi động lại API. Không tự bật local origins mặc định.
+Callback/Web Origin local đã có từ trước; phải kiểm lại đúng hostname/cổng khi triển khai.
+Xem [cấu hình React/Vite](FRONTEND_HANDOFF.md).
+
+Để FE local gọi trực tiếp, đặt trong `frontend/.env.development.local`:
+
+```dotenv
+VITE_API_BASE_URL=https://api.quizlearn.tech
+API_PROXY_TARGET=https://api.quizlearn.tech
+```
+
+Giữ các biến `VITE_KEYCLOAK_*` hiện có và khởi động lại Vite. Không sửa giao diện hoặc service FE.
+`API_PROXY_TARGET` vẫn cần cho cấu hình Vite hiện tại, nhưng request có API base URL tuyệt đối
+sẽ gọi trực tiếp API HTTPS, không đi qua proxy `/api`. Không thêm `/api/v1` vào base URL.
+BE chỉ chấp nhận đúng origins được liệt kê; `localhost` và `127.0.0.1` là hai origins riêng,
+không tự cho cổng khác, LAN IP hoặc domain khác. JWT, role và source grants vẫn được kiểm như cũ.
 
 Dùng SSO và tài khoản hiện có. Thông tin đăng nhập chỉ xem trên server, không đưa vào docs/Git/VITE/log.
 FE dùng user bearer; không gọi Admin REST, không nhận service secret. Admin REST chỉ qua mạng Docker nội bộ.

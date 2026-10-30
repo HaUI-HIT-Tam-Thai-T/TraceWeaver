@@ -41,6 +41,17 @@ export function readConfig(env = process.env) {
           (origin.protocol !== 'https:' && !(appEnv !== 'production' && local && origin.protocol === 'http:'))) throw new Error();
     } catch { throw new Error('FRONTEND_ORIGINS must contain exact HTTPS origins (loopback HTTP allowed outside production)'); }
   }
+  // Explicit opt-in for local browser development against a deployed API.
+  // Keep the production HTTPS allowlist and identity URL requirements unchanged.
+  const localFrontendOrigins = (env.FRONTEND_LOCAL_ORIGINS ?? '')
+    .split(',').map((value) => value.trim()).filter(Boolean);
+  for (const value of localFrontendOrigins) {
+    try {
+      const origin = new URL(value);
+      if (origin.origin !== value || origin.protocol !== 'http:' || origin.username || origin.password ||
+          !['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname)) throw new Error();
+    } catch { throw new Error('FRONTEND_LOCAL_ORIGINS must contain exact loopback HTTP origins'); }
+  }
   let url;
   try {
     url = new URL(env.DATABASE_URL);
@@ -77,7 +88,7 @@ export function readConfig(env = process.env) {
     accountClientId, accountClientSecret,
     scorerUrl, scorerSecret, scorerModelVersion, scorerTimeoutMs: positiveInteger(env.SCORER_TIMEOUT_MS, 'SCORER_TIMEOUT_MS', 5000, 5000),
     appEnv,
-    frontendOrigins: Object.freeze([...new Set(frontendOrigins)]),
+    frontendOrigins: Object.freeze([...new Set([...frontendOrigins, ...localFrontendOrigins])]),
     host: env.API_HOST ?? '127.0.0.1',
     port: positiveInteger(env.API_PORT, 'API_PORT', 8080, 65535),
     databaseUrl: env.DATABASE_URL,

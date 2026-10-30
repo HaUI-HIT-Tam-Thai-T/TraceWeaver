@@ -5,6 +5,7 @@ services:
   api:
     image: traceweaver-api:${TRACEWEAVER_RELEASE:?Set the release commit}
     environment:
+      FRONTEND_LOCAL_ORIGINS: ${FRONTEND_LOCAL_ORIGINS:-}
       SCORER_URL: https://scorer:8443/internal/v1/score-pairs
       SCORER_SERVICE_SECRET: ${SCORER_SERVICE_SECRET:?Set private scorer credential}
       SCORER_MODEL_VERSION: logistic-regression-sandbox-features-2-experiment-1
