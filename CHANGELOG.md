@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — AI scorer PR integration
+
+- Integrate the AI scorer contribution with its original commit authorship: reproducible synthetic dataset generation, checksum-verified bootstrap training/model, sandbox policy evaluation, feature conformance handoff and Windows/Linux AI CI.
+- Preserve explicit model-path selection, the existing backend scorer integration, sandbox-v2 artifacts and dependency/SBOM inventory. Bootstrap metrics describe synthetic experiments and do not establish production quality.
+
 ## Unreleased — Reusable backend core
 
 - Add a headless core entry point, shared workspace authorization and a separate reconstruction scope module.

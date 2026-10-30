@@ -1,0 +1,62 @@
+{
+  "model_version": "logistic-regression-v1",
+  "feature_schema_version": "1",
+  "algorithm": "LogisticRegression (Pure Python SGD with L2)",
+  "created_at": "2026-10-27T14:54:18.492142+00:00",
+  "feature_names": [
+    "delta_seconds",
+    "shared_id_count",
+    "text_similarity",
+    "transition_allowed",
+    "conflicting_id"
+  ],
+  "scaler": {
+    "mean": [
+      1153.155206286837,
+      2.237721021611002,
+      0.053964001508205905,
+      0.5049115913555993,
+      0.17485265225933203
+    ],
+    "std": [
+      3592.468544209803,
+      0.6048847596573703,
+      0.07165018987713029,
+      0.4999758756883742,
+      0.37984102234646694
+    ]
+  },
+  "weights": [
+    -0.428457,
+    0.473772,
+    -0.122001,
+    5.168236,
+    -3.390471
+  ],
+  "bias": -2.002353,
+  "decision_threshold": 0.2,
+  "test_metrics": {
+    "model": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 36,
+      "fp": 0,
+      "fn": 0,
+      "tn": 67,
+      "total": 103
+    },
+    "baseline": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 36,
+      "fp": 0,
+      "fn": 0,
+      "tn": 67,
+      "total": 103
+    }
+  }
+}
