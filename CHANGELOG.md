@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Reusable backend core
+
+- Add a headless core entry point, shared workspace authorization and a separate reconstruction scope module.
+- Extract reusable workflow repository/store with trusted server-side definition registration and creation roles; keep TraceWeaver case rules in an application adapter and preserve existing import entry points.
+- Add role-policy unit coverage and PostgreSQL coverage for an admin-only registered workflow. Existing HTTP contracts, configuration and database schema are unchanged; this source update does not deploy the server.
+
 ## Unreleased — Evidence-led repository presentation
 
 - Add a TraceWeaver-specific overview illustration, a guided investigation/sandbox demo and feature-to-test evidence map.

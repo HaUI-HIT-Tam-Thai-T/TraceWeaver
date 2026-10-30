@@ -1,5 +1,21 @@
 # Hiện trạng TraceWeaver
 
+## Refactor core BE — 31/10/2026
+
+Nhánh `Phuoc/feat/be-sandbox-verification` đã đồng bộ `dev` trước khi đưa phần refactor BE
+vào source. Có entry point headless, quyền workspace dùng chung, run scope riêng và workflow
+repository/store dùng chung; case TraceWeaver được nối qua adapter. Các import cũ giữ tương thích.
+Không đổi HTTP contract, cấu hình, dependency hoặc schema DB; FE giữ theo `dev`.
+
+Kiểm tra local: 146 BE/contract tests đạt, 2 test Python tùy chọn bỏ qua; 31 PostgreSQL integration
+tests cho core workflow/cases/runs/reviews/dashboard/lab và 6 core HTTP/JWT/PostgreSQL tests đạt,
+không skip ở hai nhóm tích hợp. Base checks, inventory 98 npm packages và headless import đạt.
+HTTP fixture chạy ngoài sandbox; PostgreSQL local được khởi động lại bằng container/volume hiện có
+và chờ phục hồi xong trước lượt DB đạt. Đây không phải kiểm thử browser/live Keycloak hoặc scorer Python.
+
+Refactor này chưa triển khai server. API server vẫn là `be-a38c380`; các mốc triển khai phía dưới
+giữ nguyên phạm vi và kết quả lịch sử của chúng.
+
 ## Web trực tuyến và tài khoản demo — 31/10/2026
 
 Frontend đã được triển khai tại [traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech), dùng API/Keycloak tại `api.quizlearn.tech`. Nginx phục vụ file tĩnh qua HTTPS; bật khởi động cùng server, tự khởi động lại sau 5 giây khi tiến trình dừng và timer gia hạn chứng chỉ. Release FE `fe-20261030T185157Z` được build từ working tree local tại thời điểm triển khai, không phải toàn bộ source đã được commit lên `dev`.

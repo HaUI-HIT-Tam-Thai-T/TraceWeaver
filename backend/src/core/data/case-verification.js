@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 TraceWeaver contributors
 // SPDX-License-Identifier: Apache-2.0
 import { inspectRequest } from '../../../../simulator/lab-state.mjs';
-import { authorize } from './run-repository.js';
+import { authorize } from '../identity/workspace-access.js';
 import { ApiError } from '../identity/api-error.js';
 
 export async function inspectCaseSource(client, subject, workspace, runId, write = true) {

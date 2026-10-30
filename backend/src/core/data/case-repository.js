@@ -3,7 +3,8 @@
 
 import { randomUUID } from 'node:crypto';
 import { withTransaction } from './database.js';
-import { authorize, artifactScope } from './run-repository.js';
+import { authorize } from '../identity/workspace-access.js';
+import { artifactScope } from '../reconstruction/run-scope.js';
 import { projectedLinks } from './link-projection.js';
 import { digest } from './event-normalizer.js';
 import { createWorkflow, appendHistory, latestWorkflow, historyDto } from './workflow-store.js';

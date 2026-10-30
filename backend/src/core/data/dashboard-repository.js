@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 TraceWeaver contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { artifactScope } from './run-repository.js';
+import { artifactScope } from '../reconstruction/run-scope.js';
 import { projectedLinks } from './link-projection.js';
 import { latestWorkflow } from './workflow-store.js';
 import { artifactTimeScope, artifactTimeValues } from './artifact-time.js';

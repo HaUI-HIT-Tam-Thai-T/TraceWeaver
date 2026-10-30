@@ -7,6 +7,10 @@ import { withTransaction } from './database.js';
 import { eventDto } from './event-repository.js';
 import { digest } from './event-normalizer.js';
 import { reader, visibleSource } from '../identity/access-repository.js';
+import { authorize } from '../identity/workspace-access.js';
+import { artifactScope } from '../reconstruction/run-scope.js';
+// Compatibility exports for existing callers.
+export { authorize, artifactScope };
 import { ApiError } from '../identity/api-error.js';
 import { createRuleEngine } from '../reconstruction/rules.js';
 import { compileRulePolicy } from '../reconstruction/candidates.js';
@@ -15,28 +19,12 @@ import { graphProjection } from '../reconstruction/reviews.js';
 import { projectedLinks } from './link-projection.js';
 
 const notFound = () => new ApiError(404, 'NOT_FOUND', 'Resource not found');
-const writerRoles = new Set(['operator', 'reviewer']), readerRoles = new Set(['viewer', 'operator', 'reviewer', 'admin']);
+
 function sqlBound(value, lower) {
   const fraction = value.includes('.') ? value.slice(20, -1) : '';
   return [`${value.slice(0, 19)}Z`, Number(fraction.padEnd(6, '0').slice(0, 6))
     + (lower && /[1-9]/.test(fraction.slice(6)) ? 1 : 0)];
 }
-export async function authorize(client, subject, workspace, sources, write = false) {
-  const { rows: [membership] } = await client.query(`SELECT ARRAY(SELECT role_key FROM core.membership_roles r
-    WHERE r.workspace_id=m.workspace_id AND r.subject=m.subject) AS roles,
-    ARRAY(SELECT s.id::text FROM core.sources s WHERE s.workspace_id=$2 AND s.id=ANY($3::uuid[]) AND ${visibleSource}) AS sources
-    FROM core.memberships m WHERE m.workspace_id=$2 AND m.subject=$1 AND m.revoked_at IS NULL`, [subject, workspace, sources]);
-  if (!membership) throw notFound();
-  if (!membership.roles.some((role) => (write ? writerRoles : readerRoles).has(role))) {
-    throw new ApiError(403, 'FORBIDDEN', 'Action is not permitted');
-  }
-  if (membership.sources.length !== sources.length) throw notFound();
-  return membership;
-}
-export const artifactScope = `${reader} AND NOT EXISTS (
-  SELECT 1 FROM core.run_sources rs WHERE rs.workspace_id=r.workspace_id AND rs.run_id=r.id
-  AND NOT EXISTS (SELECT 1 FROM core.sources s WHERE s.workspace_id=rs.workspace_id AND s.id=rs.source_id AND ${visibleSource}))`;
-
 export function createRunRepository(pool, configuration = sandboxRulePolicy(), scorer = createScorer()) {
   const policy = compileRulePolicy(configuration), reconstruct = createRuleEngine(policy);
   async function read(client, subject, workspace, id, graph) {

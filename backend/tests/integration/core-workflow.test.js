@@ -7,6 +7,7 @@ import test from 'node:test';
 import { caseFixture } from '../support/case-fixture.js';
 import { createWorkflowRepository } from '../../src/core/data/workflow-repository.js';
 import { createDatabase } from '../../src/core/data/database.js';
+import { createWorkflowRepository as createGenericWorkflowRepository } from '../../src/core/workflow/repository.js';
 test('core repository persists documents, delegates cases and rolls back audit failures', async (t) => {
   const f = await caseFixture(t), { pool, workspace } = f, repo = createWorkflowRepository(pool), app = 'core-app';
   await pool.query('INSERT INTO core.memberships(workspace_id,subject) VALUES($1,$2)', [workspace, app]);
@@ -14,6 +15,23 @@ test('core repository persists documents, delegates cases and rolls back audit f
     entity_ref: { type: 'document', id }, workspace_id: workspace, creator_subject: 'operator' });
   const step = (id, action, version, who = 'operator', extra = {}) => repo.transition(app, who, workspace, id,
     { action, expected_version: version, reason: `Checked ${action}`, evidence_refs: [], ...extra });
+  await t.test('custom admin workflow uses registered creation and transition roles on PostgreSQL', async () => {
+    const definition = { key: 'admin_approval', version: 1, initial: 'draft', states: ['draft', 'approved'],
+      transitions: { approve: { from: ['draft'], to: 'approved', roles: ['admin'], guards: [] } } };
+    const generic = createGenericWorkflowRepository(pool, { definitions: [{ definition, entityType: 'approval' }] });
+    const input = { ...create(), definition_key: definition.key, creator_subject: 'admin', entity_ref: { type: 'approval', id: randomUUID() } };
+    for (const subject of ['viewer', 'operator', 'reviewer']) {
+      await assert.rejects(generic.create(app, subject, workspace, input), { status: 403 });
+    }
+    const instance = await generic.create(app, 'admin', workspace, input);
+    assert.equal(instance.state, 'draft');
+    const command = { action: 'approve', expected_version: 1, reason: 'Approved by admin', evidence_refs: [] };
+    await assert.rejects(generic.transition(app, 'reviewer', workspace, instance.id, command), { status: 403 });
+    const approved = await generic.transition(app, 'admin', workspace, instance.id, command);
+    assert.equal(approved.state, 'approved'); assert.equal(approved.version, 2);
+    assert.equal(approved.history.at(-1).actor_subject, 'admin');
+    await assert.rejects(repo.create(app, 'admin', workspace, { ...create(), creator_subject: 'admin' }), { status: 403 });
+  });
   await t.test('document entity uniqueness, expected version concurrency, role guard and history', async () => {
     const input = create(), doc = await repo.create(app, 'operator', workspace, input);
     assert.equal(doc.state, 'draft'); assert.equal(doc.history[0].actor_subject, 'operator');

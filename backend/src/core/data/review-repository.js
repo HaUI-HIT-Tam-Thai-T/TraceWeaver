@@ -3,7 +3,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { withTransaction } from './database.js';
-import { authorize } from './run-repository.js';
+import { authorize } from '../identity/workspace-access.js';
 import { projectedLinks } from './link-projection.js';
 import { assertAcyclicLink } from '../reconstruction/reviews.js';
 import { ApiError } from '../identity/api-error.js';

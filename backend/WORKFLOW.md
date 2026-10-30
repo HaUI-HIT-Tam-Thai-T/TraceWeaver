@@ -21,6 +21,14 @@ Membership/source/role revocation affects still-valid tokens immediately on subs
 
 ## Operations and definitions
 
+The reusable headless repository is exported by `src/core/index.js` and implemented in
+`src/core/workflow/repository.js`. Trusted callers register definitions, entity types and optional
+`createRoles` at composition time; omitted creation roles are derived from transitions leaving the
+initial state. The compatibility entry point `src/core/data/workflow-repository.js` registers
+`document_review` with operator/reviewer creation roles and the TraceWeaver case adapter in
+`src/adapters/case-workflow.js`. Headless registration does not extend the public HTTP schema or
+allow request-supplied definitions/creation policies. No migration or configuration change is needed.
+
 | Operation | Behavior |
 |---|---|
 | POST /core/v1/instances | Creates document_review v1, entity_ref.type=document, state=draft/version1;201 + Location |

@@ -3,7 +3,7 @@
 import { randomUUID } from 'node:crypto';
 import { createLab, changeCapacity, changeCondition, submitRequest, provision, inspectRequest } from '../../../../simulator/lab-state.mjs';
 import { withTransaction } from './database.js';
-import { authorize } from './run-repository.js';
+import { authorize } from '../identity/workspace-access.js';
 import { ApiError } from '../identity/api-error.js';
 import { labCommand } from '../../validations/lab.validation.js';
 

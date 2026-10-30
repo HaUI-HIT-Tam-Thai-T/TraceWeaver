@@ -25,6 +25,13 @@ flowchart TB
 Core không phụ thuộc React hoặc Express. Hợp đồng HTTP nằm ở [OpenAPI và JSON Schema](backend/contracts/README.md).
 Xem [core README](backend/src/core/README.md) để theo dõi ranh giới module và các thay đổi refactor hiện tại.
 
+Entry point headless là `backend/src/core/index.js`. Workflow repository/store dùng chung nằm trong
+`core/workflow/`; ứng dụng đăng ký definition và chính sách tạo ở phía server.
+`backend/src/adapters/case-workflow.js` nối nghiệp vụ case vào repository này, giữ quyền nguồn,
+run lock, evidence và audit. Các entry point cũ trong `core/data/` giữ tương thích cho API hiện có.
+Quyền workspace dùng chung nằm ở `core/identity/workspace-access.js`; scope của run nằm riêng
+ở `core/reconstruction/run-scope.js`. Refactor không đổi endpoint, cấu hình hay schema DB.
+
 ## Luồng dữ liệu
 
 1. Collector gửi EventInput qua ingestion với danh tính dịch vụ và quyền nguồn.
