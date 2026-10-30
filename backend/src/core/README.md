@@ -37,8 +37,7 @@ Quyền tạo được đặt bằng `createRoles` trong registration server-sid
 trong DB, không áp writer roles riêng của TraceWeaver cho tất cả definitions. Role vẫn thuộc mô hình
 Identity hiện có; thay đổi này không thêm role tùy ý vào schema. Document/case giữ chính sách cũ.
 
-Refactor không đổi HTTP contract, cấu hình hoặc schema DB. Cập nhật source trên nhánh không tự
-cập nhật server; chưa nghiệm thu tích hợp BE–FE–AI hoặc triển khai server sau refactor.
+Refactor không đổi HTTP contract, cấu hình hoặc schema DB.
 
 - `data/`: PostgreSQL pool/transaction/migrations, normalized event ingestion và repository đọc events theo scope/snapshot.
 - `identity/`: access JWT/JWKS verification, cursor HMAC và repository membership/role/source grants đã có, không import Express.
@@ -49,6 +48,5 @@ Core HTTP dùng app JWT riêng, user JWT được verify độc lập và curren
 Case core transitions giữ cùng repository/run lock/evidence guards. Xem [Core HTTP](../../WORKFLOW.md)
 về CORE_APP_CLIENT_ID/CORE_APP_SUBJECT và service membership, [Identity](../../IDENTITY.md),
 [Keycloak](../../KEYCLOAK.md) và [Events](../../EVENTS.md) về các ranh giới tương ứng.
-Kết quả theo từng phiên bản và trạng thái server nằm ở [hiện trạng](../../../docs/overview/status.md);
-kiểm thử source không tự xác nhận bản đang triển khai hoặc chất lượng model.
+Kết quả kiểm thử nằm ở [hiện trạng](../../../docs/overview/status.md).
 Các thay đổi nghiệp vụ và audit phải dùng cùng transaction. DTO dùng chung tại `../../contracts/`.

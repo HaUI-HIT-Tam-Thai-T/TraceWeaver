@@ -4,7 +4,8 @@
 
 - Add a headless core entry point, shared workspace authorization and a separate reconstruction scope module.
 - Extract reusable workflow repository/store with trusted server-side definition registration and creation roles; keep TraceWeaver case rules in an application adapter and preserve existing import entry points.
-- Add role-policy unit coverage and PostgreSQL coverage for an admin-only registered workflow. Existing HTTP contracts, configuration and database schema are unchanged; this source update does not deploy the server.
+- Add role-policy unit coverage and PostgreSQL coverage for an admin-only registered workflow. Existing HTTP contracts, configuration and database schema are unchanged.
+- Deploy API `be-843c7d0`; verify 60 isolated-image tests, 66 HTTPS/Keycloak checks and 23 private TLS scorer pairs. Preserve existing business data, permissions, private configuration, frontend and other services.
 
 ## Unreleased — Evidence-led repository presentation
 

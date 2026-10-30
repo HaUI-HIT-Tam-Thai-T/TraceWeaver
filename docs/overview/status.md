@@ -2,10 +2,9 @@
 
 ## Refactor core BE — 31/10/2026
 
-Nhánh `Phuoc/feat/be-sandbox-verification` đã đồng bộ `dev` trước khi đưa phần refactor BE
-vào source. Có entry point headless, quyền workspace dùng chung, run scope riêng và workflow
+Core có entry point headless, quyền workspace dùng chung, run scope riêng và workflow
 repository/store dùng chung; case TraceWeaver được nối qua adapter. Các import cũ giữ tương thích.
-Không đổi HTTP contract, cấu hình, dependency hoặc schema DB; FE giữ theo `dev`.
+Không đổi HTTP contract, cấu hình, dependency hoặc schema DB.
 
 Kiểm tra local: 146 BE/contract tests đạt, 2 test Python tùy chọn bỏ qua; 31 PostgreSQL integration
 tests cho core workflow/cases/runs/reviews/dashboard/lab và 6 core HTTP/JWT/PostgreSQL tests đạt,
@@ -13,12 +12,16 @@ không skip ở hai nhóm tích hợp. Base checks, inventory 98 npm packages v�
 HTTP fixture chạy ngoài sandbox; PostgreSQL local được khởi động lại bằng container/volume hiện có
 và chờ phục hồi xong trước lượt DB đạt. Đây không phải kiểm thử browser/live Keycloak hoặc scorer Python.
 
-Refactor này chưa triển khai server. API server vẫn là `be-a38c380`; các mốc triển khai phía dưới
-giữ nguyên phạm vi và kết quả lịch sử của chúng.
+Đã triển khai API `be-843c7d0` tại `https://api.quizlearn.tech`; health/live và health/ready đạt.
+Image đạt 60/60 test với PostgreSQL cách ly; 66 kiểm tra HTTPS/Keycloak qua 2 workspace/15 case
+và 23 cặp scorer qua TLS nội bộ đạt, token scorer sai trả 401. Hash dữ liệu, membership/grants,
+cấu hình riêng và frontend giữ nguyên; không restart DB/Keycloak/scorer hoặc dịch vụ khác.
+11 migrations giữ nguyên, hàng đợi log 0. Backup DB ứng dụng đã kiểm archive; các bài test này
+không bao gồm browser E2E hoặc restore toàn bộ DB.
 
 ## Web trực tuyến và tài khoản demo — 31/10/2026
 
-Frontend đã được triển khai tại [traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech), dùng API/Keycloak tại `api.quizlearn.tech`. Nginx phục vụ file tĩnh qua HTTPS; bật khởi động cùng server, tự khởi động lại sau 5 giây khi tiến trình dừng và timer gia hạn chứng chỉ. Release FE `fe-20261030T185157Z` được build từ working tree local tại thời điểm triển khai, không phải toàn bộ source đã được commit lên `dev`.
+Frontend đã được triển khai tại [traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech), dùng API/Keycloak tại `api.quizlearn.tech`. Nginx phục vụ file tĩnh qua HTTPS; bật khởi động cùng server, tự khởi động lại sau 5 giây khi tiến trình dừng và timer gia hạn chứng chỉ. Release FE: `fe-20261030T185157Z`.
 
 Đã kiểm build TypeScript/Vite, HTTPS, route SPA, tải JS/CSS, HTTP chuyển sang HTTPS, CORS và trình duyệt chuyển tới trang đăng nhập Keycloak với callback production/PKCE. Bốn tài khoản demo đã được kiểm đăng nhập PKCE và `/api/v1/me` trả 200; danh sách/mật khẩu demo được công khai theo xác nhận của người dùng tại [README](../../README.md#chọn-vai-trò-để-trải-nghiệm). Chưa kiểm toàn bộ luồng nghiệp vụ sau đăng nhập bằng trình duyệt, forced crash, reboot hoặc renewal dry-run.
 
@@ -104,7 +107,7 @@ Chạy các lệnh trong [INSTALL](../../INSTALL.md) và [backend README](../../
 
 ## Hạn chế vận hành và tích hợp
 
-- Source sửa không tự cập nhật container. Rebuild theo [Docker guide](../../backend/DOCKER.md) trước khi demo bằng image; không có kết quả image scan/production deployment ở đây.
+- Hướng dẫn build và vận hành container tại [Docker guide](../../backend/DOCKER.md); image scan cần được kiểm riêng.
 - Ingest nhận EventInput chuẩn hóa. Timestamp phải biểu diễn chính xác bằng microsecond, chữ số thừa chỉ được là0; không cắt/làm tròn ngầm. Xem [ingestion](../../backend/INGESTION.md)/[events](../../backend/EVENTS.md).
 - CORS development mặc định localhost/127.0.0.1:3000; production cần HTTPS exact origins. Core workflow chỉ dành cho app server. Xem [Integration](../archive/integration-history.md).
 - Policy giữ request.accepted → account.created → provision.completed|failed. [Phản hồi AI ngày28/10](../archive/ai-backend-response.md#phản-hồi-ai_be_confirmation--28102026) chọn schema1/5 feature, BE giữ unresolved, AI chỉ đề xuất và unknown/mâu thuẫn outcome phải review. Outcome guard, lưu/trả reason, alias mapper và extractor chưa có runtime; scorer/fixture/text_similarity/policy version khi triển khai còn phải đồng bộ. Ambiguity không được phá bằng score; cardinality theo transition ID, chưa gộp hai outcome provision thành một slot.
