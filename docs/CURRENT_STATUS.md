@@ -1,5 +1,24 @@
 # Hiện trạng TraceWeaver
 
+## BE-58 — triển khai kiểm chứng theo từng yêu cầu, 31/10/2026
+
+Đã push nhánh `Phuoc/feat/be-sandbox-verification` đến `a38c380` và triển khai image
+`traceweaver-api:be-a38c380` tại `https://api.quizlearn.tech`. Migrations001–011 đã đủ, không có migration
+mới hoặc thay đổi quyền. Collector, CORS local và account-admin giữ nguyên cấu hình; hàng đợi log0.
+Chỉ thay API container; DB/Keycloak/scorer/các ứng dụng khác không restart. Backup DB ứng dụng đã kiểm
+archive; hash dữ liệu, membership/grants, source state và proof trước/sau không đổi, không đổi mật khẩu.
+
+Image mới đạt34 tests cách ly trên server (gồm11 PostgreSQL), sau rollout đạt66 kiểm tra HTTPS/Keycloak
+chỉ đọc và private TLS scorer23pairs/401. Simulator smoke trong container mới xác nhận yêu cầu khác không
+làm stale kết quả đạt; tự đổi điều kiện rồi đổi lại vẫn phải thực thi mới. Snapshot cũ đã stale giữ nguyên,
+không tự đánh dấu đạt hoặc sửa lịch sử. Browser E2E với phiên đăng nhập chưa nghiệm thu trong lượt này.
+
+FE `frontend/fix-sandbox-status` đã push đến `ecbbda2`, có sửa thông báo proof và format source/tests;
+chưa triển khai production FE trong lượt này. Vite đã bỏ proxy, FE local gọi API HTTPS trực tiếp.
+Refactor core BE chưa commit ở máy local được giữ nguyên và không đưa vào image này.
+
+Các mốc dưới đây là lịch sử, không thay thế trạng thái triển khai BE-58 ở trên.
+
 ## BE-52 — FE local gọi trực tiếp API, 30/10/2026
 
 Oracle API chạy `traceweaver-api:be-1b6a72e`. Bật riêng

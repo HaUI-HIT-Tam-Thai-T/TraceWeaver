@@ -1,18 +1,21 @@
 # Bàn giao FE — Simulator và kiểm chứng hồ sơ
 
-Cập nhật 30/10/2026 sau thay dữ liệu server. Contract simulator giữ tương thích BE60919cd; runtime `1b6a72e`
+Cập nhật 31/10/2026 sau triển khai BE/simulator mới. Contract giữ tương thích DTO cũ; runtime `a38c380`
 đã triển khai tại `https://api.quizlearn.tech`. Xem thêm [bàn giao quản trị FE](FE_WORKSPACE_ADMIN_HANDOFF.md).
 Đây là phần mở rộng xử lý/kiểm chứng nghiệp vụ; AI vẫn chỉ chấm điểm liên kết sự kiện.
 
-**Bản sửa source về hiệu lực kiểm chứng (chưa triển khai server):** `source_version` vẫn là version
+**Bản sửa hiệu lực kiểm chứng đã triển khai server (`a38c380`):** `source_version` vẫn là version
 toàn sandbox để gửi lệnh. Tạo/sửa/chạy yêu cầu khác không tự làm mất hiệu lực một yêu cầu đã đạt.
 Sửa image/account của chính yêu cầu hoặc thay tổng RAM thực sự vẫn bắt buộc chạy lại; sửa cùng giá trị
 không làm mất hiệu lực. Kết quả lỗi cần chạy lại nếu RAM khả dụng đổi do yêu cầu khác giữ chỗ.
-Không thêm field bắt buộc hay đổi DTO. Quy tắc mới chỉ có hiệu lực sau khi triển khai BE/simulator cùng nhau.
+Không thêm field bắt buộc hay đổi DTO. BE/simulator đã được triển khai cùng nhau; không cần migration mới.
+Các snapshot cũ đã stale vẫn giữ nguyên cho đến khi thực thi lại; không tự đổi kết quả hoặc mở lại hồ sơ.
+FE branch `frontend/fix-sandbox-status` đã sửa đối chiếu proof/hướng dẫn, giữ riêng với nhánh BE;
+việc push nhánh FE không đồng nghĩa giao diện production đã được triển khai.
 
 ## 0. Contract để FE triển khai ngay
 
-Đối chiếu source BE `1b6a72e`: case-repository.sandbox/verify/verifications, lab-repository,
+Đối chiếu source BE `a38c380`: case-repository.sandbox/verify/verifications, lab-repository,
 case-verification và simulator/lab-state. [OpenAPI đang phục vụ](https://api.quizlearn.tech/docs/openapi.json)
 là hợp đồng schema; các mục4–5 bên dưới mô tả DTO, JSON body, replay và errors chi tiết.
 Không gọi lại API chạy tái dựng để thay cho simulator. Không cần API mới cho luồng sandbox này.

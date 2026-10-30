@@ -6,7 +6,29 @@ independent of Keycloak login accounts. `passed` means a current attempt satisfi
 and its simulated environment matches the request and allocated RAM.
 Do not describe this evidence as verification of an external production environment.
 
-## Oracle demo deployment — 29/10/2026
+## Current Oracle deployment — 31/10/2026
+
+API and simulator source `a38c380` are deployed together at https://api.quizlearn.tech,
+image `traceweaver-api:be-a38c380`. All 11 existing migrations are current; no new migration or grant
+change was needed. Collector/account-administration configuration and credentials are unchanged.
+Only the API container was replaced; PostgreSQL, Keycloak, scorer and other applications kept their IDs.
+
+The exact image passed 34 isolated server tests, including PostgreSQL case/sandbox lifecycle, HTTP,
+permissions and simulator. Real Keycloak/HTTPS read-only checks passed66 operations across15 existing
+cases; localhost CORS and private TLS model scoring (23 pairs plus denied-token401) also passed.
+An in-memory smoke check inside the running API confirmed unrelated requests preserve a passed
+execution and own condition changes followed by reversal require rerunning. No browser E2E is claimed.
+
+Existing business data, memberships, grants, source state and proofs matched their pre-rollout hashes.
+No cases were rerun or rewritten to make old snapshots pass. Legacy stale observations, including
+REQ-20261030-103, can still return `RERUN_REQUIRED`; its passed attempt and closed case remain historical.
+FE must keep closed-case history separate from the current source observation.
+
+Server-only evidence: `.local/oracle/be58-deploy-20261031/`; the application database backup was checked
+with `pg_restore --list` (not a full restore rehearsal). Previous API image `traceweaver-api:be-1b6a72e`
+and `.local/oracle/be58-previous-release.env` are retained for rollback.
+
+## Historical Oracle demo deployment — 29/10/2026
 
 BE runtime source60919cd is deployed at https://api.quizlearn.tech (image `traceweaver-api:be-60919cd`).
 Migrations008–010 and runtime table grants applied; collector enabled using the existing ingest service
@@ -99,7 +121,7 @@ change followed by a reversal, requires a new execution. An actual shared RAM ca
 requires a new execution; setting an already-current condition/capacity does not invalidate evidence.
 For failed attempts, a change in currently available RAM also requires rerunning. Other allocations
 cannot invalidate a passing reserved environment while the total allocation invariant holds.
-This source fix requires deploying the updated BE and simulator together; it is not deployed by editing this document.
+This source fix is live in BE/simulator `a38c380`, deployed together on31/10/2026 as recorded above.
 
 Freshness is stored as `verification_version` inside each source request, without changing case command
 DTOs or attempt/proof snapshots. Existing JSON state is read without migration or rewriting history.
