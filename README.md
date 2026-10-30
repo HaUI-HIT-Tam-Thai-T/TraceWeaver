@@ -1,29 +1,37 @@
-# TraceWeaver: Tái dựng hành trình yêu cầu từ log đa nguồn
+<p align="center">
+  <img src=".github/assets/traceweaver-overview.svg" alt="TraceWeaver — request investigation through connected evidence" width="100%">
+</p>
+
+<p align="center"><strong>Từ log rời rạc đến hành trình yêu cầu có bằng chứng.</strong></p>
+
+<p align="center">
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-2563eb?style=flat-square" alt="Apache-2.0"></a>
+  <a href="https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml"><img src="https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml/badge.svg?branch=dev" alt="CI · dev"></a>
+  <img src="https://img.shields.io/badge/DX--Lab-HaUI_2026-0f766e?style=flat-square" alt="DX-Lab HaUI 2026">
+</p>
+
+<div align="center">
+
+[Khám phá demo](./docs/DEMO.md) &nbsp; · &nbsp; [Cài đặt](./INSTALL.md) &nbsp; · &nbsp; [API](https://api.quizlearn.tech/docs/) &nbsp; · &nbsp; [Tài liệu](./docs/README.md)
 
 **Tiếng Việt** · [English](./README_EN.md)
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
-[![CI](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml/badge.svg)](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml)
+</div>
 
-**Đội:** [HaUI-HIT-Tam-Thai-T](https://github.com/HaUI-HIT-Tam-Thai-T) · **Định hướng:** DX-Lab HaUI 2026
-
-**API đã triển khai:** [api.quizlearn.tech/docs](https://api.quizlearn.tech/docs/)
-
-**Tài liệu:** [Mục lục](./docs/README.md) · [Kịch bản demo](./docs/DEMO.md) · [Tính năng và bằng chứng](./docs/FEATURE_STATUS.md)
-
-TraceWeaver là phần mềm mã nguồn mở hỗ trợ điều tra yêu cầu cấp môi trường thực hành CNTT.
-Hệ thống nối dấu vết từ **intake → account → provision** thành hành trình có bằng chứng, giúp người vận hành tìm bước thất bại, xử lý hồ sơ và kiểm chứng kết quả khắc phục.
+---
 
 ## 💡 Giới thiệu
 
 Một yêu cầu cấp môi trường đi qua nhiều dịch vụ có thể thiếu mã liên kết, nhận log muộn hoặc có nhiều lần thử lại.
 TraceWeaver tập hợp sự kiện, tái dựng quan hệ và giữ lại các trường hợp chưa đủ căn cứ để người review quyết định.
 
-| Thành phần | Bài toán | Luồng chính |
-|---|---|---|
-| Điều tra hành trình | Log nằm ở nhiều nguồn, khó biết yêu cầu dừng ở đâu | Tìm sự kiện → tạo run → xem đồ thị và bằng chứng → review liên kết |
-| Hồ sơ xử lý | Cần theo dõi người phụ trách, trạng thái và quyết định | Mở hồ sơ từ run → phân công → bổ sung bằng chứng → chuyển bước theo workflow |
-| Sandbox thực hành | Cần chứng minh điều kiện đã sửa giải quyết được lỗi | Sửa điều kiện RAM/image/tài khoản → chạy lại request → giao log → kiểm chứng nguồn → đóng hồ sơ |
+> **Điều tra → Review → Khắc phục → Kiểm chứng**
+
+**Hiểu hành trình.** Nối dấu vết intake, account và provision, đối chiếu bằng chứng và giữ riêng nhánh chưa đủ căn cứ.
+
+**Theo dõi hồ sơ.** Phân công người xử lý, bổ sung bằng chứng và chuyển bước theo workflow có lịch sử quyết định.
+
+**Xác nhận kết quả.** Sửa điều kiện sandbox, chạy lại yêu cầu và kiểm tra bằng chứng nguồn mới trước khi đóng hồ sơ.
 
 ## ✨ Điểm nổi bật
 
@@ -70,6 +78,9 @@ Vai trò module và luồng dữ liệu ở [ARCHITECTURE.md](./ARCHITECTURE.md)
 
 ## 🧱 Kiến trúc 3 tầng
 
+<details>
+<summary>Xem kiến trúc ba tầng và ánh xạ H-P-D-I</summary>
+
 | Tầng | Thành phần | Vai trò trong TraceWeaver |
 |---|---|---|
 | 1. Open-Core headless | Identity, Data, Reconstruction, Workflow và audit | Cung cấp quyền, transaction, snapshot và engine dùng chung |
@@ -85,6 +96,8 @@ Vai trò module và luồng dữ liệu ở [ARCHITECTURE.md](./ARCHITECTURE.md)
 
 Core không phụ thuộc React/Express; các policy riêng của hồ sơ lab được nối qua lớp nghiệp vụ/adapter.
 Ranh giới và trạng thái refactor ở [core README](./backend/src/core/README.md).
+
+</details>
 
 ## 🧩 Tính năng
 
@@ -115,6 +128,9 @@ Danh sách, notices và phạm vi phân phối ở [LICENSES.md](./LICENSES.md);
 
 ### 💻 Yêu cầu hệ thống
 
+<details>
+<summary>Yêu cầu công cụ và cổng kết nối</summary>
+
 | Hạng mục | Yêu cầu | Ghi chú |
 |---|---|---|
 | Source | Git | Clone repository |
@@ -123,6 +139,8 @@ Danh sách, notices và phạm vi phân phối ở [LICENSES.md](./LICENSES.md);
 | Web | Node/npm và trình duyệt | Cài dependencies riêng tại `frontend/` |
 | AI tùy chọn | Python và venv theo [AI RUN](./ai/RUN.md) | Cài đúng pinned requirements |
 | Cổng local | API 8080, PostgreSQL 55432, Keycloak 8081, web 5173 | Có thể thay đổi nếu cập nhật đồng bộ cấu hình |
+
+</details>
 
 ### 📝 Các bước
 
@@ -168,6 +186,9 @@ Chi tiết origins/callback ở [INSTALL.md](./INSTALL.md#4-frontend).
 
 ### 🔧 Cấu hình
 
+<details>
+<summary>Các biến môi trường cần cấu hình</summary>
+
 Backend dùng `.env` tại root; web dùng các file env của Vite.
 Mẫu cấu hình: [.env.example](./.env.example) và [frontend/.env.example](./frontend/.env.example).
 
@@ -185,6 +206,8 @@ Mẫu cấu hình: [.env.example](./.env.example) và [frontend/.env.example](./
 
 Không đưa mật khẩu, token hoặc client secret vào Git hay biến `VITE_*`.
 Cấu hình scorer Python riêng và model opt-in ở [SCORER.md](./backend/SCORER.md).
+
+</details>
 
 ## 🌐 Chạy thử
 
@@ -215,6 +238,9 @@ Làm theo [kịch bản demo](./docs/DEMO.md) để thử log thiếu ID, nhánh
 
 ## 🔌 API
 
+<details>
+<summary>Xem xác thực và các nhóm API</summary>
+
 - Swagger local ở `/docs/`; hợp đồng chung ở [backend/contracts/openapi.json](./backend/contracts/openapi.json) và [JSON Schemas](./backend/contracts/README.md).
 - API người dùng dùng `Authorization: Bearer <access token>`; ingestion và core workflow có danh tính dịch vụ riêng.
 - Backend kiểm role/quyền nguồn hiện tại; token hợp lệ chưa đủ để đọc mọi workspace.
@@ -229,6 +255,8 @@ Làm theo [kịch bản demo](./docs/DEMO.md) để thử log thiếu ID, nhánh
 | Sandbox và proof | [LAB_SANDBOX.md](./backend/LAB_SANDBOX.md) |
 | Dashboard và quản trị | [Dashboard](./backend/DASHBOARD.md), [Workspace admin](./backend/WORKSPACE_ADMIN.md) |
 | AI scorer | API nội bộ cho backend; [SCORER.md](./backend/SCORER.md) |
+
+</details>
 
 ## 🧪 Kiểm thử
 
@@ -260,6 +288,9 @@ Hỗ trợ và cách gửi log an toàn tại [SUPPORT.md](./SUPPORT.md).
 
 ## 📁 Cấu trúc repository
 
+<details>
+<summary>Xem cấu trúc thư mục và tài liệu</summary>
+
 | Thư mục | Nội dung |
 |---|---|
 | [`backend/`](./backend/README.md) | Express API, core headless, migrations, contracts và tests |
@@ -274,6 +305,8 @@ Hỗ trợ và cách gửi log an toàn tại [SUPPORT.md](./SUPPORT.md).
 Tài liệu gốc: [ARCHITECTURE](./ARCHITECTURE.md) · [INSTALL](./INSTALL.md) · [CHANGELOG](./CHANGELOG.md) · [LICENSES](./LICENSES.md).
 Chuẩn bị gói source và bản phân phối theo [RELEASING](./docs/RELEASING.md).
 Tag `v0.1.0-base.1` là scaffold cũ; phạm vi hiện tại theo revision ở [CURRENT_STATUS](./docs/CURRENT_STATUS.md).
+
+</details>
 
 ## 🤝 Đóng góp
 

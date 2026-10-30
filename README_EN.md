@@ -1,29 +1,37 @@
-# TraceWeaver: Reconstruct request journeys from multi-source logs
+<p align="center">
+  <img src=".github/assets/traceweaver-overview.svg" alt="TraceWeaver — request investigation through connected evidence" width="100%">
+</p>
+
+<p align="center"><strong>From scattered logs to evidence-backed request journeys.</strong></p>
+
+<p align="center">
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-2563eb?style=flat-square" alt="Apache-2.0"></a>
+  <a href="https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml"><img src="https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml/badge.svg?branch=dev" alt="CI · dev"></a>
+  <img src="https://img.shields.io/badge/DX--Lab-HaUI_2026-0f766e?style=flat-square" alt="DX-Lab HaUI 2026">
+</p>
+
+<div align="center">
+
+[Demo](./docs/DEMO.md) &nbsp; · &nbsp; [Installation](./INSTALL.md) &nbsp; · &nbsp; [API](https://api.quizlearn.tech/docs/) &nbsp; · &nbsp; [Documentation](./docs/README.md)
 
 [Tiếng Việt](./README.md) · **English**
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
-[![CI](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml/badge.svg)](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml)
+</div>
 
-**Team:** [HaUI-HIT-Tam-Thai-T](https://github.com/HaUI-HIT-Tam-Thai-T) · **Project context:** DX-Lab HaUI 2026
-
-**Deployed API:** [api.quizlearn.tech/docs](https://api.quizlearn.tech/docs/)
-
-**Documentation:** [Index](./docs/README.md) · [Guided demo](./docs/DEMO.md) · [Features and evidence](./docs/FEATURE_STATUS.md)
-
-TraceWeaver is open-source software for investigating IT lab provisioning requests.
-It connects traces across **intake → account → provision** into evidence-backed journeys, helping operators locate failures, manage cases and verify remediation.
+---
 
 ## 💡 Introduction
 
 A provisioning request crosses multiple services and may have missing identifiers, delayed logs or repeated attempts.
 TraceWeaver collects events, reconstructs their relationships and preserves inconclusive cases for human review.
 
-| Component | Problem | Main flow |
-|---|---|---|
-| Journey investigation | Logs are scattered across sources; the failing step is unclear | Find an event → create a run → inspect graph/evidence → review links |
-| Case management | Ownership, progress and decisions need a durable record | Open a case from a run → assign → add evidence → follow guarded workflow |
-| Lab sandbox | A repaired condition needs a verified outcome | Repair RAM/image/account conditions → rerun request → deliver logs → verify source evidence → close case |
+> **Investigate → Review → Repair → Verify**
+
+**Investigate the journey.** Connect intake, account and provision events, inspect the evidence and preserve unresolved branches.
+
+**Track the case.** Assign an owner, add evidence and follow a guarded workflow with a durable decision history.
+
+**Verify the outcome.** Repair sandbox conditions, rerun the request and check fresh source proof before closing the case.
 
 ## ✨ Highlights
 
@@ -70,6 +78,9 @@ Module responsibilities and data flows are described in [ARCHITECTURE.md](./ARCH
 
 ## 🧱 Three-layer architecture
 
+<details>
+<summary>Three layers and the H-P-D-I mapping</summary>
+
 | Layer | Components | TraceWeaver responsibility |
 |---|---|---|
 | 1. Headless Open-Core | Identity, Data, Reconstruction, Workflow and audit | Authorization, transactions, snapshots and shared engines |
@@ -85,6 +96,8 @@ Module responsibilities and data flows are described in [ARCHITECTURE.md](./ARCH
 
 The core is independent of React/Express; lab-case policies are connected through business services/adapters.
 See the [core README](./backend/src/core/README.md) for module boundaries and refactor status.
+
+</details>
 
 ## 🧩 Features
 
@@ -115,6 +128,9 @@ Inventories, notices and distribution scope are documented in [LICENSES.md](./LI
 
 ### 💻 Requirements
 
+<details>
+<summary>Tools and local ports</summary>
+
 | Item | Requirement | Notes |
 |---|---|---|
 | Source | Git | Clone the repository |
@@ -123,6 +139,8 @@ Inventories, notices and distribution scope are documented in [LICENSES.md](./LI
 | Web | Node/npm and a browser | Install dependencies separately in `frontend/` |
 | Optional AI | Python and venv following [AI RUN](./ai/RUN.md) | Install the pinned requirements |
 | Local ports | API 8080, PostgreSQL 55432, Keycloak 8081, web 5173 | Changes require consistent configuration |
+
+</details>
 
 ### 📝 Steps
 
@@ -169,6 +187,9 @@ See [INSTALL.md](./INSTALL.md#4-frontend) for origins and callbacks.
 
 ### 🔧 Configuration
 
+<details>
+<summary>Environment variables</summary>
+
 The backend uses the root `.env`; the web app uses Vite environment files.
 Templates: [.env.example](./.env.example) and [frontend/.env.example](./frontend/.env.example).
 
@@ -186,6 +207,8 @@ Templates: [.env.example](./.env.example) and [frontend/.env.example](./frontend
 
 Keep passwords, tokens and client secrets out of Git and `VITE_*` values.
 Python scorer configuration and model opt-in are described in [SCORER.md](./backend/SCORER.md).
+
+</details>
 
 ## 🌐 Try it
 
@@ -217,6 +240,9 @@ Follow the [guided demo](./docs/DEMO.md) to explore missing IDs, ambiguous branc
 
 ## 🔌 API
 
+<details>
+<summary>Authentication and API groups</summary>
+
 - Local Swagger is at `/docs/`; shared contracts are in [backend/contracts/openapi.json](./backend/contracts/openapi.json) and [JSON Schemas](./backend/contracts/README.md).
 - User APIs use `Authorization: Bearer <access token>`; ingestion and core workflow have separate service identities.
 - Backend enforces current roles/source grants; a valid token does not grant access to every workspace.
@@ -231,6 +257,8 @@ Follow the [guided demo](./docs/DEMO.md) to explore missing IDs, ambiguous branc
 | Sandbox and proof | [LAB_SANDBOX.md](./backend/LAB_SANDBOX.md) |
 | Dashboard and administration | [Dashboard](./backend/DASHBOARD.md), [Workspace admin](./backend/WORKSPACE_ADMIN.md) |
 | AI scorer | Backend-only internal API; [SCORER.md](./backend/SCORER.md) |
+
+</details>
 
 ## 🧪 Testing
 
@@ -262,6 +290,9 @@ Support and safe diagnostic reporting are described in [SUPPORT.md](./SUPPORT.md
 
 ## 📁 Repository structure
 
+<details>
+<summary>Directories and documentation</summary>
+
 | Directory | Contents |
 |---|---|
 | [`backend/`](./backend/README.md) | Express API, headless core, migrations, contracts and tests |
@@ -276,6 +307,8 @@ Support and safe diagnostic reporting are described in [SUPPORT.md](./SUPPORT.md
 Core documents: [ARCHITECTURE](./ARCHITECTURE.md) · [INSTALL](./INSTALL.md) · [CHANGELOG](./CHANGELOG.md) · [LICENSES](./LICENSES.md).
 Prepare source/distribution packages using [RELEASING](./docs/RELEASING.md).
 The `v0.1.0-base.1` tag is an earlier scaffold; current scope is revision-specific in [CURRENT_STATUS](./docs/CURRENT_STATUS.md).
+
+</details>
 
 ## 🤝 Contributing
 
