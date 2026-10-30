@@ -236,23 +236,26 @@ Frontend đã được triển khai tại **[traceweaver.quizlearn.tech](https:/
 Nginx phục vụ bản build tĩnh qua HTTPS, tự khởi động cùng server và tự khởi động lại khi tiến trình dừng; chứng chỉ có lịch gia hạn tự động.
 Hướng dẫn vận hành backend và scorer ở [deploy/oracle/README.md](./deploy/oracle/README.md).
 
-### Chọn vai trò để trải nghiệm
+<a id="chọn-vai-trò-để-trải-nghiệm"></a>
+
+### 🔑 Tài khoản demo
 
 Bốn tài khoản dưới đây đăng nhập vào **bản web trực tuyến**. Mật khẩu demo dùng chung: **`Weave123!`**.
 Để thử đúng ranh giới quyền, chọn workspace **TraceWeaver Sandbox — Mô phỏng kiểm chứng** sau khi đăng nhập.
 
-| Bạn muốn thử gì? | Đăng nhập bằng | Vai trò trong Sandbox |
-|---|---|---|
-| Lần theo log, tạo hành trình, xử lý hồ sơ và chạy lại yêu cầu | `operator` | `operator` |
-| Duyệt liên kết, kiểm chứng bằng chứng và quyết định đóng hồ sơ | `reviewer` | `reviewer` |
-| Xem dữ liệu và theo dõi kết quả, không sửa nghiệp vụ | `viewer` | `viewer` |
-| Quản lý thành viên/quyền nguồn và sửa điều kiện mô phỏng | `workspace-admin` | `admin` |
+| Username | Mật khẩu | Vai trò trong Sandbox | Dùng để thử |
+|---|---|---|---|
+| `operator` | `Weave123!` | `operator` | Điều tra log, tạo hành trình, xử lý hồ sơ và chạy lại yêu cầu |
+| `reviewer` | `Weave123!` | `reviewer` | Duyệt liên kết, kiểm chứng và quyết định đóng hồ sơ |
+| `viewer` | `Weave123!` | `viewer` | Xem dữ liệu và kết quả, không sửa nghiệp vụ |
+| `workspace-admin` | `Weave123!` | `admin` | Quản lý thành viên/quyền nguồn và sửa điều kiện mô phỏng |
 
 Một phiên thử gợi ý: dùng `operator` điều tra yêu cầu lỗi → dùng `workspace-admin` sửa RAM/image/tài khoản → quay lại `operator` chạy lại yêu cầu → dùng `reviewer` kiểm chứng và đóng hồ sơ khi đủ điều kiện.
 Xem các bước ở [kịch bản demo](docs/guides/demo.md). Đăng xuất trước khi chuyển sang tài khoản khác.
 
 Quyền được cấp theo workspace, không suy ra từ username: riêng `viewer` ở workspace **TraceWeaver** hiện có thêm `operator` và `reviewer`; dùng workspace **Sandbox** để thử chế độ chỉ đọc.
 Đây là các tài khoản demo công khai, thao tác có thể ảnh hưởng dữ liệu demo dùng chung; không dùng cho dữ liệu thật.
+`workspace-admin` có quyền admin trong cả hai workspace demo: có thể tạo tài khoản, đổi vai trò/kích hoạt thành viên và cấp/thu hồi quyền đọc nguồn trong phạm vi được phép. Tài khoản này không có quyền quản trị Keycloak/server, không xóa tài khoản SSO hoặc đổi mật khẩu người dùng cũ. Chỉ công khai khi các workspace này dành cho demo; không dùng chung với dữ liệu thật.
 Hai tài khoản thử nghiệm phát sinh trên server không thuộc bộ demo hướng dẫn này. Tài khoản quản trị Keycloak và danh tính dịch vụ cũng không dùng để đăng nhập web demo.
 
 **Chạy trên máy cá nhân:** bootstrap local vẫn tạo `demo.operator` và `demo.viewer` với mật khẩu ngẫu nhiên trong `demo-credentials.local.json` (Git ignore).

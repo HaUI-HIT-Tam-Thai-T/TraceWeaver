@@ -237,23 +237,26 @@ The frontend is deployed at **[traceweaver.quizlearn.tech](https://traceweaver.q
 Nginx serves the static build over HTTPS, starts on boot and restarts automatically if its process stops. Certificate renewal is scheduled automatically.
 Backend/scorer operations are documented in [deploy/oracle/README.md](./deploy/oracle/README.md).
 
-### Pick a role and explore
+<a id="pick-a-role-and-explore"></a>
+
+### 🔑 Demo accounts
 
 These four accounts work on the **live web app**. Shared demo password: **`Weave123!`**.
 After signing in, select **TraceWeaver Sandbox — Mô phỏng kiểm chứng** to explore the role boundaries below.
 
-| What would you like to try? | Username | Sandbox role |
-|---|---|---|
-| Investigate logs, reconstruct journeys, work on cases and rerun requests | `operator` | `operator` |
-| Review links, verify evidence and decide case closure | `reviewer` | `reviewer` |
-| Inspect data and results without changing business state | `viewer` | `viewer` |
-| Manage members/source access and repair simulation conditions | `workspace-admin` | `admin` |
+| Username | Password | Sandbox role | What to try |
+|---|---|---|---|
+| `operator` | `Weave123!` | `operator` | Investigate logs, reconstruct journeys, work on cases and rerun requests |
+| `reviewer` | `Weave123!` | `reviewer` | Review links, verify evidence and decide case closure |
+| `viewer` | `Weave123!` | `viewer` | Inspect data and results without changing business state |
+| `workspace-admin` | `Weave123!` | `admin` | Manage members/source access and repair simulation conditions |
 
 A suggested session: investigate a failed request as `operator` → repair RAM/image/account conditions as `workspace-admin` → rerun as `operator` → verify and close as `reviewer` once all requirements are met.
 Follow the [guided demo](docs/guides/demo.md) for the steps. Sign out before switching accounts.
 
 Permissions belong to each workspace, not the username: in the **TraceWeaver** workspace, `viewer` currently also has `operator` and `reviewer` roles. Use **Sandbox** to try read-only access.
 These are public demo accounts sharing mutable demo data; do not use them for real data.
+`workspace-admin` has admin access in both demo workspaces: it can create accounts, change member roles/active status and grant/revoke source read access within its permitted scope. It cannot administer Keycloak/the server, delete SSO accounts or reset existing users' passwords. Only publish this credential for dedicated demo workspaces without real data.
 Two additional server test accounts are outside this guided demo. Keycloak administration and service identities are also separate from web demo accounts.
 
 **Running locally:** bootstrap still creates `demo.operator` and `demo.viewer` with random passwords in the Git-ignored `demo-credentials.local.json`.
