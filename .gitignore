@@ -26,6 +26,9 @@ coverage/
 !/docs/CURRENT_STATUS.md
 !/docs/BACKEND_HANDOFF.md
 !/docs/BACKEND_HANDOFF_RESPONSE.md
+!/docs/DEMO.md
+!/docs/FEATURE_STATUS.md
+!/docs/RELEASING.md
 /.planning/
 /data/
 /templates/

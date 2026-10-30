@@ -14,7 +14,7 @@ Project code: Apache-2.0. Third-party packages retain their original licenses. T
 | PostgreSQL image | postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24 | Compose development | [Docker Official Image source](https://github.com/docker-library/postgres); image/base packages require a separate audit when distributing images |
 | Keycloak image | 26.8.1@sha256:79c623a22abacf3fe6c00a5fb30f5b7843d717b234033b80995891c06116d244 | Local OIDC/PKCE IdP | [Apache-2.0](https://github.com/keycloak/keycloak/blob/26.8.1/LICENSE.txt); bundled image dependencies require separate distribution audit |
 
-React, AI runtime and model are not installed in this scaffold. Add their pinned versions, licenses and notices when implemented.
+Frontend and Python dependencies are inventoried separately; see [LICENSES.md](../LICENSES.md). Model provenance is documented in [ai/artifacts/sandbox-v2/README.md](../ai/artifacts/sandbox-v2/README.md).
 
 ## npm packages (98)
 

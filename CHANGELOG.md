@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased — Evidence-led repository presentation
+
+- Add a TraceWeaver-specific overview illustration, a guided investigation/sandbox demo and feature-to-test evidence map.
+- Add reproducible CycloneDX npm/Python inventories with explicit optional/WASM and Python graph limits; document source packaging and distribution scope.
+- Add npm dependency audit scheduling, Dependabot configuration and CI checks for SBOM/Python license drift. No release, image or deployment is created by these configurations.
+
+## Unreleased — Repository documentation and licensing
+
+- Replace the historical root introduction with Vietnamese/English project overviews, setup links and explicit implementation/model limits.
+- Add architecture, testing, support, community conduct and consolidated licensing documentation; update installation and contribution guidance.
+- Add a frontend npm inventory with bundled non-optional dependency notices and separate optional/platform package scope. Refresh backend/Python inventories without changing dependency versions.
+
 ## Unreleased — Administration deployed and FE handoff (BE-51)
 
 - Push and deploy runtime4cdd022 as traceweaver-api:be-4cdd022 on Oracle; apply011 and runtime grants. Configure dedicated service-only Keycloak account client with manage/view/query-users, admin-only ownership marker and server-only secret. Keep public Admin REST closed; route BE Admin REST over the exact private Docker endpoint while token issuer stays HTTPS.

@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: 2026 TraceWeaver contributors
+# SPDX-License-Identifier: Apache-2.0
+name: Dependency audit
+on:
+  pull_request:
+    paths:
+      - package.json
+      - package-lock.json
+      - backend/package.json
+      - frontend/package.json
+      - frontend/package-lock.json
+      - .github/workflows/dependencies.yml
+  push:
+    branches: [main]
+    paths:
+      - package-lock.json
+      - frontend/package-lock.json
+      - .github/workflows/dependencies.yml
+  schedule:
+    - cron: '23 2 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: dependency-audit-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        directory: ['.', frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.1'
+      - name: Audit locked dependencies, including dev and build tools
+        working-directory: ${{ matrix.directory }}
+        run: npm audit --package-lock-only --ignore-scripts --audit-level=high
