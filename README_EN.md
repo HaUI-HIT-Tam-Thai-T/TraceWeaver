@@ -12,15 +12,25 @@
 
 <div align="center">
 
-[Demo](./docs/DEMO.md) &nbsp; · &nbsp; [Installation](./INSTALL.md) &nbsp; · &nbsp; [API](https://api.quizlearn.tech/docs/) &nbsp; · &nbsp; [Documentation](./docs/README.md)
+[Open TraceWeaver](https://traceweaver.quizlearn.tech) &nbsp; · &nbsp; [Demo guide](./docs/DEMO.md) &nbsp; · &nbsp; [Installation](./INSTALL.md) &nbsp; · &nbsp; [API](https://api.quizlearn.tech/docs/) &nbsp; · &nbsp; [Documentation](./docs/README.md)
 
 [Tiếng Việt](./README.md) · **English**
 
 </div>
 
+**Team:** HaUI.Tam\_Thái\_Tử
+
+**Institution:** Trường Công nghệ Thông tin và Truyền thông, Đại học Công nghiệp Hà Nội
+
+**Live application:** [traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech) · **Documentation:** [Guides and system design](./docs/README.md)
+
+**Dự thi OLP Phần mềm nguồn mở 2026.** TraceWeaver connects evidence from multiple services into inspectable request journeys, supporting incident investigation and remediation verification. Its Identity, Data and Workflow core is reusable; the demonstration follows an IT operations scenario covering request intake, account creation and environment provisioning.
+
 ---
 
 ## 💡 Introduction
+
+**TraceWeaver** is an open-source platform for investigating incidents through multi-source logs: reconstructing request journeys, managing investigation cases and verifying remediation against source evidence.
 
 A provisioning request crosses multiple services and may have missing identifiers, delayed logs or repeated attempts.
 TraceWeaver collects events, reconstructs their relationships and preserves inconclusive cases for human review.
@@ -212,29 +222,40 @@ Python scorer configuration and model opt-in are described in [SCORER.md](./back
 
 | Service | Address | Login / prerequisites |
 |---|---|---|
+| Live web app | [traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech) | Sign in with a demo account below |
 | Development web app | [localhost:5173](http://localhost:5173) | Vite running; Keycloak login and workspace grants |
 | Server Swagger | [api.quizlearn.tech/docs](https://api.quizlearn.tech/docs/) | Authorize according to the deployment |
 | Local API | [127.0.0.1:8080](http://127.0.0.1:8080/health/live) | Public `/health/live` and `/health/ready`; business APIs require JWT/grants |
 | Local Swagger | [localhost:8080/docs](http://localhost:8080/docs/) | **Authorize → keycloakLogin**, after bootstrap |
 | Local Keycloak | [localhost:8081](http://localhost:8081) | Local bootstrap; credentials stored on your machine |
 
-### 🌐 Public server
+### Live deployment
 
-Backend/scorer deployment instructions are in [deploy/oracle/README.md](./deploy/oracle/README.md).
-Registered CORS/callback settings alone do not establish that the web app is deployed.
-Check the revision and deployed scope in [CURRENT_STATUS](./docs/CURRENT_STATUS.md).
+The frontend is deployed at **[traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech)** and connects to the API and Keycloak at `api.quizlearn.tech`.
+Nginx serves the static build over HTTPS, starts on boot and restarts automatically if its process stops. Certificate renewal is scheduled automatically.
+Backend/scorer operations are documented in [deploy/oracle/README.md](./deploy/oracle/README.md).
 
-### 🔑 Demo accounts
+### Pick a role and explore
 
-Local bootstrap generates random credentials in the Git-ignored `demo-credentials.local.json`.
+These four accounts work on the **live web app**. Shared demo password: **`Weave123!`**.
+After signing in, select **TraceWeaver Sandbox — Mô phỏng kiểm chứng** to explore the role boundaries below.
 
-| Local account | Role | Credentials |
+| What would you like to try? | Username | Sandbox role |
 |---|---|---|
-| `demo.operator` | Investigation and operations permitted by seeded operator grants | Read the local credentials file after bootstrap |
-| `demo.viewer` | Read-only within granted scope | Read the local credentials file after bootstrap |
+| Investigate logs, reconstruct journeys, work on cases and rerun requests | `operator` | `operator` |
+| Review links, verify evidence and decide case closure | `reviewer` | `reviewer` |
+| Inspect data and results without changing business state | `viewer` | `viewer` |
+| Manage members/source access and repair simulation conditions | `workspace-admin` | `admin` |
 
-Reviewer/admin access and sandbox capabilities require environment-specific configuration.
-Follow the [guided demo](./docs/DEMO.md) to explore missing IDs, ambiguous branches and condition repair followed by a request rerun.
+A suggested session: investigate a failed request as `operator` → repair RAM/image/account conditions as `workspace-admin` → rerun as `operator` → verify and close as `reviewer` once all requirements are met.
+Follow the [guided demo](./docs/DEMO.md) for the steps. Sign out before switching accounts.
+
+Permissions belong to each workspace, not the username: in the **TraceWeaver** workspace, `viewer` currently also has `operator` and `reviewer` roles. Use **Sandbox** to try read-only access.
+These are public demo accounts sharing mutable demo data; do not use them for real data.
+Two additional server test accounts are outside this guided demo. Keycloak administration and service identities are also separate from web demo accounts.
+
+**Running locally:** bootstrap still creates `demo.operator` and `demo.viewer` with random passwords in the Git-ignored `demo-credentials.local.json`.
+Those accounts belong to your local environment; the live demo password above does not apply to them.
 
 ## 🔌 API
 
@@ -315,12 +336,15 @@ The `v0.1.0-base.1` tag is an earlier scaffold; current scope is revision-specif
 - **Submit code:** read [CONTRIBUTING.md](./CONTRIBUTING.md) and follow [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
 - **Sensitive issues:** follow [SECURITY.md](./SECURITY.md); use synthetic data and remove secrets from public logs/screenshots.
 
-## 📞 Contact
+## Talk to the TraceWeaver developers
 
-| Contact | Channel |
-|---|---|
-| Development team | [HaUI-HIT-Tam-Thai-T](https://github.com/HaUI-HIT-Tam-Thai-T) |
-| Support, bugs and technical discussion | [GitHub Issues](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues) |
+Reach a team member directly:
+
+- **Nguyễn Văn Phước** — [vanphuocken@gmail.com](mailto:vanphuocken@gmail.com)
+- **Trần Xuân Khương** — [tranxuankhuong24022006@gmail.com](mailto:tranxuankhuong24022006@gmail.com)
+- **Phạm Thiên Bảo** — [thienbaomk147@gmail.com](mailto:thienbaomk147@gmail.com)
+
+For reproducible bugs and feature suggestions, open a [GitHub Issue](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues) so the discussion can be tracked.
 
 ## 📜 License
 

@@ -12,15 +12,25 @@
 
 <div align="center">
 
-[Khám phá demo](./docs/DEMO.md) &nbsp; · &nbsp; [Cài đặt](./INSTALL.md) &nbsp; · &nbsp; [API](https://api.quizlearn.tech/docs/) &nbsp; · &nbsp; [Tài liệu](./docs/README.md)
+[Mở TraceWeaver](https://traceweaver.quizlearn.tech) &nbsp; · &nbsp; [Hướng dẫn demo](./docs/DEMO.md) &nbsp; · &nbsp; [Cài đặt](./INSTALL.md) &nbsp; · &nbsp; [API](https://api.quizlearn.tech/docs/) &nbsp; · &nbsp; [Tài liệu](./docs/README.md)
 
 **Tiếng Việt** · [English](./README_EN.md)
 
 </div>
 
+**Đội:** HaUI.Tam\_Thái\_Tử
+
+**Trường:** Trường Công nghệ Thông tin và Truyền thông, Đại học Công nghiệp Hà Nội
+
+**Trải nghiệm trực tuyến:** [traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech) · **Tài liệu:** [Hướng dẫn và thiết kế hệ thống](./docs/README.md)
+
+**Dự thi OLP Phần mềm nguồn mở 2026.** TraceWeaver kết nối dấu vết từ nhiều dịch vụ thành hành trình yêu cầu có thể đối chiếu, hỗ trợ điều tra sự cố và kiểm chứng kết quả khắc phục. Lõi Identity, Data và Workflow có thể tái sử dụng; kịch bản minh họa là vận hành CNTT với luồng tiếp nhận yêu cầu, tạo tài khoản và cấp phát môi trường.
+
 ---
 
 ## 💡 Giới thiệu
+
+**TraceWeaver** là nền tảng mã nguồn mở hỗ trợ điều tra sự cố từ log đa nguồn: tái dựng hành trình yêu cầu, phối hợp xử lý hồ sơ và kiểm chứng kết quả khắc phục bằng bằng chứng nguồn.
 
 Một yêu cầu cấp môi trường đi qua nhiều dịch vụ có thể thiếu mã liên kết, nhận log muộn hoặc có nhiều lần thử lại.
 TraceWeaver tập hợp sự kiện, tái dựng quan hệ và giữ lại các trường hợp chưa đủ căn cứ để người review quyết định.
@@ -211,28 +221,40 @@ Cấu hình scorer Python riêng và model opt-in ở [SCORER.md](./backend/SCOR
 
 | Dịch vụ | Địa chỉ | Đăng nhập / điều kiện |
 |---|---|---|
+| Web trực tuyến | [traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech) | Đăng nhập bằng tài khoản demo bên dưới |
 | Web development | [localhost:5173](http://localhost:5173) | Chạy Vite; đăng nhập Keycloak và có quyền workspace |
 | Swagger trên server | [api.quizlearn.tech/docs](https://api.quizlearn.tech/docs/) | Authorize theo cấu hình deployment |
 | API local | [127.0.0.1:8080](http://127.0.0.1:8080/health/live) | `/health/live` và `/health/ready` public; nghiệp vụ cần JWT/quyền |
 | Swagger local | [localhost:8080/docs](http://localhost:8080/docs/) | **Authorize → keycloakLogin**, sau bootstrap |
 | Keycloak local | [localhost:8081](http://localhost:8081) | Sau bước bootstrap local; credentials riêng trên máy |
 
-### 🌐 Máy chủ công khai
+### Bản chạy trực tuyến
 
-Backend và scorer có hướng dẫn triển khai tại [deploy/oracle/README.md](./deploy/oracle/README.md).
-Cấu hình CORS/callback đã đăng ký không tự chứng minh web đã triển khai; đối chiếu phiên bản và phạm vi bản chạy tại [CURRENT_STATUS](./docs/CURRENT_STATUS.md).
+Frontend đã được triển khai tại **[traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech)**, kết nối API và Keycloak tại `api.quizlearn.tech`.
+Nginx phục vụ bản build tĩnh qua HTTPS, tự khởi động cùng server và tự khởi động lại khi tiến trình dừng; chứng chỉ có lịch gia hạn tự động.
+Hướng dẫn vận hành backend và scorer ở [deploy/oracle/README.md](./deploy/oracle/README.md).
 
-### 🔑 Tài khoản demo
+### Chọn vai trò để trải nghiệm
 
-Bootstrap local tạo credentials ngẫu nhiên trong `demo-credentials.local.json`, được Git ignore.
+Bốn tài khoản dưới đây đăng nhập vào **bản web trực tuyến**. Mật khẩu demo dùng chung: **`Weave123!`**.
+Để thử đúng ranh giới quyền, chọn workspace **TraceWeaver Sandbox — Mô phỏng kiểm chứng** sau khi đăng nhập.
 
-| Tài khoản local | Vai trò | Credentials |
+| Bạn muốn thử gì? | Đăng nhập bằng | Vai trò trong Sandbox |
 |---|---|---|
-| `demo.operator` | Điều tra và thao tác theo quyền operator được seed | Xem file credentials local sau bootstrap |
-| `demo.viewer` | Chỉ đọc trong phạm vi được cấp | Xem file credentials local sau bootstrap |
+| Lần theo log, tạo hành trình, xử lý hồ sơ và chạy lại yêu cầu | `operator` | `operator` |
+| Duyệt liên kết, kiểm chứng bằng chứng và quyết định đóng hồ sơ | `reviewer` | `reviewer` |
+| Xem dữ liệu và theo dõi kết quả, không sửa nghiệp vụ | `viewer` | `viewer` |
+| Quản lý thành viên/quyền nguồn và sửa điều kiện mô phỏng | `workspace-admin` | `admin` |
 
-Quyền reviewer/admin và sandbox cần được cấu hình theo môi trường.
-Làm theo [kịch bản demo](./docs/DEMO.md) để thử log thiếu ID, nhánh mơ hồ và sửa điều kiện rồi chạy lại request.
+Một phiên thử gợi ý: dùng `operator` điều tra yêu cầu lỗi → dùng `workspace-admin` sửa RAM/image/tài khoản → quay lại `operator` chạy lại yêu cầu → dùng `reviewer` kiểm chứng và đóng hồ sơ khi đủ điều kiện.
+Xem các bước ở [kịch bản demo](./docs/DEMO.md). Đăng xuất trước khi chuyển sang tài khoản khác.
+
+Quyền được cấp theo workspace, không suy ra từ username: riêng `viewer` ở workspace **TraceWeaver** hiện có thêm `operator` và `reviewer`; dùng workspace **Sandbox** để thử chế độ chỉ đọc.
+Đây là các tài khoản demo công khai, thao tác có thể ảnh hưởng dữ liệu demo dùng chung; không dùng cho dữ liệu thật.
+Hai tài khoản thử nghiệm phát sinh trên server không thuộc bộ demo hướng dẫn này. Tài khoản quản trị Keycloak và danh tính dịch vụ cũng không dùng để đăng nhập web demo.
+
+**Chạy trên máy cá nhân:** bootstrap local vẫn tạo `demo.operator` và `demo.viewer` với mật khẩu ngẫu nhiên trong `demo-credentials.local.json` (Git ignore).
+Đây là bộ tài khoản riêng của môi trường local; mật khẩu demo trực tuyến ở trên không áp dụng cho chúng.
 
 ## 🔌 API
 
@@ -313,12 +335,15 @@ Tag `v0.1.0-base.1` là scaffold cũ; phạm vi hiện tại theo revision ở [
 - **Gửi mã:** đọc [CONTRIBUTING.md](./CONTRIBUTING.md) và tuân theo [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
 - **Vấn đề nhạy cảm:** theo [SECURITY.md](./SECURITY.md); dùng dữ liệu giả và loại secret khỏi log/ảnh công khai.
 
-## 📞 Liên hệ
+## Trao đổi với nhóm TraceWeaver
 
-| Đầu mối | Kênh |
-|---|---|
-| Đội phát triển | [HaUI-HIT-Tam-Thai-T](https://github.com/HaUI-HIT-Tam-Thai-T) |
-| Hỗ trợ, báo lỗi và thảo luận kỹ thuật | [GitHub Issues](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues) |
+Bạn có thể liên hệ trực tiếp với các thành viên:
+
+- **Nguyễn Văn Phước** — [vanphuocken@gmail.com](mailto:vanphuocken@gmail.com)
+- **Trần Xuân Khương** — [tranxuankhuong24022006@gmail.com](mailto:tranxuankhuong24022006@gmail.com)
+- **Phạm Thiên Bảo** — [thienbaomk147@gmail.com](mailto:thienbaomk147@gmail.com)
+
+Với lỗi có bước tái hiện hoặc đề xuất tính năng, hãy mở [GitHub Issue](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues) để tiện theo dõi.
 
 ## 📜 Giấy phép
 
