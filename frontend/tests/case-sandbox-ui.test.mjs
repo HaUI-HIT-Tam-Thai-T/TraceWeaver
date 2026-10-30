@@ -56,6 +56,32 @@ test('sandbox is visible outside canWrite, roles gate actions, historical failur
     assert.match(closedHtml, /Đây không phải kết quả chạy thất bại/);
     assert.match(closedHtml, /Bản kiểm chứng lịch sử tại thời điểm lưu/);
     assert.doesNotMatch(closedHtml, /Nguồn đang ghi nhận: Chưa đủ kết luận|Khác phiên bản hồ sơ hiện tại; cần kiểm chứng mới/);
+    const verified = stateFor('reviewer');
+    const current = verified.sandbox.snapshot.data.observation;
+    current.source_version = 5;
+    current.reason = null;
+    current.delivery = { status: 'delivered', total: 1, delivered: 1 };
+    current.attempt = attempt({ result: 'passed', reason: null, blockers: [], image_available: true,
+      checks: attempt().checks.map(check => ({ ...check, passed: true })) });
+    current.attempts = [current.attempt];
+    current.environment = { id: 'environment-one', attempt_id: current.attempt.id, state: 'running' };
+    const saved = proof({ observation: { ...structuredClone(current), source_version: 4 } });
+    verified.sandbox.proofs.data = proofs([saved]);
+    const verifiedHtml = renderToStaticMarkup(h(SandboxPanel, { state: verified, actions }));
+    assert.match(verifiedHtml, /Đã lưu kiểm chứng đạt — chờ reviewer đóng hồ sơ/);
+    assert.match(verifiedHtml, /Bản kiểm chứng khớp lần chạy hiện tại/);
+    assert.doesNotMatch(verifiedHtml, /chờ reviewer xác minh|Chuyển hồ sơ sang chờ xác minh|Phiên bản hoặc định danh nguồn đã thay đổi/);
+    for (const status of ['loading', 'error']) {
+      verified.sandbox.proofs.status = status;
+      const unread = renderToStaticMarkup(h(SandboxPanel, { state: verified, actions }));
+      assert.match(unread, /Đã chạy đạt — cần đọc kiểm chứng/);
+      assert.doesNotMatch(unread, /Đã lưu kiểm chứng đạt — chờ reviewer đóng hồ sơ/);
+    }
+    verified.sandbox.proofs.status = 'ready';
+    verified.sandbox.proofs.data.items.push(proof({ id: 'ffffffff-ffff-4fff-8fff-ffffffffffff', observation: { result: 'failed' } }));
+    const newerFailure = renderToStaticMarkup(h(SandboxPanel, { state: verified, actions }));
+    assert.match(newerFailure, /Đã chạy đạt — chờ reviewer xác minh/);
+    assert.doesNotMatch(newerFailure, /Đã lưu kiểm chứng đạt — chờ reviewer đóng hồ sơ/);
     const legacy = renderToStaticMarkup(h(AttemptView, { attempt: { checker_version: 'lab-state-1', result: 'passed' } }));
     assert.match(legacy, /không dùng để kết luận nguồn hiện tại đạt/);
     const modern = renderToStaticMarkup(h(AttemptView, { attempt: attempt() }));

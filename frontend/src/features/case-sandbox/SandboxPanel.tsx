@@ -13,7 +13,7 @@ import type { CasesContextValue } from '../cases/state/casesContext';
 import { eventTimeLabel } from '../events/presentation';
 import { attemptSchema } from './schemas';
 import type { Sandbox, HistoricalAttempt, Command, Lab } from './schemas';
-import { nextSandboxStep, observationLabel, proofNotice, reasonLabel, resultLabel } from './presentation';
+import { latestMatchingProof, nextSandboxStep, observationLabel, proofNotice, reasonLabel, resultLabel } from './presentation';
 
 function Failure({ error }: { error: ApiError | null }) {
   return error && <div role="alert" className="space-y-2 text-danger"><p>{error.message}</p><TechnicalDetails headingLevel={4} title="Mã tra cứu lỗi"><p>{error.code} · {error.requestId ?? 'Không có mã tra cứu'}</p></TechnicalDetails></div>;
@@ -81,6 +81,9 @@ export function SandboxPanel({ state, actions }: { state: CasesState; actions: A
   const frozen = busy || closed || mutation.status !== 'idle' || state.workflow.status === 'uncertain' || state.evidenceMutation.status === 'uncertain' || state.linkMutation.status === 'uncertain';
   const caseAligned = sandbox.snapshot.status === 'ready' && snapshot?.case_version === version;
   const current = caseAligned && observation?.source === 'lab-sandbox' && observation.simulated === true && observation.source_version !== undefined;
+  const proofsReady = ready && caseAligned && sandbox.proofs.status === 'ready' && sandbox.proofs.data?.case_version === version && sandbox.proofs.data?.case_id === detail?.case.id;
+  const matchingProof = proofsReady ? latestMatchingProof(sandbox.proofs.data?.items ?? [], snapshot, version ?? 0) : null;
+  const progress = { caseState: detail?.case.state, proofStatus: !proofsReady ? 'unknown' as const : matchingProof ? 'matched' as const : 'missing' as const };
   const intent = mutation.intent;
   const matched = intent?.action === 'provision' && observation?.attempts?.find(item => { const parsed = attemptSchema.safeParse(item); return parsed.success && parsed.data.operation_id === intent.operation_id; });
   const unconfigured = ready && !snapshot && sandbox.snapshot.status === 'error' &&
@@ -97,8 +100,8 @@ export function SandboxPanel({ state, actions }: { state: CasesState; actions: A
     <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="type-h2">Kiểm chứng nghiệp vụ mô phỏng</h2><Button variant="tertiary" type="button" aria-expanded={open} aria-controls="sandbox-content" onClick={() => setOpen(value => !value)}>{open ? 'Thu gọn kiểm chứng' : 'Mở kiểm chứng'}</Button></div>
     <p>Đây là mô phỏng; không thao tác VM, registry hoặc mạng thật. Tài khoản nghiệp vụ mô phỏng khác tài khoản đăng nhập SSO.</p>
     {closed ? <p className="font-semibold">Hồ sơ đã đóng — xem kết quả và bằng chứng đã lưu bên dưới.</p>
-      : observation && <p className="font-semibold">{observationLabel(observation)}{sandbox.snapshot.status !== 'ready' && ' — dữ liệu cần tải lại'}</p>}
-    {observation && <p>{sandbox.snapshot.status === 'ready' ? nextSandboxStep(observation, closed) : 'Cần đọc lại nguồn trước khi xác định bước tiếp theo.'}</p>}
+      : observation && <p className="font-semibold">{observationLabel(observation, progress)}{sandbox.snapshot.status !== 'ready' && ' — dữ liệu cần tải lại'}</p>}
+    {observation && <p>{sandbox.snapshot.status === 'ready' ? nextSandboxStep(observation, closed, progress) : 'Cần đọc lại nguồn trước khi xác định bước tiếp theo.'}</p>}
     <div id="sandbox-content" hidden={!open} className="space-y-5">
       <Button variant="tertiary" type="button" disabled={busy} onClick={() => void actions.loadSandbox()}>Kiểm tra chuyển log và làm mới nguồn</Button>
       {[sandbox.snapshot, sandbox.proofs, sandbox.lab].some(item => item.status === 'loading') && <p role="status">Đang đọc nguồn mô phỏng, lịch sử kiểm chứng và tổng RAM…</p>}

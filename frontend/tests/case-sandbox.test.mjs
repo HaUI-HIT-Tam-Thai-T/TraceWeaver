@@ -5,13 +5,67 @@ import { createSandboxService, sandboxFailure } from '../src/features/case-sandb
 import { sandboxSchema, proofSchema, commandSchema, observationSchema } from '../src/features/case-sandbox/schemas.ts';
 import { createCasesController } from '../src/features/cases/state/controller.ts';
 import { ApiError } from '../src/services/apiError.ts';
-import { observationLabel, proofNotice, reasonLabel } from '../src/features/case-sandbox/presentation.ts';
+import { latestMatchingProof, observationLabel, nextSandboxStep, proofNotice, reasonLabel } from '../src/features/case-sandbox/presentation.ts';
 import { CID, CID2, caseDetail } from './case-fixtures.mjs';
 import { scope, WID } from './event-fixtures.mjs';
 import { graph, run } from './reconstruction-fixtures.mjs';
 import { attempt, sandbox, proof, proofs, command, OID } from './sandbox-fixtures.mjs';
 const tick = async () => { for (let i = 0; i < 50; i++) await Promise.resolve(); };
 const failure = (code, status = 422) => new ApiError({ kind: status === 401 ? 'auth' : 'http', code, status, message: 'Safe failure' });
+function passingSnapshot() {
+  const current = sandbox();
+  const execution = attempt({ result: 'passed', reason: null, blockers: [], image_available: true,
+    checks: attempt().checks.map(check => ({ ...check, passed: true })) });
+  current.observation = { ...current.observation, result: 'passed', reason: null,
+    conditions: { ...current.observation.conditions, image_available: true },
+    attempt: execution, attempts: [execution],
+    environment: { id: 'environment-one', attempt_id: execution.id, state: 'running' },
+    delivery: { status: 'delivered', total: 1, delivered: 1 } };
+  return current;
+}
+test('proof validity follows the same bound execution as BE, independent of global write version', () => {
+  const current = passingSnapshot();
+  const saved = proof({ observation: structuredClone(current.observation) });
+  current.observation.source_version += 10;
+  assert.equal(latestMatchingProof([saved], current, 1), saved);
+  assert.match(proofNotice(saved, current, 1), /khớp lần chạy hiện tại/);
+  for (const corrupt of [
+    value => { value.case_id = CID2; },
+    value => { value.case_version = 2; },
+    value => { value.observation.result = 'failed'; },
+    value => { value.observation.reason = 'RERUN_REQUIRED'; value.observation.result = 'inconclusive'; },
+    value => { value.observation.attempt.id = OID; },
+    value => { value.observation.attempt.source_version++; },
+    value => { value.observation.checker_version = 'lab-state-1'; },
+    value => { value.observation.request_id = 'other'; },
+    value => { value.observation.environment.id = 'other'; },
+    value => { value.observation.delivery.status = 'pending'; },
+    value => { delete value.observation.attempt; },
+    value => { delete value.observation.environment; },
+  ]) {
+    const changed = structuredClone(current); corrupt(changed);
+    assert.equal(latestMatchingProof([saved], changed, 1), null);
+    assert.doesNotMatch(proofNotice(saved, changed, 1), /khớp lần chạy hiện tại/);
+  }
+  const failed = proof({ id: OID, observation: { result: 'failed' } });
+  assert.equal(latestMatchingProof([saved, failed], current, 1), null, 'Latest failed proof must not be skipped for an older passing one');
+  const pending = structuredClone(saved); pending.observation.delivery.status = 'pending';
+  assert.equal(latestMatchingProof([pending], current, 1), null, 'Delivery finishing later cannot repair an old pending proof');
+  assert.equal(latestMatchingProof([proof()], current, 1), null, 'Minimal or legacy proof must not be treated as matching');
+});
+test('progress reflects case state and whether the latest proof was read and matches', () => {
+  const observation = passingSnapshot().observation;
+  const matched = { caseState: 'awaiting_verification', proofStatus: 'matched' };
+  assert.match(observationLabel(observation, matched), /Đã lưu kiểm chứng đạt/);
+  assert.doesNotMatch(observationLabel(observation, matched), /chờ reviewer xác minh/);
+  assert.match(nextSandboxStep(observation, false, matched), /tác vụ đóng hồ sơ/);
+  assert.doesNotMatch(nextSandboxStep(observation, false, matched), /Chuyển hồ sơ sang|reviewer lưu kiểm chứng/);
+  assert.match(nextSandboxStep(observation, false, { caseState: 'awaiting_verification', proofStatus: 'missing' }), /Reviewer lưu kiểm chứng/);
+  assert.doesNotMatch(nextSandboxStep(observation, false, { caseState: 'awaiting_verification', proofStatus: 'missing' }), /Chuyển hồ sơ sang/);
+  assert.match(nextSandboxStep(observation, false, { caseState: 'investigating', proofStatus: 'missing' }), /Chuyển hồ sơ sang/);
+  assert.match(observationLabel(observation, { caseState: 'awaiting_verification', proofStatus: 'unknown' }), /cần đọc kiểm chứng/);
+  assert.match(nextSandboxStep(observation, true, matched), /Hồ sơ đã đóng/);
+});
 test('current source labels distinguish never run, failed, changed and passed without changing historical outcomes', () => {
   assert.equal(observationLabel({ result: 'inconclusive', reason: 'NOT_EXECUTED' }), 'Chưa chạy kiểm tra');
   assert.match(observationLabel({ result: 'inconclusive', reason: 'RERUN_REQUIRED' }), /cần chạy lại/);
