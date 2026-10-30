@@ -519,9 +519,12 @@ export function createCasesController(
     const version = generation;
     const caseVersion = state.detail.data.case.version;
     const current = () => generation === version && sandboxRequest === controller && !controller.signal.aborted && state.detail.data?.case.version === caseVersion;
-    function failRead(error: unknown): never {
+    // /lab is an optional workspace module: its 404 does not mean the case is hidden.
+    const deniedRead = (error: ApiError, optionalLab = false) =>
+      error.kind === 'auth' || error.status === 403 || (error.status === 404 && !optionalLab);
+    function failRead(error: unknown, optionalLab = false): never {
       const safe = sandboxFailure(error);
-      if (current() && (safe.kind === 'auth' || safe.status === 403 || safe.status === 404)) deny(safe);
+      if (current() && deniedRead(safe, optionalLab)) deny(safe);
       throw error;
     }
     update({ sandbox: { ...state.sandbox,
@@ -531,12 +534,12 @@ export function createCasesController(
       const results = await Promise.allSettled([
         sandboxService.getSandbox(scope.workspaceId, cid, controller.signal).catch(failRead),
         sandboxService.getProofs(scope.workspaceId, cid, controller.signal).catch(failRead),
-        sandboxService.getLab(scope.workspaceId, controller.signal).catch(failRead),
+        sandboxService.getLab(scope.workspaceId, controller.signal).catch(error => failRead(error, true)),
       ]);
       if (!current()) return;
-      for (const result of results) if (result.status === 'rejected') {
+      for (const [index, result] of results.entries()) if (result.status === 'rejected') {
         const safe = sandboxFailure(result.reason);
-        if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) { deny(safe); return; }
+        if (deniedRead(safe, index === 2)) { deny(safe); return; }
       }
       const [snapshot, proofs, lab] = results;
       update({ sandbox: { ...state.sandbox,

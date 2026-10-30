@@ -13,7 +13,7 @@ import type { CasesContextValue } from '../cases/state/casesContext';
 import { eventTimeLabel } from '../events/presentation';
 import { attemptSchema } from './schemas';
 import type { Sandbox, HistoricalAttempt, Command, Lab } from './schemas';
-import { nextSandboxStep, proofNotice, reasonLabel, resultLabel } from './presentation';
+import { nextSandboxStep, observationLabel, proofNotice, reasonLabel, resultLabel } from './presentation';
 
 function Failure({ error }: { error: ApiError | null }) {
   return error && <div role="alert" className="space-y-2 text-danger"><p>{error.message}</p><TechnicalDetails headingLevel={4} title="Mã tra cứu lỗi"><p>{error.code} · {error.requestId ?? 'Không có mã tra cứu'}</p></TechnicalDetails></div>;
@@ -83,10 +83,21 @@ export function SandboxPanel({ state, actions }: { state: CasesState; actions: A
   const current = caseAligned && observation?.source === 'lab-sandbox' && observation.simulated === true && observation.source_version !== undefined;
   const intent = mutation.intent;
   const matched = intent?.action === 'provision' && observation?.attempts?.find(item => { const parsed = attemptSchema.safeParse(item); return parsed.success && parsed.data.operation_id === intent.operation_id; });
+  const unconfigured = ready && !snapshot && sandbox.snapshot.status === 'error' &&
+    sandbox.snapshot.error?.code === 'SANDBOX_BINDING_REQUIRED' &&
+    sandbox.lab.status === 'error' && sandbox.lab.error?.status === 404 &&
+    sandbox.proofs.status === 'ready';
+  if (unconfigured) return <section aria-label="Kiểm chứng nghiệp vụ mô phỏng" className="content-panel space-y-3">
+    <h2 className="type-h2">Kiểm chứng nghiệp vụ mô phỏng</h2>
+    <p>Hồ sơ này chưa gắn với nguồn mô phỏng; workspace hiện tại chưa có cấu hình sandbox.</p>
+    <p>Tiếp tục xử lý tại lịch sử, bằng chứng và tác vụ hồ sơ. BE vẫn kiểm tra điều kiện đóng theo chính sách hiện tại.</p>
+    <Button type="button" variant="tertiary" onClick={() => void actions.loadSandbox()}>Kiểm tra lại nguồn</Button>
+  </section>;
   return <section aria-label="Kiểm chứng nghiệp vụ mô phỏng" className="content-panel space-y-4">
     <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="type-h2">Kiểm chứng nghiệp vụ mô phỏng</h2><Button variant="tertiary" type="button" aria-expanded={open} aria-controls="sandbox-content" onClick={() => setOpen(value => !value)}>{open ? 'Thu gọn kiểm chứng' : 'Mở kiểm chứng'}</Button></div>
     <p>Đây là mô phỏng; không thao tác VM, registry hoặc mạng thật. Tài khoản nghiệp vụ mô phỏng khác tài khoản đăng nhập SSO.</p>
-    {observation && <p className="font-semibold">Nguồn đang ghi nhận: {resultLabel(observation.result)}{sandbox.snapshot.status !== 'ready' && ' — dữ liệu cần tải lại'}</p>}
+    {closed ? <p className="font-semibold">Hồ sơ đã đóng — xem kết quả và bằng chứng đã lưu bên dưới.</p>
+      : observation && <p className="font-semibold">{observationLabel(observation)}{sandbox.snapshot.status !== 'ready' && ' — dữ liệu cần tải lại'}</p>}
     {observation && <p>{sandbox.snapshot.status === 'ready' ? nextSandboxStep(observation, closed) : 'Cần đọc lại nguồn trước khi xác định bước tiếp theo.'}</p>}
     <div id="sandbox-content" hidden={!open} className="space-y-5">
       <Button variant="tertiary" type="button" disabled={busy} onClick={() => void actions.loadSandbox()}>Kiểm tra chuyển log và làm mới nguồn</Button>
@@ -94,7 +105,10 @@ export function SandboxPanel({ state, actions }: { state: CasesState; actions: A
       <Failure error={sandbox.snapshot.error} /><Failure error={sandbox.proofs.error} /><Failure error={sandbox.lab.error} />
       {sandbox.snapshot.error && <p>Module chưa đọc được trạng thái. Không suy ra hồ sơ được miễn proof; phần điều tra và guard đóng hồ sơ vẫn giữ nguyên.</p>}
       {observation && <div className="space-y-3"><h3 className="type-h3">Điều kiện hiện tại</h3><p>Mã yêu cầu nguồn: <span className="break-all">{observation.request_id ?? 'Chưa xác định'}</span></p>
-        <p>{reasonLabel(observation.reason)}</p>
+        {closed ? <p>Nguồn hiện tại: {observation.reason === 'RERUN_REQUIRED'
+          ? 'Khác phiên bản lần chạy đã lưu. Đây không phải kết quả chạy thất bại và không thay đổi lịch sử hồ sơ đã đóng.'
+          : observation.reason === 'NOT_EXECUTED' ? 'Chưa có lần thực thi.' : resultLabel(observation.result)} Kết quả tại thời điểm chạy nằm ở mục “Lần chạy gần nhất”.</p>
+          : <p>{reasonLabel(observation.reason)}</p>}
         {sandbox.lab.status === 'ready' && sandbox.lab.data && <p>Tổng RAM hiện tại của sandbox: {sandbox.lab.data.ram} GB</p>}
         {observation.conditions ? <dl className="grid gap-2 sm:grid-cols-3"><div><dt>RAM yêu cầu</dt><dd>{observation.conditions.required_ram} GB</dd></div><div><dt>Image</dt><dd>{observation.conditions.image_available ? 'Khả dụng' : 'Chưa khả dụng'}</dd></div><div><dt>Tài khoản mô phỏng</dt><dd>{observation.conditions.account_active ? 'Hoạt động' : 'Chưa kích hoạt'}</dd></div></dl> : <p>Quan sát này chưa cung cấp đủ điều kiện.</p>}
         <p>Chuyển log: {observation.delivery ? observation.delivery.status === 'delivered' ? `Đã chuyển ${observation.delivery.delivered}/${observation.delivery.total}` : `Đang chờ ${observation.delivery.delivered}/${observation.delivery.total}` : 'Chưa có bằng chứng chuyển log'}. Trạng thái này không thay proof reviewer.</p>
@@ -120,7 +134,7 @@ export function SandboxPanel({ state, actions }: { state: CasesState; actions: A
       <div className="space-y-3"><h3 className="type-h3">Kiểm chứng nguồn của reviewer</h3>
         {state.scope?.canVerify && <><p>Chỉ lưu khi hồ sơ chờ xác minh. Mỗi lần lưu tạo snapshot riêng; không tự đóng hồ sơ.</p><Button type="button" disabled={frozen || !caseAligned || sandbox.proofs.status !== 'ready' || detail?.case.state !== 'awaiting_verification'} onClick={() => void actions.saveSandboxProof()}>Lưu kiểm chứng nguồn</Button></>}
         {sandbox.proofs.data?.items.length ? <Table caption="Lịch sử kiểm chứng nguồn"><TableHeader><TableRow><TableHead>Thời gian (UTC+7)</TableHead><TableHead>Kết quả</TableHead><TableHead>Đối chiếu hiện tại</TableHead><TableHead>Chi tiết</TableHead></TableRow></TableHeader><TableBody>
-          {sandbox.proofs.data.items.map(proof => <TableRow key={proof.id}><TableCell>{eventTimeLabel(proof.checked_at)}</TableCell><TableCell>{resultLabel(proof.observation.result)}<p>{reasonLabel(proof.observation.reason)}</p></TableCell><TableCell>{proofNotice(proof, sandbox.snapshot.status === 'ready' ? snapshot : null, version ?? 0)}</TableCell><TableCell><TechnicalDetails headingLevel={4} title="Snapshot kiểm chứng"><pre>{JSON.stringify(proof, null, 2)}</pre></TechnicalDetails></TableCell></TableRow>)}
+          {sandbox.proofs.data.items.map(proof => <TableRow key={proof.id}><TableCell>{eventTimeLabel(proof.checked_at)}</TableCell><TableCell>{resultLabel(proof.observation.result)}<p>{reasonLabel(proof.observation.reason)}</p></TableCell><TableCell>{proofNotice(proof, sandbox.snapshot.status === 'ready' ? snapshot : null, version ?? 0, closed)}</TableCell><TableCell><TechnicalDetails headingLevel={4} title="Snapshot kiểm chứng"><pre>{JSON.stringify(proof, null, 2)}</pre></TechnicalDetails></TableCell></TableRow>)}
         </TableBody></Table> : <p>Chưa có bản kiểm chứng trong lịch sử đã đọc.</p>}
       </div>
       {snapshot && <TechnicalDetails headingLevel={3} title="Binding, phiên bản và môi trường mô phỏng"><pre>{JSON.stringify(snapshot, null, 2)}</pre></TechnicalDetails>}

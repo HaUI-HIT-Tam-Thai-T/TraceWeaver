@@ -7,6 +7,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { sandbox, proof, proofs, attempt } from './sandbox-fixtures.mjs';
 import { CID, caseDetail } from './case-fixtures.mjs';
 import { scope, WID } from './event-fixtures.mjs';
+import { ApiError } from '../src/services/apiError.ts';
 
 test('sandbox is visible outside canWrite, roles gate actions, historical failures do not override current result and data is escaped', async () => {
   const server = await createServer({ configFile: false, cacheDir: 'node_modules/.tmp/ssr-sandbox-ui', server: { middlewareMode: true, hmr: false, ws: false } });
@@ -30,7 +31,7 @@ test('sandbox is visible outside canWrite, roles gate actions, historical failur
     for (const role of ['viewer', 'admin', 'operator', 'reviewer']) {
       const state = stateFor(role);
       const html = renderToStaticMarkup(h(SandboxPanel, { state, actions }));
-      assert.match(html, /Kiểm chứng nghiệp vụ mô phỏng/); assert.match(html, /32 GB/); assert.match(html, /Nguồn đang ghi nhận: Đạt/);
+      assert.match(html, /Kiểm chứng nghiệp vụ mô phỏng/); assert.match(html, /32 GB/); assert.match(html, /Đã chạy đạt — chờ chuyển log/);
       assert.match(html, /&lt;script&gt;escape/); assert.doesNotMatch(html, /<script>/);
       assert.equal(html.includes('aria-label="Sửa điều kiện mô phỏng"'), role === 'admin');
       assert.equal(html.includes('>Chạy lại mô phỏng<'), ['operator', 'reviewer'].includes(role));
@@ -45,9 +46,30 @@ test('sandbox is visible outside canWrite, roles gate actions, historical failur
     }
     const closed = renderToStaticMarkup(h(SandboxPanel, { state: stateFor('reviewer', true), actions }));
     for (const label of ['Chạy lại mô phỏng', 'Lưu kiểm chứng nguồn']) assert.match(closed.match(new RegExp(`<button[^>]*>${label}<\\/button>`))?.[0] ?? '', / disabled=""/);
+    const staleClosed = stateFor('reviewer', true);
+    staleClosed.detail.data.case.version = 2;
+    staleClosed.sandbox.snapshot.data.case_version = 2;
+    staleClosed.sandbox.snapshot.data.observation.result = 'inconclusive';
+    staleClosed.sandbox.snapshot.data.observation.reason = 'RERUN_REQUIRED';
+    const closedHtml = renderToStaticMarkup(h(SandboxPanel, { state: staleClosed, actions }));
+    assert.match(closedHtml, /Hồ sơ đã đóng — xem kết quả/);
+    assert.match(closedHtml, /Đây không phải kết quả chạy thất bại/);
+    assert.match(closedHtml, /Bản kiểm chứng lịch sử tại thời điểm lưu/);
+    assert.doesNotMatch(closedHtml, /Nguồn đang ghi nhận: Chưa đủ kết luận|Khác phiên bản hồ sơ hiện tại; cần kiểm chứng mới/);
     const legacy = renderToStaticMarkup(h(AttemptView, { attempt: { checker_version: 'lab-state-1', result: 'passed' } }));
     assert.match(legacy, /không dùng để kết luận nguồn hiện tại đạt/);
     const modern = renderToStaticMarkup(h(AttemptView, { attempt: attempt() }));
     assert.match(modern, /Image: Không đạt/); assert.match(modern, /RAM: Đạt/);
+    const regular = stateFor('reviewer');
+    regular.sandbox.snapshot = { status: 'error', data: null, error: new ApiError({ kind: 'http', status: 422, code: 'SANDBOX_BINDING_REQUIRED', message: 'Unbound case' }) };
+    regular.sandbox.lab = { status: 'error', data: null, error: new ApiError({ kind: 'http', status: 404, code: 'NOT_FOUND', message: 'No lab configured' }) };
+    regular.sandbox.proofs = { status: 'ready', data: proofs(), error: null };
+    const regularHtml = renderToStaticMarkup(h(SandboxPanel, { state: regular, actions }));
+    assert.match(regularHtml, /Hồ sơ này chưa gắn với nguồn mô phỏng/);
+    assert.doesNotMatch(regularHtml, /role="alert"|SANDBOX_BINDING_REQUIRED|NOT_FOUND|Chưa có lịch sử thực thi|Chạy lại mô phỏng|Lưu kiểm chứng nguồn/);
+    regular.sandbox.lab.error = new ApiError({ kind: 'http', status: 503, code: 'CORE_NOT_READY', message: 'Source temporarily unavailable' });
+    const outageHtml = renderToStaticMarkup(h(SandboxPanel, { state: regular, actions }));
+    assert.match(outageHtml, /role="alert"/);
+    assert.doesNotMatch(outageHtml, /Hồ sơ này chưa gắn với nguồn mô phỏng/);
   } finally { await server.close(); }
 });

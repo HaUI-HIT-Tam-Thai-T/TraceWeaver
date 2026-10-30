@@ -2,11 +2,20 @@ import type { Observation, Proof, Sandbox } from './schemas.ts';
 export function resultLabel(result: string) {
   return result === 'passed' ? 'Đạt' : result === 'failed' ? 'Không đạt' : 'Chưa đủ kết luận';
 }
+export function observationLabel(observation: Observation): string {
+  if (observation.reason === 'NOT_EXECUTED') return 'Chưa chạy kiểm tra';
+  if (observation.reason === 'RERUN_REQUIRED') return 'Phiên bản nguồn đã thay đổi — cần chạy lại';
+  if (observation.result === 'failed') return 'Chưa đạt';
+  if (observation.result === 'passed') return observation.delivery?.status === 'delivered'
+    ? 'Đã chạy đạt — chờ reviewer xác minh' : 'Đã chạy đạt — chờ chuyển log';
+  return 'Chưa đủ dữ liệu để kết luận';
+}
 export function reasonLabel(reason?: string | null): string {
   const labels: { [key: string]: string | undefined } = {
     NOT_EXECUTED: 'Chưa có lần thực thi.', RERUN_REQUIRED: 'Nguồn đã thay đổi; cần thực thi mới.',
     INSUFFICIENT_RAM: 'Không đủ RAM.', CAPACITY_EXHAUSTED: 'Không đủ RAM.', RAM_INSUFFICIENT: 'Không đủ RAM.',
     IMAGE_UNAVAILABLE: 'Image chưa khả dụng.', ACCOUNT_INACTIVE: 'Tài khoản nghiệp vụ mô phỏng chưa được kích hoạt.',
+    ACCOUNT_DISABLED: 'Tài khoản nghiệp vụ mô phỏng đang bị vô hiệu hóa.',
     SOURCE_REQUEST_NOT_FOUND: 'Không tìm thấy yêu cầu trong nguồn kiểm chứng.',
     DELIVERY_PENDING: 'Chưa xác nhận chuyển đủ log.',
   };
@@ -20,7 +29,8 @@ export function nextSandboxStep(observation: Observation, closed: boolean): stri
   if (observation.delivery?.status !== 'delivered') return 'Thực thi đạt; kiểm tra chuyển log trước khi lưu kiểm chứng.';
   return 'Log đã chuyển. Chuyển hồ sơ sang chờ xác minh, reviewer lưu kiểm chứng rồi dùng workflow đóng hồ sơ; BE kiểm tra lại điều kiện.';
 }
-export function proofNotice(proof: Proof, current: Sandbox | null, caseVersion: number): string {
+export function proofNotice(proof: Proof, current: Sandbox | null, caseVersion: number, closed = false): string {
+  if (closed) return 'Bản kiểm chứng lịch sử tại thời điểm lưu. Hồ sơ đã đóng; kết quả nguồn hiện tại được hiển thị riêng.';
   if (proof.case_version !== caseVersion) return 'Khác phiên bản hồ sơ hiện tại; cần kiểm chứng mới.';
   if (!current) return 'Chưa có quan sát nguồn mới để đối chiếu hiệu lực.';
   const old = proof.observation, now = current.observation;

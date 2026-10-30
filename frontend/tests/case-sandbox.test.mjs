@@ -5,13 +5,22 @@ import { createSandboxService, sandboxFailure } from '../src/features/case-sandb
 import { sandboxSchema, proofSchema, commandSchema, observationSchema } from '../src/features/case-sandbox/schemas.ts';
 import { createCasesController } from '../src/features/cases/state/controller.ts';
 import { ApiError } from '../src/services/apiError.ts';
-import { proofNotice } from '../src/features/case-sandbox/presentation.ts';
+import { observationLabel, proofNotice, reasonLabel } from '../src/features/case-sandbox/presentation.ts';
 import { CID, CID2, caseDetail } from './case-fixtures.mjs';
 import { scope, WID } from './event-fixtures.mjs';
 import { graph, run } from './reconstruction-fixtures.mjs';
 import { attempt, sandbox, proof, proofs, command, OID } from './sandbox-fixtures.mjs';
 const tick = async () => { for (let i = 0; i < 50; i++) await Promise.resolve(); };
 const failure = (code, status = 422) => new ApiError({ kind: status === 401 ? 'auth' : 'http', code, status, message: 'Safe failure' });
+test('current source labels distinguish never run, failed, changed and passed without changing historical outcomes', () => {
+  assert.equal(observationLabel({ result: 'inconclusive', reason: 'NOT_EXECUTED' }), 'Chưa chạy kiểm tra');
+  assert.match(observationLabel({ result: 'inconclusive', reason: 'RERUN_REQUIRED' }), /cần chạy lại/);
+  assert.equal(observationLabel(sandbox().observation), 'Chưa đạt');
+  assert.match(observationLabel({ result: 'passed', delivery: { status: 'delivered', total: 1, delivered: 1 } }), /chờ reviewer xác minh/);
+  assert.match(reasonLabel('ACCOUNT_DISABLED'), /vô hiệu hóa/);
+  assert.match(proofNotice(proof(), sandbox(), 2, true), /Bản kiểm chứng lịch sử/);
+  assert.match(proofNotice(proof(), sandbox(), 2), /cần kiểm chứng mới/);
+});
 async function setup(options = {}) {
   let detail = caseDetail(), observed = sandbox(), history = proofs(), rechecks = 0;
   detail.case.state = options.closed ? 'closed' : 'awaiting_verification'; detail.case.owner_id = 'user-a';
@@ -164,6 +173,35 @@ test('shared write lock prevents command/proof/workflow/evidence overlap and per
   assert.equal(y.controller.getSnapshot().caseRun.status, 'ready');
   pending.resolve(sandbox()); await read;
 });
+test('unconfigured optional lab preserves an accessible regular case and evidence writes', async () => {
+  const x = await setup({
+    getSandbox: async () => { throw failure('SANDBOX_BINDING_REQUIRED', 422); },
+    getProofs: async () => proofs(),
+    getLab: async () => { throw failure('NOT_FOUND', 404); },
+  });
+  const state = x.controller.getSnapshot();
+  assert.equal(state.status, 'active');
+  assert.equal(state.detail.status, 'ready');
+  assert.equal(state.detail.data.case.id, CID);
+  assert.equal(state.sandbox.snapshot.error.code, 'SANDBOX_BINDING_REQUIRED');
+  assert.equal(state.sandbox.lab.status, 'error');
+  assert.equal(state.sandbox.lab.data, null);
+  assert.equal(x.rechecks(), 0);
+  await x.controller.submitEvidence({ kind: 'note', note: 'Đối chiếu hồ sơ theo log hiện có.', event_ids: [] });
+  assert.equal(x.posts.filter(item => item[0] === 'evidence').length, 1);
+});
+
+test('optional lab 404 stays local while lab authentication and permission failures still purge', async () => {
+  const x = await setup({ getLab: async () => { throw failure('NOT_FOUND', 404); } });
+  assert.equal(x.controller.getSnapshot().status, 'active');
+  assert.equal(x.controller.getSnapshot().sandbox.snapshot.status, 'ready');
+  for (const status of [401, 403]) {
+    const y = await setup({ getLab: async () => { throw failure('DENIED', status); } });
+    assert.equal(y.controller.getSnapshot().status, status === 401 ? 'reauth' : 'blocked');
+    assert.equal(y.controller.getSnapshot().detail.data, null);
+  }
+});
+
 test('module errors preserve investigation, 401/403/404 purge immediately, scope changes reject late reads and writes', async () => {
   const x = await setup({ getSandbox: async () => { throw failure('SANDBOX_BINDING_REQUIRED'); } });
   assert.equal(x.controller.getSnapshot().status, 'active'); assert.ok(x.controller.getSnapshot().detail.data);
