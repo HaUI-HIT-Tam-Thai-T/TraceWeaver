@@ -1,110 +1,356 @@
-# TraceWeaver
+# TraceWeaver (Bài dự thi Phần Mềm Nguồn Mở 2026)
 
-Base dự án tái dựng hành trình yêu cầu cấp môi trường thực hành từ dấu vết của ba dịch vụ intake, account và provision, định hướng DX-Lab HaUI 2026.
+<p align="center">
+  <img src=".github/assets/traceweaver-overview.svg" alt="TraceWeaver — request investigation through connected evidence" width="100%">
+</p>
 
-## Cấu trúc
+<p align="center"><strong>Từ log rời rạc đến hành trình yêu cầu có bằng chứng.</strong></p>
 
-```text
-backend/
-  src/           # Express, services và headless core
-  scripts/       # Thiết lập môi trường và migration
-  tests/         # Backend, contract và DB integration
-  contracts/     # OpenAPI, JSON Schema và fixtures
-  package.json
-frontend/        # Khung giao diện
-ai/              # Khung scorer và training
-simulator/       # Khung sinh dữ liệu giả
-.github/         # Issue/PR templates và CI
+<p align="center">
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-2563eb?style=flat-square" alt="Apache-2.0"></a>
+  <a href="https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml"><img src="https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml/badge.svg?branch=dev" alt="CI · dev"></a>
+  <img src="https://img.shields.io/badge/DX--Lab-HaUI_2026-0f766e?style=flat-square" alt="DX-Lab HaUI 2026">
+</p>
+
+<div align="center">
+
+[Mở TraceWeaver](https://traceweaver.quizlearn.tech) &nbsp; · &nbsp; [Hướng dẫn demo](docs/guides/demo.md) &nbsp; · &nbsp; [Cài đặt](./INSTALL.md) &nbsp; · &nbsp; [API](https://api.quizlearn.tech/docs/) &nbsp; · &nbsp; [Tài liệu](./docs/README.md)
+
+**Tiếng Việt** · [English](./README_EN.md)
+
+</div>
+
+**Đội:** HaUI.HIT-Tam-Thái-Tử
+
+**Trường:** Trường Công nghệ Thông tin và Truyền thông, Đại học Công nghiệp Hà Nội
+
+**Trải nghiệm trực tuyến:** [traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech) · **Tài liệu:** [Hướng dẫn và thiết kế hệ thống](./docs/README.md)
+
+**Dự thi OLP Phần mềm nguồn mở 2026.** TraceWeaver kết nối dấu vết từ nhiều dịch vụ thành hành trình yêu cầu có thể đối chiếu, hỗ trợ điều tra sự cố và kiểm chứng kết quả khắc phục. Lõi Identity, Data và Workflow có thể tái sử dụng; kịch bản minh họa là vận hành CNTT với luồng tiếp nhận yêu cầu, tạo tài khoản và cấp phát môi trường.
+
+---
+
+## 💡 Giới thiệu
+
+**TraceWeaver** là nền tảng mã nguồn mở hỗ trợ điều tra sự cố từ log đa nguồn: tái dựng hành trình yêu cầu, phối hợp xử lý hồ sơ và kiểm chứng kết quả khắc phục bằng bằng chứng nguồn.
+
+Một yêu cầu cấp môi trường đi qua nhiều dịch vụ có thể thiếu mã liên kết, nhận log muộn hoặc có nhiều lần thử lại.
+TraceWeaver tập hợp sự kiện, tái dựng quan hệ và giữ lại các trường hợp chưa đủ căn cứ để người review quyết định.
+
+> **Điều tra → Review → Khắc phục → Kiểm chứng**
+
+**Hiểu hành trình.** Nối dấu vết intake, account và provision, đối chiếu bằng chứng và giữ riêng nhánh chưa đủ căn cứ.
+
+**Theo dõi hồ sơ.** Phân công người xử lý, bổ sung bằng chứng và chuyển bước theo workflow có lịch sử quyết định.
+
+**Xác nhận kết quả.** Sửa điều kiện sandbox, chạy lại yêu cầu và kiểm tra bằng chứng nguồn mới trước khi đóng hồ sơ.
+
+## ✨ Điểm nổi bật
+
+- **Truy vết có căn cứ:** sự kiện giữ provenance; run có snapshot; review, hồ sơ và chuyển trạng thái có lịch sử/audit.
+- **Giữ nguyên sự mơ hồ:** thiếu ID, ID mâu thuẫn hoặc nhiều nhánh hợp lệ được giữ unresolved; hệ thống không ép chọn chỉ vì điểm AI cao.
+- **AI có kiểm soát:** backend lọc cặp theo quyền và guard trước khi gọi scorer; reviewer quyết định liên kết; có fallback khi scorer không khả dụng.
+- **Kiểm chứng việc khắc phục:** tái dựng phân tích log đã có, chạy lại sandbox sinh lần thực thi mới, proof xác nhận kết quả phù hợp trước khi đóng hồ sơ.
+- **Phân quyền tới từng nguồn:** Keycloak cung cấp SSO; backend kiểm membership, role và quyền đọc nguồn hiện tại khi truy cập sự kiện, run và hồ sơ.
+- **Core có thể tái sử dụng:** Identity, Data và Workflow tách khỏi giao diện và adapter HTTP.
+- **Nguồn mở minh bạch:** Apache-2.0, inventory và notices theo từng hệ sinh thái, SBOM CycloneDX và lệnh kiểm drift.
+
+## 🖥️ Giao diện
+
+Web React tổ chức theo workspace, dùng phiên đăng nhập Keycloak và quyền do backend trả về.
+
+| Màn hình | Đường dẫn | Nội dung |
+|---|---|---|
+| Tổng quan | `/dashboard` | Thống kê và điều hướng tới hồ sơ trong phạm vi được phép |
+| Sự kiện | `/events`, `/events/:eventId` | Tìm/lọc log, xem chi tiết và provenance, bắt đầu tái dựng |
+| Hồ sơ | `/cases`, `/cases/:caseId` | Theo dõi trạng thái, run/đồ thị, review, bằng chứng và sandbox |
+| Tri thức | `/knowledge` | Tra cứu tri thức theo workspace |
+| Quản trị workspace | `/workspace-admin` | Thành viên, vai trò, quyền nguồn và cấp tài khoản theo cấu hình |
+
+Hướng dẫn phiên đăng nhập và API client ở [frontend/README.md](./frontend/README.md).
+Kịch bản thao tác cùng kết quả cần quan sát ở [docs/guides/demo.md](docs/guides/demo.md).
+
+## 🗺️ Kiến trúc tổng thể
+
+```mermaid
+flowchart LR
+  U["Người vận hành / reviewer"] --> FE["Web React"]
+  FE --> SSO["Keycloak · OIDC / PKCE"]
+  FE --> API["Express API"]
+  SIM["Simulator / collector<br/>intake · account · provision"] --> API
+  API --> CORE["Core · Identity / Data<br/>Reconstruction / Workflow"]
+  CORE --> DB[("PostgreSQL<br/>events · snapshots · cases · audit")]
+  CORE --> AI["Python scorer<br/>baseline / model opt-in"]
 ```
 
-Backend dùng JavaScript ES modules, Express và PostgreSQL. Đã có cấu hình môi trường, healthcheck, xử lý lỗi, transaction và migrations. Các phần còn lại mới là khung; API nghiệp vụ, OIDC và AI chưa triển khai. OpenAPI đánh dấu rõ các operation dự kiến.
+Web gọi API để tra cứu, tái dựng và xử lý hồ sơ.
+API kiểm danh tính/quyền, sử dụng core để xử lý nghiệp vụ và lưu dữ liệu trong PostgreSQL.
+Scorer nhận các cặp sự kiện đã lọc quyền; không có quyền ghi DB hoặc quyết định workflow.
+Vai trò module và luồng dữ liệu ở [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-## Chạy backend
+## 🧱 Kiến trúc 3 tầng
 
-Yêu cầu Node.js 24.14.1, npm 11.11.0 và PostgreSQL 17 hoặc Docker Compose.
+![Kiến trúc TraceWeaver: Open-Core cung cấp năng lực dùng chung, H-P-D-I tổ chức không gian vận hành, ứng dụng Web/API/Sandbox xử lý nghiệp vụ lab](./.github/assets/architecture-layers-vi.svg)
+
+Các mũi tên thể hiện năng lực được xây từ core lên ứng dụng, không phải thứ tự gọi HTTP.
+
+| Tầng | Thành phần |
+|---|---|
+| **1. Open-Core** — không có giao diện người dùng | Identity (SSO, quyền workspace/nguồn), Data (transaction, lưu trữ), Reconstruction (snapshot, luật liên kết), Workflow (guard, chuyển bước) và audit |
+| **2. H-P-D-I** | Bốn không gian **Human, Process, Data, Intelligence** được tổ chức từ các năng lực core, kết hợp tri thức, dashboard và scorer tùy chọn |
+| **3. Ứng dụng** | **TraceWeaver** — Web điều tra và quản lý hồ sơ, API nghiệp vụ, sandbox cấp môi trường thực hành |
+
+| Không gian | Điều tra và xử lý hồ sơ | Sandbox và kiểm chứng |
+|---|---|---|
+| **H — Human** | Workspace, thành viên, vai trò và quyền đọc từng nguồn; tri thức hỗ trợ người vận hành | Operator điều tra, admin sửa điều kiện, reviewer kiểm chứng và quyết định đóng theo quyền |
+| **P — Process** | Tạo run, review liên kết, phân công hồ sơ, bổ sung bằng chứng và chuyển trạng thái có guard | Sửa điều kiện → chạy lại yêu cầu → giao log → kiểm chứng nguồn → đóng hồ sơ khi đủ điều kiện |
+| **D — Data** | Sự kiện đa nguồn, provenance, snapshot hành trình, lịch sử/audit và dashboard | Trạng thái RAM/image/tài khoản, các lần thực thi, log delivery và proof được lưu để đối chiếu |
+| **I — Intelligence** | Luật tái dựng, scorer hỗ trợ đánh giá cặp hợp lệ; giữ unresolved khi chưa đủ căn cứ | Đối chiếu kết quả thực thi và bằng chứng nguồn theo điều kiện hiện tại; điểm AI không thay thế proof |
+
+Xem [kiến trúc chi tiết](./ARCHITECTURE.md) và [ranh giới core](./backend/src/core/README.md).
+
+## 🧩 Tính năng
+
+**Thu thập và điều tra:** batch ingestion, chống trùng/xung đột sự kiện, lọc theo nguồn và thời gian, provenance, tạo run có snapshot, đồ thị hành trình, guard ID/thứ tự/kết quả, unresolved và review/thêm liên kết.
+
+**Hồ sơ và vận hành:** phân công, bổ sung bằng chứng, chuyển trạng thái có kiểm version/quyền, lịch sử/audit, dashboard, tri thức và quản trị thành viên/quyền nguồn.
+
+**Sandbox và AI:** mô phỏng lỗi RAM/image/tài khoản, sửa điều kiện, chạy lại request, theo dõi giao log và lưu proof; scorer baseline hoặc model sandbox v2 opt-in, có fallback.
+
+Mức tích hợp và bằng chứng từng tính năng ở [FEATURE_STATUS](docs/overview/features.md); lịch sử triển khai ở [CURRENT_STATUS](docs/overview/status.md).
+Model sandbox v2 đang thử nghiệm trên dữ liệu synthetic; chất lượng và giới hạn được ghi tại [model card](./ai/artifacts/sandbox-v2/README.md).
+
+## 🧰 Công nghệ và giấy phép
+
+| Thành phần | Công nghệ | Giấy phép / tài liệu kiểm kê |
+|---|---|---|
+| Backend | Node.js 24, JavaScript ES modules, Express, JOSE | Mã dự án Apache-2.0; [npm inventory](./backend/DEPENDENCIES.md) |
+| Web | React, TypeScript, Vite, Tailwind, MUI, Radix UI | Mã dự án Apache-2.0; [frontend inventory](./frontend/DEPENDENCIES.md) |
+| AI Service | Python, FastAPI, Pydantic, model JSON | Mã dự án Apache-2.0; thư viện MIT, BSD, Apache-2.0, PSF; [Python inventory](./ai/DEPENDENCIES.md) |
+| SSO | Keycloak | Apache-2.0; phiên bản/digest ở [runtime inventory](./backend/DEPENDENCIES.md#runtime-and-services) |
+| Dữ liệu | PostgreSQL 17 | PostgreSQL License |
+| Simulator | Node.js, bộ sinh dữ liệu synthetic có seed | Mã dự án Apache-2.0; [simulator](./simulator/README.md) |
+
+Mã nguồn dự án theo [Apache-2.0](./LICENSE); dependency và tài sản bên thứ ba giữ giấy phép riêng.
+Danh sách, notices và phạm vi phân phối ở [LICENSES.md](./LICENSES.md); SBOM CycloneDX ở [sbom/](./sbom/README.md).
+
+## 🚀 Cài đặt và chạy
+
+### 💻 Yêu cầu hệ thống
+
+<details>
+<summary>Yêu cầu công cụ và cổng kết nối</summary>
+
+| Hạng mục | Yêu cầu | Ghi chú |
+|---|---|---|
+| Source | Git | Clone repository |
+| Backend / simulator | Node.js 24.14.1, npm 11.11.0 | Phiên bản theo cấu hình dự án |
+| Database | PostgreSQL 17 | Có thể dùng Docker Compose v2 hoặc DB riêng |
+| Web | Node/npm và trình duyệt | Cài dependencies riêng tại `frontend/` |
+| AI tùy chọn | Python và venv theo [AI RUN](./ai/RUN.md) | Cài đúng pinned requirements |
+| Cổng local | API 8080, PostgreSQL 55432, Keycloak 8081, web 5173 | Có thể thay đổi nếu cập nhật đồng bộ cấu hình |
+
+</details>
+
+### 📝 Các bước
+
+Chạy backend với PostgreSQL qua Docker:
 
 ```sh
+git clone https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver.git
+cd TraceWeaver
 npm ci
-npm run db:setup
-# Chỉ cần pull khi máy chưa có image PostgreSQL:
-docker compose -f compose.dev.yaml pull postgres
+npm run db:setup                         # tạo .env khi chưa có
+docker compose -f compose.dev.yaml pull postgres  # khi chưa có image
 npm run db:up
 npm run db:migrate
 npm run dev:be
 ```
 
-Nếu đã có `.env`, bỏ qua `db:setup`. Script giữ nguyên cấu hình hiện có. Có thể dùng PostgreSQL riêng bằng `DATABASE_URL`.
-
-- `GET http://127.0.0.1:8080/health/live`: tiến trình hoạt động.
-- `GET http://127.0.0.1:8080/health/ready`: DB và migrations sẵn sàng.
-- `npm test`: unit, HTTP và contract tests, không cần DB.
-- `npm run test:db`: integration, cần PostgreSQL và quyền tạo DB test.
-- `npm run start:be`: chạy backend không watch.
-- `npm run db:stop`: dừng DB và giữ dữ liệu.
-
-PowerShell có thể dùng `npm.cmd`. Makefile cung cấp lệnh tương đương cho môi trường có GNU Make.
-
-## Ranh giới kiến trúc
-
-Core cung cấp Identity/Data/Workflow dùng chung, không phụ thuộc UI. Backend là lớp HTTP trung gian. Các module sau sẽ bổ sung workspace/tri thức, dữ liệu có provenance, review và workflow có audit, cùng scorer có bằng chứng và giới hạn rõ ràng. Base hiện tại chưa phải sản phẩm hoàn chỉnh hoặc bằng chứng đạt nghiệm thu bài thi.
-
-Xem [cài đặt](INSTALL.md), [đóng góp](CONTRIBUTING.md), [bảo mật](SECURITY.md) và [API contracts](backend/contracts/README.md).
-
-Mã nguồn dự án dùng [Apache-2.0](LICENSE). Dependency giữ giấy phép riêng; xem [bảng dependency/license](backend/DEPENDENCIES.md) và [thông báo bên thứ ba](backend/THIRD_PARTY_NOTICES.txt).
-
-## Kiến trúc DX-OS ba tầng
-
-```mermaid
-flowchart BT
-  subgraph L1["Tầng 1 — Open-Core headless"]
-    ID["Identity / SSO / RBAC"]
-    API["API trung gian — Express"]
-    DATA["Data — PostgreSQL / transaction"]
-    WF["Workflow — definition / guard / audit"]
-  end
-  subgraph L2["Tầng 2 — H-P-D-I"]
-    H["H: nhóm / workspace / tri thức"]
-    P["P: quy trình xử lý và hàng chờ"]
-    D["D: provenance / tìm kiếm / dashboard"]
-    I["I: luật / scorer / bằng chứng"]
-  end
-  APP["Tầng 3 — TraceWeaver: điều tra yêu cầu dịch vụ CNTT"]
-  ID --> H
-  API --> H & P & D & I
-  DATA --> API
-  WF --> API
-  H & P & D & I --> APP
-```
-
-Sơ đồ mô tả ranh giới kiến trúc mục tiêu. Luồng gọi khi triển khai: giao diện → API → Identity kiểm quyền → service nghiệp vụ → core Data/Workflow; scorer chỉ nhận dữ liệu đã được lọc quyền. Core không import Express hoặc giao diện và phải có thể tái sử dụng cho nghiệp vụ khác.
-
-| Thành phần | Hiện trạng bộ khung | Phần cần triển khai tiếp |
-|---|---|---|
-| API trung gian | Express, health, giới hạn body, lỗi/request ID | Endpoint nghiệp vụ có xác thực |
-| Data | PostgreSQL, transaction, migrations nền | Repository và service nghiệp vụ |
-| Identity | Khung module và schema membership/role/grant | OIDC/SSO và enforcement quyền |
-| Workflow | Khung module và API contract | Engine dùng chung, guard và audit |
-| H-P-D-I / ứng dụng | Khung frontend và contract | Workspace/tri thức, hồ sơ, tìm kiếm/dashboard |
-| Intelligence | Khung scorer/training và contract | Luật/scorer, giải thích, đánh giá và fallback |
-| Dữ liệu demo | Fixtures kiểm schema synthetic | Dataset có provenance/manifest và kịch bản đầu-cuối |
-
-## API và tài khoản demo
-
-Health API đang chạy được mô tả tại [health.openapi.json](backend/contracts/health.openapi.json). [openapi.json](backend/contracts/openapi.json) là hợp đồng nghiệp vụ dự kiến, có cờ `planned`; không phải danh sách endpoint đã triển khai.
-
-Base chưa có đăng nhập nên chưa có tài khoản demo. Khi triển khai Identity, tài khoản và mật khẩu demo phải được tạo tại máy qua seed, không lưu mật khẩu/token thật trong repository.
-
-## Kiểm chứng và phát triển
+Nếu đã có `.env`, giữ credentials và cấu hình hiện tại; dùng DB riêng thì đặt `DATABASE_URL` và bỏ các bước Docker PostgreSQL.
+API nghiệp vụ cần Identity và quyền dữ liệu: tiếp tục mục **Fresh checkout/bootstrap** tại [KEYCLOAK.md](./backend/KEYCLOAK.md).
+Cài đặt đầy đủ ở [INSTALL.md](./INSTALL.md).
 
 ```sh
-npm run check:base
-npm run licenses:check
-npm test
-# Sau khi DB đã khởi động và migrate:
-npm run smoke
-npm run test:db
+npm run start:be                        # chạy BE không watch
+npm run db:stop                         # dừng DB, giữ dữ liệu
 ```
 
-CI kiểm bộ khung và tests trên Linux/Windows; job PostgreSQL kiểm migration, integration và health readiness thật. `npm run licenses` cập nhật bảng dependency và nguyên văn license từ các package đã cài; `licenses:check` phát hiện dữ liệu bị lệch lockfile.
+PowerShell có thể dùng `npm.cmd` nếu execution policy chặn `npm.ps1`.
 
-[Issue tracker](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues) tiếp nhận bug/feature. Bản `v0.1.0-base.1` đánh dấu bộ khung, không phải bản nghiệm thu sản phẩm. Yêu cầu chức năng của bài thi cần tiếp tục có code chạy, dữ liệu demo và bằng chứng kiểm thử thực tế.
+### 🛠️ Chạy và build từng thành phần
+
+Các lệnh dưới đây chạy từ root repository.
+
+| Thành phần | Chuẩn bị | Chạy / kiểm tra |
+|---|---|---|
+| Backend | `npm ci`, cấu hình DB/Identity và migrate | `npm run dev:be` hoặc `npm run start:be` |
+| Web | `npm --prefix frontend ci`, tạo env từ mẫu | `npm --prefix frontend run dev`; build bằng `npm --prefix frontend run build` |
+| AI Service | Tạo venv, cài `ai/requirements.txt` theo [AI RUN](./ai/RUN.md) | Chạy `python -m ai.app` bằng interpreter của venv, với env scorer hợp lệ |
+| Simulator | Node.js và cấu hình theo [simulator README](./simulator/README.md) | `npm run sim:generate` in manifest; ghi dataset khi chỉ định `--out` |
+
+Web development mặc định ở `http://localhost:5173`.
+Tạo `frontend/.env.development.local` từ [frontend/.env.example](./frontend/.env.example), rồi chạy Vite.
+Frontend hiện yêu cầu API và Identity HTTPS; backend HTTP local cần endpoint HTTPS phù hợp để web kết nối.
+Chi tiết origins/callback ở [INSTALL.md](./INSTALL.md#4-frontend).
+
+### 🔧 Cấu hình
+
+<details>
+<summary>Các biến môi trường cần cấu hình</summary>
+
+Backend dùng `.env` tại root; web dùng các file env của Vite.
+Mẫu cấu hình: [.env.example](./.env.example) và [frontend/.env.example](./frontend/.env.example).
+
+| Biến | Ý nghĩa |
+|---|---|
+| `DATABASE_URL`, `POSTGRES_*` | Kết nối và credentials PostgreSQL |
+| `CURSOR_SECRET` | Khóa cursor ngẫu nhiên tối thiểu 32 ký tự |
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_API_AUDIENCE` | Provider và kiểm JWT của API |
+| `FRONTEND_ORIGINS`, `FRONTEND_LOCAL_ORIGINS` | Danh sách exact browser origins được phép theo môi trường |
+| `CORE_APP_CLIENT_ID`, `CORE_APP_SUBJECT` | Danh tính ứng dụng cho core workflow HTTP |
+| `SCORER_URL`, `SCORER_SERVICE_SECRET`, `SCORER_MODEL_VERSION` | Adapter scorer và opt-in model phía backend |
+| `LAB_INGEST_SUBJECT` | Subject dịch vụ collector để giao log sandbox |
+| `VITE_API_BASE_URL` | HTTPS origin API cho web, không gồm `/api/v1` |
+| `VITE_KEYCLOAK_URL`, `VITE_KEYCLOAK_REALM`, `VITE_KEYCLOAK_CLIENT_ID` | Cấu hình public client SSO cho web |
+
+Không đưa mật khẩu, token hoặc client secret vào Git hay biến `VITE_*`.
+Cấu hình scorer Python riêng và model opt-in ở [SCORER.md](./backend/SCORER.md).
+
+</details>
+
+## 🌐 Chạy thử
+
+| Dịch vụ | Địa chỉ | Đăng nhập / điều kiện |
+|---|---|---|
+| Web trực tuyến | [traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech) | Đăng nhập bằng tài khoản demo bên dưới |
+| Web development | [localhost:5173](http://localhost:5173) | Chạy Vite; đăng nhập Keycloak và có quyền workspace |
+| Swagger trên server | [api.quizlearn.tech/docs](https://api.quizlearn.tech/docs/) | Authorize theo cấu hình deployment |
+| API local | [127.0.0.1:8080](http://127.0.0.1:8080/health/live) | `/health/live` và `/health/ready` public; nghiệp vụ cần JWT/quyền |
+| Swagger local | [localhost:8080/docs](http://localhost:8080/docs/) | **Authorize → keycloakLogin**, sau bootstrap |
+| Keycloak local | [localhost:8081](http://localhost:8081) | Sau bước bootstrap local; credentials riêng trên máy |
+
+### Bản chạy trực tuyến
+
+Frontend đã được triển khai tại **[traceweaver.quizlearn.tech](https://traceweaver.quizlearn.tech)**, kết nối API và Keycloak tại `api.quizlearn.tech`.
+Nginx phục vụ bản build tĩnh qua HTTPS, tự khởi động cùng server và tự khởi động lại khi tiến trình dừng; chứng chỉ có lịch gia hạn tự động.
+Hướng dẫn vận hành backend và scorer ở [deploy/oracle/README.md](./deploy/oracle/README.md).
+
+<a id="chọn-vai-trò-để-trải-nghiệm"></a>
+
+### 🔑 Tài khoản demo
+
+Bốn tài khoản dưới đây đăng nhập vào **bản web trực tuyến**. Mật khẩu demo dùng chung: **`Weave123!`**.
+Để thử đúng ranh giới quyền, chọn workspace **TraceWeaver Sandbox — Mô phỏng kiểm chứng** sau khi đăng nhập.
+
+| Username | Mật khẩu | Vai trò trong Sandbox | Dùng để thử |
+|---|---|---|---|
+| `operator` | `Weave123!` | `operator` | Điều tra log, tạo hành trình, xử lý hồ sơ và chạy lại yêu cầu |
+| `reviewer` | `Weave123!` | `reviewer` | Duyệt liên kết, kiểm chứng và quyết định đóng hồ sơ |
+| `viewer` | `Weave123!` | `viewer` | Xem dữ liệu và kết quả, không sửa nghiệp vụ |
+| `workspace-admin` | `Weave123!` | `admin` | Quản lý thành viên/quyền nguồn và sửa điều kiện mô phỏng |
+
+Một phiên thử gợi ý: dùng `operator` điều tra yêu cầu lỗi → dùng `workspace-admin` sửa RAM/image/tài khoản → quay lại `operator` chạy lại yêu cầu → dùng `reviewer` kiểm chứng và đóng hồ sơ khi đủ điều kiện.
+Xem các bước ở [kịch bản demo](docs/guides/demo.md). Đăng xuất trước khi chuyển sang tài khoản khác.
+
+Quyền được cấp theo workspace, không suy ra từ username: riêng `viewer` ở workspace **TraceWeaver** hiện có thêm `operator` và `reviewer`; dùng workspace **Sandbox** để thử chế độ chỉ đọc.
+Đây là các tài khoản demo công khai, thao tác có thể ảnh hưởng dữ liệu demo dùng chung; không dùng cho dữ liệu thật.
+`workspace-admin` có quyền admin trong cả hai workspace demo: có thể tạo tài khoản, đổi vai trò/kích hoạt thành viên và cấp/thu hồi quyền đọc nguồn trong phạm vi được phép. Tài khoản này không có quyền quản trị Keycloak/server, không xóa tài khoản SSO hoặc đổi mật khẩu người dùng cũ. Chỉ công khai khi các workspace này dành cho demo; không dùng chung với dữ liệu thật.
+Hai tài khoản thử nghiệm phát sinh trên server không thuộc bộ demo hướng dẫn này. Tài khoản quản trị Keycloak và danh tính dịch vụ cũng không dùng để đăng nhập web demo.
+
+**Chạy trên máy cá nhân:** bootstrap local vẫn tạo `demo.operator` và `demo.viewer` với mật khẩu ngẫu nhiên trong `demo-credentials.local.json` (Git ignore).
+Đây là bộ tài khoản riêng của môi trường local; mật khẩu demo trực tuyến ở trên không áp dụng cho chúng.
+
+## 🔌 API
+
+<details>
+<summary>Xem xác thực và các nhóm API</summary>
+
+- Swagger local ở `/docs/`; hợp đồng chung ở [backend/contracts/openapi.json](./backend/contracts/openapi.json) và [JSON Schemas](./backend/contracts/README.md).
+- API người dùng dùng `Authorization: Bearer <access token>`; ingestion và core workflow có danh tính dịch vụ riêng.
+- Backend kiểm role/quyền nguồn hiện tại; token hợp lệ chưa đủ để đọc mọi workspace.
+- Các thao tác có version/idempotency phải dùng đúng contract; lỗi chứa mã lỗi và request ID để đối chiếu.
+
+| Nhóm | Đường dẫn / tài liệu |
+|---|---|
+| Danh tính và nguồn | `GET /api/v1/me`, `/api/v1/workspaces/{wid}/sources`; [Identity](./backend/IDENTITY.md) |
+| Events và ingestion | `/api/v1/workspaces/{wid}/events`, `/sources/{sid}/events:batch`; [Ingestion](./backend/INGESTION.md), [Events](./backend/EVENTS.md) |
+| Runs và review | `/api/v1/workspaces/{wid}/runs`; [Reconstruction](./backend/RECONSTRUCTION.md) |
+| Hồ sơ và workflow | `/api/v1/workspaces/{wid}/cases`; [Cases](./backend/CASES.md), [Core workflow](./backend/WORKFLOW.md) |
+| Sandbox và proof | [LAB_SANDBOX.md](./backend/LAB_SANDBOX.md) |
+| Dashboard và quản trị | [Dashboard](./backend/DASHBOARD.md), [Workspace admin](./backend/WORKSPACE_ADMIN.md) |
+| AI scorer | API nội bộ cho backend; [SCORER.md](./backend/SCORER.md) |
+
+</details>
+
+## 🧪 Kiểm thử
+
+- Backend unit/HTTP/contract: `npm test`; contracts riêng: `npm run test:contracts`.
+- PostgreSQL: `npm run test:db`; Identity/HTTP/DB: `npm run test:identity:native`.
+- Web: `npm --prefix frontend test`, `npm --prefix frontend run lint`, `npm --prefix frontend run build`.
+- Simulator: `npm run test:sim`; AI: `python -m unittest discover -s ai/tests` trong venv.
+- License và cấu trúc: `npm run check:base`, `npm run licenses:check`, `npm run licenses:frontend:check`.
+- SBOM: `npm run sbom:check`; Python license/SBOM: `python -m ai.scripts.dependency_inventory --check` trong venv.
+
+Điều kiện chạy, phân biệt unit/integration/UAT và giới hạn bằng chứng ở [TESTING.md](./TESTING.md).
+Độ phủ theo tính năng ở [FEATURE_STATUS](docs/overview/features.md); kết quả CI theo đúng commit tại [Actions](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions).
+SBOM frontend loại dependency optional; Python SBOM là danh mục phẳng — xem [phạm vi SBOM](./sbom/README.md).
+
+## 🐛 Xử lý sự cố
+
+| Dấu hiệu | Cách kiểm tra |
+|---|---|
+| PowerShell chặn `npm.ps1` | Dùng `npm.cmd` |
+| API ready trả 503 | Kiểm DB, `DATABASE_URL` và migration; xem [Docker guide](./backend/DOCKER.md) |
+| Login/callback lỗi | Kiểm issuer, public client, exact origin và `/auth/callback`; xem [Keycloak](./backend/KEYCLOAK.md) |
+| Web không gọi được API | API base phải là HTTPS origin; kiểm env và CORS cho localhost:5173 |
+| Không đọc được run/case cũ | Kiểm membership và quyền hiện tại của mọi nguồn trong snapshot |
+| Hybrid degraded | Kiểm scorer URL, credential, readiness và opt-in version |
+| Sửa sandbox nhưng chưa đóng được hồ sơ | Kiểm request đã chạy lại, log đã giao và proof còn phù hợp |
+| Inventory/SBOM stale | Sinh lại bằng công cụ tương ứng tại [LICENSES](./LICENSES.md) và [SBOM](./sbom/README.md) |
+
+Hỗ trợ và cách gửi log an toàn tại [SUPPORT.md](./SUPPORT.md).
+
+## 📁 Cấu trúc repository
+
+<details>
+<summary>Xem cấu trúc thư mục và tài liệu</summary>
+
+| Thư mục | Nội dung |
+|---|---|
+| [`backend/`](./backend/README.md) | Express API, core headless, migrations, contracts và tests |
+| [`frontend/`](./frontend/README.md) | Web React, SSO, các màn hình và tests |
+| [`ai/`](./ai/README.md) | Scorer, features, model/version, provenance và tests |
+| [`simulator/`](./simulator/README.md) | Mô phỏng nghiệp vụ có trạng thái và sinh log có seed |
+| [`deploy/oracle/`](./deploy/oracle/README.md) | Triển khai và vận hành máy chủ |
+| [`docs/`](./docs/README.md) | Tổng quan, hướng dẫn, tham chiếu, tích hợp, hồ sơ dự thi và lưu trữ |
+| [`sbom/`](./sbom/README.md) | CycloneDX JSON và hướng dẫn tái tạo |
+| [`.github/`](./.github/) | CI, kiểm dependency và mẫu issue/PR |
+
+Tài liệu gốc: [ARCHITECTURE](./ARCHITECTURE.md) · [INSTALL](./INSTALL.md) · [CHANGELOG](./CHANGELOG.md) · [LICENSES](./LICENSES.md).
+Chuẩn bị gói source và bản phân phối theo [RELEASING](docs/guides/release.md).
+Tag `v0.1.0-base.1` là scaffold cũ; phạm vi hiện tại theo revision ở [CURRENT_STATUS](docs/overview/status.md).
+
+</details>
+
+## 🤝 Đóng góp
+
+- **Báo lỗi:** [tạo bug report](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues/new?template=bug_report.md), kèm revision và bước tái hiện.
+- **Đề xuất tính năng:** [tạo feature request](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues/new?template=feature_request.md).
+- **Gửi mã:** đọc [CONTRIBUTING.md](./CONTRIBUTING.md) và tuân theo [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
+- **Vấn đề nhạy cảm:** theo [SECURITY.md](./SECURITY.md); dùng dữ liệu giả và loại secret khỏi log/ảnh công khai.
+
+## Trao đổi với nhóm TraceWeaver
+
+Bạn có thể liên hệ trực tiếp với các thành viên:
+
+- **Nguyễn Văn Phước** — [vanphuocken@gmail.com](mailto:vanphuocken@gmail.com)
+- **Trần Xuân Khương** — [tranxuankhuong24022006@gmail.com](mailto:tranxuankhuong24022006@gmail.com)
+- **Phạm Thiên Bảo** — [thienbaomk147@gmail.com](mailto:thienbaomk147@gmail.com)
+
+Với lỗi có bước tái hiện hoặc đề xuất tính năng, hãy mở [GitHub Issue](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues) để tiện theo dõi.
+
+## 📜 Giấy phép
+
+Apache License 2.0, xem [LICENSE](./LICENSE) và [NOTICE](./NOTICE).
+Dependency, model và dữ liệu có thông tin nguồn gốc/phạm vi riêng tại [LICENSES.md](./LICENSES.md) và [model card](./ai/artifacts/sandbox-v2/README.md).

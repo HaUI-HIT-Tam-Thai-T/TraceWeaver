@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 TraceWeaver contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ApiError } from '../core/identity/api-error.js';
+
 const bodyErrors = {
       'entity.too.large': [413, 'PAYLOAD_TOO_LARGE', 'Request body exceeds the limit'],
       'entity.parse.failed': [400, 'INVALID_JSON', 'Request body is not valid JSON'],
@@ -17,7 +19,9 @@ export function notFound(req, res) {
 export function errorHandler(logError) {
   return (error, req, res, next) => {
     if (res.headersSent) return next(error);
-    const [status, code, message] = bodyErrors[error.type] ?? [500, 'INTERNAL_ERROR', 'Internal server error'];
+    const [status, code, message] = error instanceof ApiError ? [error.status, error.code, error.message]
+      : (Object.hasOwn(bodyErrors, error.type) ? bodyErrors[error.type] : [500, 'INTERNAL_ERROR', 'Internal server error']);
+    if (status === 401) res.set('WWW-Authenticate', 'Bearer realm="traceweaver", error="invalid_token"');
     if (status === 500) logError({ code, request_id: req.requestId });
     res.status(status).json({ error: { code, message }, request_id: req.requestId });
   };

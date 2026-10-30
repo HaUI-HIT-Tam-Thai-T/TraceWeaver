@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="764" viewBox="0 0 1200 764" role="img" aria-labelledby="title desc" lang="vi">
+<title id="title">Kiến trúc ba tầng — TraceWeaver</title>
+<desc id="desc">Open-Core: Identity, Data, Reconstruction, Workflow, Audit. H-P-D-I: Human, Process, Data, Intelligence. TraceWeaver: Web, API, Sandbox.</desc>
+<defs>
+  <linearGradient id="canvas" x2="1" y2="1"><stop stop-color="#101e30"/><stop offset="1" stop-color="#09121e"/></linearGradient>
+  <linearGradient id="application" x2="1" y2="0"><stop stop-color="#173b43"/><stop offset="1" stop-color="#12283a"/></linearGradient>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 8 5 1 9" fill="none" stroke="#6d92ae" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+<rect width="1200" height="764" rx="18" fill="url(#canvas)"/>
+<g font-family="Segoe UI, Arial, sans-serif">
+  <text x="40" y="47" fill="#eef5fc" font-size="27" font-weight="650">Kiến trúc ba tầng</text>
+  <text x="40" y="76" fill="#9bb0c5" font-size="17">Từ năng lực dùng chung đến hành trình điều tra có bằng chứng</text>
+  <rect x="32" y="102" width="1136" height="144" rx="14" fill="url(#application)" stroke="#35626b"/>
+  <text x="56" y="143" fill="#a1eddb" font-size="23" font-weight="650">Ứng dụng TraceWeaver</text>
+  <text x="1144" y="141" text-anchor="end" fill="#9bd6ce" font-size="13" font-weight="600" letter-spacing="2">TẦNG 03</text>
+<rect x="56" y="169" width="356" height="51" rx="9" fill="#0c202d" fill-opacity=".75" stroke="#365563"/><text x="234" y="201" text-anchor="middle" fill="#e2f2f1" font-size="20">Web điều tra &amp; hồ sơ</text>
+<rect x="422" y="169" width="356" height="51" rx="9" fill="#0c202d" fill-opacity=".75" stroke="#365563"/><text x="600" y="201" text-anchor="middle" fill="#e2f2f1" font-size="20">API nghiệp vụ</text>
+<rect x="788" y="169" width="356" height="51" rx="9" fill="#0c202d" fill-opacity=".75" stroke="#365563"/><text x="966" y="201" text-anchor="middle" fill="#e2f2f1" font-size="20">Sandbox thực hành</text>
+<path d="M600 288V253" fill="none" stroke="#6d92ae" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="32" y="292" width="1136" height="206" rx="14" fill="#122236" stroke="#314963"/>
+  <text x="56" y="334" fill="#c8dcf4" font-size="23" font-weight="650">Không gian vận hành H–P–D–I</text>
+  <text x="1144" y="331" text-anchor="end" fill="#91b7df" font-size="13" font-weight="600" letter-spacing="2">TẦNG 02</text>
+<rect x="56" y="356" width="260" height="116" rx="10" fill="#0d1a2b" stroke="#2b4158"/>
+    <rect x="72" y="372" width="31" height="31" rx="8" fill="#8cd7c7" fill-opacity=".13"/>
+    <text x="87.5" y="394" text-anchor="middle" fill="#8cd7c7" font-size="21" font-weight="700">H</text>
+    <text x="114" y="394" fill="#e4eef9" font-size="21" font-weight="600">Human</text>
+    <text x="72" y="432" fill="#a8bbcf" font-size="17">Workspace · thành viên</text>
+    <text x="72" y="456" fill="#a8bbcf" font-size="17">Vai trò · quyền nguồn</text>
+<rect x="332" y="356" width="260" height="116" rx="10" fill="#0d1a2b" stroke="#2b4158"/>
+    <rect x="348" y="372" width="31" height="31" rx="8" fill="#92bbf3" fill-opacity=".13"/>
+    <text x="363.5" y="394" text-anchor="middle" fill="#92bbf3" font-size="21" font-weight="700">P</text>
+    <text x="390" y="394" fill="#e4eef9" font-size="21" font-weight="600">Process</text>
+    <text x="348" y="432" fill="#a8bbcf" font-size="17">Review · phân công</text>
+    <text x="348" y="456" fill="#a8bbcf" font-size="17">Workflow · kiểm chứng</text>
+<rect x="608" y="356" width="260" height="116" rx="10" fill="#0d1a2b" stroke="#2b4158"/>
+    <rect x="624" y="372" width="31" height="31" rx="8" fill="#b3a2ea" fill-opacity=".13"/>
+    <text x="639.5" y="394" text-anchor="middle" fill="#b3a2ea" font-size="21" font-weight="700">D</text>
+    <text x="666" y="394" fill="#e4eef9" font-size="21" font-weight="600">Data</text>
+    <text x="624" y="432" fill="#a8bbcf" font-size="17">Events · provenance</text>
+    <text x="624" y="456" fill="#a8bbcf" font-size="17">Snapshots · dashboard</text>
+<rect x="884" y="356" width="260" height="116" rx="10" fill="#0d1a2b" stroke="#2b4158"/>
+    <rect x="900" y="372" width="31" height="31" rx="8" fill="#e7c08c" fill-opacity=".13"/>
+    <text x="915.5" y="394" text-anchor="middle" fill="#e7c08c" font-size="21" font-weight="700">I</text>
+    <text x="942" y="394" fill="#e4eef9" font-size="21" font-weight="600">Intelligence</text>
+    <text x="900" y="432" fill="#a8bbcf" font-size="17">Luật tái dựng · scorer</text>
+    <text x="900" y="456" fill="#a8bbcf" font-size="17">Lý do · unresolved</text>
+<path d="M600 540V505" fill="none" stroke="#6d92ae" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="32" y="544" width="1136" height="154" rx="14" fill="#142033" stroke="#34435c"/>
+  <text x="56" y="586" fill="#d3dcf0" font-size="23" font-weight="650">Open-Core headless</text>
+  <text x="1144" y="583" text-anchor="end" fill="#a6b6d1" font-size="13" font-weight="600" letter-spacing="2">TẦNG 01</text>
+<rect x="56" y="607" width="208" height="65" rx="9" fill="#0d1828" stroke="#2d3e56"/>
+    <text x="160" y="634" text-anchor="middle" fill="#dce8f7" font-size="19" font-weight="600">Identity</text>
+    <text x="160" y="657" text-anchor="middle" fill="#94a9c0" font-size="15">SSO · quyền truy cập</text>
+<rect x="276" y="607" width="208" height="65" rx="9" fill="#0d1828" stroke="#2d3e56"/>
+    <text x="380" y="634" text-anchor="middle" fill="#dce8f7" font-size="19" font-weight="600">Data</text>
+    <text x="380" y="657" text-anchor="middle" fill="#94a9c0" font-size="15">Transaction · dữ liệu</text>
+<rect x="496" y="607" width="208" height="65" rx="9" fill="#0d1828" stroke="#2d3e56"/>
+    <text x="600" y="634" text-anchor="middle" fill="#dce8f7" font-size="19" font-weight="600">Reconstruction</text>
+    <text x="600" y="657" text-anchor="middle" fill="#94a9c0" font-size="15">Snapshot · liên kết</text>
+<rect x="716" y="607" width="208" height="65" rx="9" fill="#0d1828" stroke="#2d3e56"/>
+    <text x="820" y="634" text-anchor="middle" fill="#dce8f7" font-size="19" font-weight="600">Workflow</text>
+    <text x="820" y="657" text-anchor="middle" fill="#94a9c0" font-size="15">Guard · chuyển bước</text>
+<rect x="936" y="607" width="208" height="65" rx="9" fill="#0d1828" stroke="#2d3e56"/>
+    <text x="1040" y="634" text-anchor="middle" fill="#dce8f7" font-size="19" font-weight="600">Audit</text>
+    <text x="1040" y="657" text-anchor="middle" fill="#94a9c0" font-size="15">Lịch sử · bằng chứng</text>
+<text x="600" y="735" text-anchor="middle" fill="#8ba3bb" font-size="16">Core độc lập với React và Express. Policy riêng của lab được kết nối qua service / adapter.</text>
+</g>
+</svg>

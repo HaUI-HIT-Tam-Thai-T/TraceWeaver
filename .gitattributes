@@ -1,2 +1,11 @@
 * text=auto
 *.sql text eol=lf
+# Scorer manifests verify raw bytes; keep the imported handoff stable on Windows.
+ai/artifacts/sandbox-v2/*.json text eol=lf
+ai/app/model_scorer.py text eol=lf
+ai/tests/fixtures/scorer-v2/*.json text eol=lf
+backend/tests/fixtures/scorer-v2/*.json text eol=lf
+# Preserve the original handoff bytes verified by its bundle manifest.
+ai/handoffs/AI_BE_RUNTIME_V2/** -text whitespace=cr-at-eol
+# Generated notices retain upstream license formatting verbatim.
+frontend/THIRD_PARTY_NOTICES.txt whitespace=-blank-at-eol

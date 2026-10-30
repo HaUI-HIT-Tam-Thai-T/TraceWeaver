@@ -13,8 +13,7 @@ dist/
 coverage/
 *.log
 
-# Local project preparation
-/docs/
+# Shared documentation in docs/ is versioned; local preparation stays private.
 /.planning/
 /data/
 /templates/

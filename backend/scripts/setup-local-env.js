@@ -15,6 +15,7 @@ try {
   url.password = password;
   const content = template
     .replace(/^POSTGRES_PASSWORD=.*$/m, `POSTGRES_PASSWORD=${password}`)
+    .replace(/^CURSOR_SECRET=.*$/m, `CURSOR_SECRET=${randomBytes(32).toString('hex')}`)
     .replace(/^DATABASE_URL=.*$/m, `DATABASE_URL=${url.href}`);
   await writeFile(new URL('.env', root), content, { flag: 'wx', mode: 0o600 });
   console.log('Created local .env with a random DB password. Credentials were not printed.');
