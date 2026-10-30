@@ -1,5 +1,9 @@
 # Tài liệu TraceWeaver
 
+Điểm bắt đầu công khai: [Giới thiệu tiếng Việt](../README.md) · [English](../README_EN.md) · [Cài đặt](../INSTALL.md) · [Kiến trúc](../ARCHITECTURE.md) · [Kiểm thử](../TESTING.md) · [Giấy phép](../LICENSES.md) · [Hỗ trợ](../SUPPORT.md).
+
+Quy trình cộng đồng: [Đóng góp](../CONTRIBUTING.md), [Quy tắc ứng xử](../CODE_OF_CONDUCT.md), [Bảo mật](../SECURITY.md).
+
 **Handoff sau audit30/10:** [Hoàn thiện FE](FE_COMPLETION_HANDOFF.md) — phân biệt tái dựng với chạy lại
 nghiệp vụ, tích hợp simulator/proof, phục hồi lỗi account và UAT UX. Không mở rộng phần tìm/hiển thị tài khoản.
 

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Hướng dẫn cài đặt và hỗ trợ
+    url: https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/blob/HEAD/SUPPORT.md
+    about: Đọc hướng dẫn và cách cung cấp thông tin tái hiện an toàn.
+  - name: Báo cáo bảo mật
+    url: https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/blob/HEAD/SECURITY.md
+    about: Không công khai token, mật khẩu hoặc dữ liệu nhạy cảm trong issue.

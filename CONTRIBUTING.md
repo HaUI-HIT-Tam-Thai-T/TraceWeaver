@@ -2,6 +2,11 @@
 
 Tạo thay đổi nhỏ, nêu mục tiêu và cách kiểm tra trong issue/PR. Dùng `backend/contracts/` làm hợp đồng chung cho backend, frontend và AI.
 
+Đọc [quy tắc ứng xử](CODE_OF_CONDUCT.md), [kiến trúc](ARCHITECTURE.md) và [cài đặt](INSTALL.md).
+Fork repo hoặc tạo branch cho thay đổi; gửi PR vào nhánh đích phù hợp với module đang phát triển.
+PR cần nêu vấn đề, hành vi sau sửa, thay đổi contract/migration/dependency và kết quả kiểm thật.
+Bug và feature có mẫu tại [Issues](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues/new/choose).
+
 - Node.js ES modules; import nội bộ có đuôi `.js`.
 - Router khai báo endpoint; controller xử lý HTTP; service giữ nghiệp vụ; model/repository truy cập dữ liệu.
 - Core không phụ thuộc Express. Dùng transaction cho nghiệp vụ và audit.
@@ -18,4 +23,10 @@ Mã mới dùng Apache-2.0 và SPDX header. Thay dependency cần chạy `npm ru
 
 Chạy lệnh license tại root; không cần DB hoặc secrets. Nếu dependencies đã khớp lockfile thì không cài lại. Khi thêm/nâng dependency, commit manifest và lockfile, chạy `npm run licenses`, đọc diff [inventory](backend/DEPENDENCIES.md)/[notices](backend/THIRD_PARTY_NOTICES.txt), rồi chạy hai lệnh check ở trên. Không sửa metadata trong node_modules hoặc bỏ qua license thiếu để làm check pass.
 
-Inventory hiện đọc manifests root/backend và packages theo npm lockfile. Workspace FE mới hoặc dependency cài lồng cần mở rộng công cụ. Npm checks không bao phủ Python, model, dataset, container/base OS hoặc tự kết luận tương thích toàn bộ distribution; các thành phần đó phải ghi nguồn, exact version/digest, license và notices riêng. Xem [tích hợp](docs/INTEGRATION.md).
+Backend dùng `npm run licenses` / `npm run licenses:check`. Frontend có lockfile riêng: dùng `npm run licenses:frontend` / `npm run licenses:frontend:check` từ root. Python dùng `python -m ai.scripts.dependency_inventory` và `--check` trong venv đúng pins. Commit inventory/notices cùng thay đổi dependency; xem [LICENSES.md](LICENSES.md) về optional/native packages, model, dataset và container/base OS.
+
+Khi đóng góp, bạn xác nhận có quyền cung cấp nội dung theo [Apache-2.0](LICENSE), đồng thời giữ giấy phép/attribution gốc của phần bên thứ ba. Không đổi giấy phép của mã được sao chép thành giấy phép dự án.
+
+## Kiểm tra trước PR
+
+Chọn kiểm tra theo [TESTING.md](TESTING.md). UI cần frontend tests/lint; nghiệp vụ backend cần unit/contracts, thay DB/quyền cần integration. Ghi rõ kiểm tra chưa chạy và điều kiện còn thiếu. Không lấy số lượng test lịch sử làm kết quả của PR mới.

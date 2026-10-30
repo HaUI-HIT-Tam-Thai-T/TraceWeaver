@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Tag0.1.0-base.1 là bộ khung cũ. Nhánh phát triển hiện có20 APIs/local Keycloak; xem [hiện trạng](docs/CURRENT_STATUS.md). Chưa có cam kết production. Chỉ báo lỗi bảo mật qua kênh riêng với maintainer; không đăng credential/dữ liệu nhạy cảm lên issue công khai.
+Tag `v0.1.0-base.1` là bộ khung cũ. Dự án đang phát triển; xem [hiện trạng](docs/CURRENT_STATUS.md) theo revision và môi trường. Chưa công bố dòng release được hỗ trợ dài hạn hoặc SLA vá lỗi. Chỉ báo lỗi bảo mật qua kênh riêng với maintainer; không đăng credential/dữ liệu nhạy cảm lên issue công khai.
 
 ## Quy tắc thực hiện
 

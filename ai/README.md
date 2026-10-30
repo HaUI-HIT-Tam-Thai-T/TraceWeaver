@@ -1,4 +1,6 @@
-# AI integration — 28/10/2026
+# TraceWeaver AI scorer
+
+Scorer Python hiện có baseline và model sandbox v2 opt-in. Bắt đầu với [RUN.md](RUN.md), [tích hợp BE](../backend/SCORER.md), [model card](artifacts/sandbox-v2/README.md), [dependency inventory](DEPENDENCIES.md) và [notices](THIRD_PARTY_NOTICES.txt). Mã nguồn dùng [Apache-2.0](../LICENSE). Các ghi chú scaffold bên dưới được giữ làm lịch sử; không mô tả mức triển khai hiện tại.
 
 ## Cấu trúc thư mục
 
