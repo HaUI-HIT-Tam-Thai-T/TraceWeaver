@@ -140,6 +140,70 @@ test('disabled provider has no fake pending or automatic GET/retry; identity con
   await y.controller.createAccount({ ...account(), username: 'different' }, 1); assert.equal(y.posts.length, 1);
 });
 
+test('policy and ownership rejections persist through pending/failed checks and block every POST replay', async () => {
+  for (const code of ['ACCOUNT_POLICY_REJECTED', 'ACCOUNT_OWNERSHIP_CONFLICT']) {
+    let lookup = 'pending';
+    const x = await setup({ create: async () => { throw err(code, code === 'ACCOUNT_POLICY_REJECTED' ? 422 : 409); }, operation: async () => {
+      if (lookup === 'failed') throw err('ADMIN_UNAVAILABLE', 503);
+      return lookup === 'completed' ? { ...completed(), current_version: 3 } : { state: 'pending', username: account().username, current_version: 1 };
+    } });
+    await x.controller.createAccount(account(), 1);
+    const key = x.controller.getSnapshot().account.key;
+    assert.equal(x.controller.getSnapshot().account.rejection.code, code);
+    assert.equal(x.operations.length, 0);
+    x.controller.resetAccount();
+    assert.equal(x.controller.getSnapshot().account.key, key);
+    for (lookup of ['pending', 'failed']) {
+      await x.controller.checkOperation();
+      assert.equal(x.controller.getSnapshot().account.rejection.code, code);
+      await x.controller.createAccount(account(), 1);
+      await x.controller.createAccount({ ...account(), temporary_password: 'SYNTHETIC-CHANGED-1234' }, 1);
+      assert.equal(x.posts.length, 1);
+      assert.equal(x.controller.getSnapshot().account.key, key);
+    }
+    lookup = 'completed'; await x.controller.checkOperation();
+    assert.equal(x.controller.getSnapshot().account.status, 'completed');
+    assert.equal(x.controller.getSnapshot().account.rejection, null);
+    assert.equal(x.posts.length, 1);
+  }
+});
+
+test('member mutations remain independent of rejected/pending accounts and preserve their intent and CAS', async () => {
+  for (const code of ['ACCOUNT_POLICY_REJECTED', 'ACCOUNT_OWNERSHIP_CONFLICT', 'ACCOUNT_PROVISIONING_PENDING']) {
+    const x = await setup({ create: async () => { throw err(code, code === 'ACCOUNT_PROVISIONING_PENDING' ? 503 : 422); } });
+    await x.controller.createAccount(account(), 1);
+    const intent = x.controller.getSnapshot().account;
+    await x.controller.mutate({ kind: 'grant', subject: member().subject, sid: SID, body: { enabled: true, expected_version: 1 } });
+    assert.equal(x.posts.length, 2);
+    assert.equal(x.posts[1][0], 'grant');
+    assert.equal(x.controller.getSnapshot().account, intent);
+    await x.controller.mutate({ kind: 'update', subject: member().subject, body: { roles: ['viewer'], active: true, expected_version: 1 } });
+    assert.equal(x.posts.length, 2);
+    assert.equal(x.controller.getSnapshot().mutation.status, 'conflict');
+    if (code === 'ACCOUNT_PROVISIONING_PENDING') {
+      // Independent writes change CAS, never the original account payload/key.
+      await x.controller.createAccount(account(), 2);
+      const attempts = x.posts.filter(post => post[0] === 'account');
+      assert.equal(attempts.length, 2);
+      assert.equal(attempts[0][3], attempts[1][3]);
+      assert.deepEqual({ ...attempts[0][2], expected_version: 2 }, attempts[1][2]);
+    }
+  }
+});
+
+test('member write in flight excludes account retry/check and rejected intent is removed on scope loss', async () => {
+  const gate = deferred();
+  const x = await setup({ create: async () => { throw err('ACCOUNT_POLICY_REJECTED'); }, mutate: () => gate.promise });
+  await x.controller.createAccount(account(), 1);
+  const write = x.controller.mutate({ kind: 'add', body: { subject: 'fixture-human', roles: ['viewer'], expected_version: 1 } });
+  await tick();
+  await x.controller.checkOperation(); await x.controller.createAccount(account(), 1);
+  assert.equal(x.operations.length, 0); assert.equal(x.posts.length, 2);
+  x.controller.stop(); gate.resolve({}); await write;
+  assert.equal(x.controller.getSnapshot().account.key, null);
+  assert.equal(x.controller.getSnapshot().account.rejection, null);
+});
+
 test('operation wrong username cannot become success and exposes no raw secrets', async () => {
   const x = await setup({ create: async () => { throw err('ACCOUNT_PROVISIONING_PENDING', 503); }, operation: async () => ({ ...completed(), username: 'other-user', current_version: 2 }) });
   await x.controller.createAccount(account(), 1); assert.equal(x.controller.getSnapshot().account.status, 'uncertain');

@@ -48,10 +48,10 @@ export function WorkspaceAdminView({ state, controller, sources, sourcesReady, t
   const [addDraft, setAddDraft] = useState<MemberDraft>();
   const [editDraft, setEditDraft] = useState<MemberDraft>();
   const returnFocus = useRef<HTMLButtonElement | null>(null);
+  const membersTab = useRef<HTMLButtonElement | null>(null);
   const member = state.list.items.find(item => item.subject === selected);
-  const blockedByAccount = state.account.key !== null && state.account.status !== 'completed';
   const busy = state.blocked || state.list.status !== 'ready' || state.mutation.status === 'sending' || state.account.status === 'sending';
-  const editDisabled = busy || blockedByAccount;
+  const editDisabled = busy;
   return <div className="space-y-5">
     <AdminFailure error={state.list.error} />
     {!state.blocked && <div className="flex flex-wrap items-center justify-between gap-3">
@@ -60,12 +60,16 @@ export function WorkspaceAdminView({ state, controller, sources, sourcesReady, t
     </div>}
     {state.list.status === 'loading' && <Loader message="Đang tải thành viên và phiên bản quản trị…" />}
     {state.blocked ? <p role="status">Đã xóa dữ liệu quản trị. Xác minh lại phiên hoặc quyền workspace để tiếp tục.</p> : <Tabs value={tab} onValueChange={changeTab}>
-      <TabsList aria-label="Quản trị workspace" className="grid h-auto w-full grid-cols-1 sm:grid-cols-2"><TabsTrigger value="members">Thành viên và quyền</TabsTrigger><TabsTrigger value="accounts">Tạo tài khoản</TabsTrigger></TabsList>
+      <TabsList aria-label="Quản trị workspace" className="grid h-auto w-full grid-cols-1 sm:grid-cols-2"><TabsTrigger ref={membersTab} value="members">Thành viên và quyền</TabsTrigger><TabsTrigger value="accounts">Tạo tài khoản</TabsTrigger></TabsList>
       <TabsContent value="members" forceMount className="space-y-5">
         <AdminFailure error={state.mutation.error} />
         {state.mutation.status === 'success' && <p role="status">Đã lưu thay đổi. Xem trạng thái tải danh sách mới bên trên.</p>}
         {state.mutation.status === 'uncertain' && <p role="status">Chưa rõ kết quả ghi. Đối chiếu danh sách mới trước khi chủ động thao tác tiếp; hệ thống không tự gửi lại.</p>}
-        {blockedByAccount && <p role="status">Hoàn tất hoặc đối chiếu intent tạo tài khoản ở tab Tạo tài khoản trước khi sửa thành viên.</p>}
+        {state.account.status === 'completed' && state.account.result && <div className="space-y-2 rounded-md border border-line p-4">
+          <p>Tài khoản vừa tạo chưa tự có quyền nguồn. Tìm subject dưới đây trong bảng, chọn Sửa thành viên rồi cấp quyền đọc nguồn trực tiếp.</p>
+          <SubjectValue subject={state.account.result.subject} />
+          {!state.list.items.some(item => item.subject === state.account.result?.subject) && <p>Tài khoản chưa có trong các dòng đang tải. Dùng Tải thêm thành viên nếu còn trang; nếu không có, làm mới danh sách để đối chiếu.</p>}
+        </div>}
         <Table caption="Thành viên workspace"><TableHeader><TableRow><TableHead>Subject</TableHead><TableHead>Trạng thái</TableHead><TableHead>Vai trò</TableHead><TableHead>Quyền nguồn trực tiếp</TableHead><TableHead>Thao tác</TableHead></TableRow></TableHeader>
           <TableBody>{state.list.items.map(item => <TableRow key={item.subject}><TableCell><SubjectValue subject={item.subject} /></TableCell><TableCell>{item.active ? 'Hoạt động' : 'Đã thu hồi'}</TableCell>
             <TableCell>{item.roles.map(roleLabel).join(' · ') || 'Chưa có vai trò'}</TableCell><TableCell>{item.direct_source_ids.length === 0 ? 'Chưa có' : item.direct_source_ids.map(id => <p key={id}>{sources.find(source => source.id === id)?.name ?? 'Nguồn không khả dụng'}</p>)}</TableCell>
@@ -78,7 +82,9 @@ export function WorkspaceAdminView({ state, controller, sources, sourcesReady, t
         {state.list.status === 'ready' && state.list.items.length === 0 && <p>Chưa có thành viên trong danh sách.</p>}
         {state.list.next && <Button type="button" variant="tertiary" disabled={busy} onClick={() => void controller.more()}>Tải thêm thành viên</Button>}
       </TabsContent>
-      <TabsContent value="accounts" forceMount className="mx-auto w-full max-w-2xl">{state.list.version !== null && <AccountFormView state={state} controller={controller} disabled={busy} />}</TabsContent>
+      <TabsContent value="accounts" forceMount className="mx-auto w-full max-w-2xl"><AccountFormView state={state} controller={controller} disabled={busy} onViewMembers={() => {
+        changeTab('members'); membersTab.current?.focus(); void controller.refresh();
+      }} /></TabsContent>
     </Tabs>}
     {!state.blocked && <Sheet open={panelOpen && tab === 'members'} onOpenChange={setPanelOpen}>
       <SheetContent side="right" className="w-full gap-0 bg-panel p-0 sm:max-w-lg" onCloseAutoFocus={event => {

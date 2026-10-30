@@ -18,10 +18,12 @@ import { CaseDetailView, CaseOverview } from "../features/cases/components/CaseD
 import { useEffect, useState } from 'react';
 import { EvidenceForm } from "../features/cases/components/EvidenceForm";
 import { useWorkspace } from "../features/workspace/hooks/useWorkspace";
+import { SandboxPanel } from '../features/case-sandbox/SandboxPanel';
 
 export function CaseDetailPage() {
   const {
     state,
+    loadSandbox, submitSandboxCommand, retrySandboxProvision, saveSandboxProof, beginSandboxIntent,
     loadCaseRun, loadCaseAssignees, reviewCaseLink, createCaseManualLink,
     refresh,
     loadEvidenceSnapshot,
@@ -45,7 +47,7 @@ export function CaseDetailPage() {
   const location = useLocation();
   const workflowBusy = ["validating", "sending"].includes(
     state.workflow.status,
-  ) || state.linkMutation.status === 'sending' || state.snapshot.status === 'loading' || state.caseRun.status === 'loading';
+  ) || state.linkMutation.status === 'sending' || state.snapshot.status === 'loading' || state.caseRun.status === 'loading' || state.sandbox.mutation.status === 'sending';
   const showTools = permissions.canWrite && state.scope?.canWrite === true;
   const matches = state.detail.id === caseId;
   return (
@@ -88,6 +90,8 @@ export function CaseDetailPage() {
           <LoadingState message="Đang tải hồ sơ, lịch sử và bằng chứng…" />
         )}
       {matches && state.detail.status === 'ready' && state.detail.data && <div className="my-5"><CaseOverview item={state.detail.data.case} /></div>}
+      {matches && state.status === 'active' && state.detail.data && <SandboxPanel key={`sandbox:${state.detail.data.case.id}:${state.detail.data.case.run_id}`} state={state}
+        actions={{ loadSandbox, submitSandboxCommand, retrySandboxProvision, saveSandboxProof, beginSandboxIntent }} />}
       <div className={showTools ? "detail-workspace" : "min-w-0"} data-tools-open={showTools && toolsOpen} data-wide={selectedTab === 'reconstruction'}>
         <div className="min-w-0">
           {matches && state.detail.status === "ready" && state.detail.data && (

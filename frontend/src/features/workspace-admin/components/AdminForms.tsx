@@ -65,7 +65,7 @@ export function MemberForm({ member, version, disabled, controller, draft, onDra
     </fieldset>
   </form>;
 }
-export function AccountFormView({ state, controller, disabled }: { state: AdminState; controller: AdminController; disabled: boolean }) {
+export function AccountFormView({ state, controller, disabled, onViewMembers }: { state: AdminState; controller: AdminController; disabled: boolean; onViewMembers?: () => void }) {
   const account = state.account;
   const [expected, setExpected] = useState(state.list.version ?? 1);
   const { register, handleSubmit, control, setValue, reset, formState: { errors, isSubmitting } } = useForm<AccountForm>({ resolver: zodResolver(accountFormSchema), defaultValues: { username: '', temporary_password: '', roles: ['viewer'] } });
@@ -93,13 +93,19 @@ export function AccountFormView({ state, controller, disabled }: { state: AdminS
       {!locked && !completed && <Button type="submit" disabled={busy || expected !== state.list.version}>Tạo tài khoản</Button>}
       {locked && !completed && <div className="flex flex-wrap gap-3">
         <Button type="button" variant="secondary" disabled={busy} onClick={() => void controller.checkOperation()}>Kiểm tra trạng thái</Button>
-        <Button type="submit" disabled={busy || expected !== state.list.version}>Thử hoàn tất lại cùng mã thao tác</Button>
+        {!account.rejection && <Button type="submit" disabled={busy || expected !== state.list.version}>Thử hoàn tất lại cùng mã thao tác</Button>}
       </div>}
     </form>
     {account.status === 'sending' && <p role="status">Đang xử lý tài khoản…</p>}
-    {(account.status === 'pending' || account.status === 'uncertain') && <p role="status">{account.status === 'pending' ? 'Tài khoản đang chờ hoàn tất.' : 'Chưa rõ kết quả tạo tài khoản.'} Không tạo thao tác mới cho cùng tài khoản.</p>}
-    <AdminFailure error={account.error} />
+    {(account.status === 'pending' || account.status === 'uncertain') && <p role="status">{account.status === 'pending' ? 'Thao tác đang ở trạng thái pending; chưa xác nhận tài khoản đã tạo thành công.' : 'Chưa rõ kết quả tạo tài khoản.'} Không tạo thao tác mới cho cùng tài khoản.</p>}
+    {account.rejection && <div role="status" className="space-y-2 rounded-md border border-warning/40 bg-control p-4">
+      <p>{adminError(account.rejection)}</p>
+      <p>Đã dừng gửi lại nội dung bị từ chối. Mã thao tác cũ vẫn được giữ để kiểm tra trạng thái; pending không xác nhận thao tác đã hủy hoặc có thể gửi lại an toàn.</p>
+      <p>Backend chưa có cơ chế hủy hoặc thay thế intent này. Liên hệ vận hành để đối chiếu trước khi tạo intent khác; tải lại trang không hủy thao tác cũ. Bạn vẫn có thể quản lý thành viên độc lập ở tab Thành viên và quyền.</p>
+    </div>}
+    <AdminFailure error={account.error === account.rejection ? null : account.error} />
     {completed && account.result && <div role="status" className="space-y-3"><p>Đã tạo tài khoản {account.result.username}. Subject: <span className="break-all">{account.result.subject}</span>. Tài khoản chưa tự có quyền nguồn.</p>
+      {onViewMembers && <Button type="button" variant="secondary" disabled={busy} onClick={onViewMembers}>Tới Thành viên và quyền để cấp nguồn</Button>}
       <Button type="button" variant="secondary" disabled={busy} onClick={() => { controller.resetAccount(); setExpected(state.list.version ?? expected); }}>Tạo tài khoản khác</Button></div>}
   </section>;
 }

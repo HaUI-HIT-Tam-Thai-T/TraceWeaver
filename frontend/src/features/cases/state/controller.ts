@@ -16,6 +16,11 @@ import type { ReconstructionService } from '../../reconstruction/services/create
 import type { LinkReviewService } from '../../link-review/services/createLinkReviewService.ts';
 import { manualLinkCreateSchema, manualLinkIssue, reviewCreateSchema } from '../../link-review/schemas.ts';
 import type { ReviewCreate, ManualLinkCreate } from '../../link-review/schemas.ts';
+import type { SandboxService } from '../../case-sandbox/service.ts';
+import { sandboxFailure } from '../../case-sandbox/service.ts';
+import { commandSchema, attemptSchema } from '../../case-sandbox/schemas.ts';
+import type { Command } from '../../case-sandbox/schemas.ts';
+import { initialSandboxState } from '../../case-sandbox/state.ts';
 export type CasesView =
   | { kind: "none" }
   | { kind: "list"; search: string }
@@ -28,6 +33,7 @@ export function createCasesController(
   evidence?: Pick<CasesService, 'addEvidence'> & { getGraph: (wid: string, rid: string, signal?: AbortSignal) => Promise<Graph> },
   workflow?: Pick<CasesService, 'transitionCase'> & { listAssignees?: CasesService['listAssignees']; now?: () => number; newKey?: () => string },
   savedRun?: Pick<ReconstructionService, 'getRun'> & Pick<LinkReviewService, 'reviewLink' | 'createManualLink'>,
+  sandboxService?: SandboxService,
 ) {
   let state = initialCasesState();
   let view: CasesView = { kind: "none" };
@@ -37,6 +43,7 @@ export function createCasesController(
   let snapshotRequest: AbortController | null = null;
   let snapshotSequence = 0;
   let assigneesRequest: AbortController | null = null;
+  let sandboxRequest: AbortController | null = null;
   let blocked: { key: string; error: ApiError } | null = null;
   const listeners = new Set<() => void>();
   function reset(next: CasesState) {
@@ -52,6 +59,7 @@ export function createCasesController(
     request?.abort();
     snapshotRequest?.abort();
     assigneesRequest?.abort();
+    sandboxRequest?.abort();
     snapshotSequence++;
     busy = false;
   }
@@ -199,7 +207,7 @@ export function createCasesController(
       state.scope?.accessKey === scope.accessKey &&
       state.scope.workspaceId === scope.workspaceId &&
       state.scope.subject === scope.subject;
-    const samePermissions = state.scope?.canWrite === scope.canWrite && state.scope?.canVerify === scope.canVerify;
+    const samePermissions = state.scope?.canWrite === scope.canWrite && state.scope?.canVerify === scope.canVerify && state.scope?.canAdmin === scope.canAdmin;
     if (blocked && blocked.key !== scopeId(scope)) blocked = null;
     if (blocked) {
       abort();
@@ -418,6 +426,7 @@ export function createCasesController(
     } finally { if (current()) busy = false; }
     if (refetch && current()) await load(0, [null], true);
     if (current() && parsed.data.action === 'assign' && state.workflow.status === 'error' && state.workflow.error?.status === 422) await loadCaseAssignees();
+    if (refetch && current() && sandboxService) await loadSandbox();
   }
   async function loadCaseRun(force = false): Promise<void> {
     if (!savedRun || busy || state.snapshot.status === 'loading' || !readable() || !state.scope || !state.detail.data) return;
@@ -502,6 +511,100 @@ export function createCasesController(
   function beginNewTransition() {
     if (!busy && state.detail.status === 'ready' && state.status === 'active') update({ workflow: initialCasesState().workflow });
   }
+  async function loadSandbox(): Promise<void> {
+    if (!sandboxService || busy || !readable() || !state.scope || !state.detail.data || state.detail.status !== 'ready') return;
+    const scope = state.scope, cid = state.detail.data.case.id;
+    sandboxRequest?.abort();
+    const controller = new AbortController(); sandboxRequest = controller;
+    const version = generation;
+    const caseVersion = state.detail.data.case.version;
+    const current = () => generation === version && sandboxRequest === controller && !controller.signal.aborted && state.detail.data?.case.version === caseVersion;
+    function failRead(error: unknown): never {
+      const safe = sandboxFailure(error);
+      if (current() && (safe.kind === 'auth' || safe.status === 403 || safe.status === 404)) deny(safe);
+      throw error;
+    }
+    update({ sandbox: { ...state.sandbox,
+      snapshot: { ...state.sandbox.snapshot, status: 'loading', error: null },
+      proofs: { ...state.sandbox.proofs, status: 'loading', error: null }, lab: { ...state.sandbox.lab, status: 'loading', error: null } } });
+    try {
+      const results = await Promise.allSettled([
+        sandboxService.getSandbox(scope.workspaceId, cid, controller.signal).catch(failRead),
+        sandboxService.getProofs(scope.workspaceId, cid, controller.signal).catch(failRead),
+        sandboxService.getLab(scope.workspaceId, controller.signal).catch(failRead),
+      ]);
+      if (!current()) return;
+      for (const result of results) if (result.status === 'rejected') {
+        const safe = sandboxFailure(result.reason);
+        if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) { deny(safe); return; }
+      }
+      const [snapshot, proofs, lab] = results;
+      update({ sandbox: { ...state.sandbox,
+        snapshot: snapshot.status === 'fulfilled' ? { status: 'ready', data: snapshot.value, error: null } : { status: 'error', data: state.sandbox.snapshot.data, error: sandboxFailure(snapshot.reason) },
+        proofs: proofs.status === 'fulfilled' ? { status: 'ready', data: proofs.value, error: null } : { status: 'error', data: state.sandbox.proofs.data, error: sandboxFailure(proofs.reason) },
+        lab: lab.status === 'fulfilled' ? { status: 'ready', data: lab.value, error: null } : { status: 'error', data: state.sandbox.lab.data, error: sandboxFailure(lab.reason) },
+        mutation: { ...state.sandbox.mutation, reconciled: state.sandbox.mutation.kind === 'proof' ? proofs.status === 'fulfilled' : snapshot.status === 'fulfilled' },
+      } });
+    } finally { if (sandboxRequest === controller) sandboxRequest = null; }
+  }
+  async function mutateSandbox(input: Command | null, replay = false): Promise<void> {
+    if (!sandboxService || busy || !readable() || !state.scope || state.detail.status !== 'ready' || !state.detail.data || state.detail.data.case.state === 'closed' || state.snapshot.status === 'loading' || state.caseRun.status === 'loading') return;
+    if (state.workflow.status === 'uncertain' || state.evidenceMutation.status === 'uncertain' || state.linkMutation.status === 'uncertain') return;
+    const scope = state.scope, detail = state.detail.data.case, previous = state.sandbox.mutation;
+    const retained = previous.intent;
+    if (replay && (!previous.reconciled || retained?.action !== 'provision' || !['uncertain', 'conflict'].includes(previous.status))) return;
+    if (!replay && previous.status !== 'idle') return;
+    const body = replay ? retained : input;
+    if (body) {
+      if (body.action === 'provision' ? !scope.canWrite : !scope.canAdmin) return;
+      if (!commandSchema.safeParse(body).success) return;
+      const observed = state.sandbox.snapshot;
+      if (observed.status !== 'ready' || !observed.data) return;
+      if (observed.data.observation.source !== 'lab-sandbox' || observed.data.observation.simulated !== true || observed.data.observation.source_version === undefined) return;
+      if (!replay && (body.expected_case_version !== observed.data.case_version || body.expected_case_version !== detail.version || body.expected_version !== observed.data.observation.source_version)) {
+        update({ sandbox: { ...state.sandbox, mutation: { ...previous, status: 'conflict', intent: body, kind: 'command', reconciled: false, error: new SafeApiError({ kind: 'client', code: 'VERSION_CONFLICT', message: 'Đọc dữ liệu mới và xác nhận phiên bản trước khi gửi.' }) } } });
+        await loadSandbox(); return;
+      }
+      const conditions = observed.data.observation.conditions;
+      if ((body.action === 'image' && body.image_id !== conditions?.image_id) || (body.action === 'account' && body.account_id !== conditions?.account_id)) return;
+    } else if (!scope.canVerify || detail.state !== 'awaiting_verification' || state.sandbox.proofs.status !== 'ready' || state.sandbox.snapshot.status !== 'ready' || state.sandbox.snapshot.data?.case_version !== detail.version) return;
+    sandboxRequest?.abort();
+    const controller = new AbortController(); request = controller;
+    const version = generation;
+    const current = () => generation === version && request === controller && !controller.signal.aborted;
+    busy = true;
+    update({ sandbox: { ...state.sandbox, mutation: { ...previous, status: 'sending', kind: body ? 'command' : 'proof', intent: body, error: null, execution: null, savedProof: null, reconciled: false } } });
+    try {
+      if (body) {
+        const result = await sandboxService.command(scope.workspaceId, detail.id, body, controller.signal);
+        if (!current()) return;
+        update({ sandbox: { ...state.sandbox, snapshot: { status: 'ready', data: result, error: null }, mutation: { ...state.sandbox.mutation, status: 'success', execution: result.execution ?? null } } });
+      } else {
+        const proof = await sandboxService.verify(scope.workspaceId, detail.id, controller.signal);
+        if (!current()) return;
+        update({ sandbox: { ...state.sandbox, mutation: { ...state.sandbox.mutation, status: 'success', savedProof: proof } } });
+      }
+    } catch (error: unknown) {
+      if (!current()) return;
+      const safe = sandboxFailure(error);
+      if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) { deny(safe); return; }
+      const uncertain = axios.isCancel(error) || safe.kind === 'timeout' || safe.kind === 'network' || safe.code === 'INVALID_API_RESPONSE' || (safe.status ?? 0) >= 500;
+      update({ sandbox: { ...state.sandbox, mutation: { ...state.sandbox.mutation, status: uncertain ? 'uncertain' : safe.status === 409 || safe.code === 'VERSION_CONFLICT' ? 'conflict' : 'error', error: safe } } });
+    } finally { if (current()) busy = false; }
+    if (!current()) return;
+    await load(0, [null], true);
+    if (generation === version && state.status === 'active') await loadSandbox();
+  }
+  function beginSandboxIntent() {
+    if (busy || !readable() || state.sandbox.mutation.status === 'sending') return;
+    const old = state.sandbox.mutation;
+    if (['uncertain', 'conflict'].includes(old.status) && !old.reconciled) return;
+    if (old.status === 'uncertain' && old.intent?.action === 'provision') {
+      const operation = old.intent.operation_id;
+      if (!state.sandbox.snapshot.data?.observation.attempts?.some(item => { const parsed = attemptSchema.safeParse(item); return parsed.success && parsed.data.operation_id === operation; })) return;
+    }
+    update({ sandbox: { ...state.sandbox, mutation: initialSandboxState().mutation } });
+  }
   return {
     getSnapshot: () => state,
     subscribe(listener: () => void) {
@@ -511,6 +614,8 @@ export function createCasesController(
       };
     },
     sync,
+    loadSandbox, submitSandboxCommand: (body: Command) => mutateSandbox(body), saveSandboxProof: () => mutateSandbox(null),
+    retrySandboxProvision: () => mutateSandbox(state.sandbox.mutation.intent, true), beginSandboxIntent,
     refresh,
     loadEvidenceSnapshot, loadCaseRun, loadCaseAssignees, reviewCaseLink, createCaseManualLink, submitEvidence, beginNewEvidence,
     submitTransition: (input: CaseTransition) => executeTransition(input, false), retryTransition, beginNewTransition,

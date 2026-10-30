@@ -5,6 +5,8 @@ import type { LinkMutation } from '../../link-review/types.ts';
 import { initialLinkMutation } from '../../link-review/types.ts';
 import type { Event } from '../../events/schemas.ts';
 import type { CaseTransition } from '../workflow.ts';
+import { initialSandboxState } from '../../case-sandbox/state.ts';
+import type { SandboxState } from '../../case-sandbox/state.ts';
 
 export type CasesScope = {
   subject: string;
@@ -12,6 +14,7 @@ export type CasesScope = {
   accessKey: object;
   canWrite?: boolean;
   canVerify?: boolean;
+  canAdmin?: boolean;
 };
 export type CaseEvidenceSnapshot = {
   status: 'idle' | 'loading' | 'ready' | 'error';
@@ -39,6 +42,7 @@ export type CaseWorkflowGraph = {
 };
 
 export type CasesState = {
+  sandbox: SandboxState;
   assignees: { status: 'idle' | 'loading' | 'ready' | 'error'; items: CaseAssignees['items']; error: ApiError | null };
   scope: CasesScope | null;
   status: "idle" | "active" | "invalid" | "blocked" | "reauth";
@@ -74,6 +78,7 @@ export function initialCasesState(
   filters: CaseFilters = { limit: 50 },
 ): CasesState {
   return {
+    sandbox: initialSandboxState(),
     assignees: { status: 'idle', items: [], error: null },
     scope,
     status: scope ? "active" : "idle",

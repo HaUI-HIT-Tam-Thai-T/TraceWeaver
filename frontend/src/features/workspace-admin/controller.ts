@@ -10,11 +10,11 @@ export type AdminState = {
   scope: AdminScope | null; epoch: number; blocked: boolean;
   list: { status: 'idle' | 'loading' | 'ready' | 'error'; items: Member[]; version: number | null; next: string | null; error: ApiError | null };
   mutation: Feedback;
-  account: { status: 'idle' | 'sending' | 'error' | 'pending' | 'uncertain' | 'completed'; key: string | null; username: string | null; roles: AdminRole[]; error: ApiError | null; result: Completed | null };
+  account: { status: 'idle' | 'sending' | 'error' | 'pending' | 'uncertain' | 'completed'; key: string | null; username: string | null; roles: AdminRole[]; error: ApiError | null; rejection: ApiError | null; result: Completed | null };
 };
 export const initialAdminState = (scope: AdminScope | null = null, epoch = 0): AdminState => ({ scope, epoch, blocked: false,
   list: { status: 'idle', items: [], version: null, next: null, error: null }, mutation: { status: 'idle', error: null },
-  account: { status: 'idle', key: null, username: null, roles: [], error: null, result: null } });
+  account: { status: 'idle', key: null, username: null, roles: [], error: null, rejection: null, result: null } });
 const fail = (code: string, message: string) => new ApiError({ kind: 'client', code, message });
 export function createAdminController(service: WorkspaceAdminService, refreshAccess: () => Promise<void>, newKey = () => crypto.randomUUID()) {
   let state = initialAdminState(), generation = 0, busy = false;
@@ -60,7 +60,7 @@ export function createAdminController(service: WorkspaceAdminService, refreshAcc
   }
   type Mutation = { kind: 'add'; body: AddMember } | { kind: 'update'; subject: string; body: UpdateMember } | { kind: 'grant'; subject: string; sid: string; body: SourceGrant };
   async function mutate(input: Mutation): Promise<void> {
-    if (busy || state.blocked || !state.scope || state.list.status !== 'ready' || (state.account.key && state.account.status !== 'completed')) return;
+    if (busy || state.blocked || !state.scope || state.list.status !== 'ready') return;
     const parsed = input.kind === 'add' ? addMemberSchema.safeParse(input.body) : input.kind === 'update' ? updateMemberSchema.safeParse(input.body) : sourceGrantSchema.safeParse(input.body);
     if (!parsed.success) return;
     if (input.body.expected_version !== state.list.version) { update({ mutation: { status: 'conflict', error: fail('VERSION_CONFLICT', 'Đọc phiên bản mới và xác nhận lại trước khi gửi.') } }); return; }
@@ -89,7 +89,7 @@ export function createAdminController(service: WorkspaceAdminService, refreshAcc
     await load();
   }
   async function createAccount(input: AccountForm, expected: number): Promise<void> {
-    if (!state.scope || busy || state.blocked || state.list.status !== 'ready' || state.account.status === 'completed' || !accountFormSchema.safeParse(input).success) return;
+    if (!state.scope || busy || state.blocked || state.list.status !== 'ready' || state.account.status === 'completed' || state.account.rejection || !accountFormSchema.safeParse(input).success) return;
     if (expected !== state.list.version) return;
     const previous = state.account;
     if (previous.key && (previous.username !== input.username || previous.roles.length !== input.roles.length || previous.roles.some((role, index) => role !== input.roles[index]))) return;
@@ -98,14 +98,15 @@ export function createAdminController(service: WorkspaceAdminService, refreshAcc
     try {
       const result = await service.createAccount(scope.wid, { ...input, expected_version: expected }, key, flight.signal);
       if (!flight.current()) return;
-      update({ account: { ...state.account, status: 'completed', result, error: null } });
+      update({ account: { ...state.account, status: 'completed', result, error: null, rejection: null } });
     } catch (error: unknown) {
       if (!flight.current()) return;
       const safe = normalizeApiError(error);
       if (denied(safe)) { deny(safe); return; }
       const pending = safe.code === 'ACCOUNT_PROVISIONING_PENDING';
       const uncertain = axios.isCancel(error) || safe.kind === 'network' || safe.kind === 'timeout' || safe.code === 'INVALID_API_RESPONSE' || ((safe.status ?? 0) >= 500 && safe.code !== 'ACCOUNT_PROVIDER_DISABLED');
-      update({ account: { ...state.account, status: pending ? 'pending' : uncertain ? 'uncertain' : 'error', error: safe,
+      const rejection = ['ACCOUNT_POLICY_REJECTED', 'ACCOUNT_OWNERSHIP_CONFLICT'].includes(safe.code) ? safe : state.account.rejection;
+      update({ account: { ...state.account, status: pending ? 'pending' : uncertain ? 'uncertain' : 'error', error: safe, rejection,
         ...(safe.code === 'ACCOUNT_PROVIDER_DISABLED' && !previous.key ? { key: null } : {}) } });
     } finally { if (flight.current()) busy = false; }
     if (!flight.current()) return;
@@ -121,7 +122,8 @@ export function createAdminController(service: WorkspaceAdminService, refreshAcc
       const operation = await service.operation(scope.wid, key, flight.signal);
       if (!flight.current()) return;
       if (operation.username !== state.account.username || (operation.state === 'completed' && (operation.roles.length !== state.account.roles.length || operation.roles.some(role => !state.account.roles.includes(role))))) throw fail('INVALID_API_RESPONSE', 'Operation không khớp tài khoản đang tạo.');
-      update({ account: { ...state.account, status: operation.state, result: operation.state === 'completed' ? operation : null, error: null } });
+      update({ account: { ...state.account, status: operation.state, result: operation.state === 'completed' ? operation : null, error: null,
+        rejection: operation.state === 'completed' ? null : state.account.rejection } });
     } catch (error: unknown) {
       if (!flight.current()) return;
       const safe = normalizeApiError(error);
