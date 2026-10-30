@@ -7,9 +7,7 @@ const raw = createCasesService(apiClient);
 export const casesService: CasesService = {
   ...raw,
   createCase: (workspaceId, body, options) =>
-    workspaceMutations.afterMutation(workspaceId, () =>
-      raw.createCase(workspaceId, body, options),
-    ),
+    workspaceMutations.afterMutation(workspaceId, () => raw.createCase(workspaceId, body, options)),
   addEvidence: (workspaceId, caseId, body, signal) =>
     workspaceMutations.afterMutation(workspaceId, () =>
       raw.addEvidence(workspaceId, caseId, body, signal),
@@ -19,5 +17,4 @@ export const casesService: CasesService = {
       raw.transitionCase(workspaceId, caseId, body, options),
     ),
 };
-export const { createCase, listCases, getCase, addEvidence, transitionCase } =
-  casesService;
+export const { createCase, listCases, getCase, addEvidence, transitionCase } = casesService;

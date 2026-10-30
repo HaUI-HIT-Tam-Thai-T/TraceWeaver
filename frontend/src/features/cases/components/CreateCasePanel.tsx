@@ -12,10 +12,7 @@ import { reconstructionService } from "../../reconstruction/services/service";
 import { casesService } from "../services/service";
 import { caseCreateSchema } from "../schemas";
 import type { CaseCreate } from "../schemas";
-import {
-  createCaseCreationController,
-  initialCaseCreation,
-} from "../state/createCaseController";
+import { createCaseCreationController, initialCaseCreation } from "../state/createCaseController";
 
 const titleFormSchema = caseCreateSchema.pick({ title: true });
 const hiddenState = initialCaseCreation();
@@ -63,28 +60,25 @@ export function CreateCasePanel({
     reset({ title: "" });
     return () => controller.stop();
   }, [controller, scope, runId, anchor, reset]);
-  const state = controller.matches(scope, runId, anchor)
-    ? snapshot
-    : hiddenState;
+  const state = controller.matches(scope, runId, anchor) ? snapshot : hiddenState;
   useEffect(() => {
-    if (state.status === "success" && state.caseId)
-      navigate(`/cases/${state.caseId}`);
+    if (state.status === "success" && state.caseId) navigate(`/cases/${state.caseId}`);
   }, [state.status, state.caseId, navigate]);
   const busy = state.status === "validating" || state.status === "sending";
   return (
-    <section
-      aria-labelledby="create-case-title"
-      className="mt-6 space-y-3 border-t pt-4"
-    >
+    <section aria-labelledby="create-case-title" className="mt-6 space-y-3 border-t pt-4">
       <h3 id="create-case-title" className="text-xl font-semibold">
         Tạo hồ sơ từ kết quả tái dựng
       </h3>
       <p>
-        Lưu kết quả này thành hồ sơ để phân công, điều tra và xác minh. Rời trang không hủy hồ sơ đã được tạo.
+        Lưu kết quả này thành hồ sơ để phân công, điều tra và xác minh. Rời trang không hủy hồ sơ đã
+        được tạo.
       </p>
       <form onSubmit={handleSubmit(({ title }) => controller.create(title))}>
         <fieldset disabled={state.status !== "idle"}>
-          <label className="type-label block" htmlFor="case-title">Tiêu đề hồ sơ</label>
+          <label className="type-label block" htmlFor="case-title">
+            Tiêu đề hồ sơ
+          </label>
           <Input
             id="case-title"
             aria-invalid={!!errors.title}
@@ -92,11 +86,18 @@ export function CreateCasePanel({
             {...register("title")}
           />
           {errors.title && (
-            <Alert className="block break-words" variant="destructive" id="case-title-error" role="alert">
+            <Alert
+              className="block break-words"
+              variant="destructive"
+              id="case-title-error"
+              role="alert"
+            >
               {errors.title.message}
             </Alert>
           )}
-          <Button variant="primary" type="submit">Tạo hồ sơ</Button>
+          <Button variant="primary" type="submit">
+            Tạo hồ sơ
+          </Button>
         </fieldset>
       </form>
       {busy && (
@@ -108,16 +109,17 @@ export function CreateCasePanel({
       )}
       {state.error && (
         <Alert className="block break-words" variant="destructive" role="alert">
-          {state.error.message}{" "}
-          {state.error.requestId && <>Request ID: {state.error.requestId}</>}
+          {state.error.message} {state.error.requestId && <>Request ID: {state.error.requestId}</>}
         </Alert>
       )}
       {state.status === "uncertain" && (
         <>
           <Alert className="block break-words" variant="destructive" role="alert">
-            Chưa rõ hồ sơ đã được tạo hay chưa. Gửi lại trong 24 giờ dùng nội dung và mã chống trùng cũ. Bắt đầu thao tác mới có thể tạo thêm hồ sơ.
+            Chưa rõ hồ sơ đã được tạo hay chưa. Gửi lại trong 24 giờ dùng nội dung và mã chống trùng
+            cũ. Bắt đầu thao tác mới có thể tạo thêm hồ sơ.
           </Alert>
-          <Button variant="secondary"
+          <Button
+            variant="secondary"
             type="button"
             onClick={() => {
               void controller.retry();
@@ -128,7 +130,8 @@ export function CreateCasePanel({
         </>
       )}
       {state.status === "reauth" && (
-        <Button variant="secondary"
+        <Button
+          variant="secondary"
           type="button"
           onClick={() => {
             void signIn();
@@ -138,7 +141,8 @@ export function CreateCasePanel({
         </Button>
       )}
       {["error", "uncertain"].includes(state.status) && (
-        <Button variant="secondary"
+        <Button
+          variant="secondary"
           type="button"
           disabled={busy}
           onClick={() => {

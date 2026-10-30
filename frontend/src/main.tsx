@@ -14,8 +14,7 @@ try {
 } catch (error) {
   const message = document.createElement("p");
   message.setAttribute("role", "alert");
-  message.textContent =
-    error instanceof Error ? error.message : "Invalid frontend configuration.";
+  message.textContent = error instanceof Error ? error.message : "Invalid frontend configuration.";
   root.replaceChildren(message);
   throw error;
 }

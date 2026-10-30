@@ -14,9 +14,7 @@ export interface KnowledgeService {
   ): Promise<KnowledgePage>;
 }
 
-export function createKnowledgeService(
-  client: Pick<AxiosInstance, "get">,
-): KnowledgeService {
+export function createKnowledgeService(client: Pick<AxiosInstance, "get">): KnowledgeService {
   async function listKnowledge(
     workspaceId: string,
     filters: KnowledgeFilters = { limit: 50 },
@@ -38,15 +36,12 @@ export function createKnowledgeService(
     const params = new URLSearchParams({ limit: String(parsed.data.limit) });
     if (parsed.data.q !== undefined) params.set("q", parsed.data.q);
     if (options.cursor !== undefined) params.set("cursor", options.cursor);
-    const response = await client.get<unknown>(
-      `/api/v1/workspaces/${workspaceId}/knowledge`,
-      { params, signal: options.signal },
-    );
+    const response = await client.get<unknown>(`/api/v1/workspaces/${workspaceId}/knowledge`, {
+      params,
+      signal: options.signal,
+    });
     const result = knowledgePageSchema.safeParse(response.data);
-    if (
-      !result.success ||
-      result.data.items.some((item) => item.workspace_id !== workspaceId)
-    ) {
+    if (!result.success || result.data.items.some((item) => item.workspace_id !== workspaceId)) {
       throw new ApiError({
         kind: "client",
         code: "INVALID_API_RESPONSE",

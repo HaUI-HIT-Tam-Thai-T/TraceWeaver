@@ -1,6 +1,9 @@
 // Isolated UI fixture: fake contexts, no Keycloak or backend requests.
 import { StrictMode, useEffect, useState } from "react";
-import { DashboardTimeForm, DashboardCounters } from '../../src/features/dashboard/components/DashboardView';
+import {
+  DashboardTimeForm,
+  DashboardCounters,
+} from "../../src/features/dashboard/components/DashboardView";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, Link } from "react-router-dom";
 import { AuthContext } from "../../src/features/auth/state/authContext";
@@ -17,10 +20,7 @@ import { WorkspaceAccessState } from "../../src/components/layout/WorkspaceAcces
 import { ApiError } from "../../src/services/apiError";
 import "../../src/index.css";
 
-const ids = [
-  "10000000-0000-4000-8000-000000000001",
-  "10000000-0000-4000-8000-000000000002",
-];
+const ids = ["10000000-0000-4000-8000-000000000001", "10000000-0000-4000-8000-000000000002"];
 const memberships = ids.map((workspace_id, index) => ({
   workspace_id,
   roles: index === 0 ? ["viewer" as const] : ["ingest_service" as const],
@@ -37,16 +37,18 @@ export function FixturePage() {
     <section className="space-y-4">
       <h1 className="type-h1">Nội dung nghiệp vụ kiểm thử</h1>
       <DashboardTimeForm filters={{}} apply={() => {}} />
-      <DashboardCounters data={{ runs: 13, degraded_runs: 4, unresolved_events: 9, waiting_cases: 5, filters: {} }} waiting={false} showWaiting={() => {}} />
+      <DashboardCounters
+        data={{ runs: 13, degraded_runs: 4, unresolved_events: 9, waiting_cases: 5, filters: {} }}
+        waiting={false}
+        showWaiting={() => {}}
+      />
       <p className="type-body">
         {loaded ? "Đã tải dữ liệu trong scope hiện tại." : "Đang chờ dữ liệu…"}
       </p>
-      <Link to="/cases/88888888-8888-4888-8888-888888888888">
-        Mở case detail
-      </Link>
+      <Link to="/cases/88888888-8888-4888-8888-888888888888">Mở case detail</Link>
       <p className="type-body">
-        Nội dung tiếng Việt dài để kiểm tra Header, Sidebar và Main không tràn
-        ngang khi màn hình nhỏ.
+        Nội dung tiếng Việt dài để kiểm tra Header, Sidebar và Main không tràn ngang khi màn hình
+        nhỏ.
       </p>
     </section>
   );
@@ -107,10 +109,7 @@ export function ShellFixture() {
           <span>Fixture cô lập — không gọi API</span>
           <label>
             Trạng thái kiểm thử{" "}
-            <select
-              value={mode}
-              onChange={(event) => setMode(event.target.value)}
-            >
+            <select value={mode} onChange={(event) => setMode(event.target.value)}>
               <option value="ready">Ready</option>
               <option value="loading">Revalidation</option>
               <option value="none">Không membership</option>
@@ -120,34 +119,17 @@ export function ShellFixture() {
             </select>
           </label>
           <button
-            onClick={() =>
-              setSubject((previous) =>
-                previous === "user-a" ? "user-b" : "user-a",
-              )
-            }
+            onClick={() => setSubject((previous) => (previous === "user-a" ? "user-b" : "user-a"))}
           >
             Đổi user
           </button>
         </div>
         <Routes>
           <Route element={<AppLayout />}>
-            <Route
-              path="/"
-              element={<h1 className="type-h1">Trang chào kiểm thử</h1>}
-            />
+            <Route path="/" element={<h1 className="type-h1">Trang chào kiểm thử</h1>} />
             <Route element={<WorkspaceAccessState />}>
-              {[
-                "/dashboard",
-                "/events",
-                "/cases",
-                "/cases/:caseId",
-                "/knowledge",
-              ].map((path) => (
-                <Route
-                  key={path}
-                  path={path}
-                  element={<FixturePage key={subject + selected} />}
-                />
+              {["/dashboard", "/events", "/cases", "/cases/:caseId", "/knowledge"].map((path) => (
+                <Route key={path} path={path} element={<FixturePage key={subject + selected} />} />
               ))}
             </Route>
           </Route>

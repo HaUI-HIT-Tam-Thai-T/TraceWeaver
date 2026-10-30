@@ -13,9 +13,7 @@ export interface DashboardService {
   ): Promise<Dashboard>;
 }
 
-export function createDashboardService(
-  client: Pick<AxiosInstance, "get">,
-): DashboardService {
+export function createDashboardService(client: Pick<AxiosInstance, "get">): DashboardService {
   async function getDashboard(
     workspaceId: string,
     filters: DashboardFilters = {},
@@ -28,10 +26,10 @@ export function createDashboardService(
         code: "INVALID_DASHBOARD_INPUT",
         message: "Workspace hoặc khoảng thời gian không hợp lệ.",
       });
-    const response = await client.get<unknown>(
-      `/api/v1/workspaces/${workspaceId}/dashboard`,
-      { params: new URLSearchParams(parsed.data), signal },
-    );
+    const response = await client.get<unknown>(`/api/v1/workspaces/${workspaceId}/dashboard`, {
+      params: new URLSearchParams(parsed.data),
+      signal,
+    });
     const result = dashboardSchema.safeParse(response.data);
     if (
       !result.success ||
@@ -46,8 +44,7 @@ export function createDashboardService(
       throw new ApiError({
         kind: "client",
         code: "INVALID_API_RESPONSE",
-        message:
-          "Dữ liệu dashboard hoặc khoảng thời gian phản hồi không hợp lệ.",
+        message: "Dữ liệu dashboard hoặc khoảng thời gian phản hồi không hợp lệ.",
       });
     return result.data;
   }

@@ -5,15 +5,7 @@ import type { LinkMutation } from "../../link-review/types.ts";
 
 export type Attempt = { body: RunCreate; key: string; createdAt: number };
 export type ReconstructionState = {
-  phase:
-    | "idle"
-    | "validating"
-    | "sending"
-    | "known"
-    | "uncertain"
-    | "error"
-    | "blocked"
-    | "reauth";
+  phase: "idle" | "validating" | "sending" | "known" | "uncertain" | "error" | "blocked" | "reauth";
   attempt: Attempt | null;
   run: Run | null;
   graph: Graph | null;
@@ -43,7 +35,5 @@ export function reconstructionReducer(
   state: ReconstructionState,
   action: ReconstructionAction,
 ): ReconstructionState {
-  return action.type === "reset"
-    ? initialReconstructionState()
-    : { ...state, ...action.patch };
+  return action.type === "reset" ? initialReconstructionState() : { ...state, ...action.patch };
 }

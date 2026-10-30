@@ -57,10 +57,7 @@ export type EventsAction =
   | { type: "detailError"; error: ApiError }
   | { type: "root"; event: Event | null };
 
-export function eventsReducer(
-  state: EventsState,
-  action: EventsAction,
-): EventsState {
+export function eventsReducer(state: EventsState, action: EventsAction): EventsState {
   switch (action.type) {
     case "reset":
       return action.state;
@@ -80,9 +77,7 @@ export function eventsReducer(
       };
     case "pageError":
       return {
-        ...(action.invalidCursor
-          ? initialEventsState(state.scope, state.filters)
-          : state),
+        ...(action.invalidCursor ? initialEventsState(state.scope, state.filters) : state),
         list: { status: "error", items: [], error: action.error },
         nextCursor: null,
       };

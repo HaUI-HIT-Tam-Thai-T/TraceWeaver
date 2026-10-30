@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 
-export function DetailLink({ to, label, accessibleLabel }: {
+export function DetailLink({
+  to,
+  label,
+  accessibleLabel,
+}: {
   to: string;
   label: string;
   accessibleLabel: string;

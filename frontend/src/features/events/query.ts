@@ -11,13 +11,10 @@ export type EventQuery =
 
 export function readEventQuery(search: string): EventQuery {
   const params = new URLSearchParams(search);
-  if (knownKeys.some((key) => params.getAll(key).length > 1))
-    return { success: false };
+  if (knownKeys.some((key) => params.getAll(key).length > 1)) return { success: false };
   const result = filtersSchema.safeParse({
     ...Object.fromEntries(
-      filterKeys.flatMap((key) =>
-        params.has(key) ? [[key, params.get(key)]] : [],
-      ),
+      filterKeys.flatMap((key) => (params.has(key) ? [[key, params.get(key)]] : [])),
     ),
     limit: params.has("limit") ? Number(params.get("limit")) : 50,
   });
@@ -39,10 +36,7 @@ export function readEventLocation(search: string, eventId: string | null): Event
   return readEventQuery(params.toString());
 }
 
-export function writeEventQuery(
-  filters: EventFilters,
-  eventId: string | null = null,
-) {
+export function writeEventQuery(filters: EventFilters, eventId: string | null = null) {
   const params = new URLSearchParams();
   for (const key of filterKeys) {
     const value = filters[key];
@@ -55,8 +49,7 @@ export function writeEventQuery(
 
 // Only form input is converted. API event timestamps are always retained verbatim.
 export function localToUtc(value: string): string {
-  const match =
-    /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})(?::(\d{2})(\.\d{1,6})?)?$/.exec(value);
+  const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})(?::(\d{2})(\.\d{1,6})?)?$/.exec(value);
   if (!match) throw new Error("Invalid local time");
   const base = `${match[1]}:${match[2] ?? "00"}`;
   const date = new Date(`${base}+07:00`);
@@ -71,9 +64,7 @@ export function localToUtc(value: string): string {
 
 export function utcToLocalInput(value: string | undefined): string {
   if (!value) return "";
-  const base = new Date(new Date(value).getTime() + 7 * 3600000)
-    .toISOString()
-    .slice(0, 19);
+  const base = new Date(new Date(value).getTime() + 7 * 3600000).toISOString().slice(0, 19);
   const fraction = /\.\d+Z$/.exec(value)?.[0].slice(0, -1) ?? "";
   return base + fraction;
 }

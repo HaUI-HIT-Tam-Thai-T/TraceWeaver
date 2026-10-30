@@ -22,9 +22,7 @@ function invalidResponse() {
   });
 }
 
-export function createWorkspaceService(
-  client: Pick<AxiosInstance, "get">,
-): WorkspaceService {
+export function createWorkspaceService(client: Pick<AxiosInstance, "get">): WorkspaceService {
   async function getMe(signal?: AbortSignal): Promise<Me> {
     const response = await client.get<unknown>("/api/v1/me", { signal });
     const result = meSchema.safeParse(response.data);
@@ -58,10 +56,7 @@ export function createWorkspaceService(
       },
     );
     const result = sourcesPageSchema.safeParse(response.data);
-    if (
-      !result.success ||
-      result.data.items.some((source) => source.workspace_id !== workspaceId)
-    )
+    if (!result.success || result.data.items.some((source) => source.workspace_id !== workspaceId))
       throw invalidResponse();
     return result.data;
   }

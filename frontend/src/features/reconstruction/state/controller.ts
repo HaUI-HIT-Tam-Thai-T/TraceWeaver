@@ -19,24 +19,18 @@ import type { ManualLinkCreate, ReviewCreate } from "../../link-review/schemas.t
 type Dependencies = {
   service: ReconstructionService;
   linkService?: LinkReviewService;
-  getEvent: (
-    workspaceId: string,
-    eventId: string,
-    signal?: AbortSignal,
-  ) => Promise<Event>;
+  getEvent: (workspaceId: string, eventId: string, signal?: AbortSignal) => Promise<Event>;
   revalidate: () => Promise<void>;
   now?: () => number;
   newKey?: () => string;
   schedule?: (callback: () => void, delay: number) => () => void;
 };
-const pending = (run: Run) =>
-  run.status === "queued" || run.status === "running";
+const pending = (run: Run) => run.status === "queued" || run.status === "running";
 const invalidInput = () =>
   new ApiError({
     kind: "client",
     code: "INVALID_RUN_INPUT",
-    message:
-      "Root, nguồn hoặc khoảng thời gian không hợp lệ. Kiểm tra lại thông tin.",
+    message: "Root, nguồn hoặc khoảng thời gian không hợp lệ. Kiểm tra lại thông tin.",
   });
 
 export function createReconstructionController(deps: Dependencies) {
@@ -88,11 +82,7 @@ export function createReconstructionController(deps: Dependencies) {
     scope = nextScope;
     root = nextRoot;
   }
-  function failure(
-    error: unknown,
-    stage: "create" | "track" | "graph",
-    sent = false,
-  ) {
+  function failure(error: unknown, stage: "create" | "track" | "graph", sent = false) {
     if (axios.isCancel(error)) return;
     const safe = normalizeApiError(error);
     if (safe.kind === "auth" || safe.status === 403 || safe.status === 404) {
@@ -118,9 +108,7 @@ export function createReconstructionController(deps: Dependencies) {
     } else
       update({
         error: safe,
-        ...(stage === "graph"
-          ? { graphStatus: "error" }
-          : { tracking: "error" }),
+        ...(stage === "graph" ? { graphStatus: "error" } : { tracking: "error" }),
       });
   }
   function available() {
@@ -163,18 +151,13 @@ export function createReconstructionController(deps: Dependencies) {
     }, delay);
   }
   async function loadGraph(): Promise<void> {
-    if (busy || !available() || !scope || state.run?.status !== "completed")
-      return;
+    if (busy || !available() || !scope || state.run?.status !== "completed") return;
     const run = state.run;
     const body = state.attempt?.body;
     const operation = beginRequest();
     update({ graphStatus: "loading", error: null });
     try {
-      const graph = await deps.service.getGraph(
-        scope.workspaceId,
-        run.id,
-        operation.signal,
-      );
+      const graph = await deps.service.getGraph(scope.workspaceId, run.id, operation.signal);
       if (!operation.current()) return;
       if (
         !graph.nodes.some((node) => node.event_id === run.root_event_id) ||
@@ -199,8 +182,7 @@ export function createReconstructionController(deps: Dependencies) {
     else if (pending(run)) queuePoll();
   }
   async function track(manual = true): Promise<void> {
-    if (busy || !available() || !scope || !state.run || !pending(state.run))
-      return;
+    if (busy || !available() || !scope || !state.run || !pending(state.run)) return;
     cancelTimer?.();
     cancelTimer = undefined;
     if (manual) {
@@ -211,11 +193,7 @@ export function createReconstructionController(deps: Dependencies) {
     const operation = beginRequest();
     update({ tracking: "loading", error: null });
     try {
-      const run = await deps.service.getRun(
-        scope.workspaceId,
-        previous.id,
-        operation.signal,
-      );
+      const run = await deps.service.getRun(scope.workspaceId, previous.id, operation.signal);
       if (!operation.current()) return;
       if (
         run.root_event_id !== previous.root_event_id ||
@@ -242,8 +220,7 @@ export function createReconstructionController(deps: Dependencies) {
         error: new ApiError({
           kind: "client",
           code: "IDEMPOTENCY_EXPIRED",
-          message:
-            "Đã quá 24 giờ; không gửi lại thao tác cũ. Run trước vẫn có thể đã được tạo.",
+          message: "Đã quá 24 giờ; không gửi lại thao tác cũ. Run trước vẫn có thể đã được tạo.",
         }),
       });
       return;
@@ -275,8 +252,7 @@ export function createReconstructionController(deps: Dependencies) {
           error: new ApiError({
             kind: "client",
             code: "IDEMPOTENCY_EXPIRED",
-            message:
-              "Đã quá 24 giờ; không gửi lại thao tác cũ. Run trước vẫn có thể đã được tạo.",
+            message: "Đã quá 24 giờ; không gửi lại thao tác cũ. Run trước vẫn có thể đã được tạo.",
           }),
         });
         return;
@@ -291,11 +267,10 @@ export function createReconstructionController(deps: Dependencies) {
             };
       update({ phase: "sending", attempt });
       sent = true;
-      const run = await deps.service.createRun(
-        scope.workspaceId,
-        attempt.body,
-        { idempotencyKey: attempt.key, signal: operation.signal },
-      );
+      const run = await deps.service.createRun(scope.workspaceId, attempt.body, {
+        idempotencyKey: attempt.key,
+        signal: operation.signal,
+      });
       if (!operation.current()) return;
       busy = false;
       deadline = now() + 300000;
@@ -331,33 +306,16 @@ export function createReconstructionController(deps: Dependencies) {
         ? reviewCreateSchema.safeParse(input.body)
         : manualLinkCreateSchema.safeParse(input.body);
     const link =
-      input.kind === "review"
-        ? graph.links.find((link) => link.id === input.linkId)
-        : undefined;
+      input.kind === "review" ? graph.links.find((link) => link.id === input.linkId) : undefined;
     const issue =
-      input.kind === "manual" && body.success
-        ? manualLinkIssue(input.body, graph)
-        : null;
+      input.kind === "manual" && body.success ? manualLinkIssue(input.body, graph) : null;
     const conflict =
-      input.kind === "review" &&
-      link &&
-      link.version !== input.body.expected_version;
-    if (
-      !body.success ||
-      (input.kind === "review" && !link) ||
-      issue ||
-      conflict
-    ) {
-      const code = conflict
-        ? "VERSION_CONFLICT"
-        : (issue ?? "INVALID_LINK_INPUT");
+      input.kind === "review" && link && link.version !== input.body.expected_version;
+    if (!body.success || (input.kind === "review" && !link) || issue || conflict) {
+      const code = conflict ? "VERSION_CONFLICT" : (issue ?? "INVALID_LINK_INPUT");
       update({
         mutation: {
-          status: conflict
-            ? "conflict"
-            : issue === "LINK_EXISTS"
-              ? "duplicate"
-              : "error",
+          status: conflict ? "conflict" : issue === "LINK_EXISTS" ? "duplicate" : "error",
           error: new ApiError({
             kind: "client",
             code,
@@ -440,11 +398,7 @@ export function createReconstructionController(deps: Dependencies) {
         },
         caseLocked: status === "locked" || state.caseLocked,
       });
-      refetch =
-        uncertain ||
-        status === "conflict" ||
-        status === "duplicate" ||
-        status === "locked";
+      refetch = uncertain || status === "conflict" || status === "duplicate" || status === "locked";
     } finally {
       if (operation.current()) busy = false;
     }
@@ -475,15 +429,9 @@ export function createReconstructionController(deps: Dependencies) {
     loadGraph,
     reviewLink: (linkId: string, body: ReviewCreate) =>
       mutateLink({ kind: "review", linkId, body }),
-    createManualLink: (body: ManualLinkCreate) =>
-      mutateLink({ kind: "manual", body }),
+    createManualLink: (body: ManualLinkCreate) => mutateLink({ kind: "manual", body }),
     probeClosedCase() {
-      if (
-        !busy &&
-        available() &&
-        state.graphStatus === "ready" &&
-        state.caseLocked
-      ) {
+      if (!busy && available() && state.graphStatus === "ready" && state.caseLocked) {
         update({
           caseLocked: false,
           mutation: { status: "idle", error: null, linkId: null },

@@ -1,8 +1,6 @@
 import { z } from "zod";
 
-export const utcSchema = z.iso
-  .datetime()
-  .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/);
+export const utcSchema = z.iso.datetime().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/);
 const idSchema = z.uuid();
 export const eventSchema = z.strictObject({
   event_id: idSchema,
@@ -31,10 +29,7 @@ export const eventSchema = z.strictObject({
 export const eventsPageSchema = z.strictObject({
   items: z
     .array(eventSchema)
-    .refine(
-      (items) =>
-        new Set(items.map((item) => item.event_id)).size === items.length,
-    ),
+    .refine((items) => new Set(items.map((item) => item.event_id)).size === items.length),
   next_cursor: z.string().min(1).max(4096).nullable(),
 });
 
@@ -56,14 +51,10 @@ export const filtersSchema = z
     q: z.string().min(1).max(500).optional(),
     limit: z.number().int().min(1).max(100),
   })
-  .refine(
-    (value) =>
-      !value.from || !value.to || compareUtc(value.from, value.to) <= 0,
-    {
-      path: ["to"],
-      message: "Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.",
-    },
-  );
+  .refine((value) => !value.from || !value.to || compareUtc(value.from, value.to) <= 0, {
+    path: ["to"],
+    message: "Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.",
+  });
 
 export type Event = z.infer<typeof eventSchema>;
 export type EventsPage = z.infer<typeof eventsPageSchema>;

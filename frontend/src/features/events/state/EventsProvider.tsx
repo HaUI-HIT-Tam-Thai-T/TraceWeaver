@@ -13,15 +13,8 @@ const hiddenState = initialEventsState();
 
 export function EventsProvider({ children }: { children: ReactNode }) {
   const { state: auth } = useAuth();
-  const {
-    state: workspace,
-    membership,
-    permissions,
-    refreshAccess,
-  } = useWorkspace();
-  const [controller] = useState(() =>
-    createEventsController(eventsService, refreshAccess),
-  );
+  const { state: workspace, membership, permissions, refreshAccess } = useWorkspace();
+  const [controller] = useState(() => createEventsController(eventsService, refreshAccess));
   const [snapshot, setSnapshot] = useState(controller.getSnapshot);
 
   useEffect(() => {
@@ -52,8 +45,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     if (auth.status !== "authenticated") {
       lastScope.current = null;
       controller.stop();
-      if (visible && location.search)
-        setSearchParams(new URLSearchParams(), { replace: true });
+      if (visible && location.search) setSearchParams(new URLSearchParams(), { replace: true });
       return;
     }
     if (!allowed || !me || !workspaceId) {
@@ -74,7 +66,12 @@ export function EventsProvider({ children }: { children: ReactNode }) {
       controller.sync(scope, visible, query);
       navigate("/events", { replace: true });
     } else {
-      controller.sync(scope, visible, readEventLocation(location.search, eventId), eventId === null);
+      controller.sync(
+        scope,
+        visible,
+        readEventLocation(location.search, eventId),
+        eventId === null,
+      );
     }
   }, [
     auth.status,
@@ -110,9 +107,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
 
   // Identity response object changes on every access revalidation, even for the same subject.
   const state =
-    allowed &&
-    snapshot.scope?.accessKey === me &&
-    snapshot.scope.workspaceId === workspaceId
+    allowed && snapshot.scope?.accessKey === me && snapshot.scope.workspaceId === workspaceId
       ? snapshot
       : hiddenState;
   const query = readEventLocation(location.search, eventId);
@@ -127,7 +122,11 @@ export function EventsProvider({ children }: { children: ReactNode }) {
           void controller.refresh(next);
         },
         showEvent(id) {
-          navigate(id ? `/events/${id}?${writeEventQuery(filters)}` : `/events?${writeEventQuery(filters)}`);
+          navigate(
+            id
+              ? `/events/${id}?${writeEventQuery(filters)}`
+              : `/events?${writeEventQuery(filters)}`,
+          );
         },
         refresh() {
           clearDetailQuery();

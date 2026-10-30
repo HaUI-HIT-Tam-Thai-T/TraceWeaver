@@ -14,9 +14,7 @@ export function utcUnits(value: string, precision: number): bigint {
 }
 export function shiftUtc(value: string, seconds: number): string {
   const [base = "", fraction] = value.slice(0, -1).split(".");
-  const shifted = new Date(Date.parse(`${base}Z`) + seconds * 1000)
-    .toISOString()
-    .slice(0, 19);
+  const shifted = new Date(Date.parse(`${base}Z`) + seconds * 1000).toISOString().slice(0, 19);
   return `${shifted}${fraction === undefined ? "" : `.${fraction}`}Z`;
 }
 export const runCreateSchema = z
@@ -25,10 +23,7 @@ export const runCreateSchema = z
     source_ids: z
       .array(id)
       .min(1)
-      .refine(
-        (ids) => new Set(ids).size === ids.length,
-        "Nguồn không được lặp.",
-      ),
+      .refine((ids) => new Set(ids).size === ids.length, "Nguồn không được lặp."),
     window: z.strictObject({ from: utcSchema, to: utcSchema }),
     mode,
   })
@@ -82,9 +77,7 @@ const evidenceSchema = z.strictObject({
   reason_code: z.string().min(1).max(100),
   event_ids: uniqueIds.refine((ids) => ids.length > 0),
   field: z.string().min(1).max(200),
-  observed_values: z.array(
-    z.union([z.string(), z.number().finite(), z.boolean(), z.null()]),
-  ),
+  observed_values: z.array(z.union([z.string(), z.number().finite(), z.boolean(), z.null()])),
 });
 export const linkSchema = z.strictObject({
   id,
@@ -110,14 +103,25 @@ export const graphSchema = z
         label: z.literal("chưa có bằng chứng"),
       }),
     ),
-    abstentions: z.array(z.strictObject({
-      reason_code: z.string(),
-      event_id: id.optional(),
-      transition_id: z.string().optional(),
-      from_event_id: id.optional(),
-      to_event_id: id.optional(),
-    }).refine(value => value.event_id !== undefined ||
-      (value.transition_id !== undefined && value.from_event_id !== undefined && value.to_event_id !== undefined))).default([]),
+    abstentions: z
+      .array(
+        z
+          .strictObject({
+            reason_code: z.string(),
+            event_id: id.optional(),
+            transition_id: z.string().optional(),
+            from_event_id: id.optional(),
+            to_event_id: id.optional(),
+          })
+          .refine(
+            (value) =>
+              value.event_id !== undefined ||
+              (value.transition_id !== undefined &&
+                value.from_event_id !== undefined &&
+                value.to_event_id !== undefined),
+          ),
+      )
+      .default([]),
     version: z.number().int().min(1),
   })
   .refine((graph) => {
@@ -130,9 +134,7 @@ export const graphSchema = z
         (link) =>
           nodes.has(link.from_event_id) &&
           nodes.has(link.to_event_id) &&
-          link.evidence.every((item) =>
-            item.event_ids.every((id) => nodes.has(id)),
-          ),
+          link.evidence.every((item) => item.event_ids.every((id) => nodes.has(id))),
       )
     );
   });

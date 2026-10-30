@@ -1,11 +1,11 @@
-import type { CaseTransition } from '../workflow';
+import type { CaseTransition } from "../workflow";
 import { createContext } from "react";
 import type { CasesState } from "./state";
 import type { CaseFilters } from "../schemas";
-import type { EvidenceCreate } from '../schemas';
+import type { EvidenceCreate } from "../schemas";
 
-import type { ReviewCreate, ManualLinkCreate } from '../../link-review/schemas';
-import type { Command } from '../../case-sandbox/schemas';
+import type { ReviewCreate, ManualLinkCreate } from "../../link-review/schemas";
+import type { Command } from "../../case-sandbox/schemas";
 export type CasesContextValue = {
   loadSandbox: () => Promise<void>;
   submitSandboxCommand: (body: Command) => Promise<void>;
@@ -28,6 +28,4 @@ export type CasesContextValue = {
   retryTransition: () => Promise<void>;
   beginNewTransition: () => void;
 };
-export const CasesContext = createContext<CasesContextValue | undefined>(
-  undefined,
-);
+export const CasesContext = createContext<CasesContextValue | undefined>(undefined);

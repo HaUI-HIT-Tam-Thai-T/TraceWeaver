@@ -14,6 +14,4 @@ export type EventsContextValue = {
   clearRoot: () => void;
 };
 
-export const EventsContext = createContext<EventsContextValue | undefined>(
-  undefined,
-);
+export const EventsContext = createContext<EventsContextValue | undefined>(undefined);
