@@ -10,9 +10,8 @@ Chưa triển khai reconstruction, dashboard hoặc các thao tác case.
   Keycloak URL cho phép path `/identity`. URL không chứa credentials/query/fragment.
 - Vite (`vite.config.ts`): local `http://localhost:5173`, `strictPort: true`;
   nếu cổng bận thì dừng, không tự chuyển sang 5174.
-- Proxy development: chỉ `/api` tới `API_PROXY_TARGET`, giữ nguyên path và Authorization,
-  kiểm TLS, bỏ Origin ở chặng server tới server. OAuth dùng issuer HTTPS thật;
-  không proxy `/identity`, `/core` hoặc service secrets. Proxy không chạy trong production build.
+- FE gọi trực tiếp API HTTPS bằng `VITE_API_BASE_URL`; không dùng Vite proxy.
+  API cần cho phép exact-origin CORS `http://localhost:5173`. OAuth dùng issuer HTTPS thật.
 - React Router: BrowserRouter, cấu hình trong `src/constants/routes.ts`.
   `/` chuyển về Dashboard qua ProtectedRoute; callback thành công về `/dashboard` bằng replace;
   `*` hiển thị trang không tìm thấy. Route được chặn trong lúc SDK xử lý code/state.
@@ -31,10 +30,9 @@ Nếu chưa có dependencies, chạy `npm ci` từ thư mục `frontend/`.
 npm run dev
 ```
 
-Tạo `.env.development.local` từ `.env.example`, đặt `VITE_API_BASE_URL=` rỗng cho local.
+Tạo `.env.development.local` từ `.env.example`, giữ `VITE_API_BASE_URL=https://api.quizlearn.tech`.
 Nếu đã có `.env.development` thì giữ hoặc ghi đè bằng `.env.development.local`.
-`VITE_API_BASE_URL=` rỗng ở local để API client gọi `/api/v1/...` qua Vite.
-`API_PROXY_TARGET` chỉ dùng phía dev server, không có prefix `VITE_`.
+Không để API base rỗng khi gọi BE trực tiếp; không cần `API_PROXY_TARGET`.
 Sau khi sửa env, khởi động lại Vite.
 
 Kiểm tra bằng trình duyệt:
@@ -85,7 +83,7 @@ UAT thật cần kiểm operator/viewer, hủy login, callback, reload, refresh 
 ## Axios client — task 3
 
 - `src/services/apiClient.ts` export `apiClient` dùng trong browser. Instance lấy API origin
-  từ env đã validate; local origin rỗng đi qua Vite proxy. Factory `createApiClient` nhận
+  từ env đã validate; local và production đều gọi origin HTTPS cấu hình. Factory `createApiClient` nhận
   baseURL và token provider để kiểm thử độc lập với Keycloak, không cần thư viện mới.
 - Timeout HTTP mặc định 10 giây, Accept JSON, withCredentials=false để không gửi cookie
   khác origin. Axios tự đặt Content-Type JSON khi service gửi body dạng object.
