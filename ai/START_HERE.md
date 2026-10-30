@@ -1,13 +1,21 @@
-# Bước 1: duyệt 24 cặp sự kiện mẫu
+# Dữ liệu review và dataset AI
 
-Đây là bộ ví dụ để chốt bài toán với backend, chưa phải dataset train/test.
-Chỉ dùng Python standard library, không cần cài dependency.
+Repository giữ bộ review bootstrap cũ và pipeline policy mới riêng biệt. Nguồn
+nhãn, feature version và mục đích của từng bộ phải được giữ rõ khi tái tạo kết quả.
+Xem [RUN.md](RUN.md) để cài môi trường và [FEATURE_HANDOFF.md](FEATURE_HANDOFF.md)
+để dùng extractor theo `sandbox-rules-1`.
+
+## Bộ review bootstrap: 24 cặp
+
+Đây là ví dụ review theo quy ước bootstrap, không phải dataset train/test hoặc
+fixture policy mới. Generator chỉ dùng standard library; toàn bộ tests cần
+dependencies trong `ai/requirements.txt`.
 
 Chạy từ root repository:
 
 ```powershell
 python -m ai.training.prepare_samples
-python -m unittest discover -s ai/tests -p "test_*.py" -v
+.\.venv\Scripts\python.exe -m unittest discover -s ai/tests -p "test_*.py" -v
 ```
 
 Output local nằm trong `.local/ai-bootstrap/` (đã được gitignore):
@@ -24,16 +32,17 @@ tình huống. Không mount folder offline này vào runtime; copy riêng reques
 cần smoke test. Manifest ghi hash ban đầu; review thay đổi sau khi duyệt là bình thường.
 Generator từ chối ghi đè output đã tồn tại để giữ công việc review.
 
-## Việc bạn làm ngay
+## Duyệt nhãn bootstrap
 
 1. Mở `.local/ai-bootstrap/review.json` cùng `observable.json`.
-2. Chốt với backend: nhãn 1 là **cạnh trực tiếp A→B**, hay chỉ cùng hành trình?
-   Bộ ví dụ đang đề xuất cạnh trực tiếp; đây chưa phải quyết định nghiệp vụ.
+2. Nhãn 1 đã được team chốt là **cạnh trực tiếp A→B có ground truth xác nhận**;
+   cùng journey chưa đủ. Quyết định này không tự duyệt từng nhãn bootstrap.
 3. Đọc các ca khó trước: p-13 (account mâu thuẫn), p-18 (chỉ chung user),
    p-20 (bỏ bước), p-21 (timestamp ngược), p-22 (account failed), p-24 (unknown).
 4. Sau khi thống nhất, điền `label: 1` hoặc `label: 0`, `reviewer` và `reason`.
    Giữ `null` nếu chưa đủ thông tin; không biến `null` thành nhãn âm.
-5. Sau đó mới mở rộng dữ liệu, làm baseline và train model đầu tiên.
+5. Không tự chuyển nhãn đề xuất thành ground truth hoặc tự đổi action/namespace
+   của sample cũ sang policy mới. Pipeline policy v2 bên dưới dùng dataset riêng.
 
 Baseline/API demo đã có thể chạy độc lập với việc duyệt nhãn; xem [RUN.md](RUN.md).
 Chúng không tự duyệt các ví dụ. Sau khi cài dependency theo RUN.md, kiểm trạng
@@ -53,7 +62,7 @@ Có 8 nhãn dương đề xuất, 8 nhãn âm đề xuất và 8 ca chưa quyế
 thực tế đều để `null`; không dùng `suggested_label` làm ground truth tự động.
 Không dùng 24 ví dụ này để tuyên bố precision/recall hoặc khả năng tổng quát hóa.
 
-## Quy ước feature đang đề xuất
+## Quy ước bootstrap cũ
 
 | Feature | Cách tính trong bộ ví dụ |
 |---|---|
@@ -63,15 +72,31 @@ Không dùng 24 ví dụ này để tuyên bố precision/recall hoặc khả n�
 | `transition_allowed` | Intake/request.received→Account/account.created hoặc Account/account.created→Provision/environment.provisioned |
 | `conflicting_id` | Cùng namespace request_id/account_id, hai phía đều có giá trị và không có giá trị chung |
 
-Template và quy tắc mâu thuẫn chỉ là đề xuất cho dữ liệu bootstrap. Chưa có
-process template chuẩn trong repo. `transition_allowed` hiện chỉ xét loại bước;
-chưa gộp điều kiện outcome hoặc timestamp. Backend cần chốt các semantics này.
-User_id chung không đủ chứng minh cùng request; không tự xem user_id là ID đơn
-trị của hành trình. Similarity từ vựng ở đây chưa phải embedding/model ngữ nghĩa.
+Bảng này mô tả `bootstrap-features-1`, được giữ để tái tạo model demo cũ. Policy
+mới đã chốt `request.accepted`, `provision.completed`/`provision.failed`, namespace
+`request`, `account`, `job` và các guard riêng. Dùng [FEATURE_HANDOFF.md](FEATURE_HANDOFF.md)
+cho extractor v2. ID user chung không đủ chứng minh cạnh; similarity từ vựng chưa
+phải embedding/model ngữ nghĩa.
 
 Không có feature nào đọc nhãn, tên tình huống, pair_id hay oracle. Hàm này chưa
 là parser/validator cho input production. Backend vẫn phải redact, kiểm quyền
 và validate schema trước khi dùng dữ liệu thật.
+
+## Dataset và fixture mới
+
+| Bộ dữ liệu | Mục đích |
+|---|---|
+| `.local/ai-dataset/` | 713 cặp synthetic bootstrap để tái tạo artifact `ai/artifacts/` |
+| `.local/ai-sandbox-rules-1-features-2/` | 120 nhóm scenario, 1920 nhãn oracle và 840 unresolved tách riêng cho đánh giá offline policy mới |
+| `.local/ai-be-feature-handoff/features-v2.json` | 42 golden fixture để đối chiếu feature Node/Python, không phải tập đánh giá chất lượng model |
+
+Các lệnh tạo từng bộ có trong [RUN.md](RUN.md). Scaler chỉ fit train, threshold
+chọn validation; test dùng đánh giá. Nhãn null không đi vào supervised training,
+oracle nằm ngoài feature. Chia nhóm tránh trùng event nhưng scenario templates vẫn
+lặp lại giữa các nhóm; kết quả synthetic không chứng minh tổng quát hóa thực tế.
+
+Model thử nghiệm hiện chưa tốt hơn luật hai cờ; xem [REPORT.md](REPORT.md). Không
+coi việc pass fixture hoặc F1 trên synthetic là nghiệm thu backend đã tích hợp.
 
 ## License và phạm vi
 

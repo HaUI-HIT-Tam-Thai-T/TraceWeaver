@@ -1,5 +1,6 @@
 * text=auto
 *.sql text eol=lf
+ai/artifacts/*.json text eol=lf
 # Scorer manifests verify raw bytes; keep the imported handoff stable on Windows.
 ai/artifacts/sandbox-v2/*.json text eol=lf
 ai/app/model_scorer.py text eol=lf

@@ -2,10 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from copy import deepcopy
+import hashlib
+from pathlib import Path
+import tempfile
 import unittest
 
 from ai.training.dataset import DatasetError, require_trainable, reviewed_rows
+from ai.training.generate_dataset import build_and_save_dataset
 from ai.training.prepare_samples import build_artifacts
+from ai.training.train import DatasetIntegrityError, verify_dataset_integrity
 
 
 class DatasetTests(unittest.TestCase):
@@ -66,3 +71,27 @@ class DatasetTests(unittest.TestCase):
         for review in reviews:
             with self.subTest(review=repr(review)[:50]), self.assertRaises(DatasetError):
                 reviewed_rows(self.request, review)
+
+    def test_generated_dataset_manifest_hashes_exact_file_bytes(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            dataset_dir = Path(tmp_dir)
+            manifest = build_and_save_dataset(dataset_dir, num_journeys=12, seed=42)
+
+            for filename, expected_hash in manifest["sha256"].items():
+                with self.subTest(filename=filename):
+                    self.assertEqual(
+                        hashlib.sha256((dataset_dir / filename).read_bytes()).hexdigest(),
+                        expected_hash,
+                    )
+
+            self.assertEqual(verify_dataset_integrity(dataset_dir), manifest)
+
+    def test_training_rejects_dataset_changed_after_manifest_was_written(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            dataset_dir = Path(tmp_dir)
+            build_and_save_dataset(dataset_dir, num_journeys=12, seed=42)
+            train_path = dataset_dir / "train.json"
+            train_path.write_bytes(train_path.read_bytes() + b" ")
+
+            with self.assertRaises(DatasetIntegrityError):
+                verify_dataset_integrity(dataset_dir)
