@@ -2,7 +2,8 @@
 
 Bảng này dẫn từ tính năng tới source, bộ test và hướng dẫn demo. **Có test trong repo không có nghĩa test đã chạy đạt ở revision hiện tại.**
 Kết quả theo mốc triển khai nằm ở [CURRENT_STATUS](status.md); kết quả mới phải ghi commit, môi trường, pass/fail/skip.
-Refactor core và một số thay đổi UI đang ở working tree; không suy rằng toàn bộ nội dung local đã có trên main hoặc server.
+Refactor core có entry point headless và adapter case riêng; trạng thái kiểm thử/phát hành nằm ở
+[hiện trạng](status.md). Source trên nhánh không tự cập nhật main hoặc server.
 
 | Tính năng | Source / hướng dẫn | Kiểm tra tương ứng | Cách quan sát |
 |---|---|---|---|
