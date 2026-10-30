@@ -28,6 +28,8 @@
     "check:base": "node backend/scripts/check-base.js",
     "licenses": "node backend/scripts/dependency-inventory.js",
     "licenses:check": "node backend/scripts/dependency-inventory.js --check",
+    "licenses:frontend": "node backend/scripts/dependency-inventory.js --frontend",
+    "licenses:frontend:check": "node backend/scripts/dependency-inventory.js --frontend --check",
     "smoke": "node backend/scripts/smoke.js",
     "evidence:backend": "node backend/scripts/council-evidence.js",
     "package:source": "node backend/scripts/package-source.js"

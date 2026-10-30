@@ -69,7 +69,9 @@ def generate():
         "Project code uses [Apache-2.0](../LICENSE). Libraries retain the licenses below; full bundled "
         "texts are in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). This records package license "
         "metadata/notices, not a security audit. The npm inventory does not cover these packages.\n\n"
-        "No pretrained model or external dataset is installed in this baseline milestone.\n\n"
+        "The experimental sandbox-v2 model and synthetic fixture provenance are documented in "
+        "[artifacts/sandbox-v2/README.md](artifacts/sandbox-v2/README.md); this package inventory "
+        "does not validate model or dataset provenance.\n\n"
         "| Package | Version | Scope | License | Source |\n"
         "|---|---|---|---|---|\n" + "\n".join(rows) + "\n"
     )

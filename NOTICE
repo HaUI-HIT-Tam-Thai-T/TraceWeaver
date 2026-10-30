@@ -4,3 +4,5 @@ Copyright 2026 TraceWeaver contributors
 Project source is licensed under Apache License 2.0.
 Third-party components retain their own licenses and notices.
 See backend/DEPENDENCIES.md and backend/THIRD_PARTY_NOTICES.txt.
+See also frontend/DEPENDENCIES.md, frontend/THIRD_PARTY_NOTICES.txt,
+ai/DEPENDENCIES.md, ai/THIRD_PARTY_NOTICES.txt and LICENSES.md.
