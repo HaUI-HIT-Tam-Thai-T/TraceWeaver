@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/traceweaver-overview.svg" alt="TraceWeaver: intake, account and provision logs become an evidence-backed journey with human review and verification" width="100%">
+</p>
+
 # TraceWeaver
 
 **Turn scattered logs into evidence-backed request journeys.**
@@ -5,9 +9,18 @@
 [![CI](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml/badge.svg)](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
-[Tiếng Việt](README.md) · **English** · [Installation](INSTALL.md) · [Documentation](docs/README.md)
+[Tiếng Việt](README.md) · **English** · [Guided demo](docs/DEMO.md) · [Installation](INSTALL.md) · [Documentation](docs/README.md)
 
 TraceWeaver is an open-source investigation tool for IT lab provisioning requests, developed in the DX-Lab HaUI 2026 context. It reconstructs journeys across **intake → account → provision**, helping operators locate failures, inspect evidence, review links and manage investigation cases.
+
+Choose a starting point: [follow an investigation](docs/DEMO.md), [run from source](INSTALL.md), [read API contracts](backend/contracts/README.md), or [inspect feature evidence](docs/FEATURE_STATUS.md).
+
+## Why TraceWeaver?
+
+- Keep source provenance, immutable run snapshots and decision history together.
+- Preserve unresolved cases when identifiers conflict or several branches remain plausible.
+- Distinguish log reconstruction, sandbox re-execution and source verification before case closure.
+- Use AI scores to assist a reviewer within rule-based guards.
 
 ## Capabilities
 
@@ -61,6 +74,7 @@ Follow [INSTALL.md](INSTALL.md) for SSO bootstrap, the frontend at `http://local
 npm run check:base
 npm run licenses:check
 npm run licenses:frontend:check
+npm run sbom:check
 npm test
 npm run test:sim
 npm --prefix frontend test
@@ -74,6 +88,6 @@ Frontend checks require its separately installed dependencies. Database, identit
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md) before contributing. Use [Issues](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues) for reproducible bugs and feature requests; sensitive reports follow [SECURITY.md](SECURITY.md). See [SUPPORT.md](SUPPORT.md) for troubleshooting.
 
-Project source is licensed under [Apache-2.0](LICENSE). Third-party components retain their own terms; see [LICENSES.md](LICENSES.md) and [NOTICE](NOTICE).
+Project source is licensed under [Apache-2.0](LICENSE). Third-party components retain their own terms; see [LICENSES.md](LICENSES.md), [NOTICE](NOTICE) and the [CycloneDX SBOMs](sbom/README.md). The frontend SBOM excludes optional dependencies; the Python SBOM is a flat component inventory. Both limits are documented alongside the files.
 
-Maintained under [HaUI-HIT-Tam-Thai-T](https://github.com/HaUI-HIT-Tam-Thai-T). The open-source repository presentation was informed by [HaUI-ImplSolution/DX-OS](https://github.com/HaUI-ImplSolution/DX-OS); this repository documents TraceWeaver's own implementation and licensing.
+Maintained under [HaUI-HIT-Tam-Thai-T](https://github.com/HaUI-HIT-Tam-Thai-T). See [source packaging and release preparation](docs/RELEASING.md) before distributing a revision.

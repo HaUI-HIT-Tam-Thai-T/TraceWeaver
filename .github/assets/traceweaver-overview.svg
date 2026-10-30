@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="440" viewBox="0 0 1200 440" role="img" aria-labelledby="title desc">
+  <title id="title">TraceWeaver — from scattered logs to verified journeys</title>
+  <desc id="desc">Intake, account and provision logs converge into one request journey, with separate human review and outcome verification.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#111f31"/><stop offset="1" stop-color="#08121e"/></linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#90b2d0" stroke-opacity=".045"/></pattern>
+  </defs>
+  <rect width="1200" height="440" rx="20" fill="url(#bg)"/>
+  <rect width="1200" height="440" rx="20" fill="url(#grid)"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="48" y="40" width="196" height="27" rx="13.5" fill="#59d9c5" fill-opacity=".1" stroke="#59d9c5" stroke-opacity=".3"/>
+    <circle cx="65" cy="53.5" r="3" fill="#59d9c5"/>
+    <text x="79" y="58" fill="#8de4d6" font-size="11" font-weight="600" letter-spacing="1.8">OPEN SOURCE · DX-LAB</text>
+    <text x="47" y="142" fill="#f2f6fb" font-size="65" font-weight="700" letter-spacing="-2.5">TraceWeaver</text>
+    <text x="50" y="181" fill="#b4c5d6" font-size="20">Scattered logs. Connected evidence.</text>
+    <text x="50" y="214" fill="#7e96ad" font-size="14">Reconstruct the journey. Review the links. Verify the outcome.</text>
+    <g fill="none" stroke-width="2.5">
+      <path d="M694 102H742C800 102 774 157 828 157H1090" stroke="#59d9c5"/>
+      <path d="M694 157H1090" stroke="#7ab7ff"/>
+      <path d="M694 212H742C800 212 774 157 828 157" stroke="#c0a1ed"/>
+    </g>
+    <g fill="#111f31" stroke-width="2.5">
+      <circle cx="695" cy="102" r="6" stroke="#59d9c5"/>
+      <circle cx="695" cy="157" r="6" stroke="#7ab7ff"/>
+      <circle cx="695" cy="212" r="6" stroke="#c0a1ed"/>
+      <circle cx="854" cy="157" r="8" stroke="#7ab7ff"/>
+      <circle cx="957" cy="157" r="8" stroke="#7ab7ff"/>
+      <circle cx="1090" cy="157" r="10" stroke="#59d9c5"/>
+    </g>
+    <path d="m1085 157 3 3 7-7" fill="none" stroke="#59d9c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="676" y="82" text-anchor="end" fill="#8de4d6" font-size="12" letter-spacing="1">INTAKE</text>
+    <text x="676" y="161" text-anchor="end" fill="#9dc9ff" font-size="12" letter-spacing="1">ACCOUNT</text>
+    <text x="676" y="236" text-anchor="end" fill="#cbb5ed" font-size="12" letter-spacing="1">PROVISION</text>
+    <text x="957" y="118" text-anchor="middle" fill="#7e96ad" font-size="11" letter-spacing="2">ONE REQUEST JOURNEY</text>
+    <text x="1090" y="194" text-anchor="middle" fill="#8de4d6" font-size="12">Evidence first</text>
+    <path d="M48 273H1152" stroke="#8aa9c5" stroke-opacity=".18"/>
+    <g font-size="12" font-weight="600" letter-spacing="1.4" fill="#7ab7ff">
+      <text x="50" y="310">01 / COLLECT</text><text x="330" y="310">02 / CORRELATE</text>
+      <text x="610" y="310">03 / REVIEW</text><text x="890" y="310">04 / VERIFY</text>
+    </g>
+    <g font-size="17" font-weight="600" fill="#e4edf6">
+      <text x="50" y="342">Keep the source.</text><text x="330" y="342">Follow the evidence.</text>
+      <text x="610" y="342">Make a human decision.</text><text x="890" y="342">Prove the outcome.</text>
+    </g>
+    <g font-size="13" fill="#8fa6bc">
+      <text x="50" y="369">Events · provenance · scope</text><text x="330" y="369">Rules · snapshots · optional AI</text>
+      <text x="610" y="369">Links · cases · audit history</text><text x="890" y="369">Rerun · delivery · source proof</text>
+    </g>
+    <text x="50" y="414" fill="#607b94" font-size="11" letter-spacing="1">TRACEWEAVER / REQUEST INVESTIGATION</text>
+    <text x="1150" y="414" text-anchor="end" fill="#607b94" font-size="11">Conceptual overview</text>
+  </g>
+</svg>

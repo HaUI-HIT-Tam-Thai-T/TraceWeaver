@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Evidence-led repository presentation
+
+- Add a TraceWeaver-specific overview illustration, a guided investigation/sandbox demo and feature-to-test evidence map.
+- Add reproducible CycloneDX npm/Python inventories with explicit optional/WASM and Python graph limits; document source packaging and distribution scope.
+- Add npm dependency audit scheduling, Dependabot configuration and CI checks for SBOM/Python license drift. No release, image or deployment is created by these configurations.
+
 ## Unreleased — Repository documentation and licensing
 
 - Replace the historical root introduction with Vietnamese/English project overviews, setup links and explicit implementation/model limits.

@@ -4,6 +4,18 @@
 
 Quy trình cộng đồng: [Đóng góp](../CONTRIBUTING.md), [Quy tắc ứng xử](../CODE_OF_CONDUCT.md), [Bảo mật](../SECURITY.md).
 
+## Chọn điểm bắt đầu
+
+| Bạn muốn | Đọc trước |
+|---|---|
+| Hiểu sản phẩm và thử một hành trình | [Khám phá/demo](DEMO.md) |
+| Đối chiếu tính năng, tests và điều kiện demo | [Tính năng và bằng chứng](FEATURE_STATUS.md) |
+| Dựng môi trường của mình | [INSTALL](../INSTALL.md) |
+| Tích hợp API hoặc mở rộng core | [Contracts](../backend/contracts/README.md), [Architecture](../ARCHITECTURE.md) |
+| Kiểm license hoặc chuẩn bị phân phối | [LICENSES](../LICENSES.md), [SBOM](../sbom/README.md), [Đóng gói/phát hành](RELEASING.md) |
+
+Các bàn giao theo mốc bên dưới phục vụ tích hợp; khi hướng dẫn cũ khác source mới, đối chiếu contract và revision ở CURRENT_STATUS.
+
 **Handoff sau audit30/10:** [Hoàn thiện FE](FE_COMPLETION_HANDOFF.md) — phân biệt tái dựng với chạy lại
 nghiệp vụ, tích hợp simulator/proof, phục hồi lỗi account và UAT UX. Không mở rộng phần tìm/hiển thị tài khoản.
 

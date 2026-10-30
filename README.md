@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/traceweaver-overview.svg" alt="TraceWeaver: ba nguồn log được nối thành hành trình, qua review và kiểm chứng bằng chứng" width="100%">
+</p>
+
 # TraceWeaver
 
 **Từ log rời rạc đến hành trình yêu cầu có bằng chứng.**
@@ -6,9 +10,18 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Node.js 24](https://img.shields.io/badge/Node.js-24-43853d.svg)](package.json)
 
-**Tiếng Việt** · [English](README_EN.md) · [Cài đặt](INSTALL.md) · [Tài liệu](docs/README.md) · [API contracts](backend/contracts/README.md)
+**Tiếng Việt** · [English](README_EN.md) · [Khám phá/demo](docs/DEMO.md) · [Cài đặt](INSTALL.md) · [Tài liệu](docs/README.md)
 
 TraceWeaver là dự án mã nguồn mở hỗ trợ điều tra yêu cầu cấp môi trường thực hành CNTT, định hướng DX-Lab HaUI 2026. Hệ thống ghép dấu vết từ ba nguồn **intake → account → provision**, giúp người vận hành tìm bước thất bại, xem bằng chứng, duyệt liên kết và theo dõi hồ sơ xử lý.
+
+**Bắt đầu theo nhu cầu:** [Xem một hành trình điều tra](docs/DEMO.md#một-hành-trình-điều-tra) · [Tự chạy từ source](INSTALL.md) · [Đọc API contract](backend/contracts/README.md) · [Đối chiếu tính năng và test](docs/FEATURE_STATUS.md).
+
+## Điều gì làm TraceWeaver hữu ích?
+
+- **Giữ được căn cứ:** mỗi hành trình có snapshot, nguồn sự kiện và lịch sử quyết định để đối chiếu.
+- **Không ép nối khi thiếu bằng chứng:** ID mâu thuẫn hoặc nhiều nhánh hợp lệ được giữ unresolved để review.
+- **Phân biệt phân tích và khắc phục:** tái dựng đọc log; sandbox chạy lại nghiệp vụ; proof xác minh kết quả trước khi đóng hồ sơ.
+- **AI hỗ trợ có giới hạn:** luật kiểm tra cặp trước, scorer bổ sung điểm, reviewer giữ quyền quyết định.
 
 ## Bài toán và cách giải quyết
 
@@ -24,7 +37,7 @@ Một yêu cầu có thể đi qua nhiều hệ thống, thiếu mã liên kết
 | Giao diện | React: dashboard, sự kiện, hồ sơ, tri thức và quản trị workspace |
 | AI có kiểm soát | Baseline và model sandbox v2 opt-in; fallback khi scorer không khả dụng |
 
-Source của các module trên đã có trong repo; mức tích hợp và triển khai phụ thuộc phiên bản. [CURRENT_STATUS](docs/CURRENT_STATUS.md) ghi bằng chứng theo từng mốc. Tag `v0.1.0-base.1` là bản scaffold cũ. Model hiện là thử nghiệm trên dữ liệu synthetic; chưa có bằng chứng đạt mục tiêu chất lượng trên dữ liệu đại diện. Xem [model card](ai/artifacts/sandbox-v2/README.md).
+Source của các module trên đã có trong repo; mức tích hợp và triển khai phụ thuộc phiên bản. [Bảng tính năng và bằng chứng](docs/FEATURE_STATUS.md) dẫn tới test/demo; [CURRENT_STATUS](docs/CURRENT_STATUS.md) ghi kết quả theo từng mốc. Tag `v0.1.0-base.1` là bản scaffold cũ. Model hiện là thử nghiệm trên dữ liệu synthetic; chưa có bằng chứng đạt mục tiêu chất lượng trên dữ liệu đại diện. Xem [model card](ai/artifacts/sandbox-v2/README.md).
 
 ## Kiến trúc
 
@@ -66,13 +79,13 @@ Tiếp tục theo [INSTALL.md](INSTALL.md) để cấu hình SSO, chạy web t�
 
 | Thành phần | Công nghệ | Thông tin giấy phép |
 |---|---|---|
-| Backend | JavaScript ES modules, Express, JOSE | [98 npm packages](backend/DEPENDENCIES.md) |
+| Backend | JavaScript ES modules, Express, JOSE | [Npm inventory](backend/DEPENDENCIES.md) |
 | Frontend | React, TypeScript, Vite, Tailwind, MUI, Radix UI | [Frontend inventory](frontend/DEPENDENCIES.md) |
 | AI | Python, FastAPI, Pydantic; baseline và model JSON | [Python inventory](ai/DEPENDENCIES.md), [model provenance](ai/artifacts/sandbox-v2/README.md) |
 | Dữ liệu / Identity | PostgreSQL 17, Keycloak | [Services và phạm vi kiểm kê](LICENSES.md) |
 | Simulator | Node.js, dữ liệu synthetic có seed | [Simulator](simulator/README.md) |
 
-Mã nguồn dự án theo **[Apache-2.0](LICENSE)**. Dependency, image và tài sản bên thứ ba giữ giấy phép riêng; xem [LICENSES.md](LICENSES.md) và [NOTICE](NOTICE).
+Mã nguồn dự án theo **[Apache-2.0](LICENSE)**. Dependency, image và tài sản bên thứ ba giữ giấy phép riêng; xem [LICENSES.md](LICENSES.md), [NOTICE](NOTICE) và [SBOM CycloneDX](sbom/README.md). Phạm vi và giới hạn frontend optional/Python được ghi cùng từng SBOM.
 
 ## Kiểm chứng
 
@@ -80,6 +93,7 @@ Mã nguồn dự án theo **[Apache-2.0](LICENSE)**. Dependency, image và tài 
 npm run check:base
 npm run licenses:check
 npm run licenses:frontend:check
+npm run sbom:check
 npm test
 npm run test:sim
 npm --prefix frontend test
@@ -105,4 +119,4 @@ Lệnh frontend cần dependencies tại `frontend/`. DB integration, identity, 
 
 Báo lỗi hoặc đề xuất tính năng tại [Issues](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues), kèm phiên bản và bước tái hiện với dữ liệu giả. Đọc [CONTRIBUTING.md](CONTRIBUTING.md) trước khi gửi PR. Vấn đề nhạy cảm theo [SECURITY.md](SECURITY.md).
 
-Dự án thuộc tổ chức [HaUI-HIT-Tam-Thai-T](https://github.com/HaUI-HIT-Tam-Thai-T). Cấu trúc hồ sơ nguồn mở tham khảo [DX-OS của HaUI-ImplSolution](https://github.com/HaUI-ImplSolution/DX-OS); nội dung mô tả, license và hiện trạng ở đây dành riêng cho TraceWeaver.
+Dự án thuộc tổ chức [HaUI-HIT-Tam-Thai-T](https://github.com/HaUI-HIT-Tam-Thai-T). Chuẩn bị bản phân phối theo [hướng dẫn đóng gói/phát hành](docs/RELEASING.md).

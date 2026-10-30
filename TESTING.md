@@ -8,6 +8,7 @@ Các lệnh dưới đây mô tả cách kiểm; kết quả lịch sử nằm �
 | Cấu trúc, SPDX, manifests | `npm run check:base` | Root dependencies; phát hiện tracked secret-file paths, không phải secret-content scanner |
 | License backend | `npm run licenses:check` | Root dependencies đúng lockfile |
 | License frontend | `npm run licenses:frontend:check` | Frontend dependencies đúng lockfile; giới hạn optional tại [LICENSES](LICENSES.md) |
+| npm SBOM | `npm run sbom:check` | npm 11.11.0, đọc lockfile offline; [phạm vi từng SBOM](sbom/README.md) |
 | Unit / HTTP / contract BE | `npm test` | Không cần PostgreSQL; một số test có thể skip nếu thiếu Python tùy chọn |
 | Contracts riêng | `npm run test:contracts` | OpenAPI, JSON Schema và fixtures |
 | Simulator | `npm run test:sim` | Logic stateful và sinh/gửi log; không thay UAT server |
@@ -42,6 +43,8 @@ CI [ci.yml](.github/workflows/ci.yml) định nghĩa các job thực tế; xem k
 Chi tiết: [FE sandbox handoff](docs/FE_SANDBOX_HANDOFF.md), [workspace admin](docs/FE_WORKSPACE_ADMIN_HANDOFF.md),
 [completion handoff](docs/FE_COMPLETION_HANDOFF.md).
 Ghi revision, môi trường, lệnh, pass/fail/skip và giới hạn; loại token, credentials và dữ liệu riêng khỏi bằng chứng công khai.
+
+[Bảng tính năng và bằng chứng](docs/FEATURE_STATUS.md) dẫn từng tính năng tới bộ test và cách demo; [DEMO](docs/DEMO.md) trình bày một hành trình kiểm chứng hoàn chỉnh.
 
 Model [sandbox v2](ai/artifacts/sandbox-v2/README.md) dùng dữ liệu synthetic và chưa đạt mục tiêu precision của dự án.
 Full browser E2E, hiệu năng, backup/restore và bảo mật image cần kiểm riêng; unit/contract pass không thay các bằng chứng này.
