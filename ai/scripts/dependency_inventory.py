@@ -6,6 +6,7 @@
 import argparse
 from importlib import metadata
 from pathlib import Path
+import json
 import re
 
 
@@ -36,7 +37,7 @@ def generate():
                  if normalize(dist.metadata["Name"]) not in {"pip", "setuptools", "wheel"}}
     if set(installed) != set(locked):
         raise ValueError("Use a dedicated virtual environment matching ai/requirements.txt")
-    rows = []
+    rows, components = [], []
     notices = ["Third-party Python package notices for ai/requirements.txt.\n"
                "Generated from installed wheel license files. Each package retains its own license.\n"]
     for name, version in sorted(locked.items()):
@@ -58,6 +59,12 @@ def generate():
             text = Path(dist.locate_file(path)).read_text(encoding="utf-8").replace("\r\n", "\n")
             texts.append(f"{path.split('.dist-info/', 1)[-1]}\n{text}")
         source = f"https://pypi.org/project/{name}/{version}/"
+        components.append({
+            "type": "library", "bom-ref": f"pkg:pypi/{name}@{version}",
+            "name": name, "version": version, "purl": f"pkg:pypi/{name}@{version}",
+            "licenses": [{"expression": license_name}],
+            "externalReferences": [{"type": "distribution", "url": source}],
+        })
         rows.append(f"| {name} | {version} | {'direct' if name in direct else 'transitive'} | "
                     f"{license_name} | [PyPI]({source}) |")
         notices.append(f"\n{'=' * 72}\n{name}=={version} ({license_name})\n{source}\n\n" + "\n\n".join(texts))
@@ -75,7 +82,19 @@ def generate():
         "| Package | Version | Scope | License | Source |\n"
         "|---|---|---|---|---|\n" + "\n".join(rows) + "\n"
     )
-    return {"DEPENDENCIES.md": inventory, "THIRD_PARTY_NOTICES.txt": "\n".join(notices).rstrip() + "\n"}
+    bom = {
+        "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
+        "bomFormat": "CycloneDX", "specVersion": "1.5", "version": 1,
+        "metadata": {"component": {
+            "type": "application", "name": "traceweaver-ai",
+            "bom-ref": "traceweaver-ai", "licenses": [{"license": {"id": "Apache-2.0"}}],
+        }, "properties": [{"name": "traceweaver:scope", "value":
+            "Pinned Python component inventory; dependency graph, interpreter, model and OS excluded"}]},
+        "components": components,
+    }
+    return {"DEPENDENCIES.md": inventory,
+            "THIRD_PARTY_NOTICES.txt": "\n".join(notices).rstrip() + "\n",
+            "../sbom/ai.cdx.json": json.dumps(bom, indent=2, ensure_ascii=False) + "\n"}
 
 
 def main():
@@ -88,6 +107,7 @@ def main():
             if not path.exists() or path.read_text(encoding="utf-8") != text:
                 raise SystemExit(f"Stale AI dependency inventory: {name}")
         else:
+            path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text, encoding="utf-8", newline="\n")
     print("AI Python license inventory " + ("verified." if args.check else "generated."))
 

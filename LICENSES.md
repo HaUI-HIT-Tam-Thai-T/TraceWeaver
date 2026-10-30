@@ -53,4 +53,5 @@ Không chạy bằng Python global có các gói ngoài requirements.
 - Khi phát hành container hoặc binary, kiểm kê thêm dependency thực tế trong image, base OS, optional/native packages và tài sản được đóng gói.
 - Ghi nguồn, phiên bản/hash, license và phạm vi sử dụng khi thêm model, dataset, ảnh hoặc font.
 
-Inventory ghi nhận metadata và notices; không phải kết luận tương thích giấy phép cho mọi bản phân phối, không phải quét CVE và chưa phải SBOM CycloneDX/SPDX.
+Inventory ghi nhận metadata và notices; không phải kết luận tương thích giấy phép cho mọi bản phân phối hoặc kết quả quét CVE.
+Danh mục máy đọc được nằm ở [sbom/](sbom/README.md), định dạng CycloneDX 1.5 cho npm và Python. Có lệnh kiểm drift riêng; phạm vi frontend optional và Python dependency graph được ghi rõ.
