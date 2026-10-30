@@ -1,0 +1,75 @@
+diff --git a/frontend/src/features/cases/state/controller.ts b/frontend/src/features/cases/state/controller.ts
+index 36dac2f..a0afa90 100644
+--- a/frontend/src/features/cases/state/controller.ts
++++ b/frontend/src/features/cases/state/controller.ts
+@@ -519,9 +519,12 @@ export function createCasesController(
+     const version = generation;
+     const caseVersion = state.detail.data.case.version;
+     const current = () => generation === version && sandboxRequest === controller && !controller.signal.aborted && state.detail.data?.case.version === caseVersion;
+-    function failRead(error: unknown): never {
++    // /lab is an optional workspace module: its 404 does not mean the case is hidden.
++    const deniedRead = (error: ApiError, optionalLab = false) =>
++      error.kind === 'auth' || error.status === 403 || (error.status === 404 && !optionalLab);
++    function failRead(error: unknown, optionalLab = false): never {
+       const safe = sandboxFailure(error);
+-      if (current() && (safe.kind === 'auth' || safe.status === 403 || safe.status === 404)) deny(safe);
++      if (current() && deniedRead(safe, optionalLab)) deny(safe);
+       throw error;
+     }
+     update({ sandbox: { ...state.sandbox,
+@@ -531,12 +534,12 @@ export function createCasesController(
+       const results = await Promise.allSettled([
+         sandboxService.getSandbox(scope.workspaceId, cid, controller.signal).catch(failRead),
+         sandboxService.getProofs(scope.workspaceId, cid, controller.signal).catch(failRead),
+-        sandboxService.getLab(scope.workspaceId, controller.signal).catch(failRead),
++        sandboxService.getLab(scope.workspaceId, controller.signal).catch(error => failRead(error, true)),
+       ]);
+       if (!current()) return;
+-      for (const result of results) if (result.status === 'rejected') {
++      for (const [index, result] of results.entries()) if (result.status === 'rejected') {
+         const safe = sandboxFailure(result.reason);
+-        if (safe.kind === 'auth' || safe.status === 403 || safe.status === 404) { deny(safe); return; }
++        if (deniedRead(safe, index === 2)) { deny(safe); return; }
+       }
+       const [snapshot, proofs, lab] = results;
+       update({ sandbox: { ...state.sandbox,
+diff --git a/frontend/tests/case-sandbox.test.mjs b/frontend/tests/case-sandbox.test.mjs
+index 0a8ef18..17124d2 100644
+--- a/frontend/tests/case-sandbox.test.mjs
++++ b/frontend/tests/case-sandbox.test.mjs
+@@ -164,6 +164,35 @@ test('shared write lock prevents command/proof/workflow/evidence overlap and per
+   assert.equal(y.controller.getSnapshot().caseRun.status, 'ready');
+   pending.resolve(sandbox()); await read;
+ });
++test('unconfigured optional lab preserves an accessible regular case and evidence writes', async () => {
++  const x = await setup({
++    getSandbox: async () => { throw failure('SANDBOX_BINDING_REQUIRED', 422); },
++    getProofs: async () => proofs(),
++    getLab: async () => { throw failure('NOT_FOUND', 404); },
++  });
++  const state = x.controller.getSnapshot();
++  assert.equal(state.status, 'active');
++  assert.equal(state.detail.status, 'ready');
++  assert.equal(state.detail.data.case.id, CID);
++  assert.equal(state.sandbox.snapshot.error.code, 'SANDBOX_BINDING_REQUIRED');
++  assert.equal(state.sandbox.lab.status, 'error');
++  assert.equal(state.sandbox.lab.data, null);
++  assert.equal(x.rechecks(), 0);
++  await x.controller.submitEvidence({ kind: 'note', note: 'Đối chiếu hồ sơ theo log hiện có.', event_ids: [] });
++  assert.equal(x.posts.filter(item => item[0] === 'evidence').length, 1);
++});
++
++test('optional lab 404 stays local while lab authentication and permission failures still purge', async () => {
++  const x = await setup({ getLab: async () => { throw failure('NOT_FOUND', 404); } });
++  assert.equal(x.controller.getSnapshot().status, 'active');
++  assert.equal(x.controller.getSnapshot().sandbox.snapshot.status, 'ready');
++  for (const status of [401, 403]) {
++    const y = await setup({ getLab: async () => { throw failure('DENIED', status); } });
++    assert.equal(y.controller.getSnapshot().status, status === 401 ? 'reauth' : 'blocked');
++    assert.equal(y.controller.getSnapshot().detail.data, null);
++  }
++});
++
+ test('module errors preserve investigation, 401/403/404 purge immediately, scope changes reject late reads and writes', async () => {
+   const x = await setup({ getSandbox: async () => { throw failure('SANDBOX_BINDING_REQUIRED'); } });
+   assert.equal(x.controller.getSnapshot().status, 'active'); assert.ok(x.controller.getSnapshot().detail.data);
