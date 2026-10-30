@@ -15,6 +15,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY package.json LICENSE NOTICE ./
 COPY backend/package.json backend/THIRD_PARTY_NOTICES.txt ./backend/
 COPY backend/src ./backend/src
+COPY simulator/lab-state.mjs ./simulator/lab-state.mjs
 COPY backend/contracts/schemas ./backend/contracts/schemas
 COPY backend/contracts/openapi.json backend/contracts/health.openapi.json ./backend/contracts/
 COPY backend/scripts/migrate.js backend/scripts/container-env.js ./backend/scripts/

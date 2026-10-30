@@ -1,5 +1,47 @@
 # Hiện trạng TraceWeaver
 
+## BE-58 — triển khai kiểm chứng theo từng yêu cầu, 31/10/2026
+
+Đã push nhánh `Phuoc/feat/be-sandbox-verification` đến `a38c380` và triển khai image
+`traceweaver-api:be-a38c380` tại `https://api.quizlearn.tech`. Migrations001–011 đã đủ, không có migration
+mới hoặc thay đổi quyền. Collector, CORS local và account-admin giữ nguyên cấu hình; hàng đợi log0.
+Chỉ thay API container; DB/Keycloak/scorer/các ứng dụng khác không restart. Backup DB ứng dụng đã kiểm
+archive; hash dữ liệu, membership/grants, source state và proof trước/sau không đổi, không đổi mật khẩu.
+
+Image mới đạt34 tests cách ly trên server (gồm11 PostgreSQL), sau rollout đạt66 kiểm tra HTTPS/Keycloak
+chỉ đọc và private TLS scorer23pairs/401. Simulator smoke trong container mới xác nhận yêu cầu khác không
+làm stale kết quả đạt; tự đổi điều kiện rồi đổi lại vẫn phải thực thi mới. Snapshot cũ đã stale giữ nguyên,
+không tự đánh dấu đạt hoặc sửa lịch sử. Browser E2E với phiên đăng nhập chưa nghiệm thu trong lượt này.
+
+FE `frontend/fix-sandbox-status` đã push đến `ecbbda2`, có sửa thông báo proof và format source/tests;
+chưa triển khai production FE trong lượt này. Vite đã bỏ proxy, FE local gọi API HTTPS trực tiếp.
+Refactor core BE chưa commit ở máy local được giữ nguyên và không đưa vào image này.
+
+Các mốc dưới đây là lịch sử, không thay thế trạng thái triển khai BE-58 ở trên.
+
+## BE-52 — FE local gọi trực tiếp API, 30/10/2026
+
+Oracle API chạy `traceweaver-api:be-1b6a72e`. Bật riêng
+`FRONTEND_LOCAL_ORIGINS=http://localhost:5173,http://127.0.0.1:5173`, giữ allowlist HTTPS hiện có.
+21 kiểm tra HTTPS live đạt: health, GET/POST/PUT preflight, anonymous401, origin/cổng khác403,
+Keycloak callback và token CORS cho hai local origins. Không sửa FE; không migration hoặc restart scorer/DB/IdP.
+Local141BE/contract tests đạt,2Python tùy chọn bỏ qua; base/license98/diff đạt.
+FE đặt `VITE_API_BASE_URL=https://api.quizlearn.tech` rồi khởi động lại Vite để bỏ qua proxy.
+Giữ `API_PROXY_TARGET` vì Vite hiện vẫn kiểm biến này. Browser UI E2E chưa kiểm trong lượt này.
+Source chuyển bằng Git bundle; chưa push commit mới lên origin. Các mốc bên dưới là lịch sử.
+
+## Cập nhật hiện tại — 30/10/2026
+
+Oracle đang chạy API source `4cdd022`, image `traceweaver-api:be-4cdd022`, migrations001–011,
+collector và dedicated account-administration client/marker đã cấu hình. CORS/callback/Web Origin/logout
+cho `https://traceweaver.quizlearn.tech` đã đăng ký. Secret và credentials giữ trên server.
+40 kiểm tra quản trị HTTPS/Keycloak thật và36 kiểm tra simulator đạt: tạo account/required actions/login,
+scope/grants/revoke/replay, RAM -> image -> account -> pass -> ingestion -> proof -> closed.
+140 BE tests đạt,2 Python tùy chọn bỏ qua;10 simulator và15 PostgreSQL admin/lab/case đạt.
+Các dòng dữ liệu cũ được đối chiếu hash không đổi; thêm account/hành trình UAT, không xóa/reset.
+FE chưa sửa hoặc deploy, browser UI E2E và hosting frontend chưa xác minh. Xem [bàn giao quản trị](FE_WORKSPACE_ADMIN_HANDOFF.md)
+và [simulator](FE_SANDBOX_HANDOFF.md). Các mục bên dưới là lịch sử theo mốc, không thay trạng thái mới này.
+
 BE-38 (29/10/2026): đã deploy BE + model AI v2 lên Oracle tại https://api.quizlearn.tech/docs/, runtime release `oracle-4e2805e`. API gọi scorer bằng TLS nội bộ, AI không publish cổng Internet. Pass 23 mẫu scorer qua TLS, 20 kiểm tra hybrid/PKCE/audit/replay/dữ liệu và 49 kiểm tra live hiện có. Hashes của 72 events, 25 runs và 25 cases cũ giữ nguyên; test thêm đúng một run hybrid, không thêm event/case. PostgreSQL/Keycloak và các ứng dụng khác giữ nguyên. Xem [hướng dẫn deploy](../deploy/oracle/README.md). Các ghi chú container cũ bên dưới mô tả lịch sử hoặc container local8080, không phải deployment Oracle mới.
 
 ## BE-34 — 28/10/2026: trained model v2 opt-in

@@ -97,3 +97,7 @@ Hiện20 operations implemented với JWT/JWKS/DB scope; trusted core HTTP đã 
 ## Phân tầng
 
 `routers/` → `controllers/` → `services/`; `middlewares/` xử lý HTTP chung. `models/`, `validations/`, `utils/` là khung cho API nghiệp vụ tiếp theo. Kết nối và migrations dùng chung tại `backend/src/core/data/`.
+
+## Stateful sandbox and case verification
+
+See [LAB_SANDBOX.md](LAB_SANDBOX.md) for opt-in source APIs, log delivery and reviewer verification before closing sandbox cases.

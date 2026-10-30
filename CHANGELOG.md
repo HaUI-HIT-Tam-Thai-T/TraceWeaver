@@ -1,5 +1,45 @@
 # Changelog
 
+## Unreleased — Administration deployed and FE handoff (BE-51)
+
+- Push and deploy runtime4cdd022 as traceweaver-api:be-4cdd022 on Oracle; apply011 and runtime grants. Configure dedicated service-only Keycloak account client with manage/view/query-users, admin-only ownership marker and server-only secret. Keep public Admin REST closed; route BE Admin REST over the exact private Docker endpoint while token issuer stays HTTPS.
+- Preserve existing credentials and hashes of all pre-existing rows checked across events/runs/cases/memberships/roles/grants/sources/workflows. Append one UAT human account and one simulator journey; no deletion/reset. Reuse existing scorer/IdP/database containers.
+- Pass40 live HTTPS/Keycloak account checks including required password/profile actions, login, grants/revocation/replay/service protection; pass36 simulator checks through collector, hybrid non-degraded, immutable proof and closure. Add exact production FE CORS/callback/Web Origin/logout; preflights pass.140BE pass/2optional Python skips,10sim and15PG pass; base/license98/diff pass.
+- Add docs/FE_WORKSPACE_ADMIN_HANDOFF.md for sidebar, endpoints, versions, recovery, first login and UAT; update deployment status and simulator handoff. No FE edits/deployment or browser UI E2E claim. Private rollout evidence and credentials remain on server.
+## Unreleased — Administration audit fixes (BE-50)
+
+- Protect configured core and collector subjects independently of ingest roles at the repository boundary. Human administration cannot add their membership, change roles/active state or direct-read grants; human revocation still works without the identity provider.
+- Reject new account provisioning with ACCOUNT_PROVIDER_DISABLED before creating a pending operation or request audit when no provider is configured. Keep existing pending status, completed replay and conflicting-body detection available.
+- Verify138 BE tests (two optional Python skips),10 simulator tests and15 PostgreSQL admin/lab/case checks, plus base/license98/diff checks. No migration, dependency, FE or production change; fixes are local source commits pending push/deployment.
+
+## Unreleased — Workspace administration and account provisioning (BE-48)
+
+- Add workspace-admin member directory, existing-account membership, role/revocation and scoped direct-read grants with workspace CAS, last-admin and service-account protection, atomic audit and PUT CORS support for existing allowed origins.
+- Add opt-in Keycloak human-account creation with temporary password, owned idempotent provisioning, caller-scoped operation status and safe retry after provider/DB/audit failures. Passwords/provider tokens are not persisted in application state/audit or returned. Add migration011 and OpenAPI36 operations; handoff backend/WORKSPACE_ADMIN.md.
+- Verify138 BE tests (two optional Python skips),10 simulator tests,13 PostgreSQL admin/lab/case checks, additional real-HTTP adapter and race/audit fault regressions, base/license98/diff checks. FE unchanged. New production rollout is blocked by automatic approval review pending explicit approval for the dedicated Keycloak service client/secret/profile and migration011/runtime grants; existing simulator deployment is unchanged.
+
+## Unreleased — FE sandbox integration handoff
+
+- Add docs/FE_SANDBOX_HANDOFF.md with deployed workspace, role matrix, case-bound endpoints, JSON examples, separate execution/delivery/proof states, CAS/replay/error handling and UAT checklist. Describe admin-only repair visibility and the total-RAM semantics explicitly. No runtime or FE changes.
+
+## Unreleased — Oracle sandbox rollout (BE-46)
+
+- Push Phuoc/feat/be-sandbox-verification and deploy API source60919cd as be-60919cd on Oracle. Apply migrations008–010, runtime grants and server-local collector configuration; create a separate sandbox workspace using existing operator/reviewer/admin/viewer/ingest identities without password changes.
+- Pass36 live HTTPS/Keycloak PKCE checks: combined failures, independent repairs/retries, real log ingestion, hybrid run, failed then passing immutable proof, closure guard and viewer denial. Preserve the first trial case after fixing a script status expectation. Hashes of all old events/runs/cases/memberships/roles/grants/sources unchanged; all services healthy. No FE/browser E2E claim.
+
+## Unreleased — Sandbox ID validation and CLI guidance (BE-44)
+
+- Reject new sandbox request IDs whose request/account/image identifiers would change under ingestion redaction, before state or outbox writes. Apply validation at HTTP and repository boundaries, preserve redaction and existing data, and return a non-echoing 400 INVALID_INPUT.
+- Verify rejected IDs leave DB/outbox unchanged and accepted Unicode IDs survive simulator -> ingestion -> run -> case binding. 133 BE tests pass (two optional Python tests skipped), 10 simulator and three sandbox PostgreSQL tests pass; OpenAPI/base/license98/diff pass.
+- Correct simulator README: JSON is written only with explicit --out; the CLI has no default output directory. FE and server deployment remain unchanged.
+
+## Unreleased — Three-condition sandbox verification (BE-41)
+
+- Add combined RAM/image/account faults, targeted repairs, immutable attempt snapshots and safe retries of an existing simulated environment without duplicate allocations.
+- Bind case sandbox commands to ingested sandbox root events in one transaction; reject client-selected request IDs. Require matching checker/source/case versions, consistent allocation/conditions and delivered attempt logs before closure.
+- Add case-bound read/command endpoints and FE handoff in backend/LAB_SANDBOX.md. Preserve non-sandbox closure policy and all FE source. Existing migrations 008–010 suffice.
+- Verify 132 BE tests (two optional Python tests skipped), 10 simulator tests, three sandbox PostgreSQL tests, eight legacy case PostgreSQL checks and eight real JWT/HTTP/PostgreSQL case checks. OpenAPI/base/license/diff checks pass. No remote deployment or browser E2E claim: uploading the source bundle to Oracle was blocked by automatic approval review pending explicit destination/source-transfer authorization.
+
 ## Unreleased — Realistic deployed lab demo
 
 - Append LAB-DEMO-20261028-v2 to the existing Oracle demo workspace: 36 Vietnamese operational events, 12 runs and 12 cases with readable request codes, synthetic student accounts, courses, resource sizes, varied timings and three specific provisioning failures. Preserve missing-evidence and missing-correlation scenarios and mark every message/case as demo.

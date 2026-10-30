@@ -4,7 +4,7 @@
   "info": {
     "title": "TraceWeaver API",
     "version": "0.1.0",
-    "description": "Public/core/scorer interfaces. 22 operations implemented in source, including case-scoped assignee discovery. Health routes are in health.openapi.json."
+    "description": "Public/core/scorer interfaces. 36 operations implemented in source, including opt-in stateful sandbox, case-bound commands and immutable source verification. Non-sandbox workspaces retain their existing closure policy. See backend/LAB_SANDBOX.md."
   },
   "paths": {
     "/api/v1/workspaces/{wid}/cases/{cid}/assignees": {
@@ -280,6 +280,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -288,12 +294,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -523,6 +523,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -531,12 +537,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -710,6 +710,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -718,12 +724,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -786,6 +786,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -794,12 +800,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -859,6 +859,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -867,12 +873,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -970,13 +970,17 @@
             "name": "from",
             "in": "query",
             "description": "Inclusive lower bound on parent run created_at (UTC).",
-            "schema": { "$ref": "./schemas/domain.schema.json#/$defs/UtcTime" }
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/UtcTime"
+            }
           },
           {
             "name": "to",
             "in": "query",
             "description": "Inclusive upper bound on parent run created_at (UTC).",
-            "schema": { "$ref": "./schemas/domain.schema.json#/$defs/UtcTime" }
+            "schema": {
+              "$ref": "./schemas/domain.schema.json#/$defs/UtcTime"
+            }
           }
         ]
       }
@@ -1075,6 +1079,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -1083,12 +1093,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -1148,6 +1152,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -1156,12 +1166,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
@@ -1264,7 +1268,9 @@
         "description": "Internal app JWT (distinct client and configured service subject) plus independently verified end-user JWT; both require active workspace membership. X-Workspace-Id must match body workspace_id and creator_subject must match verified user. Creates standalone workspace-scoped document_review v1/document entities; no document content is stored. Case workflows are created by createCase; duplicate core case creation returns409 after current source ACL. Server definitions only. Entity uniqueness409; no Idempotency-Key support.",
         "x-implementation-status": "implemented",
         "parameters": [
-          { "$ref": "#/components/parameters/coreWorkspace" }
+          {
+            "$ref": "#/components/parameters/coreWorkspace"
+          }
         ],
         "security": [
           {
@@ -1298,6 +1304,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -1306,12 +1318,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "requestBody": {
@@ -1364,6 +1370,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -1372,16 +1384,12 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "parameters": [
-          { "$ref": "#/components/parameters/coreWorkspace" },
+          {
+            "$ref": "#/components/parameters/coreWorkspace"
+          },
           {
             "$ref": "#/components/parameters/id"
           }
@@ -1447,7 +1455,9 @@
           }
         },
         "parameters": [
-          { "$ref": "#/components/parameters/coreWorkspace" },
+          {
+            "$ref": "#/components/parameters/coreWorkspace"
+          },
           {
             "$ref": "#/components/parameters/id"
           }
@@ -1497,6 +1507,12 @@
           "409": {
             "$ref": "#/components/responses/409"
           },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
           "422": {
             "$ref": "#/components/responses/422"
           },
@@ -1505,12 +1521,6 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
-          },
-          "413": {
-            "$ref": "#/components/responses/413"
-          },
-          "415": {
-            "$ref": "#/components/responses/415"
           }
         },
         "requestBody": {
@@ -1524,6 +1534,1394 @@
           }
         }
       }
+    },
+    "/api/v1/workspaces/{wid}/lab": {
+      "get": {
+        "operationId": "getLabSandbox",
+        "summary": "Read persisted sandbox state; requires all three source grants",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/lab/configure": {
+      "post": {
+        "operationId": "configureLabSandbox",
+        "summary": "Opt in once; administrator with three source read grants",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "source_ids": {
+                    "type": "array",
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "ram": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1048576
+                  }
+                },
+                "required": [
+                  "source_ids",
+                  "ram"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/lab/commands": {
+      "post": {
+        "operationId": "commandLabSandbox",
+        "summary": "Execute sandbox command: capacity/image/account admin; submit/provision operator or reviewer",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "action": {
+                        "const": "capacity"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "ram": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1048576
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "ram"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "action": {
+                        "const": "submit"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "ram": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1048576
+                      },
+                      "request_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "description": "Stable request code, e.g. LAB-001. The request ID and derived account/image IDs must remain unchanged by ingestion redaction; otherwise 400 INVALID_INPUT before state or log creation. Existing identifiers are not rewritten."
+                      },
+                      "image_available": {
+                        "type": "boolean",
+                        "default": true
+                      },
+                      "account_active": {
+                        "type": "boolean",
+                        "default": true
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "ram",
+                      "request_id"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "action": {
+                        "const": "provision"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "request_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "operation_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "request_id",
+                      "operation_id"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "request_id",
+                      "image_id",
+                      "available"
+                    ],
+                    "properties": {
+                      "action": {
+                        "const": "image"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "request_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "image_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 220
+                      },
+                      "available": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "request_id",
+                      "account_id",
+                      "active"
+                    ],
+                    "properties": {
+                      "action": {
+                        "const": "account"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "request_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "account_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 220
+                      },
+                      "active": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/lab/requests/{rid}/inspection": {
+      "get": {
+        "operationId": "inspectLabRequest",
+        "summary": "Inspect current simulated environment; does not persist case verification",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/cases/{cid}/verifications": {
+      "get": {
+        "operationId": "listCaseVerifications",
+        "summary": "Read immutable source checks with current case and sandbox grants",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      },
+      "post": {
+        "operationId": "verifyCaseSource",
+        "summary": "Reviewer checks authoritative sandbox source and persists passed/failed/inconclusive; empty input only",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {},
+                "required": []
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/cases/{cid}/sandbox": {
+      "get": {
+        "operationId": "getCaseSandbox",
+        "summary": "Read bound simulated request, conditions, attempts and log delivery",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseSandbox"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/cases/{cid}/sandbox/commands": {
+      "post": {
+        "operationId": "commandCaseSandbox",
+        "summary": "Execute command bound to case root; requires case and lab versions; closed case rejected",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseSandbox"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "action": {
+                        "const": "capacity"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "ram": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1048576
+                      },
+                      "expected_case_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "ram",
+                      "expected_case_version"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "action": {
+                        "const": "provision"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "operation_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "expected_case_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "operation_id",
+                      "expected_case_version"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "image_id",
+                      "available",
+                      "expected_case_version"
+                    ],
+                    "properties": {
+                      "action": {
+                        "const": "image"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "image_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 220
+                      },
+                      "available": {
+                        "type": "boolean"
+                      },
+                      "expected_case_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "action",
+                      "expected_version",
+                      "account_id",
+                      "active",
+                      "expected_case_version"
+                    ],
+                    "properties": {
+                      "action": {
+                        "const": "account"
+                      },
+                      "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "account_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 220
+                      },
+                      "active": {
+                        "type": "boolean"
+                      },
+                      "expected_case_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/admin/members": {
+      "get": {
+        "operationId": "listWorkspaceMembers",
+        "summary": "listWorkspaceMembers",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          }
+        }
+      },
+      "post": {
+        "operationId": "addWorkspaceMember",
+        "summary": "addWorkspaceMember",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "subject",
+                  "roles",
+                  "expected_version"
+                ],
+                "properties": {
+                  "subject": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                  },
+                  "roles": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "uniqueItems": true,
+                    "items": {
+                      "enum": [
+                        "viewer",
+                        "operator",
+                        "reviewer",
+                        "admin"
+                      ]
+                    }
+                  },
+                  "expected_version": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/admin/members/{subject}": {
+      "put": {
+        "operationId": "updateWorkspaceMember",
+        "summary": "updateWorkspaceMember",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "roles",
+                  "active",
+                  "expected_version"
+                ],
+                "properties": {
+                  "roles": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "uniqueItems": true,
+                    "items": {
+                      "enum": [
+                        "viewer",
+                        "operator",
+                        "reviewer",
+                        "admin"
+                      ]
+                    }
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "expected_version": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/admin/members/{subject}/sources/{sid}": {
+      "put": {
+        "operationId": "setWorkspaceMemberSource",
+        "summary": "setWorkspaceMemberSource",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          },
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "enabled",
+                  "expected_version"
+                ],
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "expected_version": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/admin/accounts": {
+      "post": {
+        "operationId": "createWorkspaceAccount",
+        "summary": "createWorkspaceAccount",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "username",
+                  "temporary_password",
+                  "roles",
+                  "expected_version"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "pattern": "^(?!service-account-)[a-z0-9][a-z0-9._-]{2,63}$"
+                  },
+                  "temporary_password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 128,
+                    "writeOnly": true
+                  },
+                  "roles": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "uniqueItems": true,
+                    "items": {
+                      "enum": [
+                        "viewer",
+                        "operator",
+                        "reviewer",
+                        "admin"
+                      ]
+                    }
+                  },
+                  "expected_version": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspaces/{wid}/admin/accounts/provisioning": {
+      "get": {
+        "operationId": "getAccountProvisioning",
+        "summary": "Read caller-owned provisioning state without resending temporary password",
+        "x-implementation-status": "implemented",
+        "security": [
+          {
+            "userBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "wid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current administration result; version is workspace administration CAS version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "401": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "403": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "404": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "409": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "422": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          },
+          "503": {
+            "description": "Administration rejected or temporarily unavailable; see backend/WORKSPACE_ADMIN.md"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1533,7 +2931,9 @@
         "in": "header",
         "required": true,
         "description": "Explicit workspace scope; must equal WorkflowCreate.workspace_id. Both service and user need active membership.",
-        "schema": { "$ref": "./schemas/domain.schema.json#/$defs/Id" }
+        "schema": {
+          "$ref": "./schemas/domain.schema.json#/$defs/Id"
+        }
       },
       "wid": {
         "name": "wid",
@@ -1765,6 +3165,266 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Internal scorer service credential via Authorization; never delivered to frontend."
+      }
+    },
+    "schemas": {
+      "LabObservation": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "enum": [
+              "passed",
+              "failed",
+              "inconclusive"
+            ]
+          },
+          "simulated": {
+            "const": true
+          },
+          "checker_version": {
+            "type": "string"
+          },
+          "source_version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Global sandbox version used as command expected_version. A change alone does not invalidate an unrelated request's passing observation; use current result and bound attempt/environment."
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "conditions": {
+            "type": "object",
+            "properties": {
+              "required_ram": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "image_id": {
+                "type": "string"
+              },
+              "account_id": {
+                "type": "string"
+              },
+              "image_available": {
+                "type": "boolean"
+              },
+              "account_active": {
+                "type": "boolean"
+              }
+            }
+          },
+          "attempts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Historical immutable attempt snapshot; checker-v1 entries retained. Checker-v2 fields described by LabAttempt."
+            }
+          },
+          "attempt": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LabAttempt"
+              },
+              {
+                "type": "object",
+                "description": "Legacy checker-v1 attempt; result cannot pass until rerun"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "environment": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "delivery": {
+            "type": "object",
+            "required": [
+              "status",
+              "total",
+              "delivered"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "pending",
+                  "delivered"
+                ]
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "delivered": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      },
+      "CaseSandbox": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "case_version",
+          "observation"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "case_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "observation": {
+            "$ref": "#/components/schemas/LabObservation"
+          },
+          "execution": {
+            "type": "object",
+            "required": [
+              "replayed",
+              "operation_id",
+              "attempt"
+            ],
+            "properties": {
+              "replayed": {
+                "type": "boolean"
+              },
+              "operation_id": {
+                "type": "string"
+              },
+              "attempt": {
+                "$ref": "#/components/schemas/LabAttempt"
+              }
+            }
+          }
+        }
+      },
+      "LabAttempt": {
+        "type": "object",
+        "required": [
+          "id",
+          "operation_id",
+          "number",
+          "at",
+          "source_version",
+          "checker_version",
+          "result",
+          "reason",
+          "blockers",
+          "checks",
+          "required_ram",
+          "available_ram",
+          "image_id",
+          "account_id",
+          "image_available",
+          "account_active"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operation_id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "checker_version": {
+            "const": "lab-state-2"
+          },
+          "result": {
+            "enum": [
+              "passed",
+              "failed"
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "checks": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "required": [
+                "step",
+                "passed",
+                "reason"
+              ],
+              "properties": {
+                "step": {
+                  "enum": [
+                    "ram",
+                    "image",
+                    "account"
+                  ]
+                },
+                "passed": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required_ram": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "available_ram": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "image_id": {
+            "type": "string"
+          },
+          "account_id": {
+            "type": "string"
+          },
+          "image_available": {
+            "type": "boolean"
+          },
+          "account_active": {
+            "type": "boolean"
+          }
+        }
       }
     }
   }
