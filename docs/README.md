@@ -1,5 +1,8 @@
 # Tài liệu TraceWeaver
 
+**Handoff sau audit30/10:** [Hoàn thiện FE](FE_COMPLETION_HANDOFF.md) — phân biệt tái dựng với chạy lại
+nghiệp vụ, tích hợp simulator/proof, phục hồi lỗi account và UAT UX. Không mở rộng phần tìm/hiển thị tài khoản.
+
 Bàn giao quản trị: [FE — workspace và tài khoản](FE_WORKSPACE_ADMIN_HANDOFF.md) — sidebar, API,
 version, retry/pending, đăng nhập lần đầu và UAT. BE đã deploy 30/10/2026; FE chưa tích hợp.
 Chi tiết vận hành: [Workspace-admin BE](../backend/WORKSPACE_ADMIN.md).
