@@ -4,8 +4,8 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, useSearchParams } from "react-router-dom";
 import { CaseDetailView } from "../../src/features/cases/components/CaseDetailView";
 import { CaseRunPanel } from "../../src/features/cases/components/CaseRunPanel";
-import { WorkflowForm } from '../../src/features/cases/components/WorkflowForm';
-import { transitionStates } from '../../src/features/cases/workflow';
+import { WorkflowForm } from "../../src/features/cases/components/WorkflowForm";
+import { transitionStates } from "../../src/features/cases/workflow";
 import { createCasesController } from "../../src/features/cases/state/controller";
 import { initialCasesState } from "../../src/features/cases/state/state";
 import { caseDetail, CID } from "../case-fixtures.mjs";
@@ -35,14 +35,16 @@ export function Fixture() {
         getGraph: async () => structuredClone(sourceGraph),
       },
       {
-        listAssignees: async () => ({ items: [
-          { subject: scope().subject, roles: ['reviewer'] },
-          { subject: 'opaque/idp|subject:123', roles: ['operator'] },
-        ] }),
+        listAssignees: async () => ({
+          items: [
+            { subject: scope().subject, roles: ["reviewer"] },
+            { subject: "opaque/idp|subject:123", roles: ["operator"] },
+          ],
+        }),
         transitionCase: async (_wid, _cid, body) => {
           detail.case.state = transitionStates[body.action].to;
           detail.case.version++;
-          if (body.action === 'assign') detail.case.owner_id = body.owner_id;
+          if (body.action === "assign") detail.case.owner_id = body.owner_id;
           return structuredClone(detail.case);
         },
       },
@@ -59,10 +61,7 @@ export function Fixture() {
     ),
   );
   const [state, setState] = useState(initialCasesState);
-  useEffect(
-    () => controller.subscribe(() => setState(controller.getSnapshot())),
-    [controller],
-  );
+  useEffect(() => controller.subscribe(() => setState(controller.getSnapshot())), [controller]);
   useEffect(() => {
     if (role === "logout") controller.stop();
     else
@@ -111,11 +110,21 @@ export function Fixture() {
           }
         />
       )}
-      {state.detail.data && state.scope && <WorkflowForm key={`${role}:${state.detail.data.case.id}`}
-        detail={state.detail.data} scope={state.scope} ready={state.detail.status === 'ready'}
-        workflow={state.workflow} graph={state.workflowGraph} assignees={state.assignees}
-        loadAssignees={controller.loadCaseAssignees} submit={controller.submitTransition}
-        retry={controller.retryTransition} beginNew={controller.beginNewTransition} />}
+      {state.detail.data && state.scope && (
+        <WorkflowForm
+          key={`${role}:${state.detail.data.case.id}`}
+          detail={state.detail.data}
+          scope={state.scope}
+          ready={state.detail.status === "ready"}
+          workflow={state.workflow}
+          graph={state.workflowGraph}
+          assignees={state.assignees}
+          loadAssignees={controller.loadCaseAssignees}
+          submit={controller.submitTransition}
+          retry={controller.retryTransition}
+          beginNew={controller.beginNewTransition}
+        />
+      )}
     </main>
   );
 }

@@ -1,6 +1,6 @@
 # Case workflow
 
-Five case APIs, dashboard/time filters and three core workflow APIs are implemented: **20/21 operations**, scorer planned. See [current status](../docs/CURRENT_STATUS.md). Apply migration007 and restart source/rebuild the image before using new behavior; this is not overall product completion.
+Five case APIs, dashboard/time filters and three core workflow APIs are implemented: **20/21 operations**, scorer planned. See [current status](../docs/overview/status.md). Apply migration007 and restart source/rebuild the image before using new behavior; this is not overall product completion.
 
 ## API
 

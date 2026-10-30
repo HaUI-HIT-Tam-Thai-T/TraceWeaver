@@ -1,4 +1,4 @@
-import { degradedLabel } from '../presentation';
+import { degradedLabel } from "../presentation";
 import { TechnicalDetails } from "../../../components/ui/TechnicalDetails";
 import { modeLabel, runStatusLabel } from "../presentation";
 import { LoadingState } from "../../../components/ui/LoadingState";
@@ -36,13 +36,12 @@ export function RunResult({
       {state.phase === "validating" && (
         <LoadingState message="Đang kiểm tra sự kiện bắt đầu và quyền truy cập…" />
       )}
-      {state.phase === "sending" && (
-        <LoadingState message="Đang yêu cầu tái dựng…" />
-      )}
+      {state.phase === "sending" && <LoadingState message="Đang yêu cầu tái dựng…" />}
       {state.phase === "uncertain" && (
         <>
           <Alert className="block break-words" variant="destructive" role="alert">
-            Chưa rõ yêu cầu đã được xử lý hay chưa. Gửi lại thao tác này sẽ dùng mã chống trùng và nội dung cũ; không sửa phạm vi trước khi gửi lại.
+            Chưa rõ yêu cầu đã được xử lý hay chưa. Gửi lại thao tác này sẽ dùng mã chống trùng và
+            nội dung cũ; không sửa phạm vi trước khi gửi lại.
           </Alert>
           <Button variant="secondary" type="button" onClick={retry}>
             Gửi lại thao tác
@@ -66,21 +65,22 @@ export function RunResult({
         <section className="result-summary space-y-4" aria-label="Tóm tắt kết quả tái dựng">
           <h3 className="text-xl font-semibold">Kết quả tái dựng</h3>
           <p>
-            Trạng thái: {runStatusLabel(run.status)}. Yêu cầu: {modeLabel(run.mode)}. Phương pháp thực tế:{" "}
-            {modeLabel(run.effective_method)}.
+            Trạng thái: {runStatusLabel(run.status)}. Yêu cầu: {modeLabel(run.mode)}. Phương pháp
+            thực tế: {modeLabel(run.effective_method)}.
           </p>
-          <TechnicalDetails headingLevel={4} title="Thông tin kỹ thuật của lần tái dựng"><p>Run: {run.id}</p><p>
-            Snapshot: {run.input_snapshot_id}; rule: {run.rule_version}; model:{" "}
-            {run.model_version ?? "không có"}.
-          </p><p>Lý do dự phòng gốc: {run.degraded_reason ?? 'Không có'}</p></TechnicalDetails>
-          {run.degraded && (
-            <p role="status">
-              {degradedLabel(run.degraded_reason)}
+          <TechnicalDetails headingLevel={4} title="Thông tin kỹ thuật của lần tái dựng">
+            <p>Run: {run.id}</p>
+            <p>
+              Snapshot: {run.input_snapshot_id}; rule: {run.rule_version}; model:{" "}
+              {run.model_version ?? "không có"}.
             </p>
-          )}
+            <p>Lý do dự phòng gốc: {run.degraded_reason ?? "Không có"}</p>
+          </TechnicalDetails>
+          {run.degraded && <p role="status">{degradedLabel(run.degraded_reason)}</p>}
           {run.status === "failed" && (
             <Alert className="block break-words" variant="destructive" role="alert">
-              Tái dựng thất bại. Hãy kiểm tra phạm vi nguồn và thử lại bằng một thao tác mới. Mã: {runErrorCode}. Chưa có kết quả để hiển thị; đây không phải kết luận thiếu log.
+              Tái dựng thất bại. Hãy kiểm tra phạm vi nguồn và thử lại bằng một thao tác mới. Mã:{" "}
+              {runErrorCode}. Chưa có kết quả để hiển thị; đây không phải kết luận thiếu log.
             </Alert>
           )}
           {(state.tracking === "loading" || state.tracking === "waiting") && (
@@ -89,7 +89,8 @@ export function RunResult({
           {(state.tracking === "paused" || state.tracking === "error") && (
             <>
               <p>
-                Đã dừng chờ cập nhật. Tác vụ vẫn có thể đang xử lý; bấm kiểm tra tiếp để xem kết quả mới.
+                Đã dừng chờ cập nhật. Tác vụ vẫn có thể đang xử lý; bấm kiểm tra tiếp để xem kết quả
+                mới.
               </p>
               <Button variant="secondary" type="button" onClick={track}>
                 Kiểm tra tiếp trạng thái

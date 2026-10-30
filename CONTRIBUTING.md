@@ -36,7 +36,7 @@ Chọn kiểm tra theo [TESTING.md](TESTING.md). UI cần frontend tests/lint; n
 1. Xác định hành vi dùng chung và hành vi riêng của TraceWeaver theo [ARCHITECTURE](ARCHITECTURE.md). Luật nguồn log, run scope hoặc proof sandbox không tự động trở thành policy chung cho mọi ứng dụng.
 2. Với workflow, định nghĩa state/transition/role/guard ở server; core HTTP không nhận definition tùy ý do browser gửi. Giữ kiểm current DB grants và business write/audit cùng transaction.
 3. Nếu thay HTTP, sửa OpenAPI/JSON Schema/fixtures trong cùng PR và cập nhật consumer tương ứng.
-4. Viết test cho role bị từ chối, version conflict, rollback/audit và replay liên quan; xem [bảng tính năng](docs/FEATURE_STATUS.md) để chọn bộ kiểm.
+4. Viết test cho role bị từ chối, version conflict, rollback/audit và replay liên quan; xem [bảng tính năng](docs/overview/features.md) để chọn bộ kiểm.
 5. Cập nhật demo và giới hạn nếu hành vi người dùng thay đổi. Ghi rõ source mới đã tích hợp/deploy ở đâu; working tree không tự cập nhật container.
 
 Ví dụ đăng ký workflow headless và tình trạng refactor tại [core README](backend/src/core/README.md).
@@ -47,4 +47,4 @@ Dependabot được cấu hình cho root/backend npm, frontend npm và GitHub Ac
 Python requirements.in/requirements.txt được giữ đồng bộ thủ công và kiểm bằng venv riêng. Không chỉ đổi pins trong một file.
 Thay dependency cần tạo lại license/notices và `npm run sbom`, sau đó chạy `npm run sbom:check`; Python generator đồng thời cập nhật SBOM của AI.
 Lỗi optional/WASM frontend đã biết nằm ở [SBOM README](sbom/README.md); không dùng force hoặc bỏ kiểm để che lỗi resolution.
-Chuẩn bị release theo [RELEASING](docs/RELEASING.md).
+Chuẩn bị release theo [RELEASING](docs/guides/release.md).

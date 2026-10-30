@@ -11,14 +11,7 @@ export type KnowledgeScope = {
 };
 export type KnowledgeState = {
   scope: KnowledgeScope | null;
-  status:
-    | "idle"
-    | "invalid"
-    | "loading"
-    | "ready"
-    | "error"
-    | "blocked"
-    | "reauth";
+  status: "idle" | "invalid" | "loading" | "ready" | "error" | "blocked" | "reauth";
   filters: KnowledgeFilters;
   items: KnowledgeArticle[];
   error: ApiError | null;
@@ -42,8 +35,7 @@ export function knowledgeReducer(
 ): KnowledgeState {
   return { ...state, ...patch };
 }
-const identity = (scope: KnowledgeScope) =>
-  JSON.stringify([scope.subject, scope.workspaceId]);
+const identity = (scope: KnowledgeScope) => JSON.stringify([scope.subject, scope.workspaceId]);
 export function createKnowledgeController(
   service: KnowledgeService,
   revalidate: () => Promise<void>,
@@ -62,15 +54,8 @@ export function createKnowledgeController(
     request?.abort();
     request = null;
   }
-  async function load(
-    index = 0,
-    cursors: (string | null)[] = [null],
-  ): Promise<void> {
-    if (
-      !state.scope ||
-      ["loading", "invalid", "reauth", "blocked"].includes(state.status)
-    )
-      return;
+  async function load(index = 0, cursors: (string | null)[] = [null]): Promise<void> {
+    if (!state.scope || ["loading", "invalid", "reauth", "blocked"].includes(state.status)) return;
     const scope = state.scope;
     const filters = state.filters;
     abort();
@@ -93,10 +78,7 @@ export function createKnowledgeController(
         ...(cursor ? { cursor } : {}),
       });
       if (!current()) return;
-      if (
-        page.next_cursor &&
-        cursors.slice(0, index + 1).includes(page.next_cursor)
-      )
+      if (page.next_cursor && cursors.slice(0, index + 1).includes(page.next_cursor))
         throw new ApiError({
           kind: "client",
           code: "INVALID_CURSOR",
@@ -125,15 +107,12 @@ export function createKnowledgeController(
           status: safe.kind === "auth" ? "reauth" : "blocked",
           error: safe,
         });
-        if (safe.kind !== "auth" && first)
-          void revalidate().catch(() => undefined);
+        if (safe.kind !== "auth" && first) void revalidate().catch(() => undefined);
       } else
         update({
           status: "error",
           error: safe,
-          ...(safe.code === "INVALID_CURSOR"
-            ? { cursors: [null], index: 0 }
-            : {}),
+          ...(safe.code === "INVALID_CURSOR" ? { cursors: [null], index: 0 } : {}),
         });
     }
   }

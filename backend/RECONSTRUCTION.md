@@ -1,6 +1,6 @@
 # Reconstruction runs and headless rules
 
-Candidate/rule baseline, durable snapshots/idempotency/audit, reviews/manual links, [cases](CASES.md), dashboard và core HTTP đã có. Backend hiện **20/21 implemented**, chỉ scorer planned. Xem [hiện trạng](../docs/CURRENT_STATUS.md); các mốc BE cũ là lịch sử.
+Candidate/rule baseline, durable snapshots/idempotency/audit, reviews/manual links, [cases](CASES.md), dashboard và core HTTP đã có. Backend hiện **20/21 implemented**, chỉ scorer planned. Xem [hiện trạng](../docs/overview/status.md); các mốc BE cũ là lịch sử.
 
 ## API run và graph
 

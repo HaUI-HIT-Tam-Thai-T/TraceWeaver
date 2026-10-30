@@ -34,10 +34,7 @@ export type WorkspaceAction =
   | { type: "sourcesError"; error: ApiError }
   | { type: "sourcesCanceled" };
 
-export function workspaceReducer(
-  state: WorkspaceState,
-  action: WorkspaceAction,
-): WorkspaceState {
+export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction): WorkspaceState {
   switch (action.type) {
     case "reset":
       return initialWorkspaceState();
@@ -75,9 +72,7 @@ export function workspaceReducer(
         ...state,
         sources: {
           status: "ready",
-          items: [
-            ...new Map(items.map((source) => [source.id, source])).values(),
-          ],
+          items: [...new Map(items.map((source) => [source.id, source])).values()],
           nextCursor: action.page.next_cursor,
           error: null,
         },
@@ -114,19 +109,17 @@ export function activeMembership(state: WorkspaceState): Membership | null {
 }
 
 export type WorkspacePermissions = {
+  canAdmin: boolean;
   canRead: boolean;
   canWrite: boolean;
   canVerify: boolean;
 };
 
-export function workspacePermissions(
-  membership: Membership | null,
-): WorkspacePermissions {
+export function workspacePermissions(membership: Membership | null): WorkspacePermissions {
   const roles = membership?.roles ?? [];
   return {
-    canRead: roles.some((role) =>
-      ["viewer", "operator", "reviewer", "admin"].includes(role),
-    ),
+    canAdmin: roles.includes("admin"),
+    canRead: roles.some((role) => ["viewer", "operator", "reviewer", "admin"].includes(role)),
     canWrite: roles.includes("operator") || roles.includes("reviewer"),
     canVerify: roles.includes("reviewer"),
   };

@@ -1,7 +1,7 @@
 # Hỗ trợ TraceWeaver
 
 Đọc [README](README.md), [INSTALL](INSTALL.md) và [mục lục tài liệu](docs/README.md) trước khi báo lỗi.
-Mã nguồn đang phát triển; lịch sử triển khai và hạn chế nằm ở [CURRENT_STATUS](docs/CURRENT_STATUS.md).
+Mã nguồn đang phát triển; lịch sử triển khai và hạn chế nằm ở [CURRENT_STATUS](docs/overview/status.md).
 
 ## Chọn kênh
 

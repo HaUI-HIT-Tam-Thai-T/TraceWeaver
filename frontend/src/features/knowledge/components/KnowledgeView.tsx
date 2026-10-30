@@ -49,7 +49,9 @@ export function KnowledgeSearchForm({
           {...register("q")}
           maxLength={500}
           aria-invalid={!!errors.q}
-          aria-describedby={errors.q ? "knowledge-search-help knowledge-q-error" : "knowledge-search-help"}
+          aria-describedby={
+            errors.q ? "knowledge-search-help knowledge-q-error" : "knowledge-search-help"
+          }
         />
         {errors.q && (
           <Alert
@@ -76,8 +78,7 @@ export function KnowledgeSearchForm({
         Tìm kiếm
       </Button>
       <p id="knowledge-search-help" className="type-caption text-muted">
-        Bấm Tìm kiếm để áp dụng. Tìm chuỗi con, không phân biệt hoa/thường, trên
-        phiên bản mới nhất.
+        Bấm Tìm kiếm để áp dụng. Tìm chuỗi con, không phân biệt hoa/thường, trên phiên bản mới nhất.
       </p>
     </form>
   );
@@ -103,7 +104,7 @@ export function KnowledgeResults({
         lần tải; không có tổng số trang.
       </p> */}
       <Button
-        variant="secondary"
+        variant="tertiary"
         type="button"
         disabled={["loading", "invalid", "reauth"].includes(state.status)}
         onClick={refresh}
@@ -111,15 +112,9 @@ export function KnowledgeResults({
         Làm mới bài hướng dẫn
       </Button>
       <div aria-live="polite">
-        {state.status === "loading" && (
-          <LoadingState message="Đang tải bài hướng dẫn…" />
-        )}
+        {state.status === "loading" && <LoadingState message="Đang tải bài hướng dẫn…" />}
         {state.error && (
-          <Alert
-            className="block break-words"
-            variant="destructive"
-            role="alert"
-          >
+          <Alert className="block break-words" variant="destructive" role="alert">
             {state.error.message}{" "}
             {state.error.requestId && <>Request ID: {state.error.requestId}</>}
           </Alert>
@@ -158,22 +153,38 @@ export function KnowledgeResults({
                 {item.body}
               </div>
 
-              <p className="break-all">Nguồn tham khảo: {safeSource(item.source_ref) ? <a className="underline hover:text-primary" href={item.source_ref} target="_blank" rel="noopener noreferrer">{item.source_ref}</a> : item.source_ref}</p>
+              <p className="break-all">
+                Nguồn tham khảo:{" "}
+                {safeSource(item.source_ref) ? (
+                  <a
+                    className="underline hover:text-primary"
+                    href={item.source_ref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {item.source_ref}
+                  </a>
+                ) : (
+                  item.source_ref
+                )}
+              </p>
               <TechnicalDetails title="Phiên bản và thông tin bài viết">
                 <p>
                   ID: {item.id} · Version: {item.version}
                 </p>
                 <p>Tác giả (subject): {item.author_subject}</p>
                 <p>
-                  Tạo lúc (UTC gốc):{" "}
-                  <time dateTime={item.created_at}>{item.created_at}</time>
+                  Tạo lúc (UTC gốc): <time dateTime={item.created_at}>{item.created_at}</time>
                 </p>
               </TechnicalDetails>
             </article>
           ))}
         </SectionReveal>
       )}
-      <nav aria-label="Phân trang knowledge" className="flex flex-wrap items-center justify-end gap-4">
+      <nav
+        aria-label="Phân trang knowledge"
+        className="flex flex-wrap items-center justify-end gap-4"
+      >
         <Button
           variant="secondary"
           type="button"
@@ -200,9 +211,7 @@ function safeSource(value: string): boolean {
   try {
     const url = new URL(value);
     return (
-      (url.protocol === "https:" || url.protocol === "http:") &&
-      !url.username &&
-      !url.password
+      (url.protocol === "https:" || url.protocol === "http:") && !url.username && !url.password
     );
   } catch {
     return false;

@@ -1,8 +1,8 @@
 // Source: https://ui.shadcn.com/r/styles/new-york-v4/button.json
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "../../../lib/utils"
-import * as Slot from "@radix-ui/react-slot"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "../../../lib/utils";
+import * as Slot from "@radix-ui/react-slot";
 
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap cursor-pointer transition-colors duration-150 motion-reduce:transition-none outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -13,11 +13,11 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-white hover:bg-destructive hover:brightness-90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
-          "border bg-background shadow-xs hover:border-primary hover:bg-primary hover:text-primary-foreground dark:border-input dark:bg-input/30 dark:hover:bg-primary",
+          "border border-line bg-transparent text-foreground hover:border-primary hover:bg-control hover:text-primary dark:border-input dark:hover:bg-input/30",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground",
+          "border border-primary/30 bg-secondary text-primary hover:border-primary hover:bg-primary/10",
         ghost:
-          "hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary",
+          "bg-transparent text-foreground hover:bg-control hover:text-primary dark:hover:bg-input/30",
         link: "text-primary underline-offset-4 hover:text-primary-hover hover:underline",
       },
       size: {
@@ -35,8 +35,8 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
-)
+  },
+);
 
 function Button({
   className,
@@ -46,9 +46,9 @@ function Button({
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
+    asChild?: boolean;
   }) {
-  const Comp = asChild ? Slot.Root : "button"
+  const Comp = asChild ? Slot.Root : "button";
 
   return (
     <Comp
@@ -58,7 +58,7 @@ function Button({
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />
-  )
+  );
 }
 
-export { Button }
+export { Button };

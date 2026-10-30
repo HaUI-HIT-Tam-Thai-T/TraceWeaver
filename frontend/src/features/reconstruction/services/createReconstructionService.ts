@@ -7,11 +7,7 @@ import type { Graph, Run, RunCreate } from "../schemas.ts";
 export type CreateRunOptions = { idempotencyKey: string; signal?: AbortSignal };
 
 export interface ReconstructionService {
-  createRun(
-    workspaceId: string,
-    body: RunCreate,
-    options: CreateRunOptions,
-  ): Promise<Run>;
+  createRun(workspaceId: string, body: RunCreate, options: CreateRunOptions): Promise<Run>;
   getRun(workspaceId: string, runId: string, signal?: AbortSignal): Promise<Run>;
   getGraph(workspaceId: string, runId: string, signal?: AbortSignal): Promise<Graph>;
 }
@@ -62,11 +58,7 @@ export function createReconstructionService(
     // Poll only our canonical endpoint. Never follow untrusted Location, even if absolute.
     return result.data;
   }
-  async function getRun(
-    workspaceId: string,
-    runId: string,
-    signal?: AbortSignal,
-  ): Promise<Run> {
+  async function getRun(workspaceId: string, runId: string, signal?: AbortSignal): Promise<Run> {
     const response = await client.get<unknown>(path(workspaceId, runId), {
       signal,
     });
@@ -79,13 +71,9 @@ export function createReconstructionService(
     runId: string,
     signal?: AbortSignal,
   ): Promise<Graph> {
-    const response = await client.get<unknown>(
-      `${path(workspaceId, runId)}/graph`,
-      { signal },
-    );
+    const response = await client.get<unknown>(`${path(workspaceId, runId)}/graph`, { signal });
     const result = graphSchema.safeParse(response.data);
-    if (!result.success || result.data.run_id !== runId)
-      throw invalidRunResponse();
+    if (!result.success || result.data.run_id !== runId) throw invalidRunResponse();
     return result.data;
   }
   return { createRun, getRun, getGraph };

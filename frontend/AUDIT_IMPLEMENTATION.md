@@ -28,7 +28,7 @@ tên hồ sơ mở detail theo kiểu Events, hover bằng chứng đổi màu c
 ## Thiết kế dữ liệu và thao tác
 
 - Đã đối chiếu bản dev từ origin tại commit `ba0445a`, gồm OpenAPI, domain.schema.json,
-  case router và `docs/FRONTEND_READABLE_DATA_HANDOFF.md`. Không pull/merge vào working tree đang có thay đổi;
+  case router và `docs/archive/readable-data.md`. Không pull/merge vào working tree đang có thay đổi;
   bản đọc contract nằm trong `node_modules/.tmp/dev-contract-review.git` (ignored).
 - `GET /cases/{cid}/assignees` không query/body/pagination; schema strict `{items:[{subject,roles}]}`.
   Mở picker sẽ tải lại; chỉ state new và canWrite được gọi. Không nhập subject tự do, không suy tên/role.

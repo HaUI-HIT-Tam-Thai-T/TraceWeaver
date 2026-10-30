@@ -25,9 +25,7 @@ export const knowledgeFormSchema = z.object({
   limit: z.enum(["25", "50", "100"]),
 });
 export type KnowledgeFormValues = z.infer<typeof knowledgeFormSchema>;
-export function knowledgeFormDefaults(
-  filters: KnowledgeFilters,
-): KnowledgeFormValues {
+export function knowledgeFormDefaults(filters: KnowledgeFilters): KnowledgeFormValues {
   return {
     q: filters.q ?? "",
     limit: filters.limit === 25 ? "25" : filters.limit === 100 ? "100" : "50",

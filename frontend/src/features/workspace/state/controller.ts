@@ -2,6 +2,7 @@ import axios from "axios";
 import { ApiError as SafeApiError, normalizeApiError } from "../../../services/apiError.ts";
 import type { ApiError } from "../../../services/apiError.ts";
 import type { WorkspaceService } from "../services/createWorkspaceService.ts";
+import type { Source } from "../schemas.ts";
 import {
   activeMembership,
   initialWorkspaceState,
@@ -19,13 +20,12 @@ export interface WorkspaceController {
   stop(): void;
   selectWorkspace(workspaceId: string): boolean;
   refreshAccess(): Promise<void>;
+  revalidateAccess(): Promise<void>;
   loadMoreSources(): Promise<void>;
 }
 
 // One in-memory state source. Every update goes through the pure reducer.
-export function createWorkspaceController(
-  service: WorkspaceService,
-): WorkspaceController {
+export function createWorkspaceController(service: WorkspaceService): WorkspaceController {
   let state = initialWorkspaceState();
   let enabled = false;
   let generation = 0;
@@ -33,6 +33,8 @@ export function createWorkspaceController(
   let sourceRequest: AbortController | undefined;
   let accessFlight: Promise<void> | undefined;
   let sourceFlight: Promise<void> | undefined;
+  let revalidationRequest: AbortController | undefined;
+  let revalidationFlight: Promise<void> | undefined;
   const listeners = new Set<() => void>();
 
   function dispatch(action: WorkspaceAction) {
@@ -44,8 +46,10 @@ export function createWorkspaceController(
     generation += 1;
     accessRequest?.abort();
     sourceRequest?.abort();
+    revalidationRequest?.abort();
     accessFlight = undefined;
     sourceFlight = undefined;
+    revalidationFlight = undefined;
   }
 
   function requireLogin(error: ApiError) {
@@ -82,7 +86,12 @@ export function createWorkspaceController(
         const visited = new Set<string>();
         do {
           if (next !== null) {
-            if (visited.has(next)) throw new SafeApiError({ kind: 'client', code: 'INVALID_API_RESPONSE', message: 'Danh sách nguồn trả con trỏ lặp. Hãy tải lại quyền và nguồn.' });
+            if (visited.has(next))
+              throw new SafeApiError({
+                kind: "client",
+                code: "INVALID_API_RESPONSE",
+                message: "Danh sách nguồn trả con trỏ lặp. Hãy tải lại quyền và nguồn.",
+              });
             visited.add(next);
           }
           const page = await service.listSources(workspaceId, {
@@ -95,7 +104,7 @@ export function createWorkspaceController(
           if (!current()) return;
           next = page.next_cursor;
           appendPage = true;
-          if (next !== null) dispatch({ type: 'sourcesLoading' });
+          if (next !== null) dispatch({ type: "sourcesLoading" });
         } while (next !== null && current());
       } catch (error: unknown) {
         if (!current()) return;
@@ -135,8 +144,7 @@ export function createWorkspaceController(
     const request = new AbortController();
     accessRequest = request;
     const version = generation;
-    const current = () =>
-      enabled && version === generation && !request.signal.aborted;
+    const current = () => enabled && version === generation && !request.signal.aborted;
     dispatch({ type: "accessLoading" });
     const task = Promise.resolve().then(async () => {
       try {
@@ -146,9 +154,7 @@ export function createWorkspaceController(
         const sameUser = previous.me?.subject === me.subject;
         const retained =
           sameUser &&
-          me.memberships.find(
-            (item) => item.workspace_id === previous.selectedWorkspaceId,
-          );
+          me.memberships.find((item) => item.workspace_id === previous.selectedWorkspaceId);
         const selectedWorkspaceId = retained
           ? retained.workspace_id
           : me.memberships.length === 1
@@ -174,6 +180,70 @@ export function createWorkspaceController(
       }
     });
     accessFlight = task;
+    return task;
+  }
+
+  // Focus checks preserve the current access identity only when both /me and
+  // the complete readable source set are unchanged. Explicit refresh still purges.
+  function revalidateAccess(): Promise<void> {
+    if (!enabled) return Promise.resolve();
+    if (revalidationFlight) return revalidationFlight;
+    if (accessFlight || sourceFlight) return accessFlight ?? sourceFlight ?? Promise.resolve();
+    if (state.status !== "ready" || (state.selectedWorkspaceId && state.sources.status !== "ready"))
+      return loadAccess();
+    const previous = state;
+    const request = new AbortController();
+    revalidationRequest = request;
+    const version = generation;
+    const current = () => enabled && version === generation && !request.signal.aborted;
+    const task = Promise.resolve().then(async () => {
+      try {
+        const me = await service.getMe(request.signal);
+        if (!current()) return;
+        if (JSON.stringify(me) !== JSON.stringify(previous.me)) {
+          await loadAccess();
+          return;
+        }
+        const sources: Source[] = [];
+        const visited = new Set<string>();
+        let cursor: string | null = null;
+        const wid = previous.selectedWorkspaceId;
+        if (wid && workspacePermissions(activeMembership(previous)).canRead) {
+          do {
+            const page = await service.listSources(wid, {
+              signal: request.signal,
+              limit: 50,
+              ...(cursor ? { cursor } : {}),
+            });
+            if (!current()) return;
+            sources.push(...page.items);
+            cursor = page.next_cursor;
+            if (cursor && visited.has(cursor))
+              throw new SafeApiError({
+                kind: "client",
+                code: "INVALID_API_RESPONSE",
+                message: "Danh sách nguồn trả con trỏ lặp. Hãy tải lại quyền và nguồn.",
+              });
+            if (cursor) visited.add(cursor);
+          } while (cursor);
+        }
+        const ordered = (items: Source[]) => [...items].sort((a, b) => a.id.localeCompare(b.id));
+        if (JSON.stringify(ordered(sources)) !== JSON.stringify(ordered(previous.sources.items)))
+          await loadAccess();
+      } catch (error: unknown) {
+        if (!current() || axios.isCancel(error)) return;
+        const failure = normalizeApiError(error);
+        // A failed check must not leave data visible under unverified access.
+        if (failure.kind === "auth") requireLogin(failure);
+        else {
+          invalidateRequests();
+          dispatch({ type: "accessError", error: failure, reauth: false });
+        }
+      } finally {
+        if (revalidationFlight === task) revalidationFlight = undefined;
+      }
+    });
+    revalidationFlight = task;
     return task;
   }
 
@@ -215,6 +285,7 @@ export function createWorkspaceController(
     stop,
     selectWorkspace,
     refreshAccess: () => loadAccess(),
+    revalidateAccess,
     loadMoreSources: () => loadSources(true),
   };
 }

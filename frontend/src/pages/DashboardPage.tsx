@@ -12,10 +12,7 @@ import {
 } from "../features/dashboard/state/controller";
 import type { DashboardScope } from "../features/dashboard/state/controller";
 import { dashboardService } from "../features/dashboard/services/service";
-import {
-  readDashboardQuery,
-  writeDashboardQuery,
-} from "../features/dashboard/query";
+import { readDashboardQuery, writeDashboardQuery } from "../features/dashboard/query";
 import {
   DashboardCounters,
   DashboardTimeForm,
@@ -38,11 +35,7 @@ export function DashboardPage() {
     <>
       <PageHeading title="Tổng quan" />
       <DashboardBrowser
-        scope={
-          allowed
-            ? { subject: me.subject, workspaceId: wid, accessKey: me }
-            : null
-        }
+        scope={allowed ? { subject: me.subject, workspaceId: wid, accessKey: me } : null}
       />
     </>
   );
@@ -52,9 +45,7 @@ function DashboardBrowser({ scope }: { scope: DashboardScope | null }) {
   const { signIn } = useAuth();
   const [params, setParams] = useSearchParams();
   const search = params.toString();
-  const [controller] = useState(() =>
-    createDashboardController(dashboardService, refreshAccess),
-  );
+  const [controller] = useState(() => createDashboardController(dashboardService, refreshAccess));
   const [snapshot, setSnapshot] = useState(controller.getSnapshot);
   useEffect(() => {
     function handleChange() {
@@ -68,10 +59,7 @@ function DashboardBrowser({ scope }: { scope: DashboardScope | null }) {
   useEffect(() => {
     controller.sync(scope, search);
   }, [controller, scope, search]);
-  useEffect(
-    () => workspaceMutations.subscribe(controller.invalidateWorkspace),
-    [controller],
-  );
+  useEffect(() => workspaceMutations.subscribe(controller.invalidateWorkspace), [controller]);
   useEffect(() => () => controller.stop(), [controller]);
   const query = readDashboardQuery(search);
   const aligned =
@@ -81,34 +69,27 @@ function DashboardBrowser({ scope }: { scope: DashboardScope | null }) {
     snapshot.scope.workspaceId === scope.workspaceId &&
     JSON.stringify(snapshot.filters) === JSON.stringify(query.filters);
   const state = aligned ? snapshot : initialDashboardState();
-  if (!scope)
-    return <p>Đăng nhập và chọn workspace có quyền đọc để xem dashboard.</p>;
+  if (!scope) return <p>Đăng nhập và chọn workspace có quyền đọc để xem dashboard.</p>;
   return (
     <>
       {!query.success && (
         <Alert className="block break-words" variant="destructive" role="alert">
-          Khoảng thời gian URL không hợp lệ.{" "}
-          <Link to="/dashboard">Bắt đầu lại</Link>
+          Khoảng thời gian URL không hợp lệ. <Link to="/dashboard">Bắt đầu lại</Link>
         </Alert>
       )}
       <DashboardTimeForm
         key={JSON.stringify([scope.subject, scope.workspaceId, search])}
         filters={query.success ? query.filters : {}}
         apply={(filters) => {
-          if (
-            query.success &&
-            JSON.stringify(filters) === JSON.stringify(query.filters)
-          )
+          if (query.success && JSON.stringify(filters) === JSON.stringify(query.filters))
             void controller.refresh();
-          setParams(
-            writeDashboardQuery(filters, query.success && query.waiting),
-          );
+          setParams(writeDashboardQuery(filters, query.success && query.waiting));
         }}
       />
       {query.success && (
         <>
           <Button
-            variant="secondary"
+            variant="tertiary"
             type="button"
             disabled={["loading", "reauth"].includes(state.status)}
             onClick={() => void controller.refresh()}
@@ -120,32 +101,18 @@ function DashboardBrowser({ scope }: { scope: DashboardScope | null }) {
               <LoadingState message="Đang tải tổng quan…" variant="counters" />
             )}
             {state.error && (
-              <Alert
-                className="block break-words"
-                variant="destructive"
-                role="alert"
-              >
+              <Alert className="block break-words" variant="destructive" role="alert">
                 {state.error.message}{" "}
-                {state.error.requestId && (
-                  <>Request ID: {state.error.requestId}</>
-                )}
+                {state.error.requestId && <>Request ID: {state.error.requestId}</>}
               </Alert>
             )}
             {state.status === "reauth" ? (
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => void signIn()}
-              >
+              <Button variant="secondary" type="button" onClick={() => void signIn()}>
                 Đăng nhập lại
               </Button>
             ) : (
               state.error && (
-                <Button
-                  variant="secondary"
-                  type="button"
-                  onClick={() => void controller.refresh()}
-                >
+                <Button variant="secondary" type="button" onClick={() => void controller.refresh()}>
                   Thử tải lại tổng quan
                 </Button>
               )
@@ -156,9 +123,7 @@ function DashboardBrowser({ scope }: { scope: DashboardScope | null }) {
               <DashboardCounters
                 data={state.data}
                 waiting={query.waiting}
-                showWaiting={() =>
-                  setParams(writeDashboardQuery(query.filters, !query.waiting))
-                }
+                showWaiting={() => setParams(writeDashboardQuery(query.filters, !query.waiting))}
               />
               {query.waiting && (
                 <section id="waiting-cases" aria-label="Waiting cases">

@@ -3,11 +3,7 @@ import type { AxiosInstance } from "axios";
 import { ApiError } from "../../../services/apiError.ts";
 import { linkSchema } from "../../reconstruction/schemas.ts";
 import type { Link } from "../../reconstruction/schemas.ts";
-import {
-  reviewCreateSchema,
-  reviewSchema,
-  manualLinkCreateSchema,
-} from "../schemas.ts";
+import { reviewCreateSchema, reviewSchema, manualLinkCreateSchema } from "../schemas.ts";
 import type { Review, ReviewCreate, ManualLinkCreate } from "../schemas.ts";
 
 export interface LinkReviewService {
@@ -36,17 +32,12 @@ const invalidResponse = () =>
   new ApiError({
     kind: "client",
     code: "INVALID_API_RESPONSE",
-    message:
-      "Phản hồi thao tác link không đúng định dạng; kết quả chưa được xác nhận.",
+    message: "Phản hồi thao tác link không đúng định dạng; kết quả chưa được xác nhận.",
   });
-export function createLinkReviewService(
-  client: Pick<AxiosInstance, "post">,
-): LinkReviewService {
+export function createLinkReviewService(client: Pick<AxiosInstance, "post">): LinkReviewService {
   const path = (wid: string, rid: string, lid?: string) => {
     if (
-      ![wid, rid, ...(lid === undefined ? [] : [lid])].every(
-        (id) => z.uuid().safeParse(id).success,
-      )
+      ![wid, rid, ...(lid === undefined ? [] : [lid])].every((id) => z.uuid().safeParse(id).success)
     )
       throw invalidInput();
     return `/api/v1/workspaces/${wid}/runs/${rid}/links${lid === undefined ? "" : `/${lid}/reviews`}`;

@@ -9,10 +9,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { evidenceCreateSchema } from "../schemas";
 import type { EvidenceCreate } from "../schemas";
-import type {
-  CaseEvidenceSnapshot,
-  CaseEvidenceMutation,
-} from "../state/state";
+import type { CaseEvidenceSnapshot, CaseEvidenceMutation } from "../state/state";
 
 type Props = {
   snapshot: CaseEvidenceSnapshot;
@@ -53,12 +50,7 @@ function EditableEvidenceForm({
     if (kind === "note") setValue("event_ids", []);
   }, [kind, setValue]);
   useEffect(() => {
-    if (
-      kind === "events" &&
-      snapshot.status === "idle" &&
-      detailReady &&
-      !closed
-    )
+    if (kind === "events" && snapshot.status === "idle" && detailReady && !closed)
       void loadSnapshot();
   }, [kind, snapshot.status, detailReady, closed, loadSnapshot]);
   useEffect(() => {
@@ -66,24 +58,21 @@ function EditableEvidenceForm({
       reset({ kind: "note", event_ids: [], note: "" });
   }, [mutation.status, mutation.savedId, reset]);
   const disabled =
-    !detailReady ||
-    closed ||
-    ["sending", "uncertain", "locked"].includes(mutation.status);
+    !detailReady || closed || ["sending", "uncertain", "locked"].includes(mutation.status);
   const snapshotReady = kind === "note" || snapshot.status === "ready";
   return (
-    <section
-      className="mt-6 space-y-3 border-t pt-4"
-      aria-labelledby="add-evidence-title"
-    >
+    <section className="mt-6 space-y-3 border-t pt-4" aria-labelledby="add-evidence-title">
       <h2 id="add-evidence-title" className="text-xl font-semibold">
         Thêm bằng chứng hoặc ghi chú
       </h2>
       <p>
-        Chọn sự kiện trong ảnh chụp dữ liệu của lần tái dựng gắn với hồ sơ này, hoặc lưu ghi chú xử lý. Bằng chứng đã lưu được giữ trong lịch sử; phiên bản trạng thái do hệ thống quản lý.
+        Chọn sự kiện trong ảnh chụp dữ liệu của lần tái dựng gắn với hồ sơ này, hoặc lưu ghi chú xử
+        lý. Bằng chứng đã lưu được giữ trong lịch sử; phiên bản trạng thái do hệ thống quản lý.
       </p>
       {closed && (
         <p role="status">
-          Hồ sơ đã đóng: chỉ được xem. Nhờ người có quyền xác minh mở lại hồ sơ nếu cần bổ sung bằng chứng.
+          Hồ sơ đã đóng: chỉ được xem. Nhờ người có quyền xác minh mở lại hồ sơ nếu cần bổ sung bằng
+          chứng.
         </p>
       )}
       {mutation.status === "sending" && <LoadingState message="Đang lưu bằng chứng…" />}
@@ -98,9 +87,11 @@ function EditableEvidenceForm({
       {mutation.status === "uncertain" && (
         <>
           <Alert className="block break-words" variant="destructive" role="alert">
-            Chưa rõ bằng chứng đã lưu hay chưa. Hệ thống đang tải lại hồ sơ và không tự gửi lại thao tác. Nội dung trùng với bằng chứng có sẵn không chứng minh lần gửi này đã thành công.
+            Chưa rõ bằng chứng đã lưu hay chưa. Hệ thống đang tải lại hồ sơ và không tự gửi lại thao
+            tác. Nội dung trùng với bằng chứng có sẵn không chứng minh lần gửi này đã thành công.
           </Alert>
-          <Button variant="secondary"
+          <Button
+            variant="secondary"
             type="button"
             disabled={!detailReady || closed}
             onClick={beginNew}
@@ -108,22 +99,21 @@ function EditableEvidenceForm({
             Bắt đầu thêm bằng chứng mới
           </Button>
           <p>
-            Chỉ bấm sau khi kiểm tra hồ sơ. Gửi tiếp có thể tạo bằng chứng trùng;
-            nháp hiện tại được giữ.
+            Chỉ bấm sau khi kiểm tra hồ sơ. Gửi tiếp có thể tạo bằng chứng trùng; nháp hiện tại được
+            giữ.
           </p>
         </>
       )}
       {mutation.status === "locked" && (
         <Alert className="block break-words" variant="destructive" role="alert">
-          Hồ sơ đã đóng (CASE_CLOSED): form đã khóa. Tải lại hồ sơ và nhờ người có quyền xác minh kiểm tra việc mở lại.
+          Hồ sơ đã đóng (CASE_CLOSED): form đã khóa. Tải lại hồ sơ và nhờ người có quyền xác minh
+          kiểm tra việc mở lại.
         </Alert>
       )}
       {mutation.error && (
         <Alert className="block break-words" variant="destructive" role="alert">
           {mutation.error.message}{" "}
-          {mutation.error.requestId && (
-            <>Request ID: {mutation.error.requestId}</>
-          )}
+          {mutation.error.requestId && <>Request ID: {mutation.error.requestId}</>}
         </Alert>
       )}
       {!detailReady && (
@@ -141,7 +131,9 @@ function EditableEvidenceForm({
       >
         <fieldset disabled={disabled} className="space-y-3">
           <legend>Nội dung bằng chứng</legend>
-          <label className="type-label block" htmlFor="evidence-kind">Loại bằng chứng</label>
+          <label className="type-label block" htmlFor="evidence-kind">
+            Loại bằng chứng
+          </label>
           <Select id="evidence-kind" {...register("kind")}>
             <option value="note">Ghi chú</option>
             <option value="events">Sự kiện trong ảnh chụp dữ liệu</option>
@@ -156,11 +148,10 @@ function EditableEvidenceForm({
                 <>
                   <Alert className="block break-words" variant="destructive" role="alert">
                     {snapshot.error?.message}{" "}
-                    {snapshot.error?.requestId && (
-                      <>Request ID: {snapshot.error.requestId}</>
-                    )}
+                    {snapshot.error?.requestId && <>Request ID: {snapshot.error.requestId}</>}
                   </Alert>
-                  <Button variant="secondary"
+                  <Button
+                    variant="secondary"
                     type="button"
                     onClick={() => {
                       void loadSnapshot();
@@ -182,12 +173,15 @@ function EditableEvidenceForm({
                       value={event.event_id}
                       {...register("event_ids")}
                     />
-                    {actionLabel(event.action)} · {requestLabel(event)} · {sourceName(event.service)} · {eventTimeLabel(event.occurred_at)}
+                    {actionLabel(event.action)} · {requestLabel(event)} ·{" "}
+                    {sourceName(event.service)} · {eventTimeLabel(event.occurred_at)}
                   </label>
                 ))}
               <p>Đã chọn {selected.length} sự kiện.</p>
               {errors.event_ids && (
-                <Alert className="block break-words" variant="destructive" role="alert">{errors.event_ids.message}</Alert>
+                <Alert className="block break-words" variant="destructive" role="alert">
+                  {errors.event_ids.message}
+                </Alert>
               )}
             </fieldset>
           )}
@@ -201,7 +195,12 @@ function EditableEvidenceForm({
             {...register("note")}
           />
           {errors.note && (
-            <Alert className="block break-words" variant="destructive" id="evidence-note-error" role="alert">
+            <Alert
+              className="block break-words"
+              variant="destructive"
+              id="evidence-note-error"
+              role="alert"
+            >
               {errors.note.message}
             </Alert>
           )}

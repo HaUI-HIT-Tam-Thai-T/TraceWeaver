@@ -5,11 +5,7 @@ import type { Event } from "../events/schemas.ts";
 
 export function inputToUtc(value: string): string {
   const fraction = /\.\d+$/.exec(value)?.[0] ?? "";
-  return (
-    localToUtc(value.slice(0, value.length - fraction.length)).slice(0, -1) +
-    fraction +
-    "Z"
-  );
+  return localToUtc(value.slice(0, value.length - fraction.length)).slice(0, -1) + fraction + "Z";
 }
 const formBase = z.object({
   source_ids: z.array(z.uuid()).min(1),
@@ -29,8 +25,7 @@ export function toRunBody(value: RunFormValues, root: Event) {
 export function runFormSchema(root: Event) {
   return formBase.superRefine((value, ctx) => {
     try {
-      if (!validateRoot(toRunBody(value, root), root))
-        throw new Error("Invalid root");
+      if (!validateRoot(toRunBody(value, root), root)) throw new Error("Invalid root");
     } catch {
       ctx.addIssue({
         code: "custom",
