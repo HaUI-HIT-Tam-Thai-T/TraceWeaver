@@ -1,5 +1,16 @@
 # Hiện trạng TraceWeaver
 
+## BE-52 — FE local gọi trực tiếp API, 30/10/2026
+
+Oracle API chạy `traceweaver-api:be-1b6a72e`. Bật riêng
+`FRONTEND_LOCAL_ORIGINS=http://localhost:5173,http://127.0.0.1:5173`, giữ allowlist HTTPS hiện có.
+21 kiểm tra HTTPS live đạt: health, GET/POST/PUT preflight, anonymous401, origin/cổng khác403,
+Keycloak callback và token CORS cho hai local origins. Không sửa FE; không migration hoặc restart scorer/DB/IdP.
+Local141BE/contract tests đạt,2Python tùy chọn bỏ qua; base/license98/diff đạt.
+FE đặt `VITE_API_BASE_URL=https://api.quizlearn.tech` rồi khởi động lại Vite để bỏ qua proxy.
+Giữ `API_PROXY_TARGET` vì Vite hiện vẫn kiểm biến này. Browser UI E2E chưa kiểm trong lượt này.
+Source chuyển bằng Git bundle; chưa push commit mới lên origin. Các mốc bên dưới là lịch sử.
+
 ## Cập nhật hiện tại — 30/10/2026
 
 Oracle đang chạy API source `4cdd022`, image `traceweaver-api:be-4cdd022`, migrations001–011,

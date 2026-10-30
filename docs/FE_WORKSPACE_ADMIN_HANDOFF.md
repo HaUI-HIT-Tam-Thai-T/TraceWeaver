@@ -50,6 +50,9 @@ Callback/Web Origin local đã có từ trước; phải kiểm lại đúng hos
 Xem [cấu hình React/Vite](FRONTEND_HANDOFF.md).
 
 Để FE local gọi trực tiếp, đặt trong `frontend/.env.development.local`:
+BE-52 đã triển khai ngày 30/10/2026 với API image `traceweaver-api:be-1b6a72e`.
+21 kiểm tra live đạt, gồm callback/token CORS Keycloak cho cả hai local origins.
+Chưa kiểm lại toàn bộ UI bằng trình duyệt trong lượt này.
 
 ```dotenv
 VITE_API_BASE_URL=https://api.quizlearn.tech
