@@ -24,7 +24,7 @@ Danh sách hiện trả **subject**, không có username/display_name/email; kh�
 Hiển thị subject rút gọn kèm copy nguyên giá trị, encode subject trên URL.
 
 Sidebar **Hồ sơ** giữ panel kiểm chứng mô phỏng trong chi tiết hồ sơ theo
-[bàn giao simulator](FE_SANDBOX_HANDOFF.md). Tài khoản SSO ở đây khác tài khoản nghiệp vụ mô phỏng
+[bàn giao simulator](sandbox.md). Tài khoản SSO ở đây khác tài khoản nghiệp vụ mô phỏng
 được bật bằng command `account` trong hồ sơ. Không thêm workspace CRUD, realm/group management,
 xóa tài khoản/log hoặc reset mật khẩu vào phạm vi này.
 
@@ -47,7 +47,7 @@ Local `http://localhost:5173` hiện dùng Vite proxy `/api`. BE hỗ trợ opt-
 `FRONTEND_LOCAL_ORIGINS=http://localhost:5173,http://127.0.0.1:5173` trong môi trường API server;
 chỉ có hiệu lực sau khi triển khai source mới và khởi động lại API. Không tự bật local origins mặc định.
 Callback/Web Origin local đã có từ trước; phải kiểm lại đúng hostname/cổng khi triển khai.
-Xem [cấu hình React/Vite](FRONTEND_HANDOFF.md).
+Xem [cấu hình React/Vite](frontend.md).
 
 Để FE local gọi trực tiếp, đặt trong `frontend/.env.development.local`:
 BE-52 đã triển khai ngày 30/10/2026 với API image `traceweaver-api:be-1b6a72e`.
@@ -153,7 +153,7 @@ và không giả định nhận token ngay sau nhập mật khẩu tạm.
 - Cấp read -> thấy đúng nguồn; revoke -> mất nguồn; revoke membership -> token cũ cũng bị chặn.
 - Hai tab cùng version chỉ một mutation thành công; không thu hồi admin cuối hoặc sửa service.
 - Thử pending/timeout, replay completed, key khác body, username trùng khác owner.
-- Chạy checklist [simulator](FE_SANDBOX_HANDOFF.md), không dùng quản trị SSO thay command mô phỏng.
+- Chạy checklist [simulator](sandbox.md), không dùng quản trị SSO thay command mô phỏng.
 
 Server đã đạt **40 kiểm tra quản trị HTTPS/Keycloak** và **36 kiểm tra simulator**. Case mới
 `5115dbaf-7190-493c-8cb6-12bfa467816d` đã đóng, request `LAB-BE51-20261029-185155` giữ lịch sử
@@ -161,4 +161,4 @@ RAM -> image -> account -> passed, log delivered, proof reviewer đạt; hybrid 
 Mã UAT dùng thời gian UTC server; ngày bàn giao ở đầu tài liệu theo Asia/Saigon.
 Giữ account/hồ sơ UAT để xem lịch sử. Chưa kiểm toàn bộ UI FE bằng trình duyệt.
 
-Chi tiết vận hành: [Workspace-admin BE](../backend/WORKSPACE_ADMIN.md). OpenAPI là nguồn chuẩn DTO.
+Chi tiết vận hành: [Workspace-admin BE](../../backend/WORKSPACE_ADMIN.md). OpenAPI là nguồn chuẩn DTO.

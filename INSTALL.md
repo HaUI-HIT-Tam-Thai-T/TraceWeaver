@@ -127,4 +127,4 @@ npm run test:sim
 
 DB/identity/AI và browser UAT theo [TESTING.md](TESTING.md).
 Script license và phạm vi bao phủ tại [LICENSES.md](LICENSES.md).
-Gặp lỗi xem [SUPPORT.md](SUPPORT.md); hiện trạng và bằng chứng triển khai theo revision tại [CURRENT_STATUS](docs/CURRENT_STATUS.md).
+Gặp lỗi xem [SUPPORT.md](SUPPORT.md); hiện trạng và bằng chứng triển khai theo revision tại [CURRENT_STATUS](docs/overview/status.md).

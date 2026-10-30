@@ -1,6 +1,8 @@
 # API reference chi tiết — TraceWeaver
 
-Cập nhật26/10/2026 theo contract tại `116e156`. Đọc [luồng FE](FRONTEND_HANDOFF.md) trước khi tích hợp. Base origin: `https://api.quizlearn.tech`. Tài liệu mô tả **21 operation trong OpenAPI (20 implemented, scorer planned) +2 health**, cùng49 DTO.
+> **Phạm vi:** ví dụ API theo snapshot ngày 26/10/2026. Số operation và trạng thái implemented/planned bên dưới là lịch sử; dùng [OpenAPI hiện tại](../../backend/contracts/openapi.json) làm contract. [Mục lục tích hợp](README.md).
+
+Cập nhật26/10/2026 theo contract tại `116e156`. Đọc [luồng FE](frontend.md) trước khi tích hợp. Base origin: `https://api.quizlearn.tech`. Tài liệu mô tả **21 operation trong OpenAPI (20 implemented, scorer planned) +2 health**, cùng49 DTO.
 
 Các ví dụ JSON đã kiểm theo JSON Schema; ID/timestamp/hash/điểm đều minh họa, không phải dữ liệu thực đã có trên Oracle. Tính hợp schema không chứng minh token/quyền/guard/cycle/tương quan resource hợp lệ. Khi chạy thật, lấy IDs từ response trước và subject từ `/me`; không sao chép UUID mẫu. Các resource có related IDs dùng cùng ví dụ để dễ đọc; từng ví dụ có thể ở thời điểm khác nhau.
 
@@ -2182,6 +2184,6 @@ Ví dụ contract planned, không phải điểm do deployment hiện tại tín
 
 ## E. Tài liệu bổ sung
 
-[FE flows, auth, CORS và retry](FRONTEND_HANDOFF.md), [Identity](../backend/IDENTITY.md), [Events](../backend/EVENTS.md), [Ingestion](../backend/INGESTION.md), [Reconstruction](../backend/RECONSTRUCTION.md), [Cases](../backend/CASES.md), [Dashboard](../backend/DASHBOARD.md), [Core workflow](../backend/WORKFLOW.md).
+[FE flows, auth, CORS và retry](frontend.md), [Identity](../../backend/IDENTITY.md), [Events](../../backend/EVENTS.md), [Ingestion](../../backend/INGESTION.md), [Reconstruction](../../backend/RECONSTRUCTION.md), [Cases](../../backend/CASES.md), [Dashboard](../../backend/DASHBOARD.md), [Core workflow](../../backend/WORKFLOW.md).
 
 Reference được biên soạn từ source OpenAPI/schema tại mốc nêu trên; khi thay contract cần cập nhật reference, flows và kiểm lại JSON examples. Không dùng mô tả mốc lịch sử trong tài liệu backend để suy ra mọi capability đã có ở production.

@@ -1,10 +1,17 @@
 # Bàn giao Frontend — TraceWeaver
 
-> Bổ sung 29/10/2026: [Knowledge, tên workspace/nguồn và danh sách người nhận hồ sơ](FRONTEND_READABLE_DATA_HANDOFF.md). Xem trạng thái rollout trong bản bổ sung trước khi dùng API mới.
+> **Phạm vi:** tài liệu bàn giao có cập nhật theo nhiều mốc. Các nhận định “chưa có API/chưa triển khai” thuộc revision được ghi tại mục đó; đối chiếu [OpenAPI](../../backend/contracts/openapi.json), [hiện trạng](../overview/status.md) và [mục lục tích hợp](README.md).
+
+> Cập nhật triển khai 30/10/2026: runtime `4cdd022`, migrations001–011, quản trị account và simulator
+> đã deploy. CORS/callback/Web Origin/logout production `https://traceweaver.quizlearn.tech` đã đăng ký.
+> Xem [bàn giao quản trị mới](workspace-admin.md) và [simulator](sandbox.md).
+> Các bước mục2 bên dưới là snapshot cũ; không thực hiện lại phần production đã hoàn tất.
+
+> Bổ sung 29/10/2026: [Knowledge, tên workspace/nguồn và danh sách người nhận hồ sơ](../archive/readable-data.md). Xem trạng thái rollout trong bản bổ sung trước khi dùng API mới.
 
 Cập nhật 27/10/2026, theo source và API Oracle tại commit `116e156`. FE dùng **React/Vite**, local **http://localhost:5173**, production dự kiến **https://traceweaver.quizlearn.tech**. Trạng thái cấu hình đang chạy và các bước còn thiếu được ghi ở mục 2.
 
-Đọc tài liệu này để triển khai luồng; tra từng endpoint, field, enum và ví dụ JSON tại [API reference](FRONTEND_API_REFERENCE.md). [OpenAPI](../backend/contracts/openapi.json) và [JSON Schema](../backend/contracts/schemas/domain.schema.json) là hợp đồng chuẩn. Ví dụ trong tài liệu là dữ liệu minh họa, không phải ID/token/response production để sao chép nguyên vào request.
+Đọc tài liệu này để triển khai luồng; tra từng endpoint, field, enum và ví dụ JSON tại [API reference](api-examples.md). [OpenAPI](../../backend/contracts/openapi.json) và [JSON Schema](../../backend/contracts/schemas/domain.schema.json) là hợp đồng chuẩn. Ví dụ trong tài liệu là dữ liệu minh họa, không phải ID/token/response production để sao chép nguyên vào request.
 
 ## 1. Thông tin kết nối và phạm vi
 
@@ -263,7 +270,7 @@ flowchart TD
 | Thao tác case | `POST /cases`, `POST .../evidence`, `POST .../transitions` | Role/owner guards, conflict, khóa nút đang gửi |
 | Knowledge | `GET /knowledge?q=...` | Chỉ đọc, latest version, source_ref URI |
 
-Các path rút gọn trong bảng đều có prefix `/api/v1/workspaces/{wid}`. Danh sách đầy đủ và field request/response nằm trong [API reference](FRONTEND_API_REFERENCE.md).
+Các path rút gọn trong bảng đều có prefix `/api/v1/workspaces/{wid}`. Danh sách đầy đủ và field request/response nằm trong [API reference](api-examples.md).
 
 ### 5.1. Events → Run → Graph
 
@@ -446,7 +453,7 @@ Cùng workspace/server bên dưới đã thêm bộ `LAB-DEMO-20261028-v2`: **36
 
 Trên trang Sự kiện, nhập **`[Demo]`** vào ô tìm nội dung rồi bấm **Tìm kiếm**; bỏ lọc ngày cũ nếu đang bật. API tương ứng: `GET /api/v1/workspaces/{wid}/events?q=%5BDemo%5D&limit=100`. Hồ sơ mới có tiêu đề `[Demo] LAB-20261028-...`; xem theo danh sách cases rồi mở run tương ứng. Mỗi trạng thái `new`, `assigned`, `investigating`, `awaiting_verification` có ba hồ sơ trong bộ này. Các số này là riêng bộ v2, không phải tổng workspace.
 
-[Script lab demo](../backend/scripts/seed-lab-demo.js) mặc định dry-run, dùng cùng cờ đích như seed cũ. Bộ v1 được giữ nguyên; chạy lại v2 không thêm bản ghi và không đặt lại trạng thái người dùng đã sửa. Đã kiểm 278 assertions HTTPS qua operator/viewer, 15 liên kết và chín event unresolved của riêng v2; API healthy. FE React E2E và chất lượng AI chưa được đánh giá trong lần nạp dữ liệu này.
+[Script lab demo](../../backend/scripts/seed-lab-demo.js) mặc định dry-run, dùng cùng cờ đích như seed cũ. Bộ v1 được giữ nguyên; chạy lại v2 không thêm bản ghi và không đặt lại trạng thái người dùng đã sửa. Đã kiểm 278 assertions HTTPS qua operator/viewer, 15 liên kết và chín event unresolved của riêng v2; API healthy. FE React E2E và chất lượng AI chưa được đánh giá trong lần nạp dữ liệu này.
 
 ### Dữ liệu giả để test frontend — 27/10/2026
 
@@ -455,7 +462,7 @@ Workspace `10000000-0000-4000-8000-000000000015` trên `https://api.quizlearn.te
 - Đăng nhập operator hoặc viewer hiện có, chọn workspace trên. Tìm log bằng `GET /api/v1/workspaces/{wid}/events?q=FE-DEMO&limit=100`.
 - Lấy hồ sơ bằng `GET /api/v1/workspaces/{wid}/cases?limit=100`, rồi dùng `run_id` của từng case gọi graph. Ví dụ run `ce202b63-8b2e-4220-b92a-588054381a19`, root `85553210-b8ff-4fdc-94b7-54b56fdbfd80`, case `47a441b8-ed39-485e-a908-b001c29b6dd5`.
 - Events nằm trong ngày 27/10/2026; nếu UI bật bộ lọc thời gian, chọn đúng ngày hoặc bỏ lọc. Case/dashboard lọc theo thời điểm tạo run, không phải thời điểm event.
-- [Script seed](../backend/scripts/seed-frontend-demo.js) mặc định dry-run; chỉ ghi khi có `--apply --workspace=UUID --operator=SUBJECT --ingest=SUBJECT` và cấu hình DB của đích. Không đưa credentials vào command line. Toàn bộ seed nằm trong một transaction; chạy lại cùng bộ không tạo thêm event/run/case và không đưa case đã được người test sửa về trạng thái ban đầu.
+- [Script seed](../../backend/scripts/seed-frontend-demo.js) mặc định dry-run; chỉ ghi khi có `--apply --workspace=UUID --operator=SUBJECT --ingest=SUBJECT` và cấu hình DB của đích. Không đưa credentials vào command line. Toàn bộ seed nằm trong một transaction; chạy lại cùng bộ không tạo thêm event/run/case và không đưa case đã được người test sửa về trạng thái ban đầu.
 - Dữ liệu/audit có tính bất biến theo thiết kế hiện tại; bộ này không tự hết hạn và script không xóa dữ liệu. Reviewer/closed case chưa được provision trong lần seed này.
 
 Đã kiểm 148 assertions qua HTTPS với PKCE operator và viewer: event reads, phân trang không trùng, state filters, 12 graph, case history và dashboard. Chạy seed lần hai thêm 0 event/run/case. Không đổi tài khoản, mật khẩu, ACL, schema hoặc runtime container. Đây chưa phải kiểm thử E2E giao diện React.
@@ -464,4 +471,4 @@ Chưa có API CRUD users/roles/grants/sources/knowledge, list workspace ngoài `
 
 Đã kiểm Oracle trong phiên triển khai: HTTPS/ready/docs200, PKCE operator/viewer, refresh, `/me`, sources và hai service clients;49 assertions trong verifier vận hành pass. Website cũ vẫn trả200. Đây không phải full FE E2E hoặc kiểm mọi write API trên production. Tài liệu/example được kiểm riêng theo schema và contract ở lượt bàn giao; kết quả ghi trong CHANGELOG/planning.
 
-Các snippet React/TypeScript/Vite là mẫu tích hợp, chưa được build hoặc chạy trong một app React của repo này. Không gửi mật khẩu hay service secret trong tài liệu. Dataset demo đã nạp như trên; reviewer, production frontend origin/callback và E2E giao diện còn cần hoàn tất. Xem thêm [Identity](../backend/IDENTITY.md), [Events](../backend/EVENTS.md), [Reconstruction](../backend/RECONSTRUCTION.md), [Cases](../backend/CASES.md), [Core](../backend/WORKFLOW.md). Các tài liệu kỹ thuật cũ mô tả nhiều mốc local; thông tin deployment trong mục1–2 là snapshot có cập nhật đến ngày27/10/2026, không tự thay thế cho xác minh vận hành sau này.
+Các snippet React/TypeScript/Vite là mẫu tích hợp, chưa được build hoặc chạy trong một app React của repo này. Không gửi mật khẩu hay service secret trong tài liệu. Dataset demo đã nạp như trên; reviewer, production frontend origin/callback và E2E giao diện còn cần hoàn tất. Xem thêm [Identity](../../backend/IDENTITY.md), [Events](../../backend/EVENTS.md), [Reconstruction](../../backend/RECONSTRUCTION.md), [Cases](../../backend/CASES.md), [Core](../../backend/WORKFLOW.md). Các tài liệu kỹ thuật cũ mô tả nhiều mốc local; thông tin deployment trong mục1–2 là snapshot có cập nhật đến ngày27/10/2026, không tự thay thế cho xác minh vận hành sau này.

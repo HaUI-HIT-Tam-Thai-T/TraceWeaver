@@ -1,7 +1,7 @@
 # Kiểm thử TraceWeaver
 
 Chạy từ root trừ khi ghi khác. Dùng Node.js 24.14.1/npm 11.11.0; cài root và frontend theo lockfile.
-Các lệnh dưới đây mô tả cách kiểm; kết quả lịch sử nằm ở [CURRENT_STATUS](docs/CURRENT_STATUS.md), không chứng minh revision mới đã pass.
+Các lệnh dưới đây mô tả cách kiểm; kết quả lịch sử nằm ở [CURRENT_STATUS](docs/overview/status.md), không chứng minh revision mới đã pass.
 
 | Phạm vi | Lệnh | Điều kiện / bằng chứng |
 |---|---|---|
@@ -40,11 +40,11 @@ CI [ci.yml](.github/workflows/ci.yml) định nghĩa các job thực tế; xem k
 4. Tạo hồ sơ sandbox, sửa đúng điều kiện rồi chạy lại; phân biệt execution, log delivery và proof.
 5. Kiểm reviewer chỉ đóng được khi có bằng chứng đạt khớp yêu cầu hiện tại; kiểm viewer bị từ chối thao tác ghi.
 
-Chi tiết: [FE sandbox handoff](docs/FE_SANDBOX_HANDOFF.md), [workspace admin](docs/FE_WORKSPACE_ADMIN_HANDOFF.md),
-[completion handoff](docs/FE_COMPLETION_HANDOFF.md).
+Chi tiết: [FE sandbox handoff](docs/integration/sandbox.md), [workspace admin](docs/integration/workspace-admin.md),
+[completion handoff](docs/archive/frontend-completion.md).
 Ghi revision, môi trường, lệnh, pass/fail/skip và giới hạn; loại token, credentials và dữ liệu riêng khỏi bằng chứng công khai.
 
-[Bảng tính năng và bằng chứng](docs/FEATURE_STATUS.md) dẫn từng tính năng tới bộ test và cách demo; [DEMO](docs/DEMO.md) trình bày một hành trình kiểm chứng hoàn chỉnh.
+[Bảng tính năng và bằng chứng](docs/overview/features.md) dẫn từng tính năng tới bộ test và cách demo; [DEMO](docs/guides/demo.md) trình bày một hành trình kiểm chứng hoàn chỉnh.
 
 Model [sandbox v2](ai/artifacts/sandbox-v2/README.md) dùng dữ liệu synthetic và chưa đạt mục tiêu precision của dự án.
 Full browser E2E, hiệu năng, backup/restore và bảo mật image cần kiểm riêng; unit/contract pass không thay các bằng chứng này.

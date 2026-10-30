@@ -43,6 +43,6 @@ APP_ENV defaults to the existing development setting; NODE_ENV=production contro
 
 ## Verified locally
 
-Current source verification and deployment limits: [CURRENT_STATUS](../docs/CURRENT_STATUS.md). Audit fixes have not been rebuilt into the old container in this session (Docker CLI unavailable). Rebuild before using the patched behavior. The counts/API status in the paragraph below describe the historical BE-13 image, not the current branch.
+Current source verification and deployment limits: [CURRENT_STATUS](../docs/overview/status.md). Audit fixes have not been rebuilt into the old container in this session (Docker CLI unavailable). Rebuild before using the patched behavior. The counts/API status in the paragraph below describe the historical BE-13 image, not the current branch.
 
 Image built and API healthy at 127.0.0.1:8080; migration container exit0, existing PostgreSQL volume reused. Live/readiness200, anonymous /me401. Container confirmed Node24.14.1, UID1000, read-only root, no .env/.planning or Swagger dev package.29 unit/HTTP/contract tests and base/license checks pass. No Docker Hub push, cloud deployment, destructive cleanup or new API implementation; API count remains6/21.

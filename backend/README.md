@@ -1,6 +1,6 @@
 # TraceWeaver backend
 
-Current capabilities/verification: [CURRENT_STATUS](../docs/CURRENT_STATUS.md). Audit fixes include compressed-body415, patched dependencies, canonical microseconds, post-redaction validation, exact filters, transaction reuse and browser-origin config. Restart source/rebuild Docker to activate code changes.
+Current capabilities/verification: [CURRENT_STATUS](../docs/overview/status.md). Audit fixes include compressed-body415, patched dependencies, canonical microseconds, post-redaction validation, exact filters, transaction reuse and browser-origin config. Restart source/rebuild Docker to activate code changes.
 
 Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện có20 Node API (scorer là operation thứ21, chạy riêng bằng Python): GET /me, sources, knowledge, events, event detail; POST batch ingestion; POST run, GET run và graph; POST review và manual link; tạo/list/detail/evidence/transition case; dashboard và3 core workflow operations. Xem [Identity BE](IDENTITY.md), [ingestion](INGESTION.md), [events](EVENTS.md), [reconstruction](RECONSTRUCTION.md), [case/workflow](CASES.md), [dashboard](DASHBOARD.md) và [core HTTP](WORKFLOW.md) về cấu hình/quyền và giới hạn kiểm chứng.
 

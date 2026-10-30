@@ -1,5 +1,7 @@
 # Handoff FE — Hoàn thiện luồng demo sau audit
 
+> **Tài liệu lưu trữ:** checklist audit ngày 30/10/2026, không phải danh sách thiếu sót hiện tại đã được tái kiểm. Xem [tích hợp](../integration/README.md) và [hiện trạng](../overview/status.md).
+
 Cập nhật30/10/2026, đối chiếu FE `origin/ThienBao/feature/app-shell-ui` commit `d90addc`.
 Không thay đổi phần tìm/chọn tài khoản theo username, hiển thị tên hoặc đánh dấu service account
 (phần2 đã được người dùng loại khỏi phạm vi). Không thêm AI hoặc chức năng xóa dữ liệu.
@@ -23,7 +25,7 @@ tab tái dựng hiện có; thêm panel **Kiểm chứng nghiệp vụ mô phỏ
 
 ## 2. Ưu tiên P1 — simulator và kiểm chứng nguồn
 
-Contract chi tiết, body, error codes và retry: [FE_SANDBOX_HANDOFF](FE_SANDBOX_HANDOFF.md).
+Contract chi tiết, body, error codes và retry: [FE_SANDBOX_HANDOFF](../integration/sandbox.md).
 Prefix các API bên dưới là `/api/v1/workspaces/{wid}/cases/{cid}`.
 
 | API | Dùng cho |
@@ -75,9 +77,9 @@ Prefix các API bên dưới là `/api/v1/workspaces/{wid}/cases/{cid}`.
 3. resetAccount không xóa key chưa completed; sửa thành viên cũng bị chặn bởi blockedByAccount.
 
 File cần xem:
-[controller](../frontend/src/features/workspace-admin/controller.ts),
-[AdminForms](../frontend/src/features/workspace-admin/components/AdminForms.tsx),
-[WorkspaceAdminView](../frontend/src/features/workspace-admin/components/WorkspaceAdminView.tsx).
+[controller](../../frontend/src/features/workspace-admin/controller.ts),
+[AdminForms](../../frontend/src/features/workspace-admin/components/AdminForms.tsx),
+[WorkspaceAdminView](../../frontend/src/features/workspace-admin/components/WorkspaceAdminView.tsx).
 
 ### Ràng buộc BE hiện tại — không tự giả định đã có API mới
 
@@ -99,7 +101,7 @@ Trong lúc giữ contract hiện tại:
 - Xem lại việc khóa toàn bộ sửa thành viên vì một intent account lỗi; thao tác độc lập có thể được
   tách khóa nếu vẫn bảo đảm CAS và xử lý refresh version đúng. Không replay mutation ngầm.
 
-Contract quản trị nền: [FE_WORKSPACE_ADMIN_HANDOFF](FE_WORKSPACE_ADMIN_HANDOFF.md).
+Contract quản trị nền: [FE_WORKSPACE_ADMIN_HANDOFF](../integration/workspace-admin.md).
 
 ## 4. UX và tiêu chí nghiệm thu
 

@@ -1,7 +1,7 @@
 # TraceWeaver Frontend
 
 React + TypeScript + Vite, có cấu hình, routing, phiên Keycloak, Axios client, workspace/sources và event explorer.
-Source hiện có dashboard, event explorer/detail, hồ sơ và đồ thị/review, sandbox, tri thức và quản trị workspace. Mức kiểm chứng browser/deployment theo [CURRENT_STATUS](../docs/CURRENT_STATUS.md); các phần ghi theo task bên dưới mô tả lịch sử triển khai.
+Source hiện có dashboard, event explorer/detail, hồ sơ và đồ thị/review, sandbox, tri thức và quản trị workspace. Mức kiểm chứng browser/deployment theo [CURRENT_STATUS](../docs/overview/status.md); các phần ghi theo task bên dưới mô tả lịch sử triển khai.
 
 Giấy phép source: [Apache-2.0](../LICENSE). Dependency: [inventory](DEPENDENCIES.md), [notices](THIRD_PARTY_NOTICES.txt); tạo/kiểm từ root bằng `npm run licenses:frontend` / `npm run licenses:frontend:check`. Xem [LICENSES](../LICENSES.md) về gói optional theo nền tảng.
 

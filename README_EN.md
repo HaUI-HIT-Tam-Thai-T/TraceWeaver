@@ -14,7 +14,7 @@
 
 <div align="center">
 
-[Open TraceWeaver](https://traceweaver.quizlearn.tech) &nbsp; · &nbsp; [Demo guide](./docs/DEMO.md) &nbsp; · &nbsp; [Installation](./INSTALL.md) &nbsp; · &nbsp; [API](https://api.quizlearn.tech/docs/) &nbsp; · &nbsp; [Documentation](./docs/README.md)
+[Open TraceWeaver](https://traceweaver.quizlearn.tech) &nbsp; · &nbsp; [Demo guide](docs/guides/demo.md) &nbsp; · &nbsp; [Installation](./INSTALL.md) &nbsp; · &nbsp; [API](https://api.quizlearn.tech/docs/) &nbsp; · &nbsp; [Documentation](./docs/README.md)
 
 [Tiếng Việt](./README.md) · **English**
 
@@ -68,7 +68,7 @@ The React web app is organized by workspace, using Keycloak sessions and permiss
 | Workspace administration | `/workspace-admin` | Membership, roles, source grants and configured account provisioning |
 
 Session and API-client guidance is in [frontend/README.md](./frontend/README.md).
-Follow [docs/DEMO.md](./docs/DEMO.md) for a walkthrough with observable results.
+Follow [docs/guides/demo.md](docs/guides/demo.md) for a walkthrough with observable results.
 
 ## 🗺️ System architecture
 
@@ -117,7 +117,7 @@ See the [architecture details](./ARCHITECTURE.md) and [core boundaries](./backen
 
 **Sandbox and AI:** RAM/image/account failure simulation, condition repair, request reruns, log delivery and immutable proof; baseline or opt-in sandbox-v2 scoring with fallback.
 
-Feature integration and evidence are mapped in [FEATURE_STATUS](./docs/FEATURE_STATUS.md); deployment history is recorded in [CURRENT_STATUS](./docs/CURRENT_STATUS.md).
+Feature integration and evidence are mapped in [FEATURE_STATUS](docs/overview/features.md); deployment history is recorded in [CURRENT_STATUS](docs/overview/status.md).
 The sandbox-v2 model is experimental on synthetic data; its quality results and limits are documented in the [model card](./ai/artifacts/sandbox-v2/README.md).
 
 ## 🧰 Technology and licensing
@@ -250,7 +250,7 @@ After signing in, select **TraceWeaver Sandbox — Mô phỏng kiểm chứng** 
 | Manage members/source access and repair simulation conditions | `workspace-admin` | `admin` |
 
 A suggested session: investigate a failed request as `operator` → repair RAM/image/account conditions as `workspace-admin` → rerun as `operator` → verify and close as `reviewer` once all requirements are met.
-Follow the [guided demo](./docs/DEMO.md) for the steps. Sign out before switching accounts.
+Follow the [guided demo](docs/guides/demo.md) for the steps. Sign out before switching accounts.
 
 Permissions belong to each workspace, not the username: in the **TraceWeaver** workspace, `viewer` currently also has `operator` and `reviewer` roles. Use **Sandbox** to try read-only access.
 These are public demo accounts sharing mutable demo data; do not use them for real data.
@@ -291,7 +291,7 @@ Those accounts belong to your local environment; the live demo password above do
 - SBOM: `npm run sbom:check`; Python license/SBOM: `python -m ai.scripts.dependency_inventory --check` in the venv.
 
 Prerequisites, unit/integration/UAT boundaries and evidence limits are in [TESTING.md](./TESTING.md).
-Feature coverage is mapped in [FEATURE_STATUS](./docs/FEATURE_STATUS.md); inspect [Actions](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions) for results on a specific commit.
+Feature coverage is mapped in [FEATURE_STATUS](docs/overview/features.md); inspect [Actions](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions) for results on a specific commit.
 The frontend SBOM omits optional dependencies; the Python SBOM is a flat inventory — see [SBOM scope](./sbom/README.md).
 
 ## 🐛 Troubleshooting
@@ -321,13 +321,13 @@ Support and safe diagnostic reporting are described in [SUPPORT.md](./SUPPORT.md
 | [`ai/`](./ai/README.md) | Scorer, features, versioned model, provenance and tests |
 | [`simulator/`](./simulator/README.md) | Stateful business simulation and seeded log generation |
 | [`deploy/oracle/`](./deploy/oracle/README.md) | Server deployment and operations |
-| [`docs/`](./docs/README.md) | Demo, evidence and integration guidance |
+| [`docs/`](./docs/README.md) | Overview, guides, reference, integration, competition and archives |
 | [`sbom/`](./sbom/README.md) | CycloneDX JSON and regeneration instructions |
 | [`.github/`](./.github/) | CI, dependency checks and issue/PR templates |
 
 Core documents: [ARCHITECTURE](./ARCHITECTURE.md) · [INSTALL](./INSTALL.md) · [CHANGELOG](./CHANGELOG.md) · [LICENSES](./LICENSES.md).
-Prepare source/distribution packages using [RELEASING](./docs/RELEASING.md).
-The `v0.1.0-base.1` tag is an earlier scaffold; current scope is revision-specific in [CURRENT_STATUS](./docs/CURRENT_STATUS.md).
+Prepare source/distribution packages using [RELEASING](docs/guides/release.md).
+The `v0.1.0-base.1` tag is an earlier scaffold; current scope is revision-specific in [CURRENT_STATUS](docs/overview/status.md).
 
 </details>
 

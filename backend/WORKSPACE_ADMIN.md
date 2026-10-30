@@ -4,7 +4,7 @@ Trạng thái 30/10/2026: đã push và rollout Oracle source `4cdd022`, image `
 migration011 và runtime grants. User đã yêu cầu deploy sau lần chặn cũ; dedicated Keycloak service-only
 client và admin-only profile marker đã cấu hình, secret chỉ lưu server. 40 kiểm tra quản trị HTTPS/Keycloak
 thật đạt, gồm tạo account, required password/profile actions, login và cấp/thu hồi quyền; 36 kiểm tra
-simulator cũng đạt. FE chưa sửa/triển khai. Xem [bàn giao FE](../docs/FE_WORKSPACE_ADMIN_HANDOFF.md).
+simulator cũng đạt. FE chưa sửa/triển khai. Xem [bàn giao FE](../docs/integration/workspace-admin.md).
 
 Phạm vi tối thiểu: quản lý thành viên trong workspace hiện có, role viewer/operator/reviewer/admin,
 quyền đọc trực tiếp từng nguồn và tạo tài khoản Keycloak với mật khẩu tạm. Không tạo/xóa workspace,

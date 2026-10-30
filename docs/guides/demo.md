@@ -7,14 +7,15 @@ Mỗi bước có kết quả cần quan sát để người mới tự đối c
 
 | Mục đích | Điểm bắt đầu | Điều kiện |
 |---|---|---|
+| Thử bản web đã triển khai | [TraceWeaver trực tuyến](https://traceweaver.quizlearn.tech), [tài khoản demo](../../README.md#chọn-vai-trò-để-trải-nghiệm) | Chọn workspace Sandbox và vai trò phù hợp |
 | Hiểu dữ liệu, chưa cần chạy dịch vụ | `npm run sim:generate` tại root | Node 24; chỉ in manifest, không ghi DB/file |
-| Chạy API local và Swagger | [INSTALL](../INSTALL.md), [Keycloak bootstrap](../backend/KEYCLOAK.md) | PostgreSQL, SSO và demo grants |
-| Thử giao diện | [Frontend setup](../INSTALL.md#4-frontend) | API/Identity HTTPS và tài khoản được cấp; web dev tại localhost:5173 |
-| Thử sửa lỗi và đóng hồ sơ | [Sandbox guide](../backend/LAB_SANDBOX.md) | Sandbox đã cấu hình, collector và quyền operator/reviewer/admin phù hợp |
+| Chạy API local và Swagger | [INSTALL](../../INSTALL.md), [Keycloak bootstrap](../../backend/KEYCLOAK.md) | PostgreSQL, SSO và demo grants |
+| Thử giao diện | [Frontend setup](../../INSTALL.md#4-frontend) | API/Identity HTTPS và tài khoản được cấp; web dev tại localhost:5173 |
+| Thử sửa lỗi và đóng hồ sơ | [Sandbox guide](../../backend/LAB_SANDBOX.md) | Sandbox đã cấu hình, collector và quyền operator/reviewer/admin phù hợp |
 
 API demo được cấu hình trong mẫu FE tại `https://api.quizlearn.tech`; Swagger tại [API docs](https://api.quizlearn.tech/docs/).
 Đây là địa chỉ deployment được tài liệu dự án ghi nhận, không phải cam kết uptime hoặc quyền truy cập công khai cho mọi API.
-Tài khoản demo local được sinh theo bootstrap; mật khẩu nằm ngoài Git. Hướng dẫn này không cung cấp mật khẩu dùng chung.
+Tài khoản demo trực tuyến và mật khẩu công khai được ghi tại [README](../../README.md#chọn-vai-trò-để-trải-nghiệm). Tài khoản local được sinh riêng theo bootstrap, mật khẩu local nằm ngoài Git.
 
 ## Một hành trình điều tra
 
@@ -39,7 +40,7 @@ Nếu workspace không cấu hình sandbox, dùng các bước điều tra/revie
 | Hai tài khoản cùng request ID | Không ép kết luận khi dữ liệu mơ hồ | Giữ unresolved/abstention và đưa cho reviewer |
 | Request lỗi cả tài khoản và RAM | Sửa một nguyên nhân chưa giải quyết toàn bộ | Chạy lại vẫn phản ánh lỗi còn lại; đóng case cần proof phù hợp sau khi đã xử lý |
 
-Dataset synthetic có manifest và các scenario tại [simulator README](../simulator/README.md).
+Dataset synthetic có manifest và các scenario tại [simulator README](../../simulator/README.md).
 Không dựa vào ngày/ID của dataset server cũ: dùng manifest của bộ hiện có, chọn đúng time window và nguồn được cấp quyền.
 
 ## Tự sinh dataset
@@ -51,6 +52,6 @@ npm run sim:generate -- --seed=profile-demo --base-time=2026-10-31T01:00:00Z --c
 ```
 
 `observable.json` và `deliveries.json` phục vụ ingestion; `oracle.json` là đáp án đánh giá, không gửi vào scorer/runtime.
-Việc upload và tạo case làm thay đổi dữ liệu trong workspace được chọn; thực hiện theo [hướng dẫn simulator](../simulator/README.md#nạp-qua-api) trên workspace demo của bạn.
+Việc upload và tạo case làm thay đổi dữ liệu trong workspace được chọn; thực hiện theo [hướng dẫn simulator](../../simulator/README.md#nạp-qua-api) trên workspace demo của bạn.
 
-Theo dõi bằng chứng tính năng tại [FEATURE_STATUS](FEATURE_STATUS.md), cách kiểm tại [TESTING](../TESTING.md) và lỗi thường gặp tại [SUPPORT](../SUPPORT.md).
+Theo dõi bằng chứng tính năng tại [FEATURE_STATUS](../overview/features.md), cách kiểm tại [TESTING](../../TESTING.md) và lỗi thường gặp tại [SUPPORT](../../SUPPORT.md).

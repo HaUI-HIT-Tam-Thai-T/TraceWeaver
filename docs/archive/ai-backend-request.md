@@ -1,6 +1,8 @@
 # Phối hợp AI scorer với Backend
 
-> Ghi chú backend 25/10/2026: giữ nguyên yêu cầu gốc bên dưới. Đọc [phản hồi backend](BACKEND_HANDOFF_RESPONSE.md) và [hiện trạng](CURRENT_STATUS.md). Policy đang dùng `request.accepted → account.created → provision.completed|failed`; tên action trong phần giả định dưới đây chưa được runtime hỗ trợ. Chưa coi các câu hỏi outcome/retry/features là đã chốt.
+> **Tài liệu lưu trữ:** yêu cầu và giả định AI tại thời điểm bàn giao. Hợp đồng scorer hiện được dẫn trong [tham chiếu kỹ thuật](../reference/README.md).
+
+> Ghi chú backend 25/10/2026: giữ nguyên yêu cầu gốc bên dưới. Đọc [phản hồi backend](ai-backend-response.md) và [hiện trạng](../overview/status.md). Policy đang dùng `request.accepted → account.created → provision.completed|failed`; tên action trong phần giả định dưới đây chưa được runtime hỗ trợ. Chưa coi các câu hỏi outcome/retry/features là đã chốt.
 
 Mình đang làm phần AI scorer cho TraceWeaver. Luồng dự kiến:
 

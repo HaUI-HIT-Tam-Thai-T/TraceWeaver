@@ -1,7 +1,7 @@
 # Bàn giao FE — Simulator và kiểm chứng hồ sơ
 
 Cập nhật 31/10/2026 sau triển khai BE/simulator mới. Contract giữ tương thích DTO cũ; runtime `a38c380`
-đã triển khai tại `https://api.quizlearn.tech`. Xem thêm [bàn giao quản trị FE](FE_WORKSPACE_ADMIN_HANDOFF.md).
+đã triển khai tại `https://api.quizlearn.tech`. Xem thêm [bàn giao quản trị FE](workspace-admin.md).
 Đây là phần mở rộng xử lý/kiểm chứng nghiệp vụ; AI vẫn chỉ chấm điểm liên kết sự kiện.
 
 **Bản sửa hiệu lực kiểm chứng đã triển khai server (`a38c380`):** `source_version` vẫn là version
@@ -331,10 +331,10 @@ Checklist nghiệm thu:
 
 ## 7. Nguồn đối chiếu và tình trạng
 
-- [OpenAPI](../backend/contracts/openapi.json): operation `getCaseSandbox`, `commandCaseSandbox`, `listCaseVerifications`, `verifyCaseSource`.
-- [Sandbox BE](../backend/LAB_SANDBOX.md): cơ chế, cấu hình và bằng chứng triển khai.
-- [Bàn giao FE chung](FRONTEND_HANDOFF.md): SSO, source ACL và workflow hiện có.
-- [API reference chung](FRONTEND_API_REFERENCE.md).
+- [OpenAPI](../../backend/contracts/openapi.json): operation `getCaseSandbox`, `commandCaseSandbox`, `listCaseVerifications`, `verifyCaseSource`.
+- [Sandbox BE](../../backend/LAB_SANDBOX.md): cơ chế, cấu hình và bằng chứng triển khai.
+- [Bàn giao FE chung](frontend.md): SSO, source ACL và workflow hiện có.
+- [API reference chung](api-examples.md).
 
 BE đã qua kiểm thử local và36 kiểm tra HTTPS/Keycloak thật trên Oracle. Đây là bàn giao cho FE triển khai;
 chưa xác nhận có panel simulator, browser E2E, workspace-admin hoặc tạo tài khoản mới trong ứng dụng.

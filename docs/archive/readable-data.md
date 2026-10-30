@@ -1,6 +1,8 @@
 # Handoff FE — dữ liệu dễ đọc và người nhận hồ sơ
 
-Ngày 29/10/2026. Bổ sung cho [handoff tổng](FRONTEND_HANDOFF.md) và [API reference](FRONTEND_API_REFERENCE.md). Contract chuẩn: [OpenAPI](../backend/contracts/openapi.json), [schema](../backend/contracts/schemas/domain.schema.json).
+> **Tài liệu lưu trữ:** snapshot bàn giao ngày 29/10/2026; trạng thái chờ rollout dưới đây thuộc mốc đó. Xem [hiện trạng](../overview/status.md) cho triển khai mới hơn.
+
+Ngày 29/10/2026. Bổ sung cho [handoff tổng](../integration/frontend.md) và [API reference](../integration/api-examples.md). Contract chuẩn: [OpenAPI](../../backend/contracts/openapi.json), [schema](../../backend/contracts/schemas/domain.schema.json).
 
 ## Trạng thái tích hợp
 

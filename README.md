@@ -14,7 +14,7 @@
 
 <div align="center">
 
-[Mở TraceWeaver](https://traceweaver.quizlearn.tech) &nbsp; · &nbsp; [Hướng dẫn demo](./docs/DEMO.md) &nbsp; · &nbsp; [Cài đặt](./INSTALL.md) &nbsp; · &nbsp; [API](https://api.quizlearn.tech/docs/) &nbsp; · &nbsp; [Tài liệu](./docs/README.md)
+[Mở TraceWeaver](https://traceweaver.quizlearn.tech) &nbsp; · &nbsp; [Hướng dẫn demo](docs/guides/demo.md) &nbsp; · &nbsp; [Cài đặt](./INSTALL.md) &nbsp; · &nbsp; [API](https://api.quizlearn.tech/docs/) &nbsp; · &nbsp; [Tài liệu](./docs/README.md)
 
 **Tiếng Việt** · [English](./README_EN.md)
 
@@ -68,7 +68,7 @@ Web React tổ chức theo workspace, dùng phiên đăng nhập Keycloak và qu
 | Quản trị workspace | `/workspace-admin` | Thành viên, vai trò, quyền nguồn và cấp tài khoản theo cấu hình |
 
 Hướng dẫn phiên đăng nhập và API client ở [frontend/README.md](./frontend/README.md).
-Kịch bản thao tác cùng kết quả cần quan sát ở [docs/DEMO.md](./docs/DEMO.md).
+Kịch bản thao tác cùng kết quả cần quan sát ở [docs/guides/demo.md](docs/guides/demo.md).
 
 ## 🗺️ Kiến trúc tổng thể
 
@@ -117,7 +117,7 @@ Xem [kiến trúc chi tiết](./ARCHITECTURE.md) và [ranh giới core](./backen
 
 **Sandbox và AI:** mô phỏng lỗi RAM/image/tài khoản, sửa điều kiện, chạy lại request, theo dõi giao log và lưu proof; scorer baseline hoặc model sandbox v2 opt-in, có fallback.
 
-Mức tích hợp và bằng chứng từng tính năng ở [FEATURE_STATUS](./docs/FEATURE_STATUS.md); lịch sử triển khai ở [CURRENT_STATUS](./docs/CURRENT_STATUS.md).
+Mức tích hợp và bằng chứng từng tính năng ở [FEATURE_STATUS](docs/overview/features.md); lịch sử triển khai ở [CURRENT_STATUS](docs/overview/status.md).
 Model sandbox v2 đang thử nghiệm trên dữ liệu synthetic; chất lượng và giới hạn được ghi tại [model card](./ai/artifacts/sandbox-v2/README.md).
 
 ## 🧰 Công nghệ và giấy phép
@@ -249,7 +249,7 @@ Bốn tài khoản dưới đây đăng nhập vào **bản web trực tuyến**
 | Quản lý thành viên/quyền nguồn và sửa điều kiện mô phỏng | `workspace-admin` | `admin` |
 
 Một phiên thử gợi ý: dùng `operator` điều tra yêu cầu lỗi → dùng `workspace-admin` sửa RAM/image/tài khoản → quay lại `operator` chạy lại yêu cầu → dùng `reviewer` kiểm chứng và đóng hồ sơ khi đủ điều kiện.
-Xem các bước ở [kịch bản demo](./docs/DEMO.md). Đăng xuất trước khi chuyển sang tài khoản khác.
+Xem các bước ở [kịch bản demo](docs/guides/demo.md). Đăng xuất trước khi chuyển sang tài khoản khác.
 
 Quyền được cấp theo workspace, không suy ra từ username: riêng `viewer` ở workspace **TraceWeaver** hiện có thêm `operator` và `reviewer`; dùng workspace **Sandbox** để thử chế độ chỉ đọc.
 Đây là các tài khoản demo công khai, thao tác có thể ảnh hưởng dữ liệu demo dùng chung; không dùng cho dữ liệu thật.
@@ -290,7 +290,7 @@ Hai tài khoản thử nghiệm phát sinh trên server không thuộc bộ demo
 - SBOM: `npm run sbom:check`; Python license/SBOM: `python -m ai.scripts.dependency_inventory --check` trong venv.
 
 Điều kiện chạy, phân biệt unit/integration/UAT và giới hạn bằng chứng ở [TESTING.md](./TESTING.md).
-Độ phủ theo tính năng ở [FEATURE_STATUS](./docs/FEATURE_STATUS.md); kết quả CI theo đúng commit tại [Actions](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions).
+Độ phủ theo tính năng ở [FEATURE_STATUS](docs/overview/features.md); kết quả CI theo đúng commit tại [Actions](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/actions).
 SBOM frontend loại dependency optional; Python SBOM là danh mục phẳng — xem [phạm vi SBOM](./sbom/README.md).
 
 ## 🐛 Xử lý sự cố
@@ -320,13 +320,13 @@ Hỗ trợ và cách gửi log an toàn tại [SUPPORT.md](./SUPPORT.md).
 | [`ai/`](./ai/README.md) | Scorer, features, model/version, provenance và tests |
 | [`simulator/`](./simulator/README.md) | Mô phỏng nghiệp vụ có trạng thái và sinh log có seed |
 | [`deploy/oracle/`](./deploy/oracle/README.md) | Triển khai và vận hành máy chủ |
-| [`docs/`](./docs/README.md) | Hướng dẫn demo, bằng chứng và tích hợp |
+| [`docs/`](./docs/README.md) | Tổng quan, hướng dẫn, tham chiếu, tích hợp, hồ sơ dự thi và lưu trữ |
 | [`sbom/`](./sbom/README.md) | CycloneDX JSON và hướng dẫn tái tạo |
 | [`.github/`](./.github/) | CI, kiểm dependency và mẫu issue/PR |
 
 Tài liệu gốc: [ARCHITECTURE](./ARCHITECTURE.md) · [INSTALL](./INSTALL.md) · [CHANGELOG](./CHANGELOG.md) · [LICENSES](./LICENSES.md).
-Chuẩn bị gói source và bản phân phối theo [RELEASING](./docs/RELEASING.md).
-Tag `v0.1.0-base.1` là scaffold cũ; phạm vi hiện tại theo revision ở [CURRENT_STATUS](./docs/CURRENT_STATUS.md).
+Chuẩn bị gói source và bản phân phối theo [RELEASING](docs/guides/release.md).
+Tag `v0.1.0-base.1` là scaffold cũ; phạm vi hiện tại theo revision ở [CURRENT_STATUS](docs/overview/status.md).
 
 </details>
 

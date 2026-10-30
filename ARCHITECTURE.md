@@ -1,7 +1,7 @@
 # Kiến trúc TraceWeaver
 
 TraceWeaver điều tra hành trình cấp môi trường thực hành từ dấu vết intake, account và provision.
-Tài liệu mô tả ranh giới source; trạng thái triển khai theo từng phiên bản nằm ở [CURRENT_STATUS](docs/CURRENT_STATUS.md).
+Tài liệu mô tả ranh giới source; trạng thái triển khai theo từng phiên bản nằm ở [CURRENT_STATUS](docs/overview/status.md).
 
 ## Ba tầng
 

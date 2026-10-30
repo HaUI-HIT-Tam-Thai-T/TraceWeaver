@@ -1,61 +1,56 @@
 # Tài liệu TraceWeaver
 
-Điểm bắt đầu công khai: [Giới thiệu tiếng Việt](../README.md) · [English](../README_EN.md) · [Cài đặt](../INSTALL.md) · [Kiến trúc](../ARCHITECTURE.md) · [Kiểm thử](../TESTING.md) · [Giấy phép](../LICENSES.md) · [Hỗ trợ](../SUPPORT.md).
+TraceWeaver hỗ trợ điều tra log đa nguồn, xử lý hồ sơ và kiểm chứng kết quả khắc phục. Đây là điểm bắt đầu cho người dùng, người phát triển và người đánh giá bài dự thi.
 
-Quy trình cộng đồng: [Đóng góp](../CONTRIBUTING.md), [Quy tắc ứng xử](../CODE_OF_CONDUCT.md), [Bảo mật](../SECURITY.md).
+[Giới thiệu dự án](../README.md) · [English](../README_EN.md) · [Web trực tuyến](https://traceweaver.quizlearn.tech) · [Swagger API](https://api.quizlearn.tech/docs/)
 
-## Chọn điểm bắt đầu
+## Bạn muốn làm gì?
 
-| Bạn muốn | Đọc trước |
+| Nhu cầu | Bắt đầu tại đây |
 |---|---|
-| Hiểu sản phẩm và thử một hành trình | [Khám phá/demo](DEMO.md) |
-| Đối chiếu tính năng, tests và điều kiện demo | [Tính năng và bằng chứng](FEATURE_STATUS.md) |
-| Dựng môi trường của mình | [INSTALL](../INSTALL.md) |
-| Tích hợp API hoặc mở rộng core | [Contracts](../backend/contracts/README.md), [Architecture](../ARCHITECTURE.md) |
-| Kiểm license hoặc chuẩn bị phân phối | [LICENSES](../LICENSES.md), [SBOM](../sbom/README.md), [Đóng gói/phát hành](RELEASING.md) |
+| Hiểu sản phẩm, phạm vi và bản đang chạy | [Tổng quan](overview/README.md) |
+| Thử một hành trình điều tra | [Demo có hướng dẫn](guides/demo.md) |
+| Cài đặt, vận hành hoặc phát hành | [Hướng dẫn](guides/README.md) |
+| Tra kiến trúc, API, dữ liệu, workflow hoặc AI | [Tham chiếu kỹ thuật](reference/README.md) |
+| Tích hợp web, sandbox và quản trị workspace | [Tích hợp](integration/README.md) |
+| Kiểm chứng tính năng hoặc chuẩn bị hồ sơ dự thi | [Ma trận tính năng](overview/features.md), [Hồ sơ dự thi](competition/README.md) |
+| Tìm quyết định và bàn giao theo mốc cũ | [Lưu trữ](archive/README.md) |
 
-Các bàn giao theo mốc bên dưới phục vụ tích hợp; khi hướng dẫn cũ khác source mới, đối chiếu contract và revision ở CURRENT_STATUS.
+## Cấu trúc thư mục
 
-**Handoff sau audit30/10:** [Hoàn thiện FE](FE_COMPLETION_HANDOFF.md) — phân biệt tái dựng với chạy lại
-nghiệp vụ, tích hợp simulator/proof, phục hồi lỗi account và UAT UX. Không mở rộng phần tìm/hiển thị tài khoản.
+```text
+docs/
+├── README.md           # Mục lục và quy ước tài liệu
+├── overview/           # Sản phẩm, hiện trạng và ma trận tính năng
+├── guides/             # Demo, vận hành, license và phát hành
+├── reference/          # Điểm tra cứu tài liệu kỹ thuật cạnh source
+├── integration/        # Luồng FE, sandbox, quản trị và ví dụ API
+├── competition/        # Đối chiếu đề, bằng chứng và hồ sơ nộp
+└── archive/            # Kế hoạch và bàn giao lịch sử
+```
 
-Bàn giao quản trị: [FE — workspace và tài khoản](FE_WORKSPACE_ADMIN_HANDOFF.md) — sidebar, API,
-version, retry/pending, đăng nhập lần đầu và UAT. BE đã deploy 30/10/2026; FE chưa tích hợp.
-Chi tiết vận hành: [Workspace-admin BE](../backend/WORKSPACE_ADMIN.md).
+Mỗi thư mục có `README.md` làm mục lục. Tên thư mục và tệp dùng tiếng Anh, chữ thường và dấu gạch nối; nội dung hướng dẫn chủ yếu bằng tiếng Việt. Ngày và mã revision nằm trong nội dung khi cần xác định phạm vi.
 
-Bàn giao mới cho FE: [Simulator và kiểm chứng hồ sơ](FE_SANDBOX_HANDOFF.md) — API đã triển khai,
-quyền, request/response, version/retry, trạng thái log/proof và checklist UAT.
-Contract sandbox dùng ngay nằm ở mục0; mục2 đã cập nhật request/case IDs sau khi thay dữ liệu server30/10.
+## Nguồn thông tin chính
 
-Tài liệu được chia theo tổng quan, vận hành và thành phần kỹ thuật. Chỉ các chức năng trong [hiện trạng](CURRENT_STATUS.md) được xem là đã triển khai.
+- **Hợp đồng API:** [OpenAPI và schemas](../backend/contracts/README.md). Ví dụ API trong bàn giao có ngày là snapshot, không thay contract.
+- **Triển khai và kết quả xác minh:** [Hiện trạng](overview/status.md). Có source hoặc test không có nghĩa đã deploy hay đã kiểm đạt.
+- **Kỹ thuật từng thành phần:** [Backend](../backend/README.md), [Frontend](../frontend/README.md), [AI](../ai/README.md), [Simulator](../simulator/README.md). Tài liệu chi tiết giữ cạnh source và được dẫn từ [reference](reference/README.md).
+- **Cách kiểm thử:** [TESTING](../TESTING.md); bằng chứng theo tính năng ở [features](overview/features.md).
+- **Cài đặt:** [INSTALL](../INSTALL.md); **kiến trúc:** [ARCHITECTURE](../ARCHITECTURE.md).
 
-| Chủ đề | Tài liệu |
-|---|---|
-| Tổng quan, kiến trúc ba tầng, công nghệ | [README](../README.md) |
-| Cài từ source, cấu hình và kiểm thử | [INSTALL](../INSTALL.md) |
-| Docker, local Identity và demo login | [Docker](../backend/DOCKER.md), [Keycloak](../backend/KEYCLOAK.md) |
-| Backend/API | [Backend](../backend/README.md), [OpenAPI và schemas](../backend/contracts/README.md) |
-| Bàn giao React/Vite | [Luồng và tích hợp FE](FRONTEND_HANDOFF.md), [API reference chi tiết](FRONTEND_API_REFERENCE.md) |
-| Xác thực và quyền dữ liệu | [Identity](../backend/IDENTITY.md) |
-| Dữ liệu đầu vào và truy vấn | [Ingestion](../backend/INGESTION.md), [Events](../backend/EVENTS.md) |
-| Tái dựng và duyệt liên kết | [Reconstruction](../backend/RECONSTRUCTION.md) |
-| AI scorer, model opt-in và cách test | [Scorer](../backend/SCORER.md), [Model và provenance](../ai/artifacts/sandbox-v2/README.md) |
-| Quy trình và thống kê | [Cases](../backend/CASES.md), [Core workflow](../backend/WORKFLOW.md), [Dashboard](../backend/DASHBOARD.md) |
-| Tích hợp FE/AI/simulator | [Integration](INTEGRATION.md), [AI handoff](BACKEND_HANDOFF.md), [Backend response](BACKEND_HANDOFF_RESPONSE.md) |
-| Đóng góp, license, bảo mật | [Contributing](../CONTRIBUTING.md), [Dependency inventory](../backend/DEPENDENCIES.md), [Notices](../backend/THIRD_PARTY_NOTICES.txt), [Security](../SECURITY.md) |
-| Thay đổi và báo lỗi | [Changelog](../CHANGELOG.md), [Issues](https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver/issues) |
+## Quy ước cập nhật
 
-OpenAPI/JSON Schema là hợp đồng chung; không tạo DTO riêng khác schema. Checklist chuẩn bị thi và báo cáo kiểm chứng local không thuộc tài liệu sử dụng công khai. Backend đã tích hợp scorer baseline/model v2 opt-in; kết quả và giới hạn cập nhật ở [CURRENT_STATUS](CURRENT_STATUS.md). Tag v0.1.0-base.1 là bản scaffold.
+1. Đặt tài liệu vào nhóm phù hợp và thêm liên kết trong mục lục của nhóm; dùng liên kết tương đối trong repository.
+2. Khi đổi tên hoặc di chuyển tệp, sửa cả liên kết đi vào và liên kết bên trong tệp. Không giữ nhiều bản nội dung giống nhau để làm đường dẫn thay thế.
+3. Ghi rõ ngày/revision và môi trường khi mô tả kết quả; giữ lịch sử nhưng đánh dấu phạm vi cũ. Đưa kế hoạch đã bị thay thế vào `archive/`.
+4. Giữ secrets, `.env`, private key, dữ liệu thật, cache và báo cáo thao tác riêng trong `.local/`, không đưa vào docs công khai.
+5. `.planning/` phục vụ trạng thái làm việc local. Gói AI có checksum trong `ai/handoffs/` được giữ nguyên, không dời vào docs.
 
-## Quy ước thư mục
+## Đóng góp và liên hệ
 
-- `docs/`: tài liệu dùng chung và bàn giao giữa các thành phần.
-- `backend/*.md`, `ai/*.md`, `frontend/README.md`: hướng dẫn gắn với source của từng thành phần.
-- `.planning/`: kế hoạch, quyết định và trạng thái làm việc local.
-- `ai/handoffs/`: gói bàn giao AI được quản lý trong Git, giữ nguyên nội dung/checksum.
-- `.local/reports/`: kết quả kiểm tra và bản ghi thao tác local.
-- `.local/scripts/`: script vận hành/demo dùng riêng trên máy.
-- `.local/releases/`: bản nháp PR và release.
-- `.local/ai-test/`: phiên test AI đang chạy, payload, log và báo cáo của phiên.
+[Đóng góp](../CONTRIBUTING.md) · [Quy tắc ứng xử](../CODE_OF_CONDUCT.md) · [Bảo mật](../SECURITY.md) · [Hỗ trợ](../SUPPORT.md) · [Giấy phép](../LICENSES.md) · [SBOM](../sbom/README.md)
 
-Runtime AI, Keycloak và cache giữ nguyên ở `.local/ai-venv/`, `.local/keycloak/` và `.local/npm-cache/`. Không đưa secret, môi trường Python hoặc cache vào Git.
+## Tham khảo cách tổ chức
+
+[SmartCity-Platform](https://github.com/Haui-HIT-H2K/SmartCity-Platform/tree/main/docs) gợi ý phân nhóm tổng quan và thành phần kỹ thuật; [DX-OS](https://github.com/HaUI-ImplSolution/DX-OS) gợi ý các điểm vào hướng dẫn, kiểm thử và minh họa. TraceWeaver áp dụng cách phân nhóm cho tài liệu của mình, giữ nguyên kiến trúc và nội dung sản phẩm.

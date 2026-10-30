@@ -1,16 +1,18 @@
 # Phản hồi BACKEND_HANDOFF — TraceWeaver Backend
 
-BE-38 (29/10/2026): đã deploy BE + model AI v2 lên Oracle tại https://api.quizlearn.tech/docs/, runtime release `oracle-4e2805e`. API gọi scorer bằng TLS nội bộ, AI không publish cổng Internet. Pass 23 mẫu scorer qua TLS, 20 kiểm tra hybrid/PKCE/audit/replay/dữ liệu và 49 kiểm tra live hiện có. Hashes của 72 events, 25 runs và 25 cases cũ giữ nguyên; test thêm đúng một run hybrid, không thêm event/case. PostgreSQL/Keycloak và các ứng dụng khác giữ nguyên. Xem [hướng dẫn deploy](../deploy/oracle/README.md). Các ghi chú container cũ bên dưới mô tả lịch sử hoặc container local8080, không phải deployment Oracle mới.
+> **Tài liệu lưu trữ:** phản hồi có các phần theo nhiều mốc khác nhau. Đối chiếu [scorer hiện hành](../../backend/SCORER.md) và [hiện trạng](../overview/status.md).
+
+BE-38 (29/10/2026): đã deploy BE + model AI v2 lên Oracle tại https://api.quizlearn.tech/docs/, runtime release `oracle-4e2805e`. API gọi scorer bằng TLS nội bộ, AI không publish cổng Internet. Pass 23 mẫu scorer qua TLS, 20 kiểm tra hybrid/PKCE/audit/replay/dữ liệu và 49 kiểm tra live hiện có. Hashes của 72 events, 25 runs và 25 cases cũ giữ nguyên; test thêm đúng một run hybrid, không thêm event/case. PostgreSQL/Keycloak và các ứng dụng khác giữ nguyên. Xem [hướng dẫn deploy](../../deploy/oracle/README.md). Các ghi chú container cũ bên dưới mô tả lịch sử hoặc container local8080, không phải deployment Oracle mới.
 
 ## BE-34 — 28/10/2026: trained model v2 opt-in
 
-AI_BE_RUNTIME_V2 has been verified and imported: loader plus checksum-verified experimental JSON artifact, 23 HTTP sample pairs and 42 independent feature fixtures. The supplied launcher and Node probe pass; the real Node extractor passes 42/42. Explicit SCORER_MODEL_VERSION enables the exact trained version; baseline remains supported. Model success reports hybrid/non-degraded, annotating only existing pending rule-derived links. sandbox-rules-2 keeps ACL/outcome/strong-ID/ambiguity/cardinality/cycle guards. Batches <=100 share one <=5s deadline; failures discard every score. See [Scorer guide](../backend/SCORER.md) and [artifact provenance](../ai/artifacts/sandbox-v2/README.md).
+AI_BE_RUNTIME_V2 has been verified and imported: loader plus checksum-verified experimental JSON artifact, 23 HTTP sample pairs and 42 independent feature fixtures. The supplied launcher and Node probe pass; the real Node extractor passes 42/42. Explicit SCORER_MODEL_VERSION enables the exact trained version; baseline remains supported. Model success reports hybrid/non-degraded, annotating only existing pending rule-derived links. sandbox-rules-2 keeps ACL/outcome/strong-ID/ambiguity/cardinality/cycle guards. Batches <=100 share one <=5s deadline; failures discard every score. See [Scorer guide](../../backend/SCORER.md) and [artifact provenance](../../ai/artifacts/sandbox-v2/README.md).
 
 Verified: 129 Node unit/HTTP/contracts, 31 Python, 50 PostgreSQL, 47 native identity/API tests pass, zero skipped. The JWT/API→Python-model→PostgreSQL path verifies scores/audit/replay/review and stopped-scorer fallback; old baseline replay stays immutable after model selection. OpenAPI has 21 source-implemented operations (20 Node + 1 private Python). No dependency install, migration, training, image rebuild/deployment or secret change. API container retains its old image. Synthetic precision 0.7273 remains below the >=95% target; no production quality or recall gain is claimed. Earlier notes below are historical where superseded.
 
 ## Historical BE-27 — 28/10/2026: baseline scorer integration
 
-AI baseline runtime imported from origin/xkhuong/feat/ai-scorer; Node adapter tested against real Python HTTP. No trained model exists. Only reviewed baseline is enabled: scores annotate guard-approved pending links; effective_method remains rule_only with ai_baseline_only. sandbox-rules-2 applies outcome guards; optional Graph.abstentions is persisted with audit. Batch <=100, total <=5s; failures discard all scores. Runtime features are independently versioned; legacy bootstrap helpers are not trained-model parity evidence. See [Scorer guide](../backend/SCORER.md).
+AI baseline runtime imported from origin/xkhuong/feat/ai-scorer; Node adapter tested against real Python HTTP. No trained model exists. Only reviewed baseline is enabled: scores annotate guard-approved pending links; effective_method remains rule_only with ai_baseline_only. sandbox-rules-2 applies outcome guards; optional Graph.abstentions is persisted with audit. Batch <=100, total <=5s; failures discard all scores. Runtime features are independently versioned; legacy bootstrap helpers are not trained-model parity evidence. See [Scorer guide](../../backend/SCORER.md).
 
 BE-33 follow-up verified on 28/10/2026: Docker/PostgreSQL restored using existing images and volume. All 50 DB and 46 native identity/API tests pass, zero skipped, with SCORER_PYTHON enabled. The new JWT HTTP → Python baseline → PostgreSQL test proves durable scores/audit/replay, graph/review and fallback after the scorer process is stopped. Prior 82 unit/HTTP/contract and 28 Python results remain at BE-27; no model/dependency/runtime changes in this follow-up. The earlier DB connection blocker is resolved. API container still uses its previous image; tests start a separate API from current source. No production/live-Keycloak/UI E2E or trained-model readiness is claimed. Earlier status below is historical where superseded.
 
@@ -85,7 +87,7 @@ Giữ nguyên label là cạnh trực tiếp có ground truth, đúng hướng, 
 
 ## Lịch sử phản hồi BACKEND_HANDOFF — 25/10/2026
 
-Ngày 25/10/2026, cập nhật sau sửa audit. [Hiện trạng backend](CURRENT_STATUS.md). Các mục “đề xuất” dưới đây chưa thay thế quyết định nghiệp vụ hoặc policy/version đang chạy.
+Ngày 25/10/2026, cập nhật sau sửa audit. [Hiện trạng backend](../overview/status.md). Các mục “đề xuất” dưới đây chưa thay thế quyết định nghiệp vụ hoặc policy/version đang chạy.
 
 ## Phần có thể xác nhận
 
