@@ -29,6 +29,16 @@ export function AttemptView({ attempt }: { attempt: HistoricalAttempt }) {
     <TechnicalDetails headingLevel={4} title="Mã và snapshot lần chạy"><pre>{JSON.stringify(item, null, 2)}</pre></TechnicalDetails>
   </div>;
 }
+function keyedAttempts(attempts: HistoricalAttempt[]) {
+  const occurrences = new Map<string, number>();
+  return attempts.map(attempt => {
+    const identity = typeof attempt.id === 'string' && attempt.id ? `id:${attempt.id}` : `legacy:${JSON.stringify(attempt)}`;
+    // Legacy snapshots may lack IDs. Repeated identical snapshots keep their keys when history grows.
+    const occurrence = occurrences.get(identity) ?? 0;
+    occurrences.set(identity, occurrence + 1);
+    return { attempt, key: JSON.stringify([identity, occurrence]) };
+  });
+}
 const resourceFormSchema = z.strictObject({ action: z.enum(['capacity', 'image', 'account']), ram: z.string(), available: z.boolean(), active: z.boolean(), image_id: z.string(), account_id: z.string(), expected_case_version: z.number().int().min(1), expected_version: z.number().int().min(1) })
   .superRefine((value, ctx) => {
     if (value.action === 'capacity' && (!/^\d+$/.test(value.ram) || !Number.isSafeInteger(Number(value.ram)) || Number(value.ram) > 1048576)) ctx.addIssue({ code: 'custom', path: ['ram'], message: 'Nhập số nguyên từ 0 đến 1048576.' });
@@ -132,7 +142,7 @@ export function SandboxPanel({ state, actions }: { state: CasesState; actions: A
       {mutation.execution && <div className="space-y-2"><h3 className="type-h3">Kết quả operation vừa gửi</h3><p>{mutation.execution.replayed ? 'Replay thao tác cũ; không tạo attempt mới.' : 'Kết quả của ý định vừa gửi.'} Quan sát nguồn hiện tại có thể khác kết quả này.</p><AttemptView attempt={mutation.execution.attempt} /></div>}
       {observation?.attempt && <div><h3 className="type-h3">Lần chạy gần nhất</h3><AttemptView attempt={observation.attempt} /></div>}
       <div className="space-y-3"><h3 className="type-h3">Lịch sử thực thi bất biến</h3>
-        {observation?.attempts?.length ? <ol className="space-y-4">{observation.attempts.map((attempt, index) => <li key={index} className="border-t border-line pt-3"><AttemptView attempt={attempt} /></li>)}</ol> : <p>Chưa có lịch sử thực thi trong dữ liệu đã đọc.</p>}
+        {observation?.attempts?.length ? <ol className="space-y-4">{keyedAttempts(observation.attempts).map(({ attempt, key }) => <li key={key} className="border-t border-line pt-3"><AttemptView attempt={attempt} /></li>)}</ol> : <p>Chưa có lịch sử thực thi trong dữ liệu đã đọc.</p>}
       </div>
       <div className="space-y-3"><h3 className="type-h3">Kiểm chứng nguồn của reviewer</h3>
         {state.scope?.canVerify && <><p>Chỉ lưu khi hồ sơ chờ xác minh. Mỗi lần lưu tạo snapshot riêng; không tự đóng hồ sơ.</p><Button type="button" disabled={frozen || !caseAligned || sandbox.proofs.status !== 'ready' || detail?.case.state !== 'awaiting_verification'} onClick={() => void actions.saveSandboxProof()}>Lưu kiểm chứng nguồn</Button></>}

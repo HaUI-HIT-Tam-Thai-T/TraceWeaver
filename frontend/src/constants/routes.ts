@@ -2,6 +2,7 @@ import { createElement, lazy } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthCallbackPage } from "../pages/AuthCallbackPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
+import { EventDetailPage } from "../pages/EventDetailPage";
 import { PageLoadError } from "../routes/PageLoadFeedback";
 import { WorkspaceAdminPage } from '../pages/WorkspaceAdminPage';
 
@@ -9,11 +10,6 @@ import { WorkspaceAdminPage } from '../pages/WorkspaceAdminPage';
 const EventsPage = lazy(() =>
   import("../pages/EventsPage")
     .then((module) => ({ default: module.EventsPage }))
-    .catch(() => ({ default: PageLoadError })),
-);
-const EventDetailPage = lazy(() =>
-  import("../pages/EventDetailPage")
-    .then((module) => ({ default: module.EventDetailPage }))
     .catch(() => ({ default: PageLoadError })),
 );
 const CasesPage = lazy(() =>
