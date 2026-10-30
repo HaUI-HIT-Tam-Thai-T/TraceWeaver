@@ -38,7 +38,8 @@ test('AppShell keeps one main, active cases navigation and safe access states wi
     assert.match(allowed, /Bỏ qua điều hướng/);
     assert.match(allowed, /<a(?=[^>]*href="\/dashboard")(?=[^>]*aria-label="TraceWeaver")[^>]*>/);
     assert.match(allowed, /for="workspace-picker"/);
-    assert.match(allowed, /data-slot="badge"[^>]*>viewer/);
+    assert.match(allowed, /aria-label="Xem vai trò workspace"/);
+    assert.doesNotMatch(allowed, />viewer</);
     assert.match(allowed, /Mở menu điều hướng/);
     const header = allowed.match(/<header\b[\s\S]*?<\/header>/)?.[0] ?? '';
     const sidebar = allowed.match(/<aside\b[\s\S]*?<\/aside>/)?.[0] ?? '';

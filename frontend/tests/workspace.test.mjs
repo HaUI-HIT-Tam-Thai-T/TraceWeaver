@@ -28,6 +28,87 @@ function fixture(overrides = {}) {
   return { calls, controller: createWorkspaceController(service) }
 }
 
+test('focus revalidation reads all source pages, deduplicates checks and preserves unchanged scope and drafts', async () => {
+  let checked = 0;
+  const { controller } = fixture({ async listSources(id, options) {
+    checked++;
+    return options.cursor ? page(id) : { items: [], next_cursor: 'next-page' };
+  } });
+  await controller.start(); await settle();
+  const previous = controller.getSnapshot();
+  let notifications = 0;
+  controller.subscribe(() => notifications++);
+  const first = controller.revalidateAccess();
+  assert.equal(controller.revalidateAccess(), first);
+  await first;
+  assert.equal(checked, 4);
+  assert.equal(controller.getSnapshot(), previous);
+  assert.equal(notifications, 0);
+  controller.stop();
+});
+
+test('focus revalidation purges changed membership and changed source grants', async () => {
+  for (const change of ['roles', 'sources']) {
+    let changed = false;
+    const { controller } = fixture({
+      async getMe() { return me([membership(A, changed && change === 'roles' ? ['viewer'] : ['operator'])]); },
+      async listSources(id) { return changed && change === 'sources' ? { items: [], next_cursor: null } : page(id); },
+    });
+    await controller.start(); await settle();
+    const previous = controller.getSnapshot().me;
+    const statuses = [];
+    controller.subscribe(() => statuses.push(controller.getSnapshot().status));
+    changed = true;
+    await controller.revalidateAccess(); await settle();
+    assert.ok(statuses.includes('loading'));
+    assert.notEqual(controller.getSnapshot().me, previous);
+    if (change === 'roles') assert.equal(workspacePermissions(activeMembership(controller.getSnapshot())).canWrite, false);
+    else assert.deepEqual(controller.getSnapshot().sources.items, []);
+    controller.stop();
+  }
+});
+
+test('failed focus checks remove unverified data, including auth failures and errors on later source pages', async () => {
+  for (const status of [401, 403, 404, 503]) {
+    let changed = false;
+    const { controller } = fixture({ async listSources(id, options) {
+      if (changed) {
+        if (options.cursor) throw failure(status);
+        return page(id, 'later');
+      }
+      return page(id);
+    } });
+    await controller.start(); await settle(); changed = true;
+    await controller.revalidateAccess();
+    assert.equal(controller.getSnapshot().status, status === 401 ? 'reauth' : 'error');
+    assert.equal(controller.getSnapshot().me, null);
+    assert.deepEqual(controller.getSnapshot().sources.items, []);
+    controller.stop();
+  }
+});
+
+test('logout, explicit refresh and workspace change cancel focus checks and reject late results', async () => {
+  for (const change of ['logout', 'refresh', 'workspace']) {
+    let checking = false, checkSignal;
+    const pending = deferred();
+    const { controller } = fixture({
+      async getMe(signal) { if (checking) { checkSignal = signal; checking = false; return pending.promise; } return me([membership(), membership(B)]); },
+    });
+    await controller.start(); controller.selectWorkspace(A); await settle();
+    checking = true;
+    const check = controller.revalidateAccess(); await settle();
+    if (change === 'logout') controller.stop();
+    else if (change === 'refresh') await controller.refreshAccess();
+    else controller.selectWorkspace(B);
+    await settle();
+    assert.equal(checkSignal.aborted, true);
+    const previous = controller.getSnapshot();
+    pending.resolve(me([], 'obsolete-user')); await check; await settle();
+    assert.equal(controller.getSnapshot(), previous);
+    controller.stop();
+  }
+});
+
 test('inactive controller makes no calls; zero memberships never loads sources', async () => {
   const { controller, calls } = fixture({ async getMe(signal) { calls.me.push(signal); return me([]) } })
   await controller.refreshAccess()
@@ -61,13 +142,13 @@ test('multiple memberships require a valid selection, without automatic source r
   assert.equal(controller.selectWorkspace(B), true)
   await settle()
   assert.equal(calls.sources[0].id, B)
-  assert.deepEqual(workspacePermissions(activeMembership(controller.getSnapshot())), { canRead: true, canWrite: false, canVerify: false })
+  assert.deepEqual(workspacePermissions(activeMembership(controller.getSnapshot())), { canAdmin: false, canRead: true, canWrite: false, canVerify: false })
 })
 
 test('roles are workspace-specific; admin is not a writer and ingest_service is not a reader', async () => {
-  assert.deepEqual(workspacePermissions(membership(A, ['admin'])), { canRead: true, canWrite: false, canVerify: false })
-  assert.deepEqual(workspacePermissions(membership(A, ['reviewer'])), { canRead: true, canWrite: true, canVerify: true })
-  assert.deepEqual(workspacePermissions(membership(A, ['ingest_service'])), { canRead: false, canWrite: false, canVerify: false })
+  assert.deepEqual(workspacePermissions(membership(A, ['admin'])), { canAdmin: true, canRead: true, canWrite: false, canVerify: false })
+  assert.deepEqual(workspacePermissions(membership(A, ['reviewer'])), { canAdmin: false, canRead: true, canWrite: true, canVerify: true })
+  assert.deepEqual(workspacePermissions(membership(A, ['ingest_service'])), { canAdmin: false, canRead: false, canWrite: false, canVerify: false })
   const { controller, calls } = fixture({ async getMe() { return me([membership(A, ['ingest_service'])]) } })
   await controller.start()
   await settle()

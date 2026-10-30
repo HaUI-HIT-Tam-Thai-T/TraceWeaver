@@ -103,7 +103,7 @@ export function KnowledgeResults({
         lần tải; không có tổng số trang.
       </p> */}
       <Button
-        variant="secondary"
+        variant="tertiary"
         type="button"
         disabled={["loading", "invalid", "reauth"].includes(state.status)}
         onClick={refresh}

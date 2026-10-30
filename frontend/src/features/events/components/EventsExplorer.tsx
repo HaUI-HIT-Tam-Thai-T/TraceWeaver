@@ -11,6 +11,7 @@ import { useEvents } from "../hooks/useEvents";
 import { EventFiltersForm } from "./EventFiltersForm";
 import type { ApiError } from "../../../services/apiError";
 import { writeEventQuery } from "../query";
+import { PageSizeSelect } from '../../../components/ui/PageSizeSelect';
 
 import { actionLabel, requestLabel, sourceLabel } from "../presentation";
 import { EventTime, EventOutcome, EventContent } from "./EventPresentation";
@@ -30,6 +31,7 @@ export function EventsExplorer() {
   const { state: workspace, membership, permissions } = useWorkspace();
   const {
     state,
+    setFilters,
     refresh,
     previousPage,
     nextPage,
@@ -50,7 +52,7 @@ export function EventsExplorer() {
     }
   }
   return (
-    <section className="mt-8 space-y-4" aria-label="Danh sách sự kiện">
+    <section className="space-y-4" aria-label="Danh sách sự kiện">
       <EventFiltersForm />
       {state.status === "invalid-query" && (
         <Alert className="block break-words" variant="destructive" role="alert">
@@ -58,7 +60,7 @@ export function EventsExplorer() {
         </Alert>
       )}
       {state.error && <Failure error={state.error} />}
-      {state.status === "reauth" ? (
+      <div className="flex flex-wrap items-center justify-end gap-3">{state.status === "reauth" ? (
         <Button variant="secondary"
           type="button"
           disabled={loggingIn}
@@ -69,10 +71,10 @@ export function EventsExplorer() {
           Đăng nhập lại
         </Button>
       ) : (
-        <Button variant="secondary" type="button" onClick={refresh}>
+        <Button variant="tertiary" type="button" onClick={refresh}>
           Làm mới danh sách
         </Button>
-      )}
+      )}</div>
       {state.filters.q && <p className="type-body-sm text-muted">Tìm theo nội dung, mã hoạt động và mã định danh trên các nguồn được phép đọc. Khi tìm mã yêu cầu, đối chiếu mã trong từng dòng; tìm kiếm của máy chủ có thể khớp chuỗi con.</p>}
       {state.root && (
         <div role="status" className="break-words rounded border p-3">
@@ -145,6 +147,7 @@ export function EventsExplorer() {
         </div>
       )}
       <nav aria-label="Phân trang sự kiện" className="flex flex-wrap items-center justify-end gap-4">
+        <PageSizeSelect id="event-limit" value={state.filters.limit} label="Số sự kiện mỗi trang" disabled={state.status !== 'active' || state.list.status === 'loading'} onChange={limit => setFilters({ ...state.filters, limit })} />
         <Button variant="secondary"
           type="button"
           disabled={

@@ -4,6 +4,7 @@ import { AppLayout } from '../components/layout/AppLayout';
 import { PublicLayout } from '../components/layout/PublicLayout';
 import { WorkspaceAccessState } from '../components/layout/WorkspaceAccessState';
 import { ProtectedRoute } from './ProtectedRoute';
+import { WorkspaceAdminAccess } from './WorkspaceAdminAccess';
 
 export function AppRoutes() {
   return <Routes>
@@ -11,7 +12,10 @@ export function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         {APP_ROUTES.filter(route => route.path === '/').map(({ path, element }) => <Route key={path} path={path} element={element} />)}
         <Route element={<WorkspaceAccessState />}>
-          {APP_ROUTES.filter(route => route.path !== '/').map(({ path, element }) => <Route key={path} path={path} element={element} />)}
+          {APP_ROUTES.filter(route => route.path !== '/' && route.path !== '/workspace-admin').map(({ path, element }) => <Route key={path} path={path} element={element} />)}
+          <Route element={<WorkspaceAdminAccess />}>
+            {APP_ROUTES.filter(route => route.path === '/workspace-admin').map(({ path, element }) => <Route key={path} path={path} element={element} />)}
+          </Route>
         </Route>
       </Route>
     </Route>

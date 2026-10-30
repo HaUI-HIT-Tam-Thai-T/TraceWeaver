@@ -17,6 +17,7 @@ import { CasesFeedback } from "../features/cases/components/CasesFeedback";
 import { CaseFiltersForm } from "../features/cases/components/CaseFiltersForm";
 import { CaseTime } from "../features/cases/components/CaseDetailView";
 import { writeCaseQuery } from "../features/cases/query";
+import { PageSizeSelect } from '../components/ui/PageSizeSelect';
 
 export function CasesPage() {
   const { state, setFilters, refresh, previousPage, nextPage } = useCases();
@@ -25,7 +26,7 @@ export function CasesPage() {
       title="Hồ sơ"
       actions={
         <Button
-          variant="secondary"
+          variant="tertiary"
           type="button"
           disabled={
             state.status !== "active" || state.list.status === "loading"
@@ -97,6 +98,7 @@ export function CasesPage() {
         aria-label="Phân trang cases"
         className="my-4 flex flex-wrap items-center justify-end gap-4"
       >
+        <PageSizeSelect id="case-limit" value={state.filters.limit} label="Số hồ sơ mỗi trang" disabled={state.status !== 'active' || state.list.status === 'loading'} onChange={limit => setFilters({ ...state.filters, limit })} />
         <Button
           variant="secondary"
           type="button"

@@ -1,4 +1,5 @@
 const PAGE_TITLES: { [path: string]: string | undefined } = {
+  '/workspace-admin': 'Quản trị workspace',
   '/': 'Tổng quan', '/dashboard': 'Tổng quan', '/events': 'Sự kiện',
   '/cases': 'Hồ sơ', '/knowledge': 'Tri thức', '/auth/callback': 'Đăng nhập',
 };

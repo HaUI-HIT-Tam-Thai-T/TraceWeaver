@@ -3,7 +3,8 @@ import { Select } from "../../../components/ui/Select";
 import { Input } from "../../../components/ui/Input";
 import { Alert } from "../../../components/ui/primitives/alert";
 import { Button } from "../../../components/ui/Button";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { FilterTimeRange } from '../../../components/ui/FilterTimeRange';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -26,19 +27,26 @@ export function CaseFiltersForm({
     register,
     handleSubmit,
     reset,
+    getValues,
     formState: { errors },
   } = useForm<CaseFilterForm>({
     resolver: zodResolver(caseFilterFormSchema),
     defaultValues: caseFilterDefaults(filters),
   });
-  useEffect(() => reset(caseFilterDefaults(filters)), [filters, reset]);
+  const previousFilters = useRef(filters);
+  useEffect(() => {
+    const previous = previousFilters.current;
+    const sizeOnly = previous.limit !== filters.limit && previous.state === filters.state && previous.owner_id === filters.owner_id && previous.from === filters.from && previous.to === filters.to;
+    reset(sizeOnly ? { ...getValues(), limit: caseFilterDefaults(filters).limit } : caseFilterDefaults(filters));
+    previousFilters.current = filters;
+  }, [filters, reset, getValues]);
   return (
     <form
       onSubmit={handleSubmit((value) => onSearch(toCaseFilters(value)))}
-      className="filter-grid"
+      className="filter-grid case-filter-grid"
       aria-label="Bộ lọc cases"
     >
-      <p className="filter-wide type-caption text-muted">Lọc theo ngày tạo lần tái dựng, không theo ngày tạo hồ sơ. Múi giờ UTC+7. Danh sách phản ánh trạng thái hiện tại và có thể thay đổi giữa các trang.</p>
+      <input type="hidden" {...register('limit')} />
       <div className="filter-field">
         <label className="type-label block" htmlFor="case-state">
           Trạng thái
@@ -73,7 +81,7 @@ export function CaseFiltersForm({
           </Alert>
         )}
       </div>
-      <div className="filter-field">
+      <FilterTimeRange id="case-time-range" expanded={!!(filters.from || filters.to)} hasError={!!errors.to}><div className="filter-field">
         <label className="type-label block" htmlFor="case-from">
           Tái dựng tạo từ
         </label>
@@ -107,19 +115,11 @@ export function CaseFiltersForm({
           </Alert>
         )}
       </div>
-      <div className="filter-field">
-        <label className="type-label block" htmlFor="case-limit">
-          Số hồ sơ mỗi trang
-        </label>
-        <Select id="case-limit" {...register("limit")}>
-          <option value="25">25</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </Select>
-      </div>
-      <Button variant="primary" type="submit">
+      </FilterTimeRange>
+      <Button className="filter-submit" variant="primary" type="submit">
         Tìm kiếm
       </Button>
+      <details className="filter-help type-caption text-muted"><summary>Ý nghĩa bộ lọc</summary><p>Lọc theo ngày tạo lần tái dựng, không theo ngày tạo hồ sơ. Múi giờ UTC+7. Danh sách phản ánh trạng thái hiện tại và có thể thay đổi giữa các trang.</p></details>
     </form>
   );
 }

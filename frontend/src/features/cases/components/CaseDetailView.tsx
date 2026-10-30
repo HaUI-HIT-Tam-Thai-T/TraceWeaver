@@ -14,9 +14,21 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "..
 export function CaseTime({ value }: { value: string }) {
   return <time dateTime={value} title={`UTC gốc: ${value}`}>{eventTimeLabel(value)} (UTC+7)</time>;
 }
-export function CaseDetailView({ detail, selectedTab, onTabChange, runPanel, snapshot, loadSnapshot, sources = [] }: {
+export function CaseOverview({ item }: { item: CaseDetail['case'] }) {
+  return <section aria-label="Thông tin case" className="case-overview space-y-3">
+    <div className="flex flex-wrap items-start justify-between gap-3"><h2 className="type-h2 min-w-0 break-words">{item.title}</h2><p className="type-label text-primary">{caseStateLabel(item.state)}</p></div>
+    <div className="flex flex-wrap justify-between gap-x-6 gap-y-2"><p>Người xử lý: <span className="break-all">{item.owner_id ?? 'Chưa được gán'}</span></p><p className="type-body-sm text-muted">Cập nhật: <CaseTime value={item.updated_at} /></p></div>
+    <div className="rounded-md bg-control p-3"><strong>Việc tiếp theo:</strong> {nextCaseStep(item.state)}</div>
+    <TechnicalDetails title="ID, phiên bản và thông tin kỹ thuật">
+      <p>Case: {item.id}; Workspace: {item.workspace_id}; Run: {item.run_id}</p>
+      <p>Workflow: {item.workflow_instance_id}; Creator: {item.creator_subject}</p>
+      <p>Case.version: {item.version}</p><p>UTC gốc — tạo: {item.created_at}; cập nhật: {item.updated_at}</p><p>Ngày tạo: <CaseTime value={item.created_at} /></p>
+    </TechnicalDetails>
+  </section>;
+}
+export function CaseDetailView({ detail, selectedTab, onTabChange, runPanel, snapshot, loadSnapshot, sources = [], showOverview = true }: {
   detail: CaseDetail; selectedTab?: string; onTabChange?: (tab: string) => void;
-  runPanel?: ReactNode; snapshot?: CaseEvidenceSnapshot; loadSnapshot?: () => Promise<void>; sources?: Source[];
+  runPanel?: ReactNode; snapshot?: CaseEvidenceSnapshot; loadSnapshot?: () => Promise<void>; sources?: Source[]; showOverview?: boolean;
 }) {
   const item = detail.case;
   const [localTab, setLocalTab] = useState('history');
@@ -42,17 +54,7 @@ export function CaseDetailView({ detail, selectedTab, onTabChange, runPanel, sna
     setTab('evidence');
   }
   return <div className="case-content break-words">
-    <section aria-label="Thông tin case" className="case-overview space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-3"><h2 className="type-h2 min-w-0 break-words">{item.title}</h2><p className="type-label text-primary">{caseStateLabel(item.state)}</p></div>
-      <p>Người xử lý: {item.owner_id ?? "Chưa được gán"}</p>
-      <div className="rounded-md bg-control p-4"><strong>Việc tiếp theo:</strong> {nextCaseStep(item.state)}</div>
-      <p className="type-body-sm text-muted">Cập nhật: <CaseTime value={item.updated_at} /></p>
-      <TechnicalDetails title="ID, phiên bản và thông tin kỹ thuật">
-        <p>Case: {item.id}; Workspace: {item.workspace_id}; Run: {item.run_id}</p>
-        <p>Workflow: {item.workflow_instance_id}; Creator: {item.creator_subject}</p>
-        <p>Case.version: {item.version}</p><p>UTC gốc — tạo: {item.created_at}; cập nhật: {item.updated_at}</p><p>Ngày tạo: <CaseTime value={item.created_at} /></p>
-      </TechnicalDetails>
-    </section>
+    {showOverview && <CaseOverview item={item} />}
     <Tabs value={tab} onValueChange={setTab} className="content-panel">
       <TabsList aria-label="Thông tin hồ sơ" className="grid w-full grid-cols-1 gap-1 group-data-[orientation=horizontal]/tabs:h-auto sm:grid-cols-3"><TabsTrigger className="h-auto whitespace-normal" value="history">Lịch sử</TabsTrigger><TabsTrigger className="h-auto whitespace-normal" value="evidence">Bằng chứng ({detail.evidence.length})</TabsTrigger>{runPanel && <TabsTrigger className="h-auto whitespace-normal" value="reconstruction">Kết quả tái dựng</TabsTrigger>}</TabsList>
       <TabsContent value="history" forceMount>

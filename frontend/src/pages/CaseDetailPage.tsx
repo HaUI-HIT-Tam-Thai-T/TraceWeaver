@@ -14,7 +14,8 @@ import { Link, useLocation, useParams, useSearchParams } from "react-router-dom"
 import { useCases } from "../features/cases/hooks/useCases";
 import { CasesLayout } from "../features/cases/components/CasesLayout";
 import { CasesFeedback } from "../features/cases/components/CasesFeedback";
-import { CaseDetailView } from "../features/cases/components/CaseDetailView";
+import { CaseDetailView, CaseOverview } from "../features/cases/components/CaseDetailView";
+import { useEffect, useState } from 'react';
 import { EvidenceForm } from "../features/cases/components/EvidenceForm";
 import { useWorkspace } from "../features/workspace/hooks/useWorkspace";
 
@@ -33,6 +34,13 @@ export function CaseDetailPage() {
   const { permissions, state: workspace } = useWorkspace();
   const [params, setParams] = useSearchParams();
   const selectedTab = ["evidence", "reconstruction"].includes(params.get("tab") ?? "") ? params.get("tab") ?? "history" : "history";
+  const [toolsOpen, setToolsOpen] = useState(false);
+  useEffect(() => {
+    const wide = window.matchMedia('(min-width: 1536px)');
+    function updateTools() { setToolsOpen(wide.matches && selectedTab !== 'reconstruction'); }
+    updateTools(); wide.addEventListener('change', updateTools);
+    return () => wide.removeEventListener('change', updateTools);
+  }, [selectedTab]);
   const { caseId } = useParams();
   const location = useLocation();
   const workflowBusy = ["validating", "sending"].includes(
@@ -57,8 +65,8 @@ export function CaseDetailPage() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <Button
-        variant="secondary"
+      <div className="flex flex-wrap gap-3 py-3"><Button
+        variant="tertiary"
         type="button"
         disabled={
           state.status !== "active" ||
@@ -70,6 +78,8 @@ export function CaseDetailPage() {
       >
         Làm mới chi tiết
       </Button>
+      {showTools && matches && state.detail.data && <Button type="button" variant="tertiary" aria-controls="case-tools" aria-expanded={toolsOpen} onClick={() => setToolsOpen(value => !value)}>{toolsOpen ? 'Thu gọn tác vụ hồ sơ' : 'Mở tác vụ hồ sơ'}</Button>}
+      </div>
       <CasesFeedback />
       {state.status !== "invalid" &&
         state.status !== "blocked" &&
@@ -77,12 +87,14 @@ export function CaseDetailPage() {
         (!matches || state.detail.status === "loading") && (
           <LoadingState message="Đang tải hồ sơ, lịch sử và bằng chứng…" />
         )}
-      <div className={showTools ? "detail-workspace" : "min-w-0"}>
+      {matches && state.detail.status === 'ready' && state.detail.data && <div className="my-5"><CaseOverview item={state.detail.data.case} /></div>}
+      <div className={showTools ? "detail-workspace" : "min-w-0"} data-tools-open={showTools && toolsOpen} data-wide={selectedTab === 'reconstruction'}>
         <div className="min-w-0">
           {matches && state.detail.status === "ready" && state.detail.data && (
             <CaseDetailView
               key={state.detail.data.case.id + state.detail.data.case.run_id}
               detail={state.detail.data}
+              showOverview={false}
               selectedTab={selectedTab}
               onTabChange={tab => { setParams(previous => { const next = new URLSearchParams(previous); if (tab === 'history') next.delete('tab'); else next.set('tab', tab); return next; }); }}
               snapshot={state.snapshot} loadSnapshot={loadEvidenceSnapshot} sources={workspace.sources.items}
@@ -91,7 +103,7 @@ export function CaseDetailPage() {
           )}
         </div>
         {showTools && (
-          <aside className="case-tools" aria-label="Thao tác hồ sơ">
+          <aside id="case-tools" className="case-tools" hidden={!toolsOpen} aria-label="Thao tác hồ sơ">
             {matches && state.status === "active" && state.detail.data && (
               <EvidenceForm
                 key={`evidence:${state.detail.data.case.id}:${state.detail.data.case.run_id}`}

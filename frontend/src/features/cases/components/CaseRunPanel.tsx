@@ -28,7 +28,7 @@ export function CaseRunPanel({ state, active, load, actions }: {
     {(status === 'loading' || state.snapshot.status === 'loading') && <p role="status">Đang tải lần tái dựng đã lưu…</p>}
     {state.caseRun.error && <p role="alert">{state.caseRun.error.message}</p>}
     {state.snapshot.error && <p role="alert">{state.snapshot.error.message}</p>}
-    <Button variant="secondary" disabled={status === 'loading' || state.snapshot.status === 'loading' || state.linkMutation.status === 'sending'} onClick={() => { void load(true); }}>Tải lại kết quả tái dựng</Button>
+    <Button variant="tertiary" disabled={status === 'loading' || state.snapshot.status === 'loading' || state.linkMutation.status === 'sending'} onClick={() => { void load(true); }}>Tải lại kết quả tái dựng</Button>
     {run && <>
       <p>Trạng thái phân tích: {runStatusLabel(run.status)}. Hoàn tất phân tích không có nghĩa yêu cầu nghiệp vụ đã thành công.</p>
       {run.degraded && <p role="status">{degradedLabel(run.degraded_reason)}</p>}

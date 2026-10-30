@@ -31,8 +31,8 @@ export function AppLayout() {
       <AppHeader />
       <div className="flex items-start">
         <div data-collapsed={sidebarCollapsed} className="desktop-sidebar sticky top-16 z-20 hidden h-[calc(100dvh-4rem)] shrink-0 lg:block">
-          <aside id="desktop-sidebar" aria-label="Thanh bên" aria-hidden={sidebarCollapsed} inert={sidebarCollapsed} className="h-full overflow-hidden">
-            <div className="desktop-sidebar-content h-full bg-chrome"><AppSidebar /></div>
+          <aside id="desktop-sidebar" aria-label="Thanh bên" className="h-full overflow-hidden">
+            <div className="desktop-sidebar-content h-full bg-chrome"><AppSidebar collapsed={sidebarCollapsed} /></div>
           </aside>
           <Button variant="secondary" type="button" onClick={() => setSidebarCollapsed(previous => !previous)}
             aria-controls="desktop-sidebar" aria-expanded={!sidebarCollapsed}

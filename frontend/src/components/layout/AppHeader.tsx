@@ -8,6 +8,8 @@ import { Badge } from '../ui/Badge';
 import { roleLabel } from '../../features/workspace/presentation';
 import { WorkspacePicker } from '../../features/workspace/components/WorkspacePicker';
 import { SheetTrigger } from '../ui/primitives/sheet';
+import AccountCircleOutlined from '@mui/icons-material/AccountCircleOutlined';
+import { Popover, PopoverTrigger, PopoverContent } from '../ui/primitives/popover';
 
 export function AppHeader() {
   const { state: auth, signIn } = useAuth();
@@ -49,9 +51,15 @@ export function AppHeader() {
         </div>
       </div>
       <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2 lg:px-6">
-        {ready && membership && <div aria-label="Vai trò workspace" className="hidden flex-wrap gap-1 lg:flex">
-          {membership.roles.map(role => <Badge key={role} tone="info" className="text-chrome-muted">{roleLabel(role)}</Badge>)}
-        </div>}
+        {ready && membership && <Popover key={membership.workspace_id}>
+          <PopoverTrigger asChild><Button variant="ghost" type="button" aria-label="Xem vai trò workspace" className="min-h-11 gap-2 px-2 text-white hover:bg-chrome-active hover:text-white">
+            <AccountCircleOutlined aria-hidden="true" sx={{ fontSize: '1.5rem' }} /><span className="hidden sm:inline">Vai trò</span>
+          </Button></PopoverTrigger>
+          <PopoverContent align="end" className="w-72 max-w-[calc(100vw-2rem)] space-y-3" aria-label="Vai trò workspace">
+            <p className="type-label">Vai trò trong workspace hiện tại</p>
+            <div className="flex flex-wrap gap-2">{membership.roles.map(role => <Badge key={role} tone="info">{roleLabel(role)}</Badge>)}</div>
+          </PopoverContent>
+        </Popover>}
         {!authenticated && <Button variant="secondary" loading={busy} disabled={auth.status === 'initializing'}
           className="border-white/30 bg-white text-chrome hover:bg-chrome-active hover:text-white focus-visible:ring-white/60"
           onClick={() => {
@@ -62,9 +70,6 @@ export function AppHeader() {
         </Button>}
       </div>
     </div>
-    {ready && membership && <div className="flex flex-wrap gap-1 px-4 pb-2 lg:hidden" aria-label="Vai trò workspace">
-      {membership.roles.map(role => <Badge key={role} tone="info" className="text-chrome-muted">{role}</Badge>)}
-    </div>}
     {actionError && <p role="alert" className="type-body-sm px-4 pb-2 text-white">{actionError}</p>}
   </header>;
 }

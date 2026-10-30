@@ -108,7 +108,7 @@ function DashboardBrowser({ scope }: { scope: DashboardScope | null }) {
       {query.success && (
         <>
           <Button
-            variant="secondary"
+            variant="tertiary"
             type="button"
             disabled={["loading", "reauth"].includes(state.status)}
             onClick={() => void controller.refresh()}
