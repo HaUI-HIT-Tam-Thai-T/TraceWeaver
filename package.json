@@ -12,6 +12,8 @@
     "backend"
   ],
   "scripts": {
+    "sim:generate": "node simulator/cli.mjs",
+    "test:sim": "node --test simulator/tests/*.test.mjs",
     "dev:be": "npm run dev --workspace=@traceweaver/backend",
     "start:be": "npm run start --workspace=@traceweaver/backend",
     "db:migrate": "npm run db:migrate --workspace=@traceweaver/backend",

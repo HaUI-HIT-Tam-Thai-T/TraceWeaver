@@ -17,6 +17,9 @@ test('browser origins use exact allowlists; preflights do not bypass authenticat
   const allowed = await preflight(); assert.equal(allowed.status, 204);
   assert.equal(allowed.headers.get('access-control-allow-origin'), origin);
   assert.match(allowed.headers.get('vary'), /Origin/);
+  const adminPreflight = await preflight({ 'Access-Control-Request-Method': 'PUT' }, '/api/v1/workspaces/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/admin/members/person');
+  assert.equal(adminPreflight.status, 204);
+  assert.match(adminPreflight.headers.get('access-control-allow-methods'), /PUT/);
   for (const patch of [{ Origin: origin + '.evil.test' }, { 'Access-Control-Request-Method': 'DELETE' },
     { 'Access-Control-Request-Headers': 'x-end-user-authorization' }]) assert.equal((await preflight(patch)).status, 403);
   const anonymous = await fetch(base + '/api/v1/me', { headers: { Origin: origin } });
@@ -34,4 +37,42 @@ test('frontend origin config rejects wildcards/paths/nonlocal HTTP and defaults 
   const production = { ...env, APP_ENV: 'production', OIDC_ISSUER: 'https://identity.example.test/realm' };
   assert.deepEqual(readConfig(production).frontendOrigins, []);
   assert.throws(() => readConfig({ ...production, FRONTEND_ORIGINS: 'http://localhost:3000' }), /FRONTEND_ORIGINS/);
+});
+
+test('production local frontend origins are opt-in, loopback-only and exact at the HTTP boundary', async (t) => {
+  const env = { DATABASE_URL: 'postgresql://test:test@localhost/db', CURSOR_SECRET: 'x'.repeat(32),
+    APP_ENV: 'production', OIDC_ISSUER: 'https://identity.example.test/realm',
+    FRONTEND_ORIGINS: 'https://frontend.example.test' };
+  assert.deepEqual(readConfig(env).frontendOrigins, ['https://frontend.example.test']);
+  const config = readConfig({ ...env,
+    FRONTEND_LOCAL_ORIGINS: ' http://localhost:5173, http://127.0.0.1:5173,http://localhost:5173 ' });
+  assert.deepEqual(config.frontendOrigins, ['https://frontend.example.test', 'http://localhost:5173', 'http://127.0.0.1:5173']);
+  for (const value of ['*', 'null', 'http://*.localhost:5173', 'http://localhost.evil.test:5173',
+    'http://192.168.1.2:5173', 'http://evil.test', 'https://localhost:5173',
+    'http://localhost:5173/', 'http://localhost:5173/callback', 'http://localhost:5173?x=1',
+    'http://localhost:5173#fragment', 'http://user:pass@localhost:5173']) {
+    assert.throws(() => readConfig({ ...env, FRONTEND_LOCAL_ORIGINS: value }), /FRONTEND_LOCAL_ORIGINS/);
+  }
+  const server = createApp({ frontendOrigins: config.frontendOrigins, checkReadiness: async () => true }).listen(0, '127.0.0.1');
+  await once(server, 'listening'); t.after(() => new Promise((r) => server.close(r)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  for (const origin of config.frontendOrigins) {
+    for (const method of ['GET', 'POST', 'PUT']) {
+      const response = await fetch(base + '/api/v1/me', { method: 'OPTIONS', headers: {
+        Origin: origin, 'Access-Control-Request-Method': method,
+        'Access-Control-Request-Headers': 'authorization,content-type,idempotency-key',
+      } });
+      assert.equal(response.status, 204);
+      assert.equal(response.headers.get('access-control-allow-origin'), origin);
+    }
+    const response = await fetch(base + '/api/v1/me', { headers: { Origin: origin } });
+    assert.equal(response.status, 401);
+    assert.equal(response.headers.get('access-control-allow-origin'), origin);
+  }
+  for (const origin of ['http://localhost:5174', 'http://localhost.evil.test:5173', 'http://127.0.0.1:5174']) {
+    assert.equal((await fetch(base + '/api/v1/me', { headers: { Origin: origin } })).status, 403);
+  }
+  assert.equal((await fetch(base + '/core/v1/instances', { method: 'OPTIONS', headers: {
+    Origin: 'http://localhost:5173', 'Access-Control-Request-Method': 'POST',
+  } })).headers.get('access-control-allow-origin'), null);
 });

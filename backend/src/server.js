@@ -26,10 +26,16 @@ import { createDashboardRepository } from './core/data/dashboard-repository.js';
 import { createDashboardService } from './services/dashboard.service.js';
 import { createWorkflowRepository } from './core/data/workflow-repository.js';
 import { createWorkflowService } from './services/workflow.service.js';
+import { createLabRepository } from './core/data/lab-repository.js';
+import { createLabCollector } from './core/data/lab-collector.js';
+import { createAdminRepository } from './core/data/admin-repository.js';
+import { createAdminService } from './services/admin.service.js';
+import { createAccountProvider } from './core/identity/account-provider.js';
 
 let database;
 try {
   const config = readConfig();
+  if (config.labIngestSubject && config.poolMax < 2) throw new Error('LAB_COLLECTOR requires DB_POOL_MAX at least 2');
   const migrations = await loadMigrations(new URL('./core/data/migrations/', import.meta.url));
   database = createDatabase(config, () => console.error('DATABASE_IDLE_ERROR'));
   const app = createApp({
@@ -39,6 +45,10 @@ try {
     verifyIngestToken: createIngestTokenVerifier(config),
     verifyAppToken: createAppTokenVerifier(config),
     workflows: createWorkflowService(createWorkflowRepository(database)),
+    lab: createLabRepository(database),
+    admin: createAdminService(createAdminRepository(database, {
+      protectedSubjects: [config.oidcAppSubject, config.labIngestSubject],
+    }), createAccountProvider(config), config.cursorSecret),
     oidc: { issuer: config.oidcIssuer, clientId: config.oidcUserClientId },
     access: createAccessService(createAccessRepository(database), createCursorCodec(config.cursorSecret)),
     ingestion: createIngestionService(createIngestionRepository(database)),
@@ -49,6 +59,18 @@ try {
     dashboard: createDashboardService(createDashboardRepository(database)),
     logError: (event) => console.error(JSON.stringify(event)),
   });
+  let collectorTimer;
+  if (config.labIngestSubject) {
+    const collect = createLabCollector(database, createIngestionService(createIngestionRepository(database)), config.labIngestSubject);
+    let collecting = false;
+    collectorTimer = setInterval(async () => {
+      if (collecting) return;
+      collecting = true;
+      try { await collect(); } catch { console.error('LAB_COLLECTOR_UNAVAILABLE'); }
+      finally { collecting = false; }
+    }, 2000);
+    collectorTimer.unref();
+  }
   const server = app.listen(config.port, config.host, () => {
     console.log(`TraceWeaver backend listening on ${config.host}:${config.port}`);
   });
@@ -61,6 +83,7 @@ try {
   function stop() {
     if (stopping) return;
     stopping = true;
+    clearInterval(collectorTimer);
     const deadline = setTimeout(() => {
       console.error('SHUTDOWN_TIMEOUT');
       process.exit(1);

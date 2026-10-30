@@ -4,6 +4,7 @@
 import { ApiError } from '../core/identity/api-error.js';
 import { workspaceId } from '../validations/access.validation.js';
 import { caseQuery } from '../validations/case.validation.js';
+import { labCommand } from '../validations/lab.validation.js';
 export function createCaseController(cases) {
   function scope(req, list = false) {
     if (!list && Object.keys(req.query).length) throw new ApiError(400, 'INVALID_QUERY', 'Case query parameters are invalid');
@@ -13,6 +14,28 @@ export function createCaseController(cases) {
     return workspace;
   }
   return {
+    async sandbox(req, res) {
+      const workspace = scope(req);
+      let command;
+      if (req.method === 'POST') {
+        const { expected_case_version, ...input } = req.body ?? {};
+        if (!Number.isSafeInteger(expected_case_version) || expected_case_version < 1 ||
+            Object.hasOwn(input, 'request_id') || input.action === 'submit') throw new ApiError(400, 'INVALID_INPUT', 'Invalid case sandbox command');
+        const parsed = labCommand({ ...input, ...(input.action === 'capacity' ? {} : { request_id: 'server-bound' }) });
+        const { request_id, ...bound } = parsed;
+        command = { ...bound, expected_case_version };
+      }
+      res.json(await cases.sandbox(req.identity.subject, workspace, workspaceId(req.params.cid), command));
+    },
+    async verifications(req, res) {
+      const workspace = scope(req);
+      res.json(await cases.verifications(req.identity.subject, workspace, workspaceId(req.params.cid)));
+    },
+    async verify(req, res) {
+      const workspace = scope(req);
+      if (!req.body || Array.isArray(req.body) || Object.keys(req.body).length) throw new ApiError(400, 'INVALID_INPUT', 'Verification accepts an empty object');
+      res.status(201).json(await cases.verify(req.identity.subject, workspace, workspaceId(req.params.cid)));
+    },
     async create(req, res) {
       const workspace = scope(req), result = await cases.create(req.identity.subject, workspace, req.body, req.get('Idempotency-Key'));
       res.location(`/api/v1/workspaces/${workspace}/cases/${result.id}`).status(201).json(result);

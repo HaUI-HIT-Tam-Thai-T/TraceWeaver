@@ -12,6 +12,8 @@ import { caseDefinition } from '../workflow/definitions.js';
 import { ApiError } from '../identity/api-error.js';
 import { artifactTimeScope, artifactTimeValues } from './artifact-time.js';
 import { visibleSource } from '../identity/access-repository.js';
+import { inspectCaseSource, verifiedClosure } from './case-verification.js';
+import { createLabRepository } from './lab-repository.js';
 
 const notFound = () => new ApiError(404, 'NOT_FOUND', 'Resource not found');
 const projection = `SELECT c.*,h.to_state,h.owner_subject,h.version,h.occurred_at AS updated_at
@@ -67,15 +69,63 @@ export function createCaseRepository(pool) {
     if (!row) throw notFound();
     return row;
   }
-  async function lockedCase(client, subject, workspace, id) {
+  async function lockedCase(client, subject, workspace, id, write = true) {
     const initial = await lookup(client, workspace, id);
-    const run = await lockRun(client, subject, workspace, initial.run_id);
+    const run = await lockRun(client, subject, workspace, initial.run_id, write);
     const row = await lookup(client, workspace, id);
     const { rows: [instance] } = await client.query(`SELECT definition FROM core.workflow_instances WHERE workspace_id=$1 AND id=$2 FOR UPDATE`,
       [workspace, row.workflow_instance_id]);
     return { row, run, engine: createWorkflowEngine(instance.definition) };
   }
   return {
+    sandbox(subject, workspace, id, command) {
+      return withTransaction(pool, async client => {
+        const { row } = await lockedCase(client, subject, workspace, id, false);
+        let observation = await inspectCaseSource(client, subject, workspace, row.run_id, false);
+        let execution;
+        if (!observation?.request_id) throw new ApiError(422, 'SANDBOX_BINDING_REQUIRED', 'Case root must originate from this sandbox request');
+        if (command) {
+          const replay = command.action === 'provision' && observation.attempts.some(a => a.operation_id === command.operation_id);
+          if (row.version !== command.expected_case_version) throw new ApiError(409, 'VERSION_CONFLICT', 'Case changed');
+          if (row.to_state === 'closed') throw new ApiError(422, 'CASE_CLOSED', 'Reopen case before changing sandbox');
+          const { expected_case_version, ...input } = command;
+          await createLabRepository(pool).command(subject, workspace,
+            { ...input, ...(input.action === 'capacity' ? {} : { request_id: observation.request_id }) }, client);
+          observation = await inspectCaseSource(client, subject, workspace, row.run_id, false);
+          if (input.action === 'provision') execution = { replayed: replay, operation_id: input.operation_id,
+            attempt: observation.attempts.find(a => a.operation_id === input.operation_id) };
+          await audit(client, workspace, subject, 'case.sandbox_command', id, null,
+            { action: input.action, request_id: observation.request_id, source_version: observation.source_version });
+        }
+        return { case_id: id, case_version: row.version, observation, ...(execution ? { execution } : {}) };
+      });
+    },
+    verifications(subject, workspace, id) {
+      return withTransaction(pool, async client => {
+        const { row, run } = await lockedCase(client, subject, workspace, id, false);
+        const { rows: [lab] } = await client.query('SELECT source_ids FROM core.lab_sandboxes WHERE workspace_id=$1', [workspace]);
+        if (lab) await authorize(client, subject, workspace, lab.source_ids);
+        const { rows } = await client.query('SELECT document FROM core.case_verifications WHERE workspace_id=$1 AND case_id=$2 ORDER BY created_at,id', [workspace, id]);
+        await authorize(client, subject, workspace, run.sources);
+        return { case_id: id, case_version: row.version, items: rows.map(r => r.document) };
+      });
+    },
+    verify(subject, workspace, id) {
+      return withTransaction(pool, async client => {
+        const { row, run } = await lockedCase(client, subject, workspace, id);
+        if (!run.actor.roles.includes('reviewer')) throw new ApiError(403, 'FORBIDDEN', 'Reviewer required');
+        if (row.to_state !== 'awaiting_verification') throw new ApiError(409, 'INVALID_STATE', 'Case must be awaiting verification');
+        const observation = await inspectCaseSource(client, subject, workspace, row.run_id);
+        if (!observation) throw new ApiError(422, 'VERIFIER_UNAVAILABLE', 'No source verifier configured');
+        const { attempts, ...current } = observation;
+        const proof = { id: randomUUID(), case_id: id, case_version: row.version, actor_subject: subject,
+          checked_at: new Date().toISOString(), observation: current };
+        await client.query('INSERT INTO core.case_verifications(id,workspace_id,case_id,case_version,document) VALUES($1,$2,$3,$4,$5)',
+          [proof.id, workspace, id, row.version, proof]);
+        await audit(client, workspace, subject, 'case.verified', id, null, { verification_id: proof.id, result: observation.result });
+        return proof;
+      });
+    },
     async assignees(subject, workspace, id) {
       const initial = await lookup(pool, workspace, id);
       const { rows: scope } = await pool.query('SELECT source_id::text FROM core.run_sources WHERE workspace_id=$1 AND run_id=$2', [workspace, initial.run_id]);
@@ -168,7 +218,8 @@ export function createCaseRepository(pool) {
           evidence_count: data.evidence.length, pending_links: data.links.filter((link) => link.review_state === 'pending').length,
           new_reason: input.reason !== data.close_reason,
         });
-        const snapshot = input.action === 'verify_close' ? { links: data.links.map(({ id, version, review_state }) => ({ id, version, review_state })) } : {};
+        const verification = input.action === 'verify_close' ? await verifiedClosure(client, subject, workspace, row) : null;
+        const snapshot = input.action === 'verify_close' ? { links: data.links.map(({ id, version, review_state }) => ({ id, version, review_state })), ...(verification ? { verification } : {}) } : {};
         const history = await appendHistory(client, workspace, row.workflow_instance_id, next, subject, input.action, input.reason,
           current.state, data.evidence.map((e) => e.id), snapshot);
         const result = caseDto({ ...row, to_state: next.state, owner_subject: next.owner_subject, version: next.version, updated_at: history.occurred_at });

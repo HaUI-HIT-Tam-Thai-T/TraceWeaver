@@ -18,3 +18,5 @@
 !backend/contracts/health.openapi.json
 !backend/contracts/schemas/
 !backend/contracts/schemas/**
+!simulator/
+!simulator/lab-state.mjs

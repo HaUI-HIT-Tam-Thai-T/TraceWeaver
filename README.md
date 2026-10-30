@@ -19,7 +19,7 @@ backend/
   package.json
 frontend/        # Giao diện, cấu hình và tests riêng
 ai/              # Scorer Python, model có version, features và tests
-simulator/       # Scenarios, fixtures và nguồn dữ liệu giả lập
+simulator/       # Sinh và nạp dữ liệu lab có seed; xem simulator/README.md
 docs/            # Mục lục tài liệu, hiện trạng và hướng dẫn tích hợp
 .planning/       # Kế hoạch và trạng thái làm việc local (Git ignore)
 .local/          # Gói bàn giao, báo cáo, công cụ và môi trường local (Git ignore)

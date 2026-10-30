@@ -3,7 +3,7 @@
 import { ApiError } from '../core/identity/api-error.js';
 
 export function browserCors(origins) {
-  const allowed = new Set(origins), methods = new Set(['GET', 'POST', 'OPTIONS']);
+  const allowed = new Set(origins), methods = new Set(['GET', 'POST', 'PUT', 'OPTIONS']);
   const headers = new Set(['authorization', 'content-type', 'idempotency-key']);
   return (req, res, next) => {
     const origin = req.get('Origin');
@@ -18,7 +18,7 @@ export function browserCors(origins) {
     if (!methods.has(method) || requested.some((x) => !headers.has(x))) {
       throw new ApiError(403, 'CORS_FORBIDDEN', 'Browser preflight is not allowed');
     }
-    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
     res.set('Access-Control-Allow-Headers', 'Authorization, Content-Type, Idempotency-Key');
     res.status(204).end();
   };
