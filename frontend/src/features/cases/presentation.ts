@@ -1,4 +1,4 @@
-import type { Case } from "./schemas";
+import type { Case } from "../../types/cases";
 
 const states: { [value: string]: string | undefined } = {
   new: "Mới tiếp nhận",

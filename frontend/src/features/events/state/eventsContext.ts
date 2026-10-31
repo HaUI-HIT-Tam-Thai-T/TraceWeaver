@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { EventFilters } from "../schemas";
+import type { EventFilters } from "../../../types/events";
 import type { EventsState } from "./state";
 
 export type EventsContextValue = {

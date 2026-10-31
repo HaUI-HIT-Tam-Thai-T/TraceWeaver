@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { matchPath, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/hooks/useAuth";
-import { useWorkspace } from "../../workspace/hooks/useWorkspace";
-import { casesService } from "../services/service";
+import { useAuth } from "../../../hooks/useAuth";
+import { useWorkspace } from "../../../hooks/useWorkspace";
+import { casesService } from "../casesService";
 import { createCasesController } from "./controller";
 import { CasesContext } from "./casesContext";
 import { initialCasesState } from "./state";
 import { readCaseQuery, writeCaseQuery } from "../query";
-import { reconstructionService } from "../../reconstruction/services/service";
+import { reconstructionService } from "../../reconstruction/reconstructionService";
 
-import { linkReviewService } from "../../link-review/services/service";
-import { createSandboxService } from "../../case-sandbox/service";
+import { linkReviewService } from "../../reconstruction/review/linkReviewService";
+import { createSandboxService } from "../sandbox/sandboxService";
 import { apiClient } from "../../../services/apiClient";
 const sandboxService = createSandboxService(apiClient);
 const hiddenState = initialCasesState();
@@ -39,7 +39,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
       setSnapshot(controller.getSnapshot());
     }
     const unsubscribe = controller.subscribe(handleChange);
-    // Catch a change between rendering and registering the listener.
+
     handleChange();
     return unsubscribe;
   }, [controller]);

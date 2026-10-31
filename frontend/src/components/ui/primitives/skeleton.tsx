@@ -1,6 +1,6 @@
 // Adapted from https://ui.shadcn.com/r/styles/new-york-v4/skeleton.json (MUI icons, existing Radix packages).
 import type * as React from "react";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (

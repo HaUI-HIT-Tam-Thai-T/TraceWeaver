@@ -4,7 +4,7 @@ import type { CaseTransition } from "../workflow.ts";
 import { z } from "zod";
 import { ApiError as SafeApiError, normalizeApiError } from "../../../services/apiError.ts";
 import type { ApiError } from "../../../services/apiError.ts";
-import type { CasesService } from "../services/createCasesService.ts";
+import type { CasesService } from "../createCasesService.ts";
 import { readCaseQuery } from "../query.ts";
 import {
   casesReducer,
@@ -13,23 +13,23 @@ import {
   initialEvidenceSnapshot,
 } from "./state.ts";
 import { evidenceCreateSchema } from "../schemas.ts";
-import type { EvidenceCreate } from "../schemas.ts";
-import type { Graph } from "../../reconstruction/schemas.ts";
+import type { EvidenceCreate } from "../../../types/cases.ts";
+import type { Graph } from "../../../types/reconstruction.ts";
 import type { CasesScope, CasesState } from "./state.ts";
 
-import type { ReconstructionService } from "../../reconstruction/services/createReconstructionService.ts";
-import type { LinkReviewService } from "../../link-review/services/createLinkReviewService.ts";
+import type { ReconstructionService } from "../../reconstruction/createReconstructionService.ts";
+import type { LinkReviewService } from "../../reconstruction/review/createLinkReviewService.ts";
 import {
   manualLinkCreateSchema,
   manualLinkIssue,
   reviewCreateSchema,
-} from "../../link-review/schemas.ts";
-import type { ReviewCreate, ManualLinkCreate } from "../../link-review/schemas.ts";
-import type { SandboxService } from "../../case-sandbox/service.ts";
-import { sandboxFailure } from "../../case-sandbox/service.ts";
-import { commandSchema, attemptSchema } from "../../case-sandbox/schemas.ts";
-import type { Command } from "../../case-sandbox/schemas.ts";
-import { initialSandboxState } from "../../case-sandbox/state.ts";
+} from "../../reconstruction/review/schemas.ts";
+import type { ReviewCreate, ManualLinkCreate } from "../../reconstruction/review/schemas.ts";
+import type { SandboxService } from "../sandbox/sandboxService.ts";
+import { sandboxFailure } from "../sandbox/sandboxService.ts";
+import { commandSchema, attemptSchema } from "../sandbox/schemas.ts";
+import type { Command } from "../sandbox/schemas.ts";
+import { initialSandboxState } from "../sandbox/state.ts";
 export type CasesView =
   | { kind: "none" }
   | { kind: "list"; search: string }
@@ -912,7 +912,7 @@ export function createCasesController(
       sandboxRequest === controller &&
       !controller.signal.aborted &&
       state.detail.data?.case.version === caseVersion;
-    // /lab is an optional workspace module: its 404 does not mean the case is hidden.
+
     const deniedRead = (error: ApiError, optionalLab = false) =>
       error.kind === "auth" || error.status === 403 || (error.status === 404 && !optionalLab);
     function failRead(error: unknown, optionalLab = false): never {

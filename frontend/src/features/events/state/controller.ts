@@ -1,10 +1,10 @@
 import axios from "axios";
 import { normalizeApiError } from "../../../services/apiError.ts";
 import type { ApiError } from "../../../services/apiError.ts";
-import type { EventsService } from "../services/createEventsService.ts";
+import type { EventsService } from "../createEventsService.ts";
 import { initialEventsState, eventsReducer } from "./state.ts";
 import type { EventsAction, EventsScope, EventsState } from "./state.ts";
-import type { EventFilters } from "../schemas.ts";
+import type { EventFilters } from "../../../types/events.ts";
 import type { EventQuery } from "../query.ts";
 
 export interface EventsController {

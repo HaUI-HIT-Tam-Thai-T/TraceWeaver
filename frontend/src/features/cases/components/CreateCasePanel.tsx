@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/hooks/useAuth";
-import { useWorkspace } from "../../workspace/hooks/useWorkspace";
+import { useAuth } from "../../../hooks/useAuth";
+import { useWorkspace } from "../../../hooks/useWorkspace";
 import type { EventsScope } from "../../events/state/state";
-import { reconstructionService } from "../../reconstruction/services/service";
-import { casesService } from "../services/service";
+import { reconstructionService } from "../../reconstruction/reconstructionService";
+import { casesService } from "../casesService";
 import { caseCreateSchema } from "../schemas";
-import type { CaseCreate } from "../schemas";
+import type { CaseCreate } from "../../../types/cases";
 import { createCaseCreationController, initialCaseCreation } from "../state/createCaseController";
 
 const titleFormSchema = caseCreateSchema.pick({ title: true });
@@ -42,7 +42,7 @@ export function CreateCasePanel({
       setSnapshot(controller.getSnapshot());
     }
     const unsubscribe = controller.subscribe(handleChange);
-    // Catch a change between rendering and registering the listener.
+
     handleChange();
     return unsubscribe;
   }, [controller]);

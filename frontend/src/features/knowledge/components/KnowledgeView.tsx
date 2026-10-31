@@ -99,10 +99,6 @@ export function KnowledgeResults({
   const ready = state.status === "ready";
   return (
     <section aria-label="Kết quả knowledge" className="space-y-4">
-      {/* <p>
-        Chỉ đọc, hiển thị phiên bản mới nhất. Dữ liệu có thể thay đổi giữa các
-        lần tải; không có tổng số trang.
-      </p> */}
       <Button
         variant="tertiary"
         type="button"

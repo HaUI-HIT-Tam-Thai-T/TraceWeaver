@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import type { WorkspaceController } from "./controller";
-import type { Membership } from "../schemas";
-import type { WorkspaceState, WorkspacePermissions } from "./state";
+import type { Membership, WorkspacePermissions } from "../../../types/workspace";
+import type { WorkspaceState } from "./state";
 
 export type WorkspaceContextValue = Pick<
   WorkspaceController,

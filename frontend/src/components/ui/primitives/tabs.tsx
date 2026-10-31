@@ -1,7 +1,7 @@
 // Adapted from https://ui.shadcn.com/r/styles/new-york-v4/tabs.json (MUI icons, existing Radix packages).
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 
 function Tabs({

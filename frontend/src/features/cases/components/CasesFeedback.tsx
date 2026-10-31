@@ -1,8 +1,8 @@
 import { Alert } from "../../../components/ui/primitives/alert";
 import { Button } from "../../../components/ui/Button";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../auth/hooks/useAuth";
-import { useCases } from "../hooks/useCases";
+import { useAuth } from "../../../hooks/useAuth";
+import { useCases } from "../../../hooks/useCases";
 
 export function CasesFeedback() {
   const { state, refresh } = useCases();

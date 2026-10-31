@@ -9,7 +9,6 @@ type Props = {
   describedBy?: string;
 };
 
-// The calendar edits whole seconds; fractional seconds stay separate and are never rounded by Date.
 export function PreciseDateTimeField({ id, label, value, onChange, invalid, describedBy }: Props) {
   const [base = "", fraction = ""] = value.split(".");
   function updateBase(next: string) {

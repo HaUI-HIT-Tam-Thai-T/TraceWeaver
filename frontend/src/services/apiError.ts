@@ -61,7 +61,6 @@ function httpMessage(status: number) {
   }
 }
 
-// Never retain the Axios config/request/cause: they may contain Bearer tokens or payloads.
 export function normalizeApiError(error: unknown): ApiError {
   if (error instanceof ApiError) return error;
   if (axios.isAxiosError<unknown, unknown>(error)) {

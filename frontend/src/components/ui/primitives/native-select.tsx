@@ -1,7 +1,6 @@
-// Icon adapted to MUI; native select behavior is unchanged.
 // Source: https://ui.shadcn.com/r/styles/new-york-v4/native-select.json
 import * as React from "react";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 function NativeSelect({

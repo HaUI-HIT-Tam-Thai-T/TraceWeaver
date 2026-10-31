@@ -1,7 +1,7 @@
 import { PageHeading } from "../../../components/layout/PageHeading";
 import type { ReactNode } from "react";
-import { useAuth } from "../../auth/hooks/useAuth";
-import { useWorkspace } from "../../workspace/hooks/useWorkspace";
+import { useAuth } from "../../../hooks/useAuth";
+import { useWorkspace } from "../../../hooks/useWorkspace";
 
 export function CasesLayout({
   title,

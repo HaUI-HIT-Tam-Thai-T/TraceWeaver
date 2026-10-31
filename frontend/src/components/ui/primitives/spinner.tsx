@@ -1,7 +1,7 @@
 import type { SvgIconProps } from "@mui/material/SvgIcon";
-// MUI SVG icon with the existing spinner accessibility and reduced-motion behavior.
+
 // Source: https://ui.shadcn.com/r/styles/new-york-v4/spinner.json
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 function Spinner({ className, ...props }: SvgIconProps) {

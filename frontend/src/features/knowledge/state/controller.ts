@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ApiError, normalizeApiError } from "../../../services/apiError.ts";
 import type { KnowledgeArticle, KnowledgeFilters } from "../schemas.ts";
-import type { KnowledgeService } from "../services/createKnowledgeService.ts";
+import type { KnowledgeService } from "../createKnowledgeService.ts";
 import { readKnowledgeQuery } from "../query.ts";
 
 export type KnowledgeScope = {

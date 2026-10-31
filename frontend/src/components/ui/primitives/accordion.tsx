@@ -1,6 +1,6 @@
 // Adapted from https://ui.shadcn.com/r/styles/new-york-v4/accordion.json (MUI icons, existing Radix packages).
 import * as React from "react";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 import ChevronDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 

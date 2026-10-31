@@ -7,19 +7,19 @@ import { Button } from "../../../components/ui/Button";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "../../auth/hooks/useAuth";
-import { useEvents } from "../../events/hooks/useEvents";
-import { eventsService } from "../../events/services/service";
-import { useWorkspace } from "../../workspace/hooks/useWorkspace";
+import { useAuth } from "../../../hooks/useAuth";
+import { useEvents } from "../../../hooks/useEvents";
+import { eventsService } from "../../events/eventsService";
+import { useWorkspace } from "../../../hooks/useWorkspace";
 import { createReconstructionController } from "../state/controller";
-import { reconstructionService } from "../services/service";
+import { reconstructionService } from "../reconstructionService";
 import { initialReconstructionState } from "../state/state";
 import { runFormDefaults, runFormSchema, toRunBody } from "../form";
 import type { RunFormValues } from "../form";
-import type { Event } from "../../events/schemas";
+import type { Event } from "../../../types/events";
 import type { EventsScope } from "../../events/state/state";
 import { RunResult } from "./RunResult";
-import { linkReviewService } from "../../link-review/services/service";
+import { linkReviewService } from "../review/linkReviewService";
 import { CreateCasePanel } from "../../cases/components/CreateCasePanel";
 import { actionLabel, requestLabel, sourceLabel } from "../../events/presentation";
 import { EventTime, EventTechnicalDetails } from "../../events/components/EventPresentation";
@@ -59,7 +59,7 @@ function ReconstructionForm({ root, scope }: { root: Event; scope: EventsScope }
       setSnapshot(controller.getSnapshot());
     }
     const unsubscribe = controller.subscribe(handleChange);
-    // Catch a change between rendering and registering the listener.
+
     handleChange();
     return unsubscribe;
   }, [controller]);

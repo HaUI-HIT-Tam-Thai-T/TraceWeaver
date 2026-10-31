@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { useAuth } from "../../auth/hooks/useAuth";
+import { useAuth } from "../../../hooks/useAuth";
 import { createWorkspaceController } from "./controller";
-import { workspaceService } from "../services/service";
+import { workspaceService } from "../workspaceService";
 import { activeMembership, initialWorkspaceState, workspacePermissions } from "./state";
 import { WorkspaceContext } from "./workspaceContext";
 
@@ -18,7 +18,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setSnapshot(controller.getSnapshot());
     }
     const unsubscribe = controller.subscribe(handleChange);
-    // Catch a change between rendering and registering the listener.
+
     handleChange();
     return unsubscribe;
   }, [controller]);
@@ -40,7 +40,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     };
   }, [authenticated, controller]);
 
-  // Hide the old scope in the same render as logout, before effect cleanup runs.
   const state = authenticated ? snapshot : hiddenState;
   const membership = activeMembership(state);
   return (

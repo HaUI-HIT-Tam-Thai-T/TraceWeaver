@@ -1,6 +1,6 @@
 import type { SelectHTMLAttributes, Ref } from "react";
 import { NativeSelect } from "./primitives/native-select";
-import { cn } from "../../lib/utils";
+import { cn } from "../../utils/classNames";
 
 type SelectProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, "size"> & {
   ref?: Ref<HTMLSelectElement>;

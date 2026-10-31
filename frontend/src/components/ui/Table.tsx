@@ -13,7 +13,7 @@ import {
   TableHead as ShadcnTableHead,
   TableCell as ShadcnTableCell,
 } from "./primitives/table";
-import { cn } from "../../lib/utils";
+import { cn } from "../../utils/classNames";
 
 type TableProps = TableHTMLAttributes<HTMLTableElement> & {
   caption: string;

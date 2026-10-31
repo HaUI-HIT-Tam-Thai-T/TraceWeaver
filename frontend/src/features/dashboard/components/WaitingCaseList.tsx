@@ -6,7 +6,7 @@ import { DetailLink } from "../../../components/ui/DetailLink";
 import { createCasesController } from "../../cases/state/controller";
 import { initialCasesState } from "../../cases/state/state";
 import { writeCaseQuery } from "../../cases/query";
-import { casesService } from "../../cases/services/service";
+import { casesService } from "../../cases/casesService";
 import type { DashboardFilters } from "../schemas";
 import type { DashboardScope } from "../state/controller";
 import type { ApiError } from "../../../services/apiError";
@@ -30,7 +30,7 @@ export function WaitingCaseList({
       setSnapshot(controller.getSnapshot());
     }
     const unsubscribe = controller.subscribe(handleChange);
-    // Catch a change between rendering and registering the listener.
+
     handleChange();
     return unsubscribe;
   }, [controller]);

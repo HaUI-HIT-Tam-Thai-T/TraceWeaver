@@ -1,6 +1,6 @@
 import { TechnicalDetails } from "../../../components/ui/TechnicalDetails";
 import { Badge } from "../../../components/ui/Badge";
-import type { Event } from "../schemas";
+import type { Event } from "../../../types/events";
 import { errorLabel, eventDescription, eventTimeLabel, outcomeLabel } from "../presentation";
 
 export function EventTime({ value }: { value: string }) {

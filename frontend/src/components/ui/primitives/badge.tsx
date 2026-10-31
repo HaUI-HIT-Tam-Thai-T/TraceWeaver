@@ -1,7 +1,7 @@
 // Source: https://ui.shadcn.com/r/styles/new-york-v4/badge.json
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 import * as Slot from "@radix-ui/react-slot";
 
 const badgeVariants = cva(

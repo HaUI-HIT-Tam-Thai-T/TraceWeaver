@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { Outlet } from "react-router-dom";
-import { useAuth } from "../features/auth/hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 import { PageHeading } from "../components/layout/PageHeading";
 import { Button } from "../components/ui/Button";
 import { Loader } from "../components/ui/Loader";

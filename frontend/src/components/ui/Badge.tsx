@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from "react";
 import { Badge as ShadcnBadge } from "./primitives/badge";
-import { cn } from "../../lib/utils";
+import { cn } from "../../utils/classNames";
 
 type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
   tone?: "neutral" | "info" | "success" | "warning" | "danger";

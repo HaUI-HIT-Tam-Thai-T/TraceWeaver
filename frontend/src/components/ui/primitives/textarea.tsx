@@ -1,6 +1,6 @@
 // Adapted from https://ui.shadcn.com/r/styles/new-york-v4/textarea.json
 import type { ComponentProps } from "react";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 
 export function Textarea({ className, ...props }: ComponentProps<"textarea">) {
   return (

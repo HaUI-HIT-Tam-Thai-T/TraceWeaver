@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { localToUtc, utcToLocalInput } from "../events/query.ts";
 import { caseFiltersSchema, caseStateSchema } from "./schemas.ts";
-import type { CaseFilters } from "./schemas.ts";
+import type { CaseFilters } from "../../types/cases.ts";
 
 const keys = ["state", "owner_id", "from", "to"] as const;
 export function readCaseQuery(search: string) {

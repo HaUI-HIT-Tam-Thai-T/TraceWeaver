@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { localToUtc, utcToLocalInput } from "../events/query.ts";
 import { runCreateSchema, shiftUtc, validateRoot } from "./schemas.ts";
-import type { Event } from "../events/schemas.ts";
+import type { Event } from "../../types/events.ts";
 
 export function inputToUtc(value: string): string {
   const fraction = /\.\d+$/.exec(value)?.[0] ?? "";

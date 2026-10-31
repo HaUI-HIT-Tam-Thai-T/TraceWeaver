@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { useWorkspace } from "../features/workspace/hooks/useWorkspace";
+import { useWorkspace } from "../hooks/useWorkspace";
 import { PageHeading } from "../components/layout/PageHeading";
 export function WorkspaceAdminAccess() {
   const { permissions } = useWorkspace();
