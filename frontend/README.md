@@ -1,32 +1,32 @@
-# TraceWeaver Frontend
+# Giao diện web TraceWeaver
 
-React + TypeScript + Vite, có cấu hình, routing, phiên Keycloak, Axios client, workspace/sources và event explorer.
-Source hiện có dashboard, event explorer/detail, hồ sơ và đồ thị/review, sandbox, tri thức và quản trị workspace. Mức kiểm chứng browser/deployment theo [CURRENT_STATUS](../docs/overview/status.md); các phần ghi theo task bên dưới mô tả lịch sử triển khai.
+Giao diện dùng React và TypeScript; Vite phục vụ chạy thử và đóng gói web. Người dùng đăng nhập qua Keycloak, chọn nhóm làm việc (workspace), tìm bản ghi từ các nguồn và xử lý hồ sơ.
+Mã nguồn đã có trang tổng quan, tra cứu/chi tiết bản ghi, hồ sơ, sơ đồ hành trình và duyệt liên kết, môi trường mô phỏng, tri thức và quản trị nhóm làm việc. Kết quả kiểm trên trình duyệt và tình trạng triển khai nằm ở [CURRENT_STATUS](../docs/overview/status.md); các phần ghi theo từng nhiệm vụ bên dưới mô tả lịch sử triển khai.
 
-Giấy phép source: [Apache-2.0](../LICENSE). Dependency: [inventory](DEPENDENCIES.md), [notices](THIRD_PARTY_NOTICES.txt); tạo/kiểm từ root bằng `npm run licenses:frontend` / `npm run licenses:frontend:check`. Xem [LICENSES](../LICENSES.md) về gói optional theo nền tảng.
+Giấy phép mã nguồn: [Apache-2.0](../LICENSE). Thư viện sử dụng: [inventory](DEPENDENCIES.md), [notices](THIRD_PARTY_NOTICES.txt); tạo và kiểm từ thư mục gốc bằng `npm run licenses:frontend` / `npm run licenses:frontend:check`. Xem [LICENSES](../LICENSES.md) về gói tùy chọn theo nền tảng.
 
-## Công cụ và phần đã làm
+## Các công cụ được dùng
 
-- Zod (`src/config/env.ts`): kiểm tra env khi Vite khởi động/build và trước khi mount React.
-  Lỗi chỉ nêu tên biến, không in giá trị. API URL là HTTPS origin, không gồm `/api/v1`;
-  Keycloak URL cho phép path `/identity`. URL không chứa credentials/query/fragment.
+- Zod (`src/config/env.ts`): kiểm file cấu hình khi Vite khởi động hoặc đóng gói và trước khi hiển thị React.
+  Lỗi chỉ nêu tên biến, không in giá trị. địa chỉ API phải là địa chỉ gốc HTTPS, gồm giao thức, tên máy và cổng, không gồm `/api/v1`;
+  Địa chỉ Keycloak cho phép đường dẫn `/identity`. Địa chỉ không chứa tài khoản, mật khẩu, tham số truy vấn hoặc đoạn sau dấu #.
 - Vite (`vite.config.ts`): local `http://localhost:5173`, `strictPort: true`;
   nếu cổng bận thì dừng, không tự chuyển sang 5174.
-- FE gọi trực tiếp API HTTPS bằng `VITE_API_BASE_URL`; không dùng Vite proxy.
-  API cần cho phép exact-origin CORS `http://localhost:5173`. OAuth dùng issuer HTTPS thật.
+- Giao diện gọi trực tiếp API HTTPS bằng `VITE_API_BASE_URL`; không dùng Vite proxy.
+  Máy chủ cần cho phép chính xác địa chỉ web gọi API (CORS) `http://localhost:5173`. Đăng nhập OAuth dùng địa chỉ HTTPS thật của nơi cấp mã.
 - React Router: BrowserRouter, cấu hình trong `src/constants/routes.ts`.
-  `/` chuyển về Dashboard qua ProtectedRoute; callback thành công về `/dashboard` bằng replace;
-  `*` hiển thị trang không tìm thấy. Route được chặn trong lúc SDK xử lý code/state.
-- Keycloak JS 26.2.4 (Apache-2.0, không phụ thuộc React): một instance, init một lần,
-  Code flow + PKCE S256, response query và tắt session-status iframe.
-  Khởi động tự chuyển đến Keycloak nếu chưa xác thực; không cần bấm Đăng nhập trên FE.
-  Context + useState/useEffect theo dõi phiên, không sao chép token vào React state/Redux.
-- TypeScript: `strict: true` cho app và Vite config; entrypoint kiểm tra DOM root thay assertion.
+  `/` chuyển về Dashboard qua ProtectedRoute; sau đăng nhập thành công quay về `/dashboard` bằng replace;
+  `*` hiển thị trang không tìm thấy. Trang chờ trong lúc thư viện đăng nhập xử lý mã và trạng thái của lần đăng nhập.
+- Keycloak JS 26.2.4 (Apache-2.0, không phụ thuộc React): tạo một đối tượng và khởi tạo một lần,
+  Code flow + PKCE S256, nhận kết quả trong tham số URL và tắt khung kiểm phiên đăng nhập (session-status iframe).
+  Khi chưa đăng nhập, giao diện tự chuyển tới Keycloak ngay lúc khởi động.
+  Context + useState/useEffect theo dõi phiên; không sao chép mã truy cập vào trạng thái React/Redux.
+- TypeScript: `strict: true` cho app và Vite config; điểm khởi chạy kiểm phần tử gốc của trang thay vì giả định nó luôn có.
 
-## Chạy local
+## Chạy trên máy cá nhân
 
-Dùng Node 22.18+ hoặc 24 LTS, npm và lockfile hiện có; test dùng TypeScript stripping của Node.
-Nếu chưa có dependencies, chạy `npm ci` từ thư mục `frontend/`.
+Dùng Node 22.18+ hoặc 24 LTS, npm và lockfile hiện có; kiểm thử dùng khả năng chạy TypeScript sau khi loại chú thích kiểu của Node.
+Nếu chưa cài thư viện, chạy `npm ci` từ thư mục `frontend/`.
 
 ```powershell
 npm run dev
@@ -34,18 +34,18 @@ npm run dev
 
 Tạo `.env.development.local` từ `.env.example`, giữ `VITE_API_BASE_URL=https://api.quizlearn.tech`.
 Nếu đã có `.env.development` thì giữ hoặc ghi đè bằng `.env.development.local`.
-Không để API base rỗng khi gọi BE trực tiếp; không cần `API_PROXY_TARGET`.
-Sau khi sửa env, khởi động lại Vite.
+Không để địa chỉ API rỗng khi gọi máy chủ trực tiếp; không cần `API_PROXY_TARGET`.
+Sau khi sửa file cấu hình, khởi động lại Vite.
 
 Kiểm tra bằng trình duyệt:
 
-1. Mở `http://localhost:5173/`: tự chuyển thẳng đến Keycloak, hiện form đăng nhập nếu chưa có phiên SSO.
-2. Đăng nhập trên Keycloak; callback thành công chuyển về Dashboard. Có phiên SSO còn hiệu lực thì tự vào ứng dụng.
-3. Reload để xác thực lại qua Keycloak; bấm đăng xuất để kết thúc phiên, quay về origin rồi tự mở form Keycloak.
-4. Hủy login/callback lỗi phải hiện thông báo an toàn; lỗi init dùng tải lại trang, không init lại SDK.
+1. Mở `http://localhost:5173/`: tự chuyển thẳng đến Keycloak, hiện biểu mẫu đăng nhập nếu chưa có phiên đăng nhập tập trung (SSO).
+2. Đăng nhập trên Keycloak; đăng nhập thành công chuyển về trang tổng quan. Có phiên SSO còn hiệu lực thì tự vào ứng dụng.
+3. Tải lại trang để xác thực lại qua Keycloak; bấm đăng xuất để kết thúc phiên, quay về địa chỉ web rồi tự mở biểu mẫu Keycloak.
+4. Hủy đăng nhập hoặc lỗi khi quay lại web phải hiện thông báo an toàn; lỗi khởi tạo yêu cầu tải lại trang, không khởi tạo lại thư viện trong cùng lần chạy.
 5. Mở `/khong-ton-tai` khi phiên đã khởi tạo để kiểm tra trang không tìm thấy.
 
-## Build và kiểm tra
+## Đóng gói và kiểm tra
 
 ```powershell
 Copy-Item .env.example .env.production.local
@@ -55,67 +55,56 @@ npm run build
 npm run preview
 ```
 
-`.env.example` chứa toàn bộ biến công khai cho production; điều chỉnh theo deployment thực tế.
-`.env.production.local` đã được Git bỏ qua. Không ghi mật khẩu, token hay client secret vào `VITE_*`.
-Production bắt buộc API HTTPS origin khác rỗng cùng đủ ba biến Keycloak;
-thiếu/sai env sẽ làm build dừng. `npm run build` chạy `tsc -b` với strict rồi Vite build.
-Preview phục vụ bản build tại URL Vite in ra (mặc định cổng 4173), không dùng dev proxy.
-Nếu thử auth trên preview, BE cần đăng ký riêng origin/callback cổng 4173; mặc định dùng dev 5173 để UAT.
+`.env.example` chứa toàn bộ biến công khai dùng khi triển khai; chỉnh theo máy chủ thực tế.
+`.env.production.local` đã được Git bỏ qua. Không ghi mật khẩu, mã truy cập hoặc khóa bí mật ứng dụng vào `VITE_*`.
+Khi đóng gói để triển khai, địa chỉ API HTTPS không được rỗng và cần đủ ba biến Keycloak;
+thiếu hoặc sai cấu hình sẽ dừng việc đóng gói. `npm run build` chạy `tsc -b` với strict rồi Vite build.
+Lệnh xem thử phục vụ bản web đã đóng gói tại địa chỉ Vite in ra (mặc định cổng 4173), không dùng dev proxy.
+Nếu thử đăng nhập trên bản xem thử, máy chủ và Keycloak cần đăng ký địa chỉ web/địa chỉ quay lại ở cổng 4173. Mặc định thử thao tác người dùng trên cổng phát triển 5173.
 
 ## Quản lý phiên và giao diện tích hợp
 
 - `src/features/auth/auth.ts` cung cấp `initializeAuth`, `signIn`, `signOut`, `getAccessToken`.
-  `initializeAuth` được await trước mount, giữ chung Promise kể cả lỗi.
-- `getAccessToken()` chia sẻ Promise refresh đang chạy, gọi `updateToken(30)` và chỉ trả access token.
-  Khi refresh lỗi: clear token, cập nhật UI yêu cầu đăng nhập lại; không tự retry API.
-  Refresh đến muộn sau logout không được trả token hoặc khôi phục phiên.
-- `useAuth()` trong provider cung cấp trạng thái và các thao tác cho UI. Trạng thái gồm
-  initializing/authenticated/unauthenticated/error, không chứa token hoặc quyền workspace.
-- onTokenExpired gọi refresh; onAuthRefreshError/onAuthLogout cập nhật trạng thái.
-  Tắt iframe đồng nghĩa logout tab khác được phát hiện ở lần refresh sau, không tức thì.
-- Không persist access/refresh token hoặc log chúng. SDK tự quản lý dữ liệu giao dịch OAuth
+  `initializeAuth` được chờ hoàn tất trước khi hiển thị ứng dụng, dùng chung Promise (kết quả bất đồng bộ) kể cả khi lỗi.
+- `getAccessToken()` dùng chung kết quả làm mới mã truy cập đang chạy, gọi `updateToken(30)` và chỉ trả mã truy cập.
+  Khi làm mới thất bại, xóa mã truy cập, yêu cầu đăng nhập lại và không tự gửi lại API.
+  Kết quả làm mới đến sau khi đăng xuất không được trả mã truy cập hoặc khôi phục phiên.
+- `useAuth()` trong phần cung cấp phiên đăng nhập trả trạng thái và các thao tác cho giao diện. Trạng thái gồm
+  initializing/authenticated/unauthenticated/error, không chứa mã truy cập hoặc quyền nhóm làm việc.
+- Khi mã hết hạn, onTokenExpired gọi làm mới; onAuthRefreshError/onAuthLogout cập nhật trạng thái khi lỗi hoặc đăng xuất.
+  Khi tắt khung kiểm phiên, việc đăng xuất ở tab khác chỉ được phát hiện ở lần làm mới mã tiếp theo.
+- Không lưu bền vững hoặc ghi log mã truy cập/mã làm mới. Thư viện đăng nhập tự quản lý dữ liệu giao dịch OAuth
   ngắn hạn (state/nonce/PKCE verifier); điều này khác với lưu token ứng dụng.
-- SDK logout tạo request trước khi FE xóa token trong memory. Nếu điều hướng logout lỗi,
-  FE báo chưa xác nhận kết thúc SSO; xóa local không được coi là đã logout toàn bộ Keycloak.
+- Thư viện tạo yêu cầu đăng xuất trước khi giao diện xóa mã truy cập trong bộ nhớ. Nếu điều hướng logout lỗi,
+  giao diện báo chưa xác nhận kết thúc phiên đăng nhập tập trung; xóa dữ liệu trên máy không chứng minh đã đăng xuất khỏi Keycloak.
 
-`npm test` dùng node:test, không thêm framework. Adapter giả kiểm tra lifecycle, refresh,
-race với logout, lỗi và subscription; kiểm thử UI dùng SSR với Context giả, không chứng minh SSO thật.
-UAT thật cần kiểm operator/viewer, hủy login, callback, reload, refresh và logout trên trình duyệt.
+`npm test` dùng bộ kiểm thử node:test. Lớp kết nối giả kiểm vòng đời phiên, làm mới mã, lỗi, nhận thay đổi và trường hợp làm mới mã cùng lúc đăng xuất. Kiểm giao diện bằng cách dựng HTML ở phía máy chủ với Context giả chưa chứng minh đăng nhập tập trung thật hoạt động. Trên trình duyệt, cần thử tài khoản operator/viewer, hủy đăng nhập, quay lại web, tải lại, làm mới phiên và đăng xuất.
 
-## Axios client — task 3
+## Gửi yêu cầu bằng Axios
 
-- `src/services/apiClient.ts` export `apiClient` dùng trong browser. Instance lấy API origin
-  từ env đã validate; local và production đều gọi origin HTTPS cấu hình. Factory `createApiClient` nhận
-  baseURL và token provider để kiểm thử độc lập với Keycloak, không cần thư viện mới.
-- Timeout HTTP mặc định 10 giây, Accept JSON, withCredentials=false để không gửi cookie
-  khác origin. Axios tự đặt Content-Type JSON khi service gửi body dạng object.
-  Không tự JSON.stringify body trong service nếu không có nhu cầu riêng.
-- Mỗi request await `getAccessToken()` của auth trước khi gắn Bearer. Auth quản lý refresh
-  dùng chung; client không tạo cơ chế refresh khác. Refresh thất bại thì request không gửi.
-- Chỉ dùng path bắt đầu `/api/v1/`, gồm cả prefix. Client chặn URL tuyệt đối, đổi baseURL,
-  Basic Auth và path traversal ra ngoài API scope trước khi gọi token provider.
-  Không dùng instance này cho health public, Identity, core hoặc service bên ngoài.
-- Giữ AxiosResponse khi thành công: service lấy `response.data`, còn headers/status vẫn có
-  khi cần. Generic TypeScript không xác thực JSON lúc chạy; service phải validate boundary
-  theo DTO khi cần. Client chỉ kiểm tra shape của phần lỗi chung.
-- Client không retry, kể cả 401 hoặc GET. Không tự logout/redirect/alert khi lỗi HTTP.
-  Session auth tự xóa phiên khi refresh thất bại; UI/caller xử lý HTTP 401 và 403 riêng.
-- Service quyết định Idempotency-Key theo endpoint. Client chuyển nguyên key và body;
-  không tự sinh hoặc thay key. POST timeout có thể đã commit ở BE.
+- `src/services/apiClient.ts` xuất `apiClient` dùng trong trình duyệt. Đối tượng này lấy địa chỉ API
+  từ cấu hình đã kiểm; khi phát triển hoặc triển khai đều gọi địa chỉ HTTPS đó. Hàm tạo `createApiClient` nhận
+  baseURL và hàm cung cấp mã truy cập để kiểm thử độc lập với Keycloak, không cần thư viện mới.
+- Thời hạn chờ HTTP mặc định 10 giây, Accept JSON, withCredentials=false để không gửi cookie
+  sang địa chỉ gốc khác. Axios tự đặt Content-Type JSON khi dịch vụ gửi nội dung dạng đối tượng.
+  Không tự JSON.stringify nội dung trong dịch vụ nếu không có nhu cầu riêng.
+- Mỗi yêu cầu chờ `getAccessToken()` lấy mã truy cập trước khi gắn Bearer. Phần đăng nhập dùng chung một lần làm mới mã; phần gọi API không tự tạo cơ chế khác. Nếu làm mới thất bại, yêu cầu không được gửi.
+- Chỉ nhận đường dẫn bắt đầu `/api/v1/`, bao gồm cả tiền tố này. Trước khi xin mã truy cập, phần gọi API chặn URL tuyệt đối, đổi baseURL, Basic Auth và đường dẫn đi ra ngoài phạm vi API. Không dùng đối tượng này để gọi kiểm trạng thái công khai, dịch vụ đăng nhập, API lõi hoặc dịch vụ ngoài.
+- Khi thành công, giữ AxiosResponse: dịch vụ lấy `response.data`, còn header và mã trạng thái vẫn có
+  khi cần. Khai báo kiểu TypeScript không tự kiểm dữ liệu JSON nhận được lúc chạy; dịch vụ phải kiểm dữ liệu
+  theo cấu trúc trao đổi (DTO) khi cần. Phần gọi API chỉ kiểm cấu trúc lỗi chung.
+- Phần gọi API không tự gửi lại, kể cả khi nhận 401 hoặc gọi GET. Nó không tự đăng xuất, chuyển trang hoặc hiện hộp cảnh báo khi lỗi HTTP.
+  Phần đăng nhập tự xóa phiên khi không làm mới được mã; giao diện hoặc mã gọi xử lý riêng lỗi HTTP 401 và 403.
+- Dịch vụ nghiệp vụ quyết định khóa chống thực hiện trùng (Idempotency-Key) theo từng API. Phần gửi yêu cầu chuyển nguyên khóa và nội dung, không tự tạo hoặc đổi khóa. POST hết thời gian chờ vẫn có thể đã được máy chủ lưu thành công.
 
 `ApiError` có kind (`http`, `network`, `timeout`, `auth`, `client`), code, status và requestId.
 Status/requestId là null nếu không có. HTTP 401 có kind=auth, 403 có kind=http.
-Code backend hợp lệ được giữ, fallback HTTP_<status>. Request ID ưu tiên body.request_id,
-rồi header X-Request-ID không phân biệt hoa/thường. Message dùng thông báo an toàn;
-không đính kèm raw body, HTML, config, request hoặc cause có thể chứa token.
-Network error không khẳng định là CORS vì browser có thể không cung cấp nguyên nhân.
+Mã lỗi hợp lệ từ máy chủ được giữ nguyên; nếu không có thì dùng HTTP_<status>. Mã yêu cầu ưu tiên body.request_id, sau đó lấy header X-Request-ID không phân biệt hoa/thường. Thông báo không kèm nội dung phản hồi thô, HTML, cấu hình, yêu cầu hoặc nguyên nhân có thể chứa mã truy cập. Lỗi mạng chưa đủ kết luận do CORS vì trình duyệt có thể không cung cấp nguyên nhân.
 
-Truyền AbortController.signal qua request config. Hủy khi chờ token kết thúc request ngay,
-không hủy refresh chung; sau khi hủy, request đó không được gửi. Lỗi cancellation vẫn kiểm
-tra bằng `axios.isCancel(error)`, không hiển thị như lỗi hệ thống. Abort POST không bảo đảm rollback.
-Không log toàn bộ response, Axios config hoặc cancellation object vì có thể chứa Authorization.
+Truyền AbortController.signal trong cấu hình yêu cầu để hủy khi không còn cần kết quả. Hủy trong lúc chờ mã truy cập kết thúc yêu cầu ngay nhưng không hủy việc làm mới mã dùng chung; yêu cầu đã hủy không được gửi. Kiểm trường hợp hủy bằng `axios.isCancel(error)` và không hiển thị như lỗi hệ thống. Hủy POST ở trình duyệt không bảo đảm máy chủ hủy thay đổi đã xử lý.
+Không ghi log toàn bộ phản hồi, cấu hình Axios hoặc đối tượng hủy yêu cầu vì có thể chứa Authorization.
 
-Ví dụ gọi từ service (DTO và schema nghiệp vụ sẽ được thêm trong task tương ứng):
+Ví dụ gọi từ dịch vụ nghiệp vụ ở mốc triển khai phần kết nối. Cấu trúc dữ liệu nghiệp vụ được bổ sung trong nhiệm vụ tương ứng:
 
 ```ts
 import axios from 'axios'
@@ -139,16 +128,16 @@ try {
 }
 ```
 
-Đây là mẫu sử dụng, chưa triển khai service /me hoặc nối request vào UI.
+Tại mốc viết ví dụ này, chưa triển khai dịch vụ /me hoặc nối yêu cầu vào giao diện.
 `tests/api-client.test.mjs` dùng Axios adapter và token provider giả, kiểm token/refresh,
 scope URL, cancellation khi chờ token/HTTP, các kiểu lỗi JSON/HTML/network/timeout,
 request ID, không lộ token và POST không retry. `npm test` chạy cả tests auth và client.
 
-## Deploy SPA và phụ thuộc tiếp theo
+## Đưa giao diện lên máy chủ web
 
-Deploy thư mục `dist/`. Hosting phải phục vụ static assets trước và fallback `index.html`
-cho các đường dẫn React, bao gồm `/auth/callback`; cấu hình dev không tự cấu hình hosting.
-Ví dụ location trên Nginx dành riêng cho frontend:
+Triển khai thư mục `dist/`. Máy chủ web phải phục vụ file tĩnh trước, rồi trả `index.html`
+cho các đường dẫn React, bao gồm `/auth/callback`; cấu hình khi phát triển không tự cấu hình máy chủ web.
+Ví dụ mục location trên Nginx dành riêng cho giao diện:
 
 ```nginx
 location / {
@@ -162,7 +151,14 @@ Lần kiểm tra ban đầu gặp `Invalid parameter: redirect_uri`; khi kiểm 
 callback local đã hoạt động. Operator và viewer đăng nhập, tải `/me` cùng ba nguồn thật
 intake/account/provision, hiển thị đúng roles. Viewer làm mới quyền/nguồn và logout thành công;
 UI xóa dữ liệu workspace sau logout. Khởi động lại dev server cũng khôi phục SSO operator.
-Không đặt thông tin đăng nhập vào source. Lỗi cấu hình Identity không giải quyết bằng retry API.
+Không đặt thông tin đăng nhập trong mã nguồn. Cần sửa cấu hình dịch vụ đăng nhập khi cấu hình sai; gửi lại API không giải quyết được lỗi đó.
+
+## Ghi chép triển khai theo từng nhiệm vụ
+
+<details>
+<summary>Chi tiết kỹ thuật và kết quả kiểm tra theo mốc</summary>
+
+Phần này giữ các thay đổi, số liệu và giới hạn của từng lần làm. Một số trạng thái như chưa triển khai, đang chờ API hoặc chưa có tài khoản chỉ mô tả đúng thời điểm được ghi. Khi cài và dùng bản hiện tại, đối chiếu [hiện trạng dự án](../docs/overview/status.md).
 
 ## Workspace và quyền truy cập — task 4
 
@@ -1134,7 +1130,7 @@ kích thước SVG vì SvgIcon có style width/height riêng; màu vẫn kế th
 Tailwind/theme. Icon trang trí aria-hidden; accessible name nằm trên button/link.
 Spinner tiếp tục role/nhãn của LoadingState và animate-spin/motion-reduce:animate-none.
 
-Dependency: @mui/icons-material, @mui/material, @emotion/react, @emotion/styled; đã gỡ
+Thư viện sử dụng: @mui/icons-material, @mui/material, @emotion/react, @emotion/styled; đã gỡ
 lucide-react khỏi package/lockfile. Material/Emotion là dependency để SvgIcon hoạt động,
 không thêm CssBaseline/ThemeProvider, font CDN hoặc thay UI shadcn sang component MUI.
 `components.json.iconLibrary` vẫn là mặc định registry shadcn (lucide), không điều khiển
@@ -1449,3 +1445,5 @@ Chưa xác minh zoom browser 200% và bật/tắt reduced motion của hệ đi�
 - Chuyển danh sách → chi tiết → danh sách giữ trang/cursor trong memory khi scope và bộ lọc không đổi. Reload tải lại dữ liệu; không lưu cursor hoặc payload vào storage.
 - Mở trực tiếp detail chỉ GET sự kiện, không tải collection. URL cũ `/events?event_id=...` được chuyển sang route detail. ID không hợp lệ bị từ chối trước khi gọi API.
 - Provider tiếp tục hủy request và purge khi đổi scope/mất quyền; reconstruction unmount khi rời detail, không tự gửi mutation khi quay lại.
+
+</details>

@@ -1,7 +1,7 @@
-# AI handoffs
+# Các gói bàn giao AI
 
-Versioned delivery bundles from AI development belong here so they are included in Git and source archives. Keep original bundle contents unchanged to preserve sender checksums and provenance.
+Các gói bàn giao AI được lưu theo phiên bản trong thư mục này và đi cùng mã nguồn khi phát hành. Giữ nguyên nội dung gói gốc để đối chiếu mã băm và nguồn gốc do bên gửi cung cấp.
 
-`AI_BE_RUNTIME_V2/` is the complete supplied trained sandbox-v2 bundle: source, dependencies, model, manifest/evaluation,23 HTTP sample pairs and42 feature fixtures. See its [README](AI_BE_RUNTIME_V2/README.md) and [bundle manifest](AI_BE_RUNTIME_V2/bundle-manifest.json).
+`AI_BE_RUNTIME_V2/` là toàn bộ gói sandbox-v2 đã nhận: mã nguồn, thư viện, mô hình, bản kê file/kết quả đánh giá, 23 cặp mẫu HTTP và 42 mẫu đặc trưng. Xem [README gốc](AI_BE_RUNTIME_V2/README.md) và [bản kê của gói](AI_BE_RUNTIME_V2/bundle-manifest.json). README bên trong gói được giữ nguyên ngôn ngữ khi bàn giao để đối chiếu, không phải hướng dẫn sử dụng tiếng Việt hiện hành.
 
-The integrated runtime is maintained in `ai/app/`, models in `ai/artifacts/`, features in `ai/features/` and tests in `ai/tests/`. A handoff is a preserved delivery snapshot; changes to application behavior belong in those maintained directories. Local credentials, environments, logs and verification output stay outside this versioned folder.
+Chương trình đang tích hợp được sửa tại `ai/app/`, mô hình tại `ai/artifacts/`, đặc trưng tại `ai/features/` và kiểm thử tại `ai/tests/`. Khi đổi cách ứng dụng hoạt động, sửa các thư mục này; không sửa bản bàn giao đã lưu. Thông tin đăng nhập trên máy, môi trường Python, log và kết quả kiểm tra riêng nằm ngoài thư mục gói được quản lý trong Git này.
