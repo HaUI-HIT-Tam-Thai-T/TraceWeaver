@@ -130,22 +130,21 @@ Inventories, notices and distribution scope are documented in [LICENSES.md](./LI
 
 ## 🚀 Installation and startup
 
-### 💻 System requirements
+### 💻 Requirements
 
-**To use the hosted app:** you only need a browser and an Internet connection. Open [TraceWeaver](https://traceweaver.quizlearn.tech) and sign in with one of the demo accounts below.
+<details>
+<summary>Tools and local ports</summary>
 
-**To run from source:** prepare the tools below. These instructions run the application server with Node.js and the database in Docker. Other components have separate setup steps.
-
-| Item | What to prepare | Notes |
+| Item | Requirement | Notes |
 |---|---|---|
-| Software | Git, Node.js 24.14.1, npm 11.11.0, Docker and Docker Compose v2 | Git downloads the source; Node.js runs the server and web tools; npm installs libraries; Docker runs PostgreSQL and the login service as described in the setup guides. Start Docker before using `docker compose`. |
-| RAM | No measured minimum for the whole application has been published | Usage depends on whether you also run the web tools, login service and AI. |
-| CPU | No measured minimum has been published | The current AI scoring service does not require a GPU. |
-| Disk | Space for source code, libraries, Docker images and log data | Storage grows with retained logs; the project has not published a verified minimum. |
-| Local ports | `5173` (web), `8080` (server), `8081` (login), `55432` (PostgreSQL) | Keep the ports for the components you plan to run available. These are the defaults for a local setup. |
-| Optional AI | Python and an isolated library environment (venv) | Follow [AI RUN](./ai/RUN.md). Python is not needed for the hosted app or for a rules-only application server. |
+| Source | Git | Clone the repository |
+| Backend / simulator | Node.js 24.14.1, npm 11.11.0 | Versions configured by the project |
+| Database | PostgreSQL 17 | Docker Compose v2 or an external database |
+| Web | Node/npm and a browser | Install dependencies separately in `frontend/` |
+| Optional AI | Python and venv following [AI RUN](./ai/RUN.md) | Install the pinned requirements |
+| Local ports | API 8080, PostgreSQL 55432, Keycloak 8081, web 5173 | Changes require consistent configuration |
 
-If you already have PostgreSQL 17, you can use it instead of the Docker database. Component setup instructions are in [INSTALL.md](./INSTALL.md).
+</details>
 
 ### 📝 Steps
 

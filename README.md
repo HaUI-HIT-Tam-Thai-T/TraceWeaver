@@ -133,20 +133,19 @@ Danh sách thư viện, thông báo bản quyền và phạm vi phân phối ở
 
 ### 💻 Yêu cầu hệ thống
 
-**Dùng bản web có sẵn:** chỉ cần trình duyệt và kết nối Internet. Mở [TraceWeaver](https://traceweaver.quizlearn.tech), đăng nhập bằng tài khoản demo bên dưới.
+<details>
+<summary>Yêu cầu công cụ và cổng kết nối</summary>
 
-**Tự chạy từ mã nguồn:** chuẩn bị các công cụ sau. Hướng dẫn trong README chạy máy chủ bằng Node.js và dùng Docker để chạy cơ sở dữ liệu; các thành phần khác có bước thiết lập riêng.
-
-| Hạng mục | Cần chuẩn bị | Ghi chú |
+| Hạng mục | Yêu cầu | Ghi chú |
 |---|---|---|
-| Phần mềm | Git, Node.js 24.14.1, npm 11.11.0, Docker và Docker Compose v2 | Git tải mã nguồn; Node.js chạy máy chủ và công cụ web; npm cài thư viện; Docker chạy PostgreSQL và dịch vụ đăng nhập theo hướng dẫn. Bật Docker trước khi chạy lệnh có `docker compose`. |
-| RAM | Chưa có mức tối thiểu được đo cho toàn bộ hệ thống | Phụ thuộc việc chạy riêng máy chủ hay chạy thêm giao diện, dịch vụ đăng nhập và AI. |
-| CPU | Chưa có mức tối thiểu được đo | Bộ chấm điểm AI hiện tại không yêu cầu GPU. |
-| Ổ đĩa | Cần chỗ cho mã nguồn, thư viện, Docker images và dữ liệu log | Dung lượng tăng theo số log lưu giữ; dự án chưa công bố mức tối thiểu đã kiểm chứng. |
-| Cổng trên máy | `5173` (web), `8080` (máy chủ), `8081` (đăng nhập), `55432` (PostgreSQL) | Để trống các cổng của thành phần bạn định chạy. Đây là số cổng mặc định khi chạy trên máy cá nhân. |
-| AI, nếu muốn chạy thêm | Python và một môi trường cài thư viện riêng (venv) | Làm theo [hướng dẫn AI](./ai/RUN.md). Không cần cài Python để thử bản web hoặc chạy máy chủ chỉ dùng quy tắc. |
+| Source | Git | Clone repository |
+| Backend / simulator | Node.js 24.14.1, npm 11.11.0 | Phiên bản theo cấu hình dự án |
+| Database | PostgreSQL 17 | Có thể dùng Docker Compose v2 hoặc DB riêng |
+| Web | Node/npm và trình duyệt | Cài dependencies riêng tại `frontend/` |
+| AI tùy chọn | Python và venv theo [AI RUN](./ai/RUN.md) | Cài đúng pinned requirements |
+| Cổng local | API 8080, PostgreSQL 55432, Keycloak 8081, web 5173 | Có thể thay đổi nếu cập nhật đồng bộ cấu hình |
 
-Nếu đã có PostgreSQL 17, bạn có thể dùng cơ sở dữ liệu đó thay cho PostgreSQL trong Docker. Các bước cài từng thành phần nằm ở [INSTALL.md](./INSTALL.md).
+</details>
 
 ### 📝 Các bước
 
