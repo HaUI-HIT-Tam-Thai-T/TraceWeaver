@@ -59,9 +59,12 @@ jobs:
           node-version: '24.14.1'
           cache: npm
       - run: npm ci --ignore-scripts
+      - run: npm run format:be:check
+      - run: npm run format:sim:check
       - run: npm run check:base
       - run: npm run licenses:check
       - run: npm test
+      - run: npm run test:sim
 
   postgres:
     runs-on: ubuntu-latest

@@ -20,6 +20,8 @@ try {
   await writeFile(new URL('.env', root), content, { flag: 'wx', mode: 0o600 });
   console.log('Created local .env with a random DB password. Credentials were not printed.');
 } catch (error) {
-  console.error(error.code === 'EEXIST' ? '.env already exists; kept unchanged.' : 'LOCAL_ENV_SETUP_FAILED');
+  console.error(
+    error.code === 'EEXIST' ? '.env already exists; kept unchanged.' : 'LOCAL_ENV_SETUP_FAILED',
+  );
   process.exitCode = 1;
 }

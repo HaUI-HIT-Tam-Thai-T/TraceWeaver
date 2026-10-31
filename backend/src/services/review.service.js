@@ -5,7 +5,9 @@ import { ApiError } from '../core/identity/api-error.js';
 import { reviewInput, manualLinkInput } from '../validations/review.validation.js';
 export function createReviewService(repository) {
   async function protect(work) {
-    try { return await work(); } catch (error) {
+    try {
+      return await work();
+    } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(503, 'CORE_NOT_READY', 'Link editing is temporarily unavailable');
     }

@@ -11,7 +11,10 @@ export function createDashboardRepository(pool) {
   return {
     async get(subject, workspace, filters) {
       // Scope, latest review/history and counters share one MVCC statement snapshot.
-      const { rows: [row] } = await pool.query(`WITH RECURSIVE
+      const {
+        rows: [row],
+      } = await pool.query(
+        `WITH RECURSIVE
         visible_runs AS MATERIALIZED (
           SELECT r.* FROM core.reconstruction_runs r
           WHERE r.workspace_id=$2 AND ${artifactScope} AND ${artifactTimeScope(3)}
@@ -34,7 +37,8 @@ export function createDashboardRepository(pool) {
               SELECT 1 FROM connected c WHERE c.run_id=r.id AND c.event_id=re.event_id::text)) AS unresolved_events,
           (SELECT count(*)::int FROM core.cases c JOIN visible_runs r ON r.workspace_id=c.workspace_id AND r.id=c.run_id
             JOIN LATERAL (${latestWorkflow}) h ON true WHERE h.to_state IN ('new','assigned')) AS waiting_cases`,
-      [subject, workspace, ...artifactTimeValues(filters)]);
+        [subject, workspace, ...artifactTimeValues(filters)],
+      );
       if (row.roles === null) throw new ApiError(404, 'NOT_FOUND', 'Resource not found');
       if (!row.roles.some((role) => ['viewer', 'operator', 'reviewer', 'admin'].includes(role))) {
         throw new ApiError(403, 'FORBIDDEN', 'Action is not permitted');

@@ -10,3 +10,9 @@ backend/tests/fixtures/scorer-v2/*.json text eol=lf
 ai/handoffs/AI_BE_RUNTIME_V2/** -text whitespace=cr-at-eol
 # Generated notices retain upstream license formatting verbatim.
 frontend/THIRD_PARTY_NOTICES.txt whitespace=-blank-at-eol
+
+# Consistent formatting for backend and simulator on Windows/Linux.
+backend/src/**/*.js text eol=lf
+backend/scripts/**/*.js text eol=lf
+backend/tests/**/*.js text eol=lf
+simulator/**/*.mjs text eol=lf
