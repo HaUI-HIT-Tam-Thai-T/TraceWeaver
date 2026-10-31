@@ -20,7 +20,7 @@
 
 </div>
 
-**Đội:** HaUI.HIT-Tam-Thái-Tử
+**Đội:** HaUI.Tam_Thái_Tử
 
 **Trường:** Trường Công nghệ Thông tin và Truyền thông, Đại học Công nghiệp Hà Nội
 
