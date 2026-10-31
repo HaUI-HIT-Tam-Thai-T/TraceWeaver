@@ -1,5 +1,5 @@
-import type { Event } from "./schemas";
-import type { Source } from "../workspace/schemas";
+import type { Event } from "../../types/events";
+import type { Source } from "../../types/workspace";
 
 const ACTION_LABELS: { [code: string]: string | undefined } = {
   "request.accepted": "Đã tiếp nhận yêu cầu",
@@ -73,7 +73,6 @@ export function errorLabel(event: Event): string | null {
 }
 
 export function eventDescription(event: Event): string {
-  // Display the recorded message, never replace it with an inferred action summary.
   return event.message.trim()
     ? event.message
     : "Log không có thông điệp; mở chi tiết kỹ thuật để xem dữ liệu đã ghi nhận.";

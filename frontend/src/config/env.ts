@@ -23,14 +23,13 @@ const publicEnvSchema = z.object({
   VITE_KEYCLOAK_CLIENT_ID: z.string().trim().min(1),
 });
 
-// Zod supplies the validated output type, including schema transforms.
 export type AppEnv = z.infer<typeof publicEnvSchema>;
 
 export function parseEnv(input: unknown, production: boolean): AppEnv {
   const result = publicEnvSchema.safeParse(input);
   if (!result.success) {
     const fields = [...new Set(result.error.issues.map((issue) => issue.path.join(".")))];
-    // Report field names only; never print environment values.
+
     throw new Error(`Invalid frontend configuration: ${fields.join(", ")}. See .env.example.`);
   }
   if (production && !result.data.VITE_API_BASE_URL) {

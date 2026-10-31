@@ -1,10 +1,9 @@
-// Icon adapted to MUI; Radix still manages dialog behavior.
 // Source: https://ui.shadcn.com/r/styles/new-york-v4/sheet.json
-// Local imports, direct Radix Dialog dependency, no animation package.
+
 "use client";
 
 import * as React from "react";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 import CloseIcon from "@mui/icons-material/Close";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 

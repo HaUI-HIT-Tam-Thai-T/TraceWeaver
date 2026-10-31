@@ -1,6 +1,6 @@
 import { actionLabel, eventTimeLabel, requestLabel } from "../events/presentation";
 import { compareUtc } from "../events/schemas";
-import type { Graph, Link, Run } from "./schemas";
+import type { Graph, Link, Run } from "../../types/reconstruction";
 
 export function modeLabel(mode: Run["mode"]): string {
   return mode === "hybrid" ? "Kết hợp luật và AI" : "Theo luật";

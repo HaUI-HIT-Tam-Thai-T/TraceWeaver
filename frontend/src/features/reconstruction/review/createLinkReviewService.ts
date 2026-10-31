@@ -1,0 +1,91 @@
+import { endpoints } from "../../../services/endpoints.ts";
+import { z } from "zod";
+import type { AxiosInstance } from "axios";
+import { ApiError } from "../../../services/apiError.ts";
+import { linkSchema } from "../schemas.ts";
+import type { Link } from "../../../types/reconstruction.ts";
+import { reviewCreateSchema, reviewSchema, manualLinkCreateSchema } from "./schemas.ts";
+import type { Review, ReviewCreate, ManualLinkCreate } from "./schemas.ts";
+
+export interface LinkReviewService {
+  reviewLink(
+    workspaceId: string,
+    runId: string,
+    linkId: string,
+    body: ReviewCreate,
+    signal?: AbortSignal,
+  ): Promise<Review>;
+  createManualLink(
+    workspaceId: string,
+    runId: string,
+    body: ManualLinkCreate,
+    signal?: AbortSignal,
+  ): Promise<Link>;
+}
+
+const invalidInput = () =>
+  new ApiError({
+    kind: "client",
+    code: "INVALID_LINK_INPUT",
+    message: "Thông tin link hoặc lý do không hợp lệ.",
+  });
+const invalidResponse = () =>
+  new ApiError({
+    kind: "client",
+    code: "INVALID_API_RESPONSE",
+    message: "Phản hồi thao tác link không đúng định dạng; kết quả chưa được xác nhận.",
+  });
+export function createLinkReviewService(client: Pick<AxiosInstance, "post">): LinkReviewService {
+  const path = (wid: string, rid: string, lid?: string) => {
+    if (
+      ![wid, rid, ...(lid === undefined ? [] : [lid])].every((id) => z.uuid().safeParse(id).success)
+    )
+      throw invalidInput();
+    return endpoints.linkReviews(wid, rid, lid);
+  };
+  async function reviewLink(
+    wid: string,
+    rid: string,
+    lid: string,
+    body: ReviewCreate,
+    signal?: AbortSignal,
+  ): Promise<Review> {
+    const url = path(wid, rid, lid);
+    const parsed = reviewCreateSchema.safeParse(body);
+    if (!parsed.success) throw invalidInput();
+    const response = await client.post<unknown>(url, parsed.data, { signal });
+    const result = reviewSchema.safeParse(response.data);
+    if (
+      !result.success ||
+      result.data.link_id !== lid ||
+      result.data.decision !== parsed.data.decision ||
+      result.data.link_version !== parsed.data.expected_version + 1
+    )
+      throw invalidResponse();
+    return result.data;
+  }
+  async function createManualLink(
+    wid: string,
+    rid: string,
+    body: ManualLinkCreate,
+    signal?: AbortSignal,
+  ): Promise<Link> {
+    const url = path(wid, rid);
+    const parsed = manualLinkCreateSchema.safeParse(body);
+    if (!parsed.success) throw invalidInput();
+    const response = await client.post<unknown>(url, parsed.data, { signal });
+    const result = linkSchema.safeParse(response.data);
+    if (
+      !result.success ||
+      result.data.from_event_id !== body.from_event_id ||
+      result.data.to_event_id !== body.to_event_id ||
+      result.data.method !== "manual" ||
+      result.data.review_state !== "pending" ||
+      result.data.score !== null ||
+      result.data.version !== 1
+    )
+      throw invalidResponse();
+    return result.data;
+  }
+  return { reviewLink, createManualLink };
+}

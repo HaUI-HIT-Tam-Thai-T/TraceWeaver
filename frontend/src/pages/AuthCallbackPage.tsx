@@ -1,5 +1,5 @@
 import { Link, Navigate } from "react-router-dom";
-import { useAuth } from "../features/auth/hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 import { AuthStatus } from "../features/auth/components/AuthStatus";
 
 export function AuthCallbackPage() {

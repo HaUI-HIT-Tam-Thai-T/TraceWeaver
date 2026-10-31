@@ -7,7 +7,7 @@ import { Textarea } from "../../../components/ui/primitives/textarea";
 import { LoadingState } from "../../../components/ui/LoadingState";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { CaseDetail } from "../schemas";
+import type { CaseDetail } from "../../../types/cases";
 import type { CaseWorkflow, CaseWorkflowGraph, CasesScope, CasesState } from "../state/state";
 import { caseActionSchema, transitionSchema, transitionIssue, transitionStates } from "../workflow";
 import type { CaseTransition } from "../workflow";

@@ -6,7 +6,6 @@ import { EventDetailPage } from "../pages/EventDetailPage";
 import { PageLoadError } from "../routes/PageLoadFeedback";
 import { WorkspaceAdminPage } from "../pages/WorkspaceAdminPage";
 
-// Declare once so rendering does not recreate the lazy component or reset its state.
 const EventsPage = lazy(() =>
   import("../pages/EventsPage")
     .then((module) => ({ default: module.EventsPage }))

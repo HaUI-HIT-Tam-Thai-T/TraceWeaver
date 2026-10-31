@@ -1,5 +1,5 @@
 import type { CaseEvidenceSnapshot } from "../state/state";
-import type { Source } from "../../workspace/schemas";
+import type { Source } from "../../../types/workspace";
 import { actionLabel, requestLabel, sourceLabel } from "../../events/presentation";
 import { EventContent, EventTime, EventOutcome } from "../../events/components/EventPresentation";
 import { TechnicalDetails } from "../../../components/ui/TechnicalDetails";

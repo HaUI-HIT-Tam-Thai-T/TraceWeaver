@@ -1,9 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { parseEnv } from "./config/env";
-import "./index.css";
+import "./styles/global.css";
 import App from "./App.tsx";
-import { initializeAuth } from "./features/auth/services/auth";
+import { initializeAuth } from "./features/auth/authService";
 import { AppProviders } from "./app/providers";
 
 const root = document.getElementById("root");

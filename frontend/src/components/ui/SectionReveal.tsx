@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { LazyMotion, domAnimation, MotionConfig } from "motion/react";
 import * as m from "motion/react-m";
 
-// Entrance only: removal is immediate, including when access is revoked.
 export function SectionReveal({
   children,
   className,

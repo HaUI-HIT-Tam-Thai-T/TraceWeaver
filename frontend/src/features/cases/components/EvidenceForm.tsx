@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { evidenceCreateSchema } from "../schemas";
-import type { EvidenceCreate } from "../schemas";
+import type { EvidenceCreate } from "../../../types/cases";
 import type { CaseEvidenceSnapshot, CaseEvidenceMutation } from "../state/state";
 
 type Props = {

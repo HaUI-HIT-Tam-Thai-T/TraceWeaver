@@ -1,10 +1,5 @@
+import type { AuthState, AuthSession } from "../../../types/auth.ts";
 import type Keycloak from "keycloak-js";
-
-export type AuthState =
-  | { status: "initializing" }
-  | { status: "authenticated" }
-  | { status: "unauthenticated"; message?: string }
-  | { status: "error"; reason: "initialization" | "action"; message: string };
 
 type AuthClient = Pick<
   Keycloak,
@@ -19,15 +14,6 @@ type AuthClient = Pick<
   | "onAuthRefreshError"
   | "onTokenExpired"
 >;
-
-export interface AuthSession {
-  getSnapshot(): AuthState;
-  subscribe(listener: () => void): () => void;
-  initializeAuth(): Promise<void>;
-  signIn(): Promise<void>;
-  signOut(): Promise<void>;
-  getAccessToken(): Promise<string>;
-}
 
 export function createAuthSession(
   createClient: () => AuthClient,
@@ -63,7 +49,6 @@ export function createAuthSession(
   }
 
   function initializeAuth(): Promise<void> {
-    // Cache even a failed initialization: SDK instances must never be initialized twice.
     initialization ??= Promise.resolve().then(async () => {
       try {
         client = createClient();
@@ -86,10 +71,7 @@ export function createAuthSession(
         });
         if (authenticated) publish({ status: "authenticated" });
         else {
-          // Start login once at bootstrap. Avoid SDK login-required: clearToken()
-          // would otherwise start another login while logout is still redirecting.
           await client.login({ redirectUri: redirects.callbackUri });
-          // Keep the loader visible until navigation; do not flash a login prompt.
         }
       } catch {
         client?.clearToken();
@@ -120,7 +102,6 @@ export function createAuthSession(
   async function signOut(): Promise<void> {
     if (!client || state.status !== "authenticated") return;
     try {
-      // Let the adapter build its logout request with its ID-token hint before clearing memory.
       const logout = client.logout({ redirectUri: redirects.logoutUri });
       clearSession();
       await logout;

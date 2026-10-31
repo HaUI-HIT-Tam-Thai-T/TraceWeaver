@@ -1,5 +1,5 @@
 import type { ApiError } from "../../../services/apiError.ts";
-import type { Event, EventFilters } from "../schemas.ts";
+import type { Event, EventFilters } from "../../../types/events.ts";
 
 export type EventsScope = {
   subject: string;

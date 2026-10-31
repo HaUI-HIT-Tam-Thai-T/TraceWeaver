@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { matchPath, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "../../auth/hooks/useAuth";
-import { useWorkspace } from "../../workspace/hooks/useWorkspace";
+import { useAuth } from "../../../hooks/useAuth";
+import { useWorkspace } from "../../../hooks/useWorkspace";
 import { createEventsController } from "./controller";
-import { eventsService } from "../services/service";
+import { eventsService } from "../eventsService";
 import { readEventLocation, readEventQuery, writeEventQuery } from "../query";
 import { initialEventsState } from "./state";
 import { EventsContext } from "./eventsContext";
@@ -22,7 +22,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
       setSnapshot(controller.getSnapshot());
     }
     const unsubscribe = controller.subscribe(handleChange);
-    // Catch a change between rendering and registering the listener.
+
     handleChange();
     return unsubscribe;
   }, [controller]);
@@ -105,7 +105,6 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     }
   }, [snapshot.list.error, visible, location.search, eventId, navigate]);
 
-  // Identity response object changes on every access revalidation, even for the same subject.
   const state =
     allowed && snapshot.scope?.accessKey === me && snapshot.scope.workspaceId === workspaceId
       ? snapshot

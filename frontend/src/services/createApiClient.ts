@@ -17,7 +17,7 @@ function invalidRequest() {
 
 function validatePath(path: string | undefined) {
   if (!path?.startsWith("/api/v1/") || /[\\\s#]/.test(path)) throw invalidRequest();
-  // URL normalizes dot segments, including %2e%2e, before the scope check.
+
   const normalized = new URL(path, "https://api-client.invalid");
   if (!normalized.pathname.startsWith("/api/v1/")) throw invalidRequest();
 }
@@ -34,7 +34,7 @@ function waitForToken(
       reject(new CanceledError("Request canceled"));
     };
     signal?.addEventListener?.("abort", cancel, { once: true });
-    // Cancellation only stops this request; it must not abort a shared SDK refresh.
+
     Promise.resolve()
       .then(() => {
         if (signal?.aborted) throw new CanceledError("Request canceled");

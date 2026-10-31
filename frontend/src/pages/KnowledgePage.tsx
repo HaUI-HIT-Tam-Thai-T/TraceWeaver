@@ -2,14 +2,14 @@ import { PageHeading } from "../components/layout/PageHeading";
 import { Alert } from "../components/ui/primitives/alert";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useAuth } from "../features/auth/hooks/useAuth";
-import { useWorkspace } from "../features/workspace/hooks/useWorkspace";
+import { useAuth } from "../hooks/useAuth";
+import { useWorkspace } from "../hooks/useWorkspace";
 import {
   createKnowledgeController,
   initialKnowledgeState,
 } from "../features/knowledge/state/controller";
 import type { KnowledgeScope } from "../features/knowledge/state/controller";
-import { knowledgeService } from "../features/knowledge/services/service";
+import { knowledgeService } from "../features/knowledge/knowledgeService";
 import { readKnowledgeQuery, writeKnowledgeQuery } from "../features/knowledge/query";
 import {
   KnowledgeResults,
@@ -50,7 +50,7 @@ function KnowledgeBrowser({ scope, search }: { scope: KnowledgeScope | null; sea
       setSnapshot(controller.getSnapshot());
     }
     const unsubscribe = controller.subscribe(handleChange);
-    // Catch a change between rendering and registering the listener.
+
     handleChange();
     return unsubscribe;
   }, [controller]);

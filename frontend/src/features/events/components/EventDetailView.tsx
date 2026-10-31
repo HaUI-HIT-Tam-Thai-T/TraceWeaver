@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useLocation, useParams, Link } from "react-router-dom";
-import { useAuth } from "../../auth/hooks/useAuth";
-import { useWorkspace } from "../../workspace/hooks/useWorkspace";
-import { useEvents } from "../hooks/useEvents";
+import { useAuth } from "../../../hooks/useAuth";
+import { useWorkspace } from "../../../hooks/useWorkspace";
+import { useEvents } from "../../../hooks/useEvents";
 import { SectionReveal } from "../../../components/ui/SectionReveal";
 import { Alert } from "../../../components/ui/primitives/alert";
 import { Button } from "../../../components/ui/Button";
@@ -41,7 +41,7 @@ export function EventDetailView() {
   if (auth.status !== "authenticated") return <p>Vui lòng đăng nhập để xem sự kiện.</p>;
   if (workspace.status !== "ready" || !membership || !permissions.canRead)
     return <p role="status">Chọn workspace có quyền đọc để xem sự kiện.</p>;
-  // Never display the previous event while the route is being synchronized.
+
   const detail =
     query.success &&
     JSON.stringify(state.filters) === JSON.stringify(query.filters) &&

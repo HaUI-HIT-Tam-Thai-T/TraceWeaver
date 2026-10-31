@@ -1,10 +1,11 @@
 import { z } from "zod";
+import type { RunCreate } from "../../types/reconstruction.ts";
 import { compareUtc, eventSchema, utcSchema } from "../events/schemas.ts";
-import type { Event } from "../events/schemas.ts";
+import type { Event } from "../../types/events.ts";
 
 const id = z.uuid();
 const mode = z.enum(["rule_only", "hybrid"]);
-// Integer nanosecond-like units with variable precision; never round API timestamps to milliseconds.
+
 export function utcUnits(value: string, precision: number): bigint {
   const [base = "", fraction = ""] = value.slice(0, -1).split(".");
   return (
@@ -89,7 +90,7 @@ export const linkSchema = z.strictObject({
   review_state: z.enum(["pending", "accepted", "rejected"]),
   version: z.number().int().min(1),
 });
-export type Link = z.infer<typeof linkSchema>;
+
 export const graphSchema = z
   .strictObject({
     run_id: id,
@@ -138,6 +139,3 @@ export const graphSchema = z
       )
     );
   });
-export type RunCreate = z.infer<typeof runCreateSchema>;
-export type Run = z.infer<typeof runSchema>;
-export type Graph = z.infer<typeof graphSchema>;

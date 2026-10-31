@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { caseFilterDefaults, caseFilterFormSchema, toCaseFilters } from "../query";
 import type { CaseFilterForm } from "../query";
-import type { CaseFilters } from "../schemas";
+import type { CaseFilters } from "../../../types/cases";
 import { caseStateSchema } from "../schemas";
 
 export function CaseFiltersForm({

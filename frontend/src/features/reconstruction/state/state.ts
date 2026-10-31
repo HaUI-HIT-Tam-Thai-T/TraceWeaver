@@ -1,7 +1,7 @@
 import type { ApiError } from "../../../services/apiError.ts";
-import type { Run, Graph, RunCreate } from "../schemas.ts";
-import { initialLinkMutation } from "../../link-review/types.ts";
-import type { LinkMutation } from "../../link-review/types.ts";
+import type { Run, Graph, RunCreate } from "../../../types/reconstruction.ts";
+import { initialLinkMutation } from "../review/types.ts";
+import type { LinkMutation } from "../review/types.ts";
 
 export type Attempt = { body: RunCreate; key: string; createdAt: number };
 export type ReconstructionState = {

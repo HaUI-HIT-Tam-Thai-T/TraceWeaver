@@ -2,7 +2,6 @@ export function dateString(date: Date) {
   return `${String(date.getFullYear()).padStart(4, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-// Keep time and fractional seconds verbatim; Date is used only to lay out days.
 export function replaceCalendarDate(value: string, day: string) {
   return `${day}T${value.split("T")[1] || "00:00:00"}`;
 }

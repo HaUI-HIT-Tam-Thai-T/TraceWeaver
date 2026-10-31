@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { filtersSchema } from "./schemas.ts";
-import type { EventFilters } from "./schemas.ts";
+import type { EventFilters } from "../../types/events.ts";
 
 const filterKeys = ["source_id", "from", "to", "action", "q"] as const;
 const knownKeys = [...filterKeys, "limit", "event_id"];
@@ -29,7 +29,6 @@ export function readEventQuery(search: string): EventQuery {
   return { success: true, filters: result.data, eventId };
 }
 
-// The path owns the detail ID; query parameters retain only the list filters.
 export function readEventLocation(search: string, eventId: string | null): EventQuery {
   const params = new URLSearchParams(search);
   if (eventId !== null) params.set("event_id", eventId);
@@ -47,7 +46,6 @@ export function writeEventQuery(filters: EventFilters, eventId: string | null = 
   return params;
 }
 
-// Only form input is converted. API event timestamps are always retained verbatim.
 export function localToUtc(value: string): string {
   const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})(?::(\d{2})(\.\d{1,6})?)?$/.exec(value);
   if (!match) throw new Error("Invalid local time");

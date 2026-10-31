@@ -2,11 +2,11 @@ import axios from "axios";
 import { ApiError, normalizeApiError } from "../../../services/apiError.ts";
 import type { ApiError as ApiErrorType } from "../../../services/apiError.ts";
 import type { EventsScope } from "../../events/state/state.ts";
-import type { Run } from "../../reconstruction/schemas.ts";
-import type { CasesService } from "../services/createCasesService.ts";
-import { invalidCaseInput } from "../services/createCasesService.ts";
+import type { Run } from "../../../types/reconstruction.ts";
+import type { CasesService } from "../createCasesService.ts";
+import { invalidCaseInput } from "../createCasesService.ts";
 import { caseCreateSchema } from "../schemas.ts";
-import type { CaseCreate } from "../schemas.ts";
+import type { CaseCreate } from "../../../types/cases.ts";
 
 export type CaseCreationState = {
   status:

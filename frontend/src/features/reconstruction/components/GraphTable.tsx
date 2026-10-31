@@ -1,5 +1,5 @@
 import { TechnicalDetails } from "../../../components/ui/TechnicalDetails";
-import type { Graph } from "../schemas";
+import type { Graph } from "../../../types/reconstruction";
 import {
   abstentionLabel,
   orderedSteps,

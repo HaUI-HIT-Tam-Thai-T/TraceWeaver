@@ -3,7 +3,7 @@ import { Button } from "../../../components/ui/Button";
 import { Badge } from "../../../components/ui/Badge";
 import { Loader } from "../../../components/ui/Loader";
 import { ErrorState } from "../../../components/ui/ErrorState";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../../hooks/useAuth";
 
 export function AuthStatus() {
   const { state, signIn, signOut } = useAuth();

@@ -2,7 +2,7 @@ import axios from "axios";
 import { normalizeApiError } from "../../../services/apiError.ts";
 import type { ApiError } from "../../../services/apiError.ts";
 import type { Dashboard, DashboardFilters } from "../schemas.ts";
-import type { DashboardService } from "../services/createDashboardService.ts";
+import type { DashboardService } from "../createDashboardService.ts";
 import { readDashboardQuery } from "../query.ts";
 export type DashboardScope = { subject: string; workspaceId: string; accessKey: object };
 export type DashboardState = {

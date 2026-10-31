@@ -1,8 +1,8 @@
 import axios from "axios";
 import { ApiError as SafeApiError, normalizeApiError } from "../../../services/apiError.ts";
 import type { ApiError } from "../../../services/apiError.ts";
-import type { WorkspaceService } from "../services/createWorkspaceService.ts";
-import type { Source } from "../schemas.ts";
+import type { WorkspaceService } from "../createWorkspaceService.ts";
+import type { Source } from "../../../types/workspace.ts";
 import {
   activeMembership,
   initialWorkspaceState,
@@ -24,7 +24,6 @@ export interface WorkspaceController {
   loadMoreSources(): Promise<void>;
 }
 
-// One in-memory state source. Every update goes through the pure reducer.
 export function createWorkspaceController(service: WorkspaceService): WorkspaceController {
   let state = initialWorkspaceState();
   let enabled = false;
@@ -183,8 +182,6 @@ export function createWorkspaceController(service: WorkspaceService): WorkspaceC
     return task;
   }
 
-  // Focus checks preserve the current access identity only when both /me and
-  // the complete readable source set are unchanged. Explicit refresh still purges.
   function revalidateAccess(): Promise<void> {
     if (!enabled) return Promise.resolve();
     if (revalidationFlight) return revalidationFlight;
@@ -233,7 +230,7 @@ export function createWorkspaceController(service: WorkspaceService): WorkspaceC
       } catch (error: unknown) {
         if (!current() || axios.isCancel(error)) return;
         const failure = normalizeApiError(error);
-        // A failed check must not leave data visible under unverified access.
+
         if (failure.kind === "auth") requireLogin(failure);
         else {
           invalidateRequests();

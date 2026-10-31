@@ -6,8 +6,8 @@ import { Alert } from "../../../components/ui/primitives/alert";
 import { Button } from "../../../components/ui/Button";
 import type { ReconstructionState } from "../state/state";
 import { GraphTable } from "./GraphTable";
-import { LinkReviewPanel } from "../../link-review/components/LinkReviewPanel";
-import type { LinkReviewActions } from "../../link-review/types";
+import { LinkReviewPanel } from "../review/components/LinkReviewPanel";
+import type { LinkReviewActions } from "../review/types";
 
 export function RunResult({
   state,

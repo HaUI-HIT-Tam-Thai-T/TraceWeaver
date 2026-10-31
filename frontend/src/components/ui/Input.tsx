@@ -1,11 +1,10 @@
 import type { InputHTMLAttributes, Ref } from "react";
 import { Input as ShadcnInput } from "./primitives/input";
-import { cn } from "../../lib/utils";
+import { cn } from "../../utils/classNames";
 import SearchOutlined from "@mui/icons-material/SearchOutlined";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & { ref?: Ref<HTMLInputElement> };
 
-// React 19 passes the React Hook Form register() ref through to the native input.
 export function Input({ className, type, ...props }: InputProps) {
   const input = (
     <ShadcnInput

@@ -10,10 +10,9 @@ import {
   TableHead,
   TableCell,
 } from "../../../components/ui/Table";
-import { useAuth } from "../../auth/hooks/useAuth";
-import { useWorkspace } from "../hooks/useWorkspace";
+import { useAuth } from "../../../hooks/useAuth";
+import { useWorkspace } from "../../../hooks/useWorkspace";
 
-// Workspace selection/account controls live in AppHeader; this panel only shows sources.
 export function WorkspacePanel() {
   const { state: auth } = useAuth();
   const { state, membership, permissions, refreshAccess, loadMoreSources } = useWorkspace();

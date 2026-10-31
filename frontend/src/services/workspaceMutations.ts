@@ -1,4 +1,3 @@
-// Only workspace IDs cross this boundary; no token, body or response is retained.
 export function createWorkspaceMutationEvents() {
   const listeners = new Set<(workspaceId: string) => void>();
   return {
@@ -13,7 +12,6 @@ export function createWorkspaceMutationEvents() {
         return await operation();
       } finally {
         listeners.forEach((listener) => {
-          // A broken subscriber must not change a mutation's result or trigger a replay.
           try {
             listener(workspaceId);
           } catch {
