@@ -1,5 +1,7 @@
 # TraceWeaver Frontend
 
+> Cập nhật 31/10/2026: đã bỏ thư mục `tests/`, gồm fixtures, và script `npm test` theo yêu cầu. Dùng `npm run lint` và `npm run build` để kiểm tra hiện tại. Những mô tả test/fixture và số test đạt bên dưới hoặc trong các báo cáo bàn giao là lịch sử trước khi xóa.
+
 React + TypeScript + Vite, có cấu hình, routing, phiên Keycloak, Axios client, workspace/sources và event explorer.
 Chưa triển khai reconstruction, dashboard hoặc các thao tác case.
 
@@ -24,7 +26,7 @@ Chưa triển khai reconstruction, dashboard hoặc các thao tác case.
 
 ## Chạy local
 
-Dùng Node 22.18+ hoặc 24 LTS, npm và lockfile hiện có; test dùng TypeScript stripping của Node.
+Dùng Node 22.18+ hoặc 24 LTS, npm và lockfile hiện có.
 Nếu chưa có dependencies, chạy `npm ci` từ thư mục `frontend/`.
 
 ```powershell
@@ -50,7 +52,6 @@ Kiểm tra bằng trình duyệt:
 ```powershell
 Copy-Item .env.example .env.production.local
 npm run lint
-npm test
 npm run build
 npm run preview
 ```
