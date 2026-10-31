@@ -14,6 +14,8 @@
   "scripts": {
     "format:be": "npm run format --workspace=@traceweaver/backend",
     "format:be:check": "npm run format:check --workspace=@traceweaver/backend",
+    "format:sim": "prettier --write \"simulator/**/*.mjs\"",
+    "format:sim:check": "prettier --check \"simulator/**/*.mjs\"",
     "sim:generate": "node simulator/cli.mjs",
     "test:sim": "node --test simulator/tests/*.test.mjs",
     "dev:be": "npm run dev --workspace=@traceweaver/backend",

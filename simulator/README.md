@@ -1,5 +1,12 @@
 # Simulator TraceWeaver
 
+## Định dạng mã
+
+Từ thư mục gốc dự án, chạy `npm run format:sim` để định dạng mã và kiểm thử
+JavaScript trong simulator. Dùng `npm run format:sim:check` để chỉ kiểm tra,
+không sửa file. Cấu hình giống backend: thụt dòng 2 dấu cách, nháy đơn,
+dấu chấm phẩy và độ dài dòng mục tiêu 100 ký tự. Dữ liệu JSON sinh ra được giữ nguyên.
+
 Thư mục này có hai phần dùng chung ba nguồn intake, account và provision:
 
 - **Mô phỏng nghiệp vụ có trạng thái:** kiểm tra RAM, image và tài khoản; sửa điều kiện rồi chạy lại để sinh bằng chứng mới.
