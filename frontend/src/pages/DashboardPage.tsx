@@ -4,14 +4,14 @@ import { Button } from "../components/ui/Button";
 import { LoadingState } from "../components/ui/LoadingState";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useAuth } from "../features/auth/hooks/useAuth";
-import { useWorkspace } from "../features/workspace/hooks/useWorkspace";
+import { useAuth } from "../hooks/useAuth";
+import { useWorkspace } from "../hooks/useWorkspace";
 import {
   createDashboardController,
   initialDashboardState,
 } from "../features/dashboard/state/controller";
 import type { DashboardScope } from "../features/dashboard/state/controller";
-import { dashboardService } from "../features/dashboard/services/service";
+import { dashboardService } from "../features/dashboard/dashboardService";
 import { readDashboardQuery, writeDashboardQuery } from "../features/dashboard/query";
 import {
   DashboardCounters,
@@ -52,7 +52,7 @@ function DashboardBrowser({ scope }: { scope: DashboardScope | null }) {
       setSnapshot(controller.getSnapshot());
     }
     const unsubscribe = controller.subscribe(handleChange);
-    // Catch a change between rendering and registering the listener.
+
     handleChange();
     return unsubscribe;
   }, [controller]);
@@ -128,12 +128,7 @@ function DashboardBrowser({ scope }: { scope: DashboardScope | null }) {
               {query.waiting && (
                 <section id="waiting-cases" aria-label="Waiting cases">
                   <h2 className="text-2xl font-semibold">Hồ sơ cần xử lý</h2>
-                  {/* <p>
-                    Hai nhóm Mới và Đã phân công được tải riêng, mỗi nhóm 50 hồ
-                    sơ mỗi trang. Bộ lọc dùng ngày tạo lần tái dựng liên quan.
-                    Danh sách có thể thay đổi trong lúc xem; số hồ sơ trên trang
-                    không phải tổng chỉ số ở trên.
-                  </p> */}
+
                   <div className="grid min-w-0 gap-6 xl:grid-cols-2">
                     {(["new", "assigned"] as const).map((caseState) => (
                       <WaitingCaseList

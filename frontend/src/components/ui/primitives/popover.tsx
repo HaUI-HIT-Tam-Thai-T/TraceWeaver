@@ -1,8 +1,8 @@
 // Adapted from https://ui.shadcn.com/r/styles/new-york-v4/popover.json
-// Direct Radix package; no animation dependency.
+
 import type { ComponentProps } from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 
 export function Popover(props: ComponentProps<typeof PopoverPrimitive.Root>) {
   return <PopoverPrimitive.Root {...props} />;

@@ -1,5 +1,11 @@
+import type {
+  WorkspacePermissions,
+  Me,
+  Membership,
+  Source,
+  SourcesPage,
+} from "../../../types/workspace.ts";
 import type { ApiError } from "../../../services/apiError.ts";
-import type { Me, Membership, Source, SourcesPage } from "../schemas.ts";
 
 export type WorkspaceState = {
   status: "idle" | "loading" | "ready" | "error" | "reauth";
@@ -107,13 +113,6 @@ export function activeMembership(state: WorkspaceState): Membership | null {
     ) ?? null
   );
 }
-
-export type WorkspacePermissions = {
-  canAdmin: boolean;
-  canRead: boolean;
-  canWrite: boolean;
-  canVerify: boolean;
-};
 
 export function workspacePermissions(membership: Membership | null): WorkspacePermissions {
   const roles = membership?.roles ?? [];

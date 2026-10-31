@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import ChevronRight from "@mui/icons-material/ChevronRight";
-import { useAuth } from "../../features/auth/hooks/useAuth";
-import { useWorkspace } from "../../features/workspace/hooks/useWorkspace";
+import { useAuth } from "../../hooks/useAuth";
+import { useWorkspace } from "../../hooks/useWorkspace";
 import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
 import { roleLabel } from "../../features/workspace/presentation";

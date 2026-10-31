@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useAuth } from "../features/auth/hooks/useAuth";
-import { useWorkspace } from "../features/workspace/hooks/useWorkspace";
+import { useAuth } from "../hooks/useAuth";
+import { useWorkspace } from "../hooks/useWorkspace";
 import { PageHeading } from "../components/layout/PageHeading";
-import { createWorkspaceAdminService } from "../features/workspace-admin/services";
+import { createWorkspaceAdminService } from "../features/workspace/admin/workspaceAdminService";
 import { apiClient } from "../services/apiClient";
-import { createAdminController, initialAdminState } from "../features/workspace-admin/controller";
-import { WorkspaceAdminView } from "../features/workspace-admin/components/WorkspaceAdminView";
+import { createAdminController, initialAdminState } from "../features/workspace/admin/controller";
+import { WorkspaceAdminView } from "../features/workspace/admin/components/WorkspaceAdminView";
 
 const service = createWorkspaceAdminService(apiClient);
 export function WorkspaceAdminPage() {

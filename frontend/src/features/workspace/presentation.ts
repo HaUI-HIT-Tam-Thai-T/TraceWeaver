@@ -1,4 +1,4 @@
-import type { Membership } from "./schemas";
+import type { Membership } from "../../types/workspace";
 export function roleLabel(role: Membership["roles"][number]): string {
   return {
     viewer: "Người xem",

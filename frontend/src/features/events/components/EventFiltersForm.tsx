@@ -7,8 +7,8 @@ import { useEffect, useRef } from "react";
 import { FilterTimeRange } from "../../../components/ui/FilterTimeRange";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useWorkspace } from "../../workspace/hooks/useWorkspace";
-import { useEvents } from "../hooks/useEvents";
+import { useWorkspace } from "../../../hooks/useWorkspace";
+import { useEvents } from "../../../hooks/useEvents";
 import { eventFormSchema, formDefaults, formToFilters } from "../query";
 import type { EventFormValues } from "../query";
 

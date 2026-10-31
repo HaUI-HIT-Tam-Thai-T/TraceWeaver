@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { authSession } from "../services/auth";
+import { authSession } from "../authService";
 import { AuthContext } from "./authContext";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -11,7 +11,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState(authSession.getSnapshot());
     }
     const unsubscribe = authSession.subscribe(handleChange);
-    // Catch a change between rendering and registering the listener.
+
     handleChange();
     return unsubscribe;
   }, []);

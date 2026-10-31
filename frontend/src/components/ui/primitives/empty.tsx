@@ -1,7 +1,7 @@
 import type * as React from "react";
 // Source: https://ui.shadcn.com/r/styles/new-york-v4/empty.json
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 
 function Empty({ className, ...props }: React.ComponentProps<"div">) {
   return (

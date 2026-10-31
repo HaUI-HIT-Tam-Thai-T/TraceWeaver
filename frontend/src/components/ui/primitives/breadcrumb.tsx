@@ -1,6 +1,6 @@
 // Adapted from https://ui.shadcn.com/r/styles/new-york-v4/breadcrumb.json (MUI icons, existing Radix packages).
 import * as React from "react";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import * as Slot from "@radix-ui/react-slot";
 

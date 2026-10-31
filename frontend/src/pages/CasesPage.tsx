@@ -11,7 +11,7 @@ import {
   TableCell,
 } from "../components/ui/Table";
 import { DetailLink } from "../components/ui/DetailLink";
-import { useCases } from "../features/cases/hooks/useCases";
+import { useCases } from "../hooks/useCases";
 import { CasesLayout } from "../features/cases/components/CasesLayout";
 import { CasesFeedback } from "../features/cases/components/CasesFeedback";
 import { CaseFiltersForm } from "../features/cases/components/CaseFiltersForm";
@@ -36,10 +36,7 @@ export function CasesPage() {
       }
     >
       <CaseFiltersForm filters={state.filters} onSearch={setFilters} />
-      {/* <p>
-        Phân trang theo trạng thái hiện tại (live-state); nội dung có thể thay
-        đổi giữa các trang. Không có tổng số trang.
-      </p> */}
+
       <CasesFeedback />
       {state.list.status === "loading" && (
         <LoadingState message="Đang tải hồ sơ…" variant="table" />

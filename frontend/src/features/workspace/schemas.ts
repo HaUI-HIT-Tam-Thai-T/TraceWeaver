@@ -32,8 +32,3 @@ export const sourcesQuerySchema = z.object({
   cursor: z.string().min(1).max(4096).optional(),
   limit: z.number().int().min(1).max(100),
 });
-
-export type Me = z.infer<typeof meSchema>;
-export type Membership = z.infer<typeof membershipSchema>;
-export type Source = z.infer<typeof sourceSchema>;
-export type SourcesPage = z.infer<typeof sourcesPageSchema>;

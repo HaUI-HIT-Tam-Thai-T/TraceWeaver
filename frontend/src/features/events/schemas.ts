@@ -55,7 +55,3 @@ export const filtersSchema = z
     path: ["to"],
     message: "Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.",
   });
-
-export type Event = z.infer<typeof eventSchema>;
-export type EventsPage = z.infer<typeof eventsPageSchema>;
-export type EventFilters = z.infer<typeof filtersSchema>;

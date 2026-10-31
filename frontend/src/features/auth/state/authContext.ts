@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { AuthSession, AuthState } from "./session";
+import type { AuthSession, AuthState } from "../../../types/auth";
 
 type AuthContextValue = Pick<AuthSession, "signIn" | "signOut" | "getAccessToken"> & {
   state: AuthState;

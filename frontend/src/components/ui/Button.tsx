@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
 import { Button as ShadcnButton } from "./primitives/button";
-import { cn } from "../../lib/utils";
+import { cn } from "../../utils/classNames";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "tertiary" | "ghost" | "danger";

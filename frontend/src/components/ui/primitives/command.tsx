@@ -1,10 +1,9 @@
-// Used primitives adapted from the official shadcn Command source:
 // https://github.com/shadcn-ui/ui/blob/main/apps/v4/registry/new-york-v4/ui/command.tsx
-// MUI replaces Lucide; CommandDialog is not needed by the workspace picker.
+
 import type { ComponentProps } from "react";
 import { Command as CommandPrimitive } from "cmdk";
 import SearchOutlined from "@mui/icons-material/SearchOutlined";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 
 export function Command({ className, ...props }: ComponentProps<typeof CommandPrimitive>) {
   return (

@@ -1,7 +1,6 @@
 import type { ComponentProps } from "react";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../utils/classNames";
 
-// shadcn Separator presentation with native separator semantics; no interactive primitive is needed.
 export function Separator({
   className,
   orientation = "horizontal",

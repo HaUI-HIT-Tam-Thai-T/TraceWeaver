@@ -6,3 +6,7 @@ Third-party components retain their own licenses and notices.
 See backend/DEPENDENCIES.md and backend/THIRD_PARTY_NOTICES.txt.
 See also frontend/DEPENDENCIES.md, frontend/THIRD_PARTY_NOTICES.txt,
 ai/DEPENDENCIES.md, ai/THIRD_PARTY_NOTICES.txt and LICENSES.md.
+
+Frontend components include source copied and adapted from shadcn/ui.
+Copyright (c) 2023 shadcn. Licensed under the MIT License.
+See frontend/THIRD_PARTY_NOTICES-SHADCN.txt for scope, source and full license.

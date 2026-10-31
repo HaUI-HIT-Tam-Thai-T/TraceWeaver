@@ -12,12 +12,15 @@ Các dependency và thành phần bên thứ ba giữ giấy phép gốc; licens
 |---|---|---|
 | Root + backend npm | [package-lock.json](package-lock.json) | [DEPENDENCIES](backend/DEPENDENCIES.md), [THIRD_PARTY_NOTICES](backend/THIRD_PARTY_NOTICES.txt) |
 | Frontend npm | [frontend/package-lock.json](frontend/package-lock.json) | [DEPENDENCIES](frontend/DEPENDENCIES.md), [THIRD_PARTY_NOTICES](frontend/THIRD_PARTY_NOTICES.txt) |
+| Mã UI sao chép/chỉnh sửa từ shadcn/ui | URL nguồn ghi trong các component và [upstream](https://github.com/shadcn-ui/ui) | MIT, Copyright (c) 2023 shadcn; [phạm vi và nguyên văn giấy phép](frontend/THIRD_PARTY_NOTICES-SHADCN.txt) |
 | Python AI | [requirements.txt](ai/requirements.txt), [direct pins](ai/requirements.in) | [DEPENDENCIES](ai/DEPENDENCIES.md), [THIRD_PARTY_NOTICES](ai/THIRD_PARTY_NOTICES.txt) |
 | Model sandbox v2 / synthetic fixtures | Manifest, checksums và nguồn gói bàn giao | [Model card](ai/artifacts/sandbox-v2/README.md), [handoff](ai/handoffs/README.md) |
 | PostgreSQL / Keycloak / Node / npm | Phiên bản/digest trong cấu hình và inventory | [Runtime và services](backend/DEPENDENCIES.md#runtime-and-services) |
 
 Model JSON và fixtures được khai báo Apache-2.0 theo gói bàn giao; checksum xác định bytes nhận được, không thay cho tái lập huấn luyện độc lập.
 Không áp dụng các giấy phép riêng của repo tham khảo DX-OS lên source TraceWeaver.
+
+Attribution shadcn/ui bao phủ các UI primitives, tiện ích `cn` và phần theme tokens được chỉnh sửa từ upstream. Đây là mã được đưa trực tiếp vào source, được ghi nhận riêng với dependency npm. Giữ [notices shadcn](frontend/THIRD_PARTY_NOTICES-SHADCN.txt) khi phân phối phần mã này; file đó được quản lý riêng để lệnh sinh inventory npm không ghi đè. Phần mã shadcn giữ MIT, mã do dự án cung cấp giữ Apache-2.0.
 
 ## Tạo và kiểm tra
 

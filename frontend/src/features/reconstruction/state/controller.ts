@@ -1,20 +1,16 @@
 import axios from "axios";
 import { ApiError, normalizeApiError } from "../../../services/apiError.ts";
-import type { Event } from "../../events/schemas.ts";
+import type { Event } from "../../../types/events.ts";
 import type { EventsScope } from "../../events/state/state.ts";
-import type { ReconstructionService } from "../services/createReconstructionService.ts";
-import { invalidRunResponse } from "../services/createReconstructionService.ts";
+import type { ReconstructionService } from "../createReconstructionService.ts";
+import { invalidRunResponse } from "../createReconstructionService.ts";
 import { runCreateSchema, validateRoot } from "../schemas.ts";
-import type { Run, RunCreate } from "../schemas.ts";
+import type { Run, RunCreate } from "../../../types/reconstruction.ts";
 import { initialReconstructionState, reconstructionReducer } from "./state.ts";
 import type { ReconstructionState } from "./state.ts";
-import type { LinkReviewService } from "../../link-review/services/createLinkReviewService.ts";
-import {
-  manualLinkCreateSchema,
-  reviewCreateSchema,
-  manualLinkIssue,
-} from "../../link-review/schemas.ts";
-import type { ManualLinkCreate, ReviewCreate } from "../../link-review/schemas.ts";
+import type { LinkReviewService } from "../review/createLinkReviewService.ts";
+import { manualLinkCreateSchema, reviewCreateSchema, manualLinkIssue } from "../review/schemas.ts";
+import type { ManualLinkCreate, ReviewCreate } from "../review/schemas.ts";
 
 type Dependencies = {
   service: ReconstructionService;

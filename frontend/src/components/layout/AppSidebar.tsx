@@ -1,7 +1,7 @@
 import { useState } from "react";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
-import { useAuth } from "../../features/auth/hooks/useAuth";
-import { useWorkspace } from "../../features/workspace/hooks/useWorkspace";
+import { useAuth } from "../../hooks/useAuth";
+import { useWorkspace } from "../../hooks/useWorkspace";
 import AdminPanelSettingsOutlined from "@mui/icons-material/AdminPanelSettingsOutlined";
 import { Button } from "../ui/Button";
 import { NavLink } from "react-router-dom";
@@ -9,7 +9,7 @@ import DashboardOutlined from "@mui/icons-material/DashboardOutlined";
 import TimelineOutlined from "@mui/icons-material/TimelineOutlined";
 import FolderOpenOutlined from "@mui/icons-material/FolderOpenOutlined";
 import MenuBookOutlined from "@mui/icons-material/MenuBookOutlined";
-import { cn } from "../../lib/utils";
+import { cn } from "../../utils/classNames";
 import Tooltip from "@mui/material/Tooltip";
 
 const items = [

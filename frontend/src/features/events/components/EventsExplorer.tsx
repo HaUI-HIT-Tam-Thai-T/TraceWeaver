@@ -12,9 +12,9 @@ import {
 } from "../../../components/ui/Table";
 import { useState } from "react";
 import { DetailLink } from "../../../components/ui/DetailLink";
-import { useAuth } from "../../auth/hooks/useAuth";
-import { useWorkspace } from "../../workspace/hooks/useWorkspace";
-import { useEvents } from "../hooks/useEvents";
+import { useAuth } from "../../../hooks/useAuth";
+import { useWorkspace } from "../../../hooks/useWorkspace";
+import { useEvents } from "../../../hooks/useEvents";
 import { EventFiltersForm } from "./EventFiltersForm";
 import type { ApiError } from "../../../services/apiError";
 import { writeEventQuery } from "../query";

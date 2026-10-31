@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { CaseDetail, WorkflowHistory } from "./schemas.ts";
+import type { CaseDetail, WorkflowHistory } from "../../types/cases.ts";
 import type { CasesScope } from "./state/state.ts";
 
 export const caseActionSchema = z.enum([

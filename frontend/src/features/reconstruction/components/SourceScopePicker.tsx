@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../../components/ui/Button";
-import { useWorkspace } from "../../workspace/hooks/useWorkspace";
+import { useWorkspace } from "../../../hooks/useWorkspace";
 import { sourceName } from "../../events/presentation";
 
 type Props = {
@@ -20,7 +20,7 @@ export function SourceScopePicker({ rootSource, selected, disabled, onChange, on
   useEffect(() => {
     if (!all || disabled || sources.status === "loading") return;
     let canceled = false;
-    // Wait for the source request to publish its state before selecting the complete set.
+
     async function selectLoadedSources() {
       await Promise.resolve();
       if (canceled) return;

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { CaseEvidenceSnapshot } from "../state/state";
-import type { Source } from "../../workspace/schemas";
+import type { Source } from "../../../types/workspace";
 import { EvidenceEvents } from "./EvidenceEvents";
-import type { CaseDetail } from "../schemas";
+import type { CaseDetail } from "../../../types/cases";
 import { caseStateLabel, caseActionLabel, nextCaseStep } from "../presentation";
 import { eventTimeLabel } from "../../events/presentation";
 import { Button } from "../../../components/ui/Button";

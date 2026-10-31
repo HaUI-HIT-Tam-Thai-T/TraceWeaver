@@ -1,12 +1,12 @@
 import type { ApiError } from "../../../services/apiError.ts";
-import type { Case, CaseDetail, CaseFilters, CaseAssignees } from "../schemas.ts";
-import type { Graph, Run } from "../../reconstruction/schemas.ts";
-import type { LinkMutation } from "../../link-review/types.ts";
-import { initialLinkMutation } from "../../link-review/types.ts";
-import type { Event } from "../../events/schemas.ts";
+import type { Case, CaseDetail, CaseFilters, CaseAssignees } from "../../../types/cases.ts";
+import type { Graph, Run } from "../../../types/reconstruction.ts";
+import type { LinkMutation } from "../../reconstruction/review/types.ts";
+import { initialLinkMutation } from "../../reconstruction/review/types.ts";
+import type { Event } from "../../../types/events.ts";
 import type { CaseTransition } from "../workflow.ts";
-import { initialSandboxState } from "../../case-sandbox/state.ts";
-import type { SandboxState } from "../../case-sandbox/state.ts";
+import { initialSandboxState } from "../sandbox/state.ts";
+import type { SandboxState } from "../sandbox/state.ts";
 
 export type CasesScope = {
   subject: string;

@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { Button } from "../../../components/ui/Button";
 import { GraphTable } from "../../reconstruction/components/GraphTable";
-import { LinkReviewPanel } from "../../link-review/components/LinkReviewPanel";
+import { LinkReviewPanel } from "../../reconstruction/review/components/LinkReviewPanel";
 import { degradedLabel, runStatusLabel } from "../../reconstruction/presentation";
 import type { CasesState } from "../state/state";
-import type { LinkReviewActions } from "../../link-review/types";
+import type { LinkReviewActions } from "../../reconstruction/review/types";
 import { TechnicalDetails } from "../../../components/ui/TechnicalDetails";
 
 export function CaseRunPanel({

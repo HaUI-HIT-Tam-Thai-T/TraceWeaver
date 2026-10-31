@@ -11,14 +11,14 @@ import { Button } from "../components/ui/Button";
 import { LoadingState } from "../components/ui/LoadingState";
 import { WorkflowForm } from "../features/cases/components/WorkflowForm";
 import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
-import { useCases } from "../features/cases/hooks/useCases";
+import { useCases } from "../hooks/useCases";
 import { CasesLayout } from "../features/cases/components/CasesLayout";
 import { CasesFeedback } from "../features/cases/components/CasesFeedback";
 import { CaseDetailView, CaseOverview } from "../features/cases/components/CaseDetailView";
 import { useEffect, useState } from "react";
 import { EvidenceForm } from "../features/cases/components/EvidenceForm";
-import { useWorkspace } from "../features/workspace/hooks/useWorkspace";
-import { SandboxPanel } from "../features/case-sandbox/SandboxPanel";
+import { useWorkspace } from "../hooks/useWorkspace";
+import { SandboxPanel } from "../features/cases/sandbox/SandboxPanel";
 
 export function CaseDetailPage() {
   const {

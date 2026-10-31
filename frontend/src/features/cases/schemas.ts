@@ -12,7 +12,7 @@ export const caseAssigneesSchema = z.strictObject({
     }),
   ),
 });
-export type CaseAssignees = z.infer<typeof caseAssigneesSchema>;
+
 export const caseStateSchema = z.enum([
   "new",
   "assigned",
@@ -80,7 +80,7 @@ export const evidenceCreateSchema = z
     if (body.kind === "note" && !/\S/.test(body.note))
       ctx.addIssue({ code: "custom", path: ["note"], message: "Nhập note có nội dung." });
   });
-export type EvidenceCreate = z.infer<typeof evidenceCreateSchema>;
+
 export const caseDetailSchema = z
   .strictObject({
     case: caseSchema,
@@ -110,10 +110,3 @@ export const caseFiltersSchema = z
     path: ["to"],
     message: "Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.",
   });
-export type Case = z.infer<typeof caseSchema>;
-export type WorkflowHistory = z.infer<typeof historySchema>;
-export type Evidence = z.infer<typeof evidenceSchema>;
-export type CaseCreate = z.infer<typeof caseCreateSchema>;
-export type CaseDetail = z.infer<typeof caseDetailSchema>;
-export type CaseFilters = z.infer<typeof caseFiltersSchema>;
-export type CasesPage = z.infer<typeof casesPageSchema>;
