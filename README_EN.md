@@ -20,7 +20,7 @@
 
 </div>
 
-**Team:** HaUI.HIT-Tam-Thái-Tử
+**Team:** HaUI.Tam_Thái_Tử
 
 **Institution:** Trường Công nghệ Thông tin và Truyền thông, Đại học Công nghiệp Hà Nội
 
@@ -32,28 +32,22 @@
 
 ## 💡 Introduction
 
-**TraceWeaver** is an open-source platform for investigating incidents through multi-source logs: reconstructing request journeys, managing investigation cases and verifying remediation against source evidence.
+Each service records its own activity log. When a lab provisioning request fails, an operator may need to search several logs to find which step went wrong.
 
-A provisioning request crosses multiple services and may have missing identifiers, delayed logs or repeated attempts.
-TraceWeaver collects events, reconstructs their relationships and preserves inconclusive cases for human review.
+TraceWeaver brings related records into one request journey. For example, it can show that a request was received and its account was created, but allocating the lab machine failed because there was not enough RAM.
 
-> **Investigate → Review → Repair → Verify**
+You can open a case, assign someone to investigate, record evidence and check the outcome after a repair. A simulated lab environment, called the sandbox, lets you try RAM, operating-system image and account failures without provisioning real resources.
 
-**Investigate the journey.** Connect intake, account and provision events, inspect the evidence and preserve unresolved branches.
-
-**Track the case.** Assign an owner, add evidence and follow a guarded workflow with a durable decision history.
-
-**Verify the outcome.** Repair sandbox conditions, rerun the request and check fresh source proof before closing the case.
+To try the application, open the [hosted web app](https://traceweaver.quizlearn.tech) and use a [demo account](#pick-a-role-and-explore). You do not need development tools on your computer.
 
 ## ✨ Highlights
 
-- **Traceable evidence:** events retain provenance, runs preserve snapshots, and review/case/workflow decisions retain history and audit records.
-- **Explicit uncertainty:** missing or conflicting identifiers and multiple plausible branches remain unresolved for review.
-- **Controlled AI assistance:** backend authorization and guards filter candidate pairs before scoring; reviewers decide links; scorer failures have a fallback.
-- **Verified remediation:** reconstruction analyzes existing logs, sandbox reruns create new attempts, and source proof verifies the outcome before closure.
-- **Source-level authorization:** Keycloak provides SSO; backend checks current membership, roles and source grants when reading events, runs and cases.
-- **Reusable core:** Identity, Data and Workflow are separated from the UI and HTTP adapters.
-- **Transparent open source:** Apache-2.0, per-ecosystem inventories/notices, CycloneDX SBOMs and drift checks.
+- Follow one request across several services without searching each log separately.
+- Keep the original records, their sources and the history of review decisions.
+- Leave links unresolved when records are missing or several explanations remain plausible.
+- Use AI scores to help a reviewer assess links. The reviewer makes the decision; rules remain available when AI cannot be used.
+- Repair a simulated condition, rerun the request and obtain new verification evidence before closing its case.
+- Restrict access to the workspaces, roles and log sources granted to the user. A workspace is a group of members working with shared data.
 
 ## 🖥️ Interface
 
@@ -92,12 +86,12 @@ Module responsibilities and data flows are described in [ARCHITECTURE.md](./ARCH
 
 ![TraceWeaver architecture: shared Open-Core capabilities support H-P-D-I operational spaces and the Web/API/Sandbox application](./.github/assets/architecture-layers-en.svg)
 
-Arrows show how shared capabilities support the application, rather than the HTTP call sequence.
+The diagram shows how the shared processing layer supports the application. Its arrows connect architectural layers; they do not show individual network requests.
 
 | Layer | Components |
 |---|---|
-| **1. Open-Core** — no end-user interface | Identity (SSO, workspace/source authorization), Data (transactions, storage), Reconstruction (snapshots, linking rules), Workflow (guards, transitions) and audit |
-| **2. H-P-D-I** | Four spaces — **Human, Process, Data, Intelligence** — composed from core capabilities, with knowledge, dashboards and optional scoring |
+| **1. Open-Core: shared processing, with no separate user interface** | Login and access permissions (Identity), reliable data storage (Data), saved request journeys and linking rules (Reconstruction), case steps and their conditions (Workflow), and action history (audit) |
+| **2. H-P-D-I** | Four groups of functions: people (Human), procedures (Process), records (Data) and analysis support (Intelligence), using shared processing capabilities |
 | **3. Application** | **TraceWeaver** — investigation and case-management web app, business APIs and lab-provisioning sandbox |
 
 | Space | Investigation and case handling | Sandbox and verification |
@@ -154,7 +148,7 @@ Inventories, notices and distribution scope are documented in [LICENSES.md](./LI
 
 ### 📝 Steps
 
-Start the backend with PostgreSQL through Docker:
+Run these commands in order to download the source, create server configuration, start PostgreSQL and create its tables:
 
 ```sh
 git clone https://github.com/HaUI-HIT-Tam-Thai-T/TraceWeaver.git
@@ -169,7 +163,7 @@ npm run dev:be
 
 Preserve existing credentials/configuration when `.env` already exists.
 For an external database, set `DATABASE_URL` and skip the Docker PostgreSQL steps.
-Business APIs require Identity and data grants: continue with **Fresh checkout/bootstrap** in [KEYCLOAK.md](./backend/KEYCLOAK.md).
+After these steps, the server can report its health. Signing in and accessing application data also require a login service and access permissions. Continue with **Fresh checkout/bootstrap** (setting up a new copy of the source) in [KEYCLOAK.md](./backend/KEYCLOAK.md).
 Full installation guidance is in [INSTALL.md](./INSTALL.md).
 
 ```sh
@@ -181,7 +175,7 @@ On PowerShell, use `npm.cmd` if execution policy blocks `npm.ps1`.
 
 ### 🛠️ Run and build individual components
 
-Run these commands from the repository root.
+Run these commands from the project directory containing `package.json`.
 
 | Component | Preparation | Run / check |
 |---|---|---|

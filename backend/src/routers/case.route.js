@@ -5,7 +5,9 @@ import { Router } from 'express';
 import { authenticateAccessToken } from '../middlewares/auth.middleware.js';
 import { createCaseController } from '../controllers/case.controller.js';
 export function createCaseRouter({ verifyToken, access, cases }) {
-  const router = Router(), auth = authenticateAccessToken(verifyToken, access), controller = createCaseController(cases);
+  const router = Router(),
+    auth = authenticateAccessToken(verifyToken, access),
+    controller = createCaseController(cases);
   router.post('/workspaces/:wid/cases', auth, controller.create);
   router.get('/workspaces/:wid/cases', auth, controller.list);
   router.get('/workspaces/:wid/cases/:cid', auth, controller.get);

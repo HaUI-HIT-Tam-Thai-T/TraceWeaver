@@ -6,6 +6,10 @@ import { authenticateAccessToken } from '../middlewares/auth.middleware.js';
 import { createDashboardController } from '../controllers/dashboard.controller.js';
 export function createDashboardRouter({ verifyToken, access, dashboard }) {
   const router = Router();
-  router.get('/workspaces/:wid/dashboard', authenticateAccessToken(verifyToken, access), createDashboardController(dashboard));
+  router.get(
+    '/workspaces/:wid/dashboard',
+    authenticateAccessToken(verifyToken, access),
+    createDashboardController(dashboard),
+  );
   return router;
 }

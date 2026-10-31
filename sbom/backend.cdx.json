@@ -2228,6 +2228,39 @@
       ]
     },
     {
+      "bom-ref": "prettier@3.9.10",
+      "type": "library",
+      "name": "prettier",
+      "version": "3.9.10",
+      "scope": "optional",
+      "purl": "pkg:npm/prettier@3.9.10",
+      "properties": [
+        {
+          "name": "cdx:npm:package:development",
+          "value": "true"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/prettier/-/prettier-3.9.10.tgz"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b241874c7d586fd42f6930b88569d14f3118b42a40a45d143013f3fadff464fccff2285e7e8fdbb4a77e400ee9504d1f13003549b4bf36687211cb2d75738874"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
       "bom-ref": "proxy-addr@2.0.8",
       "type": "library",
       "name": "proxy-addr",
@@ -2879,7 +2912,8 @@
         "@traceweaver/backend@0.1.0-base.1",
         "@apidevtools/swagger-parser@13.1.0",
         "ajv@8.20.0",
-        "ajv-formats@3.0.1"
+        "ajv-formats@3.0.1",
+        "prettier@3.9.10"
       ]
     },
     {
@@ -3329,6 +3363,10 @@
       "dependsOn": [
         "xtend@4.0.2"
       ]
+    },
+    {
+      "ref": "prettier@3.9.10",
+      "dependsOn": []
     },
     {
       "ref": "proxy-addr@2.0.8",

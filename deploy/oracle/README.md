@@ -1,12 +1,14 @@
-# Oracle API + AI deployment
+# Triển khai máy chủ và AI trên Oracle
 
-This overlay extends the existing private `.local/oracle/compose.yaml` installation. It preserves database/Keycloak configuration, volumes, roles and production HTTPS issuer. The main development Compose file is not used for this server.
+Hướng dẫn này dành cho người vận hành bản cài Oracle đã có. File cấu hình bổ sung mở rộng bản cài riêng tại `.local/oracle/compose.yaml`. Nó giữ cấu hình cơ sở dữ liệu, Keycloak, vùng lưu dữ liệu, vai trò và địa chỉ HTTPS cấp mã đăng nhập của môi trường đang chạy. Không dùng Compose dành cho phát triển để thay cấu hình máy chủ này.
 
-The pinned Python3.12 image includes only runtime source, pinned dependencies, model/manifest and notices. Scorer runs as UID65532, read-only, with bounded resources and no published host port. API retains production URL validation and verifies scorer TLS using a private deployment certificate, SAN `scorer`, `localhost`, `127.0.0.1`. Never disable TLS verification.
+Gói chạy Docker (image) Python 3.12 đã khóa phiên bản chỉ chứa mã cần chạy, thư viện đúng phiên bản, mô hình/bản kê và thông báo giấy phép. Dịch vụ chấm điểm chạy bằng tài khoản hệ điều hành có mã UID65532, chỉ đọc, có giới hạn tài nguyên và không mở cổng ra máy chủ bên ngoài. API vẫn kiểm địa chỉ theo quy tắc môi trường thực tế và kiểm chứng chỉ TLS riêng khi kết nối AI. Các tên máy được chứng chỉ cho phép (SAN) là `scorer`, `localhost`, `127.0.0.1`. Không tắt kiểm chứng chỉ TLS để xử lý lỗi kết nối.
 
-Keep a random SCORER_SERVICE_SECRET in `.local/oracle/.env`; use the same private value for both services. Keep the certificate/key under `.local/oracle/scorer-tls/` (key readable by scorer UID65532 only) and a copy of the public certificate under `.local/oracle/scorer-ca/`. Do not commit these files. The private foundation Compose/env and TLS files are intentionally supplied outside Git.
+Lưu SCORER_SERVICE_SECRET ngẫu nhiên trong `.local/oracle/.env`; hai dịch vụ phải dùng cùng giá trị bí mật. Chứng chỉ và khóa nằm trong `.local/oracle/scorer-tls/`; chỉ UID65532 của AI được đọc khóa riêng. Bản sao chứng chỉ công khai nằm trong `.local/oracle/scorer-ca/`. Không đưa các file này lên Git. Cấu hình Compose nền, env và chứng chỉ riêng được cung cấp ngoài repo.
 
-From `.local/oracle/`, set TRACEWEAVER_RELEASE to the checked-out commit identifier, then:
+## Áp dụng bản triển khai
+
+Tại `.local/oracle/`, đặt TRACEWEAVER_RELEASE bằng mã commit đang triển khai, rồi chạy theo thứ tự:
 
 ```sh
 docker compose -f compose.yaml -f ../../deploy/oracle/compose.ai.yaml config --quiet
@@ -16,22 +18,22 @@ docker compose -f compose.yaml -f ../../deploy/oracle/compose.ai.yaml run --rm -
 docker compose -f compose.yaml -f ../../deploy/oracle/compose.ai.yaml up -d --no-deps --no-build --pull never --wait api
 ```
 
-Check public HTTPS live/ready/docs, private TLS scorer readiness/sample predictions, real Keycloak PKCE and a new hybrid run with durable scores. Verify existing data remains readable and other hosted applications stay healthy. A successful rollout does not approve the synthetic model's quality; see `ai/artifacts/sandbox-v2/README.md`.
+## Kiểm tra sau triển khai
 
-The existing base Compose keeps the previous API image. If rollout validation fails, restore API with `docker compose -f compose.yaml up -d --no-deps --no-build --pull never --wait api` while investigating. No DB/Keycloak restart, volume removal, pruning, credential rotation or migration-history rewrite is required. Future restarts of the new release must include this overlay and the recorded TRACEWEAVER_RELEASE.
+Kiểm các địa chỉ HTTPS công khai về trạng thái hoạt động, trạng thái sẵn sàng và tài liệu API. Trong mạng nội bộ, kiểm TLS, trạng thái AI và điểm của dữ liệu mẫu. Thử đăng nhập Keycloak thật bằng PKCE và tạo hành trình mới ở chế độ kết hợp quy tắc/AI để kiểm điểm được lưu. Đối chiếu dữ liệu cũ vẫn đọc được và các ứng dụng khác trên máy chủ vẫn hoạt động. Triển khai thành công chưa chứng minh mô hình đạt chất lượng trên dữ liệu thực tế; xem `ai/artifacts/sandbox-v2/README.md`.
 
-## Local frontend without the Vite proxy
+## Quay về bản API trước
 
-To explicitly allow local browser development against this HTTPS API, set
-`FRONTEND_LOCAL_ORIGINS=http://localhost:5173,http://127.0.0.1:5173` in the private
-`.local/oracle/.env`. The overlay forwards this variable to API only. Deploy the updated API
-and recreate API to apply it; no database migration or scorer restart is needed.
-Keep the existing `FRONTEND_ORIGINS` HTTPS allowlist unchanged. The new list defaults empty
-and accepts only exact HTTP loopback origins, with no wildcards, paths or LAN/public hosts.
+Compose nền giữ image API trước đó. Nếu kiểm sau triển khai thất bại, khôi phục API bằng `docker compose -f compose.yaml up -d --no-deps --no-build --pull never --wait api` trong lúc tìm lỗi. Không cần khởi động lại cơ sở dữ liệu/Keycloak, xóa vùng dữ liệu, dọn image, đổi khóa hoặc sửa lịch sử cập nhật bảng. Những lần khởi động lại bản mới sau này phải dùng cả cấu hình bổ sung này và TRACEWEAVER_RELEASE đã ghi nhận.
 
-Verify API GET/POST/PUT preflights for each configured origin, a 401 with the correct CORS
-header for anonymous `/api/v1/me`, and rejection of an unconfigured origin/port. Verify the
-Keycloak public client's exact callback, Web Origin and logout entries for each local origin;
-API CORS does not configure identity. Keep Authorization Code + PKCE and existing origins.
-Frontend uses `VITE_API_BASE_URL=https://api.quizlearn.tech`; keep existing Keycloak values
-and restart Vite. No frontend UI or API contract changes are required.
+## Kết nối giao diện trên máy cá nhân, không qua Vite proxy
+
+Để giao diện đang phát triển gọi thẳng API HTTPS này, đặt
+`FRONTEND_LOCAL_ORIGINS=http://localhost:5173,http://127.0.0.1:5173` trong
+`.local/oracle/.env` riêng. Cấu hình bổ sung chỉ truyền biến này cho API. Triển khai mã API đã cập nhật và tạo lại container API để áp dụng; không cần cập nhật bảng dữ liệu hoặc khởi động lại AI.
+
+Giữ nguyên danh sách địa chỉ HTTPS được phép trong `FRONTEND_ORIGINS`. Danh sách mới mặc định rỗng, chỉ nhận địa chỉ HTTP trỏ về chính máy đang chạy, khớp chính xác; không nhận ký tự đại diện, đường dẫn hoặc địa chỉ mạng LAN/công khai.
+
+Với mỗi địa chỉ web đã cấu hình, kiểm yêu cầu thăm dò quyền kết nối (preflight) cho GET/POST/PUT. Khi chưa đăng nhập, `/api/v1/me` phải trả 401 cùng header CORS đúng; địa chỉ hoặc cổng chưa đăng ký phải bị từ chối. Kiểm cả địa chỉ quay lại sau đăng nhập, địa chỉ web và địa chỉ đăng xuất trong ứng dụng Keycloak cho từng địa chỉ web trên máy cá nhân. Cấu hình CORS của API không tự cấu hình Keycloak. Giữ cơ chế Authorization Code + PKCE và các địa chỉ đang có.
+
+Giao diện dùng `VITE_API_BASE_URL=https://api.quizlearn.tech`; giữ các giá trị Keycloak hiện tại và khởi động lại Vite. Không cần sửa màn hình giao diện hoặc định nghĩa API.

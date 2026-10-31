@@ -66,14 +66,14 @@ Không có path/query parameters.
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [Me](#dto-me); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-listsources"></a>
 
@@ -98,14 +98,14 @@ Cần membership và role đọc, chỉ trả source có direct/group read grant
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [SourcesPage](#dto-sourcespage); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-listknowledge"></a>
 
@@ -131,14 +131,14 @@ Cần membership và role đọc. q tìm literal substring không phân biệt h
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [KnowledgePage](#dto-knowledgepage); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-ingestevents"></a>
 
@@ -187,16 +187,16 @@ Chỉ server producer: đúng ingest-client JWT + ingest_service role + ingest g
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [BatchResult](#dto-batchresult); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
 | 413 | [Error](#dto-error) — Body exceeds 1 MiB; no records written |
 | 415 | [Error](#dto-error) — Unsupported content type/encoding |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-listevents"></a>
 
@@ -226,14 +226,14 @@ Role đọc và current source grants. from/to inclusive theo occurred_at; q tì
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [EventsPage](#dto-eventspage); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-getevent"></a>
 
@@ -257,14 +257,14 @@ Không nhận query parameters. Event bị ẩn hoặc không tồn tại đều
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [Event](#dto-event); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-createrun"></a>
 
@@ -304,16 +304,16 @@ Chỉ operator/reviewer + read grants trên mọi source_ids, kể cả nguồn 
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 202 | [Run](#dto-run); xem ví dụ đầy đủ ở mục DTO; có Location |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
 | 413 | [Error](#dto-error) — Body exceeds 1 MiB; no records written |
 | 415 | [Error](#dto-error) — Unsupported content type/encoding |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-getrun"></a>
 
@@ -337,14 +337,14 @@ Role đọc và toàn bộ current grants của requested source scope, kể c�
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [Run](#dto-run); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-getgraph"></a>
 
@@ -368,14 +368,14 @@ Run completed mới đọc được; khác trạng thái trả409 RUN_NOT_READY.
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [Graph](#dto-graph); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-reviewlink"></a>
 
@@ -409,16 +409,16 @@ Operator/reviewer, full run-source scope. expected_version là Link.version. M�
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 201 | [Review](#dto-review); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
 | 413 | [Error](#dto-error) — Body exceeds 1 MiB; no records written |
 | 415 | [Error](#dto-error) — Unsupported content type/encoding |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-createmanuallink"></a>
 
@@ -451,16 +451,16 @@ Operator/reviewer, full run-source scope, run completed. Server tạo manual/pen
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 201 | [Link](#dto-link); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
 | 413 | [Error](#dto-error) — Body exceeds 1 MiB; no records written |
 | 415 | [Error](#dto-error) — Unsupported content type/encoding |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-createcase"></a>
 
@@ -492,16 +492,16 @@ Operator/reviewer, run completed và full source grants. Title không trắng t�
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 201 | [Case](#dto-case); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
 | 413 | [Error](#dto-error) — Body exceeds 1 MiB; no records written |
 | 415 | [Error](#dto-error) — Unsupported content type/encoding |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-listcases"></a>
 
@@ -530,14 +530,14 @@ Role đọc + full run-source grants cho từng case. from/to inclusive theo par
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [CasesPage](#dto-casespage); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-getcase"></a>
 
@@ -561,14 +561,14 @@ Role đọc + full current run-source grants. Body là {case,history,evidence}, 
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [CaseDetail](#dto-casedetail); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-addevidence"></a>
 
@@ -601,16 +601,16 @@ Operator/reviewer + full source grants. Bắt buộc cả kind/event_ids/note. k
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 201 | [Evidence](#dto-evidence); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
 | 413 | [Error](#dto-error) — Body exceeds 1 MiB; no records written |
 | 415 | [Error](#dto-error) — Unsupported content type/encoding |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-transitioncase"></a>
 
@@ -645,16 +645,16 @@ Mọi action cần current Case.version và reason không trắng≤1000. assign
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [Case](#dto-case); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
 | 413 | [Error](#dto-error) — Body exceeds 1 MiB; no records written |
 | 415 | [Error](#dto-error) — Unsupported content type/encoding |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-getdashboard"></a>
 
@@ -679,14 +679,14 @@ Role đọc + full current grants trên từng run. from/to inclusive theo paren
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [Dashboard](#dto-dashboard); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-createworkflowinstance"></a>
 
@@ -723,16 +723,16 @@ Không gọi từ browser. Authorization là core-app JWT; X-End-User-Authorizat
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 201 | [WorkflowInstance](#dto-workflowinstance); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
 | 413 | [Error](#dto-error) — Body exceeds 1 MiB; no records written |
 | 415 | [Error](#dto-error) — Unsupported content type/encoding |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-transitionworkflowinstance"></a>
 
@@ -766,16 +766,16 @@ Chỉ app server, hai JWT + workspace header. expected_version lấy WorkflowIns
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [WorkflowInstance](#dto-workflowinstance); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
 | 413 | [Error](#dto-error) — Body exceeds 1 MiB; no records written |
 | 415 | [Error](#dto-error) — Unsupported content type/encoding |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-getworkflowinstance"></a>
 
@@ -799,14 +799,14 @@ Chỉ app server, hai JWT và workspace header; user cần role đọc, case c�
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [WorkflowInstance](#dto-workflowinstance); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-scorepairs"></a>
 
@@ -846,16 +846,16 @@ Không có path/query parameters.
 | HTTP | Schema / ý nghĩa response |
 |---|---|
 | 200 | [ScoreResponse](#dto-scoreresponse); xem ví dụ đầy đủ ở mục DTO |
-| 400 | [Error](#dto-error) — Malformed request or cursor/filter mismatch |
-| 401 | [Error](#dto-error) — Invalid/expired token |
-| 403 | [Error](#dto-error) — Action forbidden on visible resource |
-| 404 | [Error](#dto-error) — Not found or outside source/workspace scope |
-| 409 | [Error](#dto-error) — Version/content conflict or RUN_NOT_READY |
+| 400 | [Error](#dto-error) — Yêu cầu sai định dạng hoặc mã chuyển trang không khớp bộ lọc |
+| 401 | [Error](#dto-error) — Mã đăng nhập không hợp lệ hoặc đã hết hạn |
+| 403 | [Error](#dto-error) — Không có quyền thực hiện thao tác trên dữ liệu đang xem |
+| 404 | [Error](#dto-error) — Không tìm thấy hoặc dữ liệu nằm ngoài nguồn/nhóm làm việc được cấp quyền |
+| 409 | [Error](#dto-error) — Xung đột phiên bản/nội dung hoặc RUN_NOT_READY (hành trình chưa sẵn sàng) |
 | 413 | [Error](#dto-error) — Body exceeds 1 MiB; no records written |
 | 415 | [Error](#dto-error) — Unsupported content type/encoding |
-| 422 | [Error](#dto-error) — Schema/guard/window/cycle failure |
-| 429 | [Error](#dto-error) — Rate limited |
-| 503 | [Error](#dto-error) — Core/scorer unavailable |
+| 422 | [Error](#dto-error) — Dữ liệu sai cấu trúc, không đạt điều kiện, vượt khoảng thời gian hoặc tạo chu trình |
+| 429 | [Error](#dto-error) — Vượt giới hạn số lần gọi |
+| 503 | [Error](#dto-error) — Lõi xử lý hoặc dịch vụ AI không sẵn sàng |
 
 <a id="op-getliveness"></a>
 

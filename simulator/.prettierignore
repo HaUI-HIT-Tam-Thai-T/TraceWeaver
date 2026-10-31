@@ -1,0 +1,4 @@
+# Generated datasets are data, not formatting targets.
+**/*.json
+coverage/
+node_modules/

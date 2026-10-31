@@ -34,7 +34,11 @@
     "sbom:check": "node backend/scripts/sbom.js --check && node backend/scripts/sbom.js --frontend --check",
     "smoke": "node backend/scripts/smoke.js",
     "evidence:backend": "node backend/scripts/council-evidence.js",
-    "package:source": "node backend/scripts/package-source.js"
+    "package:source": "node backend/scripts/package-source.js",
+    "format:be": "npm run format --workspace=@traceweaver/backend",
+    "format:be:check": "npm run format:check --workspace=@traceweaver/backend",
+    "format:sim": "prettier --write \"simulator/**/*.mjs\"",
+    "format:sim:check": "prettier --check \"simulator/**/*.mjs\""
   },
   "overrides": {
     "body-parser": "2.4.0",
@@ -43,7 +47,8 @@
   "devDependencies": {
     "@apidevtools/swagger-parser": "13.1.0",
     "ajv": "8.20.0",
-    "ajv-formats": "3.0.1"
+    "ajv-formats": "3.0.1",
+    "prettier": "3.9.10"
   },
   "repository": {
     "type": "git",

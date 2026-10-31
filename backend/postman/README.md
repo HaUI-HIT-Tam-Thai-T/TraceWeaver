@@ -1,11 +1,17 @@
-# Local Identity dependency simulation
+# Mô phỏng dịch vụ xác thực trên máy cá nhân
 
-Postman CLI tested: 1.74.0. No cloud account/workspace is used.
+Đã kiểm với Postman CLI 1.74.0. Bộ mô phỏng không dùng tài khoản hoặc không gian làm việc trên đám mây.
 
-For CI or hosts without that CLI, `npm run test:identity:native` runs the same identity assertions with `tests/support/oidc-native-loader.js` redirecting only the JWKS helper to a local HTTP fixture. It mirrors this mock's JWKS/JSON/HTML/delay/501 contract and records actual request paths; JOSE, Express and PostgreSQL remain real. It does not test Postman routing/lifecycle. The CI PostgreSQL job runs this native suite sequentially; `test:identity` continues to use Postman. Keep fixtures synchronized if the dependency contract changes.
+## Khi không có Postman CLI
 
-`oidc-jwks.openapi.json` captures the Keycloak public certs response shape. Mock was generated from that contract then adapted to receive ephemeral PUBLIC JWKS via OIDC_TEST_JWKS. Private keys stay in the Node test process. Unmodeled calls return 501. This is local-only, not login infrastructure.
+Trong môi trường kiểm thử tự động hoặc máy không cài Postman CLI, chạy `npm run test:identity:native` để kiểm cùng các điều kiện xác thực. File `tests/support/oidc-native-loader.js` chỉ chuyển phần lấy khóa kiểm chữ ký (JWKS) sang máy chủ HTTP giả lập trên máy. Máy chủ này mô phỏng phản hồi JWKS, JSON, HTML, độ trễ và lỗi 501, đồng thời ghi đường dẫn thực tế đã gọi. JOSE, Express và PostgreSQL vẫn chạy thật. Bộ kiểm này không kiểm việc định tuyến hoặc khởi động/dừng Postman. Bước PostgreSQL trong CI chạy bộ kiểm native tuần tự; `test:identity` vẫn dùng Postman. Khi đổi quy định phản hồi giả lập, phải cập nhật đồng bộ cả hai bộ dữ liệu mẫu.
 
-`simulations/identity.sim.yaml` routes under `/oidc`. `npm run test:identity` starts each simulation on an explicit available loopback port, points the real JOSE client at its certs URL, checks request logs and stops only its own process tree. JSON/HTML/slow variants use OIDC_TEST_FAILURE. Slow response: 1000ms versus BE test timeout 300ms. Tests wait for asynchronous request logs after verification rejects.
+## Dữ liệu và khóa xác thực
 
-Owner search was skipped because CLI is signed out. No mock push/deploy. The simulation establishes BE JWKS HTTP behavior, not a live Keycloak/SSO deployment.
+`oidc-jwks.openapi.json` định nghĩa cấu trúc phản hồi khóa công khai của Keycloak. Bộ mô phỏng được tạo từ định nghĩa đó, rồi chỉnh để nhận bộ khóa công khai tạm thời qua OIDC_TEST_JWKS. Khóa riêng chỉ nằm trong tiến trình kiểm thử Node. Lời gọi chưa được mô tả trả 501. Bộ mô phỏng chỉ dùng trên máy kiểm thử, không thay dịch vụ đăng nhập thật.
+
+## Cách bộ kiểm thử chạy
+
+`simulations/identity.sim.yaml` định tuyến dưới `/oidc`. `npm run test:identity` khởi động từng bản mô phỏng trên cổng còn trống, chỉ nhận kết nối từ cùng máy. Sau đó bộ kiểm trỏ JOSE thật tới địa chỉ lấy khóa, kiểm nhật ký yêu cầu và chỉ dừng các tiến trình do nó tạo. Các biến thể trả JSON, HTML hoặc trả chậm dùng OIDC_TEST_FAILURE. Độ trễ giả lập là 1000 ms, trong khi máy chủ kiểm thử đặt thời hạn 300 ms. Khi việc xác minh bị từ chối, bộ kiểm chờ nhật ký yêu cầu được ghi xong rồi mới đối chiếu.
+
+Chưa tìm chủ sở hữu qua CLI vì công cụ dòng lệnh chưa đăng nhập. Không đẩy hoặc triển khai bộ mô phỏng lên dịch vụ bên ngoài. Kết quả chỉ xác nhận cách máy chủ xử lý việc lấy khóa qua HTTP, không chứng minh bản Keycloak hoặc đăng nhập tập trung thật đã hoạt động.
