@@ -16,7 +16,7 @@ Project code: Apache-2.0. Third-party packages retain their original licenses. T
 
 Frontend and Python dependencies are inventoried separately; see [LICENSES.md](../LICENSES.md). Model provenance is documented in [ai/artifacts/sandbox-v2/README.md](../ai/artifacts/sandbox-v2/README.md).
 
-## npm packages (98)
+## npm packages (99)
 
 | Package | Version | Scope | License | Source |
 |---|---|---|---|---|
@@ -95,6 +95,7 @@ Frontend and Python dependencies are inventoried separately; see [LICENSES.md](.
 | postgres-bytea | 1.0.1 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/postgres-bytea/v/1.0.1) |
 | postgres-date | 1.0.7 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/postgres-date/v/1.0.7) |
 | postgres-interval | 1.2.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/postgres-interval/v/1.2.0) |
+| prettier | 3.9.10 | development / direct | MIT | [npm](https://www.npmjs.com/package/prettier/v/3.9.10) |
 | proxy-addr | 2.0.8 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/proxy-addr/v/2.0.8) |
 | qs | 6.16.1 | runtime / transitive | BSD-3-Clause | [npm](https://www.npmjs.com/package/qs/v/6.16.1) |
 | range-parser | 1.3.0 | runtime / transitive | MIT | [npm](https://www.npmjs.com/package/range-parser/v/1.3.0) |

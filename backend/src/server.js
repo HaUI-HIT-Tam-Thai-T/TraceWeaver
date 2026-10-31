@@ -5,7 +5,11 @@ import { readConfig } from './config.js';
 import { createApp } from './app.js';
 import { createDatabase } from './core/data/database.js';
 import { isDatabaseReady, loadMigrations } from './core/data/migrations.js';
-import { createTokenVerifier, createIngestTokenVerifier, createAppTokenVerifier } from './core/identity/token-verifier.js';
+import {
+  createTokenVerifier,
+  createIngestTokenVerifier,
+  createAppTokenVerifier,
+} from './core/identity/token-verifier.js';
 import { createCursorCodec } from './core/identity/cursor.js';
 import { createAccessRepository } from './core/identity/access-repository.js';
 import { createAccessService } from './services/access.service.js';
@@ -35,7 +39,8 @@ import { createAccountProvider } from './core/identity/account-provider.js';
 let database;
 try {
   const config = readConfig();
-  if (config.labIngestSubject && config.poolMax < 2) throw new Error('LAB_COLLECTOR requires DB_POOL_MAX at least 2');
+  if (config.labIngestSubject && config.poolMax < 2)
+    throw new Error('LAB_COLLECTOR requires DB_POOL_MAX at least 2');
   const migrations = await loadMigrations(new URL('./core/data/migrations/', import.meta.url));
   database = createDatabase(config, () => console.error('DATABASE_IDLE_ERROR'));
   const app = createApp({
@@ -46,28 +51,54 @@ try {
     verifyAppToken: createAppTokenVerifier(config),
     workflows: createWorkflowService(createWorkflowRepository(database)),
     lab: createLabRepository(database),
-    admin: createAdminService(createAdminRepository(database, {
-      protectedSubjects: [config.oidcAppSubject, config.labIngestSubject],
-    }), createAccountProvider(config), config.cursorSecret),
+    admin: createAdminService(
+      createAdminRepository(database, {
+        protectedSubjects: [config.oidcAppSubject, config.labIngestSubject],
+      }),
+      createAccountProvider(config),
+      config.cursorSecret,
+    ),
     oidc: { issuer: config.oidcIssuer, clientId: config.oidcUserClientId },
-    access: createAccessService(createAccessRepository(database), createCursorCodec(config.cursorSecret)),
+    access: createAccessService(
+      createAccessRepository(database),
+      createCursorCodec(config.cursorSecret),
+    ),
     ingestion: createIngestionService(createIngestionRepository(database)),
-    events: createEventService(createEventRepository(database), createAccessRepository(database), createEventCursorCodec(config.cursorSecret)),
-    runs: createRunService(createRunRepository(database, sandboxRulePolicy(), createScorer(config))),
+    events: createEventService(
+      createEventRepository(database),
+      createAccessRepository(database),
+      createEventCursorCodec(config.cursorSecret),
+    ),
+    runs: createRunService(
+      createRunRepository(database, sandboxRulePolicy(), createScorer(config)),
+    ),
     reviews: createReviewService(createReviewRepository(database)),
-    cases: createCaseService(createCaseRepository(database), createAccessRepository(database), createCursorCodec(config.cursorSecret)),
+    cases: createCaseService(
+      createCaseRepository(database),
+      createAccessRepository(database),
+      createCursorCodec(config.cursorSecret),
+    ),
     dashboard: createDashboardService(createDashboardRepository(database)),
     logError: (event) => console.error(JSON.stringify(event)),
   });
   let collectorTimer;
   if (config.labIngestSubject) {
-    const collect = createLabCollector(database, createIngestionService(createIngestionRepository(database)), config.labIngestSubject);
+    const collect = createLabCollector(
+      database,
+      createIngestionService(createIngestionRepository(database)),
+      config.labIngestSubject,
+    );
     let collecting = false;
     collectorTimer = setInterval(async () => {
       if (collecting) return;
       collecting = true;
-      try { await collect(); } catch { console.error('LAB_COLLECTOR_UNAVAILABLE'); }
-      finally { collecting = false; }
+      try {
+        await collect();
+      } catch {
+        console.error('LAB_COLLECTOR_UNAVAILABLE');
+      } finally {
+        collecting = false;
+      }
     }, 2000);
     collectorTimer.unref();
   }
@@ -90,7 +121,11 @@ try {
     }, config.shutdownTimeoutMs);
     deadline.unref();
     server.close(async () => {
-      try { await database.end(); } catch { process.exitCode = 1; }
+      try {
+        await database.end();
+      } catch {
+        process.exitCode = 1;
+      }
       clearTimeout(deadline);
     });
   }
@@ -98,10 +133,18 @@ try {
   process.on('SIGTERM', stop);
 } catch (error) {
   // Configuration errors are intentionally sanitized by readConfig.
-  console.error(error.message.startsWith('DATABASE_URL') || error.message.startsWith('API_') ||
-    error.message.startsWith('APP_ENV') || error.message.startsWith('DB_POOL_MAX') ||
-    error.message.startsWith('SHUTDOWN_TIMEOUT_MS') || error.message.startsWith('OIDC') ||
-    error.message.startsWith('CURSOR_SECRET') || error.message.startsWith('FRONTEND_') ? error.message : 'BACKEND_STARTUP_FAILED');
+  console.error(
+    error.message.startsWith('DATABASE_URL') ||
+      error.message.startsWith('API_') ||
+      error.message.startsWith('APP_ENV') ||
+      error.message.startsWith('DB_POOL_MAX') ||
+      error.message.startsWith('SHUTDOWN_TIMEOUT_MS') ||
+      error.message.startsWith('OIDC') ||
+      error.message.startsWith('CURSOR_SECRET') ||
+      error.message.startsWith('FRONTEND_')
+      ? error.message
+      : 'BACKEND_STARTUP_FAILED',
+  );
   process.exitCode = 1;
   if (database) await database.end();
 }

@@ -12,6 +12,8 @@
     "backend"
   ],
   "scripts": {
+    "format:be": "npm run format --workspace=@traceweaver/backend",
+    "format:be:check": "npm run format:check --workspace=@traceweaver/backend",
     "sim:generate": "node simulator/cli.mjs",
     "test:sim": "node --test simulator/tests/*.test.mjs",
     "dev:be": "npm run dev --workspace=@traceweaver/backend",
@@ -43,7 +45,8 @@
   "devDependencies": {
     "@apidevtools/swagger-parser": "13.1.0",
     "ajv": "8.20.0",
-    "ajv-formats": "3.0.1"
+    "ajv-formats": "3.0.1",
+    "prettier": "3.9.10"
   },
   "repository": {
     "type": "git",

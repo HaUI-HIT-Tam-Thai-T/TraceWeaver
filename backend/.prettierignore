@@ -1,0 +1,11 @@
+# Data, contracts and migration checksums must remain unchanged.
+contracts/
+tests/fixtures/
+src/core/data/migrations/
+**/*.json
+**/*.sql
+**/*.license
+DEPENDENCIES.md
+THIRD_PARTY_NOTICES.txt
+node_modules/
+coverage/

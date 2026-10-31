@@ -1,5 +1,15 @@
 # TraceWeaver backend
 
+## Định dạng mã bằng Prettier
+
+Từ thư mục gốc, chạy `npm run format:be` để định dạng JavaScript trong mã nguồn,
+script và kiểm thử backend; chạy `npm run format:be:check` để chỉ kiểm tra.
+Prettier được ghim phiên bản trong dự án, dùng thụt dòng 2 dấu cách, nháy đơn,
+dấu chấm phẩy và độ dài dòng mục tiêu 100 ký tự. CI kiểm định dạng trên Windows/Linux.
+Cấu hình riêng nằm tại `backend/.prettierrc.json`; không áp dụng cho frontend.
+Các file SQL migration, dữ liệu JSON, fixtures và nội dung sinh tự động được bỏ qua
+để giữ nguyên dữ liệu và checksum.
+
 Current capabilities/verification: [CURRENT_STATUS](../docs/overview/status.md). Audit fixes include compressed-body415, patched dependencies, canonical microseconds, post-redaction validation, exact filters, transaction reuse and browser-origin config. Restart source/rebuild Docker to activate code changes.
 
 Node.js + Express + PostgreSQL. JavaScript ESM; npm workspace tại root. Hiện có20 Node API (scorer là operation thứ21, chạy riêng bằng Python): GET /me, sources, knowledge, events, event detail; POST batch ingestion; POST run, GET run và graph; POST review và manual link; tạo/list/detail/evidence/transition case; dashboard và3 core workflow operations. Xem [Identity BE](IDENTITY.md), [ingestion](INGESTION.md), [events](EVENTS.md), [reconstruction](RECONSTRUCTION.md), [case/workflow](CASES.md), [dashboard](DASHBOARD.md) và [core HTTP](WORKFLOW.md) về cấu hình/quyền và giới hạn kiểm chứng.
