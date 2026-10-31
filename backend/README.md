@@ -116,3 +116,10 @@ Luồng xử lý đi từ `routers/` (khai báo địa chỉ API) qua `controlle
 ## Môi trường mô phỏng và kiểm chứng hồ sơ
 
 Môi trường mô phỏng lưu trạng thái qua từng thao tác sửa điều kiện và chạy lại yêu cầu. Xem [LAB_SANDBOX.md](LAB_SANDBOX.md) để cấu hình API nguồn, chuyển log vào hệ thống và lấy bằng chứng cho người kiểm duyệt kiểm tra trước khi đóng hồ sơ.
+
+## Định dạng JavaScript bằng Prettier
+
+Từ thư mục gốc, chạy `npm run format:be` để định dạng mã nguồn và kiểm thử;
+chạy `npm run format:be:check` để chỉ kiểm tra. Cấu hình dùng 2 dấu cách, nháy đơn,
+dấu chấm phẩy và độ dài dòng mục tiêu 100 ký tự. CI kiểm trên Windows/Linux.
+Dữ liệu JSON, fixture và SQL migration được giữ nguyên.

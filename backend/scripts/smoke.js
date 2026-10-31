@@ -22,18 +22,31 @@ try {
   for (let attempt = 0; attempt < 50; attempt++) {
     assert.equal(child.exitCode, null, 'Backend exited before becoming live');
     try {
-      const response = await fetch(`http://127.0.0.1:${port}/health/live`, { signal: AbortSignal.timeout(1000) });
-      if (response.ok && (await response.json()).status === 'ok') { live = true; break; }
-    } catch { /* Retry during startup. */ }
+      const response = await fetch(`http://127.0.0.1:${port}/health/live`, {
+        signal: AbortSignal.timeout(1000),
+      });
+      if (response.ok && (await response.json()).status === 'ok') {
+        live = true;
+        break;
+      }
+    } catch {
+      /* Retry during startup. */
+    }
     await delay(100);
   }
   assert.ok(live, 'Backend liveness timed out');
-  const ready = await fetch(`http://127.0.0.1:${port}/health/ready`, { signal: AbortSignal.timeout(10000) });
+  const ready = await fetch(`http://127.0.0.1:${port}/health/ready`, {
+    signal: AbortSignal.timeout(10000),
+  });
   assert.equal(ready.status, 200, 'Database/migrations not ready; run db:migrate first');
   assert.deepEqual(await ready.json(), { status: 'ready' });
   console.log('Backend process smoke passed: liveness and database readiness 200.');
 } finally {
   if (child.exitCode === null) child.kill('SIGTERM');
   const deadline = setTimeout(() => child.kill('SIGKILL'), 12000);
-  try { await closed; } finally { clearTimeout(deadline); }
+  try {
+    await closed;
+  } finally {
+    clearTimeout(deadline);
+  }
 }

@@ -132,3 +132,10 @@ Khi triển khai, giữ giá trị khởi tạo, bản kê dữ liệu và phiê
 Không dùng bộ mô phỏng để cấp tài nguyên thật; chỉ dùng thông tin đăng nhập và dữ liệu cá nhân giả.
 
 Tên dịch vụ/hành động máy chủ đang dùng: intake/request.accepted → account/account.created → provision/provision.completed|provision.failed. Ánh xạ mã yêu cầu/tài khoản/tác vụ sang `{namespace,value}`; không tự dùng tên hành động khác trong gói bàn giao khi chưa tạo phiên bản quy tắc tương ứng. API nhận log hiện nhận EventInput đã chuẩn hóa, chưa đọc log thô; thời gian phải biểu diễn chính xác tới micro giây, không tự cắt/làm tròn. Xem [tích hợp](../docs/integration/README.md).
+
+## Định dạng JavaScript bằng Prettier
+
+Từ thư mục gốc, chạy `npm run format:sim` để định dạng mã nguồn và kiểm thử;
+chạy `npm run format:sim:check` để chỉ kiểm tra. Cấu hình dùng 2 dấu cách, nháy đơn,
+dấu chấm phẩy và độ dài dòng mục tiêu 100 ký tự. CI kiểm trên Windows/Linux.
+Dữ liệu JSON, fixture và SQL migration được giữ nguyên.

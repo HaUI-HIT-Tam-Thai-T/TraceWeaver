@@ -8,7 +8,13 @@ import { createCaseWorkflowAdapter } from '../../adapters/case-workflow.js';
 
 export function createWorkflowRepository(pool) {
   return createRepository(pool, {
-    definitions: [{ definition: documentReviewDefinition, entityType: 'document', createRoles: ['operator', 'reviewer'] }],
+    definitions: [
+      {
+        definition: documentReviewDefinition,
+        entityType: 'document',
+        createRoles: ['operator', 'reviewer'],
+      },
+    ],
     adapters: [createCaseWorkflowAdapter(pool)],
   });
 }
